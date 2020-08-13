@@ -1,0 +1,983 @@
+#include "matr640.ch"
+#include "topconn.ch"
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡…o    ³ MATR640R3³ Autor ³ Wagner Xavier         ³ Data ³ 16.11.98 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³Relacao de Duplicatas                                       ³±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+*/
+
+User Function MATR640REC()
+
+Local nAc1   			:=	0
+Local nAg1   			:=	0
+Local lContinua 		:=	.t.
+Local tamanho			:=	"M"
+Local limite 			:=	132
+Local cString			:= "SE1"
+Local wnrel				:=	"MATR640REC"
+Local titulo 			:= "Relacao de Duplicatas"
+Local cDesc1 			:= "Este programa ira emitir a relacao de duplicatas"
+Local cDesc2 			:= "emitidas.Podera ser emitida por Ordem de Data+Numero, "
+Local cDesc3 			:= "por Vendedor ou Supervisor."
+Local aOrd   			:=	{ "Numero" , "Emissao" , "Vencimento" , "Vendedor" , "Cliente" , "Natureza" }
+
+Private nLastKey 		:=	0
+Private aLinha  		:= {}
+Private cPerg   		:=	"MT640R    "
+Private nomeprog		:=	"MATR640REC"
+Private aReturn 		:=	{ "Zebrado" , 01 , "Administracao" , 01, 02, 01, "", 01 }
+
+AjustaSX1()
+
+pergunte(cPerg,.f.)
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Variaveis utilizadas para parametros                         ³
+//³ mv_par01             // Da Duplicata                         ³
+//³ mv_par02             // Ate a Duplicata                      ³
+//³ mv_par03             // Do Vendedor                          ³
+//³ mv_par04             // Ate o vendedor                       ³
+//³ mv_par05             // Todos/em Aberto                      ³
+//³ mv_par06             // Serie da Duplicata                   ³
+//³ mv_par07             // A partir da Emissao                  ³
+//³ mv_par08             // Ate a data de Emissao                ³
+//³ mv_par09             // A partir do vencimento               ³
+//³ mv_par10             // Ate o vencimento                     ³
+//³ mv_par11             // Do Cliente                           ³
+//³ mv_par12             // Ate o Cliente                        ³
+//³ mv_par13             // Qual moeda                           ³
+//³ mv_par14             // Pula Pagina Quebra                   ³
+//³ mv_par15             // Pagina Inicial                       ³
+//³ mv_par16             // Considerar titulos                   ³
+//³ mv_par17             // Serie Final                          ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+wnrel:=SetPrint(cString,wnrel,cPerg,@titulo,cDesc1,cDesc2,cDesc3,.f.,aOrd,,Tamanho)
+
+If	nLastKey==27
+	DbClearFilter()
+	Return
+Endif
+
+SetDefault(aReturn,cString)
+
+If nLastKey==27
+	DbClearFilter()
+	Return
+Endif
+
+RptStatus({|lEnd| C640Impr(@lEnd,wnRel,cString,aOrd)},Titulo)
+
+Return
+
+/*ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡…o    ³ C640IMP  ³ Autor ³ Rosane Luciane Chene  ³ Data ³ 09.11.95 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³ Chamada do Relatorio                                       ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ MATR640	   	                                            ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß*/
+
+Static Function C640Impr(lEnd,WnRel,cString,aOrd)
+
+Local cabec1
+Local cabec2
+Local nOrdem
+Local Tamanho		:=	"G"
+Local Limite 		:=	132
+Local nAc1   		:= 0
+Local nTotal		:=	0
+Local nAg1   		:= 0
+Local nNcc1  		:= 0
+Local nNcc2  		:= 0
+Local nTI1			:=	0
+Local nTIG 			:=	0
+Local nTLq1			:=	0
+Local nTLqG			:=	0
+Local lContinua 	:= .t.
+Local cVend
+Local aCampos		:=	{}
+Local cCond1
+Local nCnt   		:= 0
+Local nVend
+Local cProxVend
+Local _nNat
+Local _cProxNat
+Local nX
+Local aTamSXG  	:= TamSXG("001")
+Local aTamSXG2 	:= TamSXG("002")
+Local aCoord
+Local aTam
+Local _cQuery		:=	""
+Local _nNatImp		:= 0
+Local cClie := ""
+Local cLoja := ""
+Local cPrefixo := ""
+Local cNum := ""
+Local cParcel := ""
+Local cPedido := ""
+Local lOk := .T.
+
+Private _cNaoTipo	:= Alltrim(mv_par21) //Nao imprimir tipos...
+
+nOrdem	:= aReturn[8]
+
+m_pag 	:=	iif( mv_par15 > 0 , mv_par15 , 1 )
+nVend 	:=	Fa440CntVen()
+cbcont   := 0
+cbtxt    := Space(10)
+li       := 80
+
+titulo 	:=	"RELACAO DAS DUPLICATAS EMITIDAS POR " + aOrd[nOrdem] + " EM " + GetMv("MV_MOEDA" + STR(mv_par13,1))
+
+/*
+0         1         2         3         4         5         6         7         8         9        10        11        12        13         14        15        16        17        18       19        20        21        22
+0123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012
+PRF/NUMERO/PAR CODIGO LJ RAZAO                           EMISSAO   VENCTO         VALOR         VALOR      VALOR      VALOR      VALOR      VALOR      VALOR      VALOR      %      VALOR NOME                           PEDIDO
+SOCIAL                                                   TOTAL       LIQUIDO       IRRF        ISS       INSS        PIS     COFINS       CSLL COMISS   COMISSAO VENDEDOR
+999/999999/999 123456 99 123456789012345678901234567890 99/99/99 99/99/99 99,999,999.99 99,999,999.99 999,999.99 999,999.99 999,999.99 999,999.99 999,999.99 999,999.99 999.99 999,999.99 012345678901234567890123456789 999999
+*/
+
+cabec1	:=	"PRF/NUMERO/PAR CODIGO LJ RAZAO                           EMISSAO   VENCTO         VALOR         VALOR      VALOR      VALOR      VALOR      VALOR      VALOR      VALOR      %      VALOR NOME                          CFOP" // 07/06/16 - Rafael França - Incluido o CFOP a pedido da Sra. Elisangela
+cabec2 	:=	"                         SOCIAL                                                   TOTAL       LIQUIDO       IRRF        ISS       INSS        PIS     COFINS       CSLL COMISS   COMISSAO VENDEDOR"
+
+//01-000-Prefixo
+//02-004-Numero
+//03-011-Parcela
+//04-015-Cod. Cliente
+//05-022-Loja Cliente
+//06-025-Razao Social
+//07-056-Emissao
+//08-065-Vencimento
+//09-074-Valor Total
+//10-088-Valor Liquido
+//11-102-Valor IRRF
+//12-113-Valor ISS
+//13-124-Valor INSS
+//14-135-Valor PIS
+//15-146-Valor COFINS
+//16-157-Valor CSLL
+//17-168 % Comissão
+//18-175-Vlr. Comissão
+//19-186-Nome Vendedor
+//20-217-Pedido
+
+aTam   := {40}
+aCoord := {000,004,011,015,022,025,056,065,074,088,102,113,124,135,146,157,168,175,186,214}
+
+SetRegua(RecCount())
+
+If	nOrdem == 4 		// Por Vendedor
+	
+	aAdd(aCampos,{ "TRB_CLIE"		,"C"	, aTamSXG[1] 				,00 } )
+	aAdd(aCampos,{ "TRB_LOJA"		,"C"	, aTamSXG2[1]				,00 } )
+	aAdd(aCampos,{ "TRB_VEND"		,"C"	, 06						,00 } )
+	aAdd(aCampos,{ "TRB_PREFIX"		,"C"	, 03						,00 } )
+	aAdd(aCampos,{ "TRB_NUM"		,"C"	, 06						,00 } )
+	aAdd(aCampos,{ "TRB_PARCEL"		,"C"	, 04						,00 } )
+	aAdd(aCampos,{ "TRB_EMISSA"		,"D"	, 08						,00 } )
+	aAdd(aCampos,{ "TRB_VENCRE"		,"D"	, 08						,00 } )
+	aAdd(aCampos,{ "TRB_VALOR"		,"N"	, 17						,02 } )
+	aAdd(aCampos,{ "TRB_SUPERV"		,"C"	, 06						,00 } )
+	aAdd(aCampos,{ "TRB_PEDIDO"		,"C"	, 06						,00 } )
+	aAdd(aCampos,{ "TRB_TIPO"	   	,"C"	, 03						,00 } )
+	aAdd(aCampos,{ "TRB_IRRF" 		,"N"	, 17						,02 } )
+	aAdd(aCampos,{ "TRB_CSLL" 		,"N"	, 17						,02 } )
+	aAdd(aCampos,{ "TRB_COFINS"		,"N"	, 17						,02 } )
+	aAdd(aCampos,{ "TRB_PIS"  		,"N"	, 17						,02 } )
+	aAdd(aCampos,{ "TRB_ISS"  		,"N"	, 17						,02 } )
+	aAdd(aCampos,{ "TRB_INSS" 		,"N"	, 17						,02 } )
+	aAdd(aCampos,{ "TRB_COMIS1"		,"N"	, 06						,02 } )
+	
+	cArq := CriaTrab(aCampos,.t.)
+	
+	dbUseArea( .t. , , cArq , "TRB" , iif( .t. .or. .f. , !.f. , Nil ) , .f. )
+	
+	IndRegua("TRB",cArq,"TRB_VEND + TRB_CLIE + TRB_LOJA",,,"Selecionando Registros...")
+	
+	dbSelectArea("SE1")
+	dbSeek( xFilial() )
+	
+	Do While !Eof() .and. xFilial() == E1_FILIAL .and. lContinua
+		
+		IncRegua()
+		
+		If lEnd
+			@Prow()+1,001 Psay "CANCELADO PELO OPERADOR"
+			Exit
+		Endif
+		
+		If	mv_par05 == 2 .and. SE1->E1_SALDO == 0
+			dbSkip()
+			Loop
+		EndIF
+		
+		If	Alltrim(SE1->E1_TIPO) $ _cNaoTipo
+			dbSkip()
+			Loop
+		EndIF
+		
+		If    E1_NUM      <  mv_par01 .or.  E1_NUM      > mv_par02   .or. ;
+			E1_EMISSAO  <  mv_par07 .or.  E1_EMISSAO  > mv_par08   .or. ;
+			E1_VENCTO   <  mv_par09 .or.  E1_VENCTO   > mv_par10   .or. ;
+			E1_CLIENTE  <  mv_par11 .or.  E1_CLIENTE  > mv_par12   .or. ;
+			E1_NATUREZ  <  mv_par18 .or.  E1_NATUREZ  > mv_par19   .or. ;
+			!( E1_PREFIXO >=  mv_par06 .and. E1_PREFIXO <= mv_par17 ) .or. ;
+			( E1_TIPO     $ MVABATIM  .and. mv_par16   == 2 )
+			dbSkip()
+			Loop
+		EndIF
+		
+		If	SE1->( E1_IRRF + E1_CSLL + E1_COFINS + E1_PIS + E1_ISS + E1_INSS ) > 0
+			_nNatImp	+=	SE1->( E1_IRRF + E1_CSLL + E1_COFINS + E1_PIS + E1_ISS + E1_INSS )
+		EndIf
+		
+		cProxVend := "1"
+		
+		For nx := 1 To nVend
+			
+			cVend := FieldGet(FieldPos( "E1_VEND" + cProxVend ))
+			
+			If	( !Empty(cVend) .or. nx == 1 ) .and. ( cVend >= mv_par03	.and. cVend	<= mv_par04 )
+				
+				nTotal += xMoeda( SE1->E1_VALOR , SE1->E1_MOEDA , mv_par13 , SE1->E1_EMISSAO )
+				
+				DbSelectArea("TRB")
+				
+				RecLock("TRB",.t.)
+				Replace 	TRB_LOJA 	With SE1->E1_LOJA			,;
+				TRB_CLIE		With SE1->E1_CLIENTE	,;
+				TRB_VEND		With cVend				,;
+				TRB_PREFIX	With SE1->E1_PREFIXO		,;
+				TRB_NUM	 	With SE1->E1_NUM			,;
+				TRB_PARCEL 	With SE1->E1_PARCELA		,;
+				TRB_EMISSA	With SE1->E1_EMISSAO		,;
+				TRB_VENCRE	With SE1->E1_VENCTO			,;
+				TRB_VALOR	With xMoeda(SE1->E1_VALOR,SE1->E1_MOEDA,mv_par13,SE1->E1_EMISSAO)	,;
+				TRB_SUPERV 	With SE1->E1_SUPERVI		,;
+				TRB_PEDIDO  With SE1->E1_PEDIDO			,;
+				TRB_TIPO   	With SE1->E1_TIPO			,;
+				TRB_IRRF   	With SE1->E1_IRRF			,;
+				TRB_CSLL   	With SE1->E1_CSLL			,;
+				TRB_COFINS 	With SE1->E1_COFINS			,;
+				TRB_PIS    	With SE1->E1_PIS 			,;
+				TRB_ISS    	With SE1->E1_ISS 			,;
+				TRB_INSS   	With SE1->E1_INSS			,;
+				TRB_COMIS1  With SE1->E1_COMIS1
+				MsUnlock("TRB")
+				
+				DbSelectArea("SE1")
+			Endif
+			
+			cProxVend := Soma1(cProxVend,1)
+		Next nx
+		
+		DbSelectArea("SE1")
+		dbSkip()
+	EndDo
+	
+	dbSelectArea("TRB")
+	dbGoTop()
+	
+	Do While !Eof()
+		
+		IncRegua()
+		
+		If lEnd
+			lContinua := .f.
+			Exit
+		EndIf
+		
+		If li > 58
+			cabec(titulo,cabec1,cabec2,nomeprog,tamanho,iif(aReturn[4]==1,GetMv("MV_COMP"),GetMv("MV_NORM")))
+		EndIf
+		
+		nCnt	:=	0
+		nAc1	:=	0
+		nTI1 	:= 0
+		nTLq1 := 0
+		nNcc2 := 0
+		cVend	:=	TRB_VEND
+		
+		Do While !Eof() .and. TRB_VEND == cVend
+			
+			If li > 58
+				cabec(titulo,cabec1,cabec2,nomeprog,tamanho,iif(aReturn[4]==1,GetMv("MV_COMP"),GetMv("MV_NORM")))
+			EndIf
+			
+			If	mv_par20 == 1
+				R640Impr( "TRB" , TRB_CLIE , TRB_LOJA , TRB_VEND , aCoord , aTam )		// Verificar aTam
+				li ++
+			EndIf
+			
+			nCnt ++
+			
+			If (lOk == .F.)
+				If ( cClie == TRB->TRB_CLIE .and. cLoja == TRB->TRB_LOJA .and. cPrefixo == TRB->TRB_PREFIX .and. cNum == TRB->TRB_NUM .and. cParcel == TRB->TRB_PARCEL .and. cPedido == TRB->TRB_PEDIDO )
+					
+					cClie := TRB->TRB_CLIE
+					cLoja := TRB->TRB_LOJA
+					cPrefixo := TRB->TRB_PREFIX
+					cNum := TRB->TRB_NUM
+					cParcel := TRB->TRB_PARCEL
+					cPedido := TRB->TRB_PEDIDO
+					
+					dbskip()
+					loop
+				EndIf
+			EndIf
+			
+			
+			nTI1  += TRB->( TRB_IRRF + TRB_CSLL + TRB_COFINS + TRB_PIS + TRB_ISS + TRB_INSS )
+			nTIG  += TRB->( TRB_IRRF + TRB_CSLL + TRB_COFINS + TRB_PIS + TRB_ISS + TRB_INSS )
+			nTLq1 -= TRB->( TRB_IRRF + TRB_CSLL + TRB_COFINS + TRB_PIS + TRB_ISS + TRB_INSS )
+			nTLqG -= TRB->( TRB_IRRF + TRB_CSLL + TRB_COFINS + TRB_PIS + TRB_ISS + TRB_INSS )
+			
+			If ( TRB->TRB_TIPO $ MVABATIM ) .and. !( mv_par16 == 1 )
+				If mv_par16 == 3
+					nAc1  -= TRB->TRB_VALOR
+					nAg1  -= TRB->TRB_VALOR
+					nTLq1 -= TRB->TRB_VALOR
+					nTLqG -= TRB->TRB_VALOR
+				EndIf
+			Else
+				
+				nAc1  += TRB->TRB_VALOR
+				nAg1  += TRB->TRB_VALOR
+				nTLq1 += TRB->TRB_VALOR
+				nTLqG += TRB->TRB_VALOR
+			EndIf
+			
+			If ( TRB->TRB_TIPO $ MV_CRNEG+"/"+MVRECANT )
+				nNcc1 += TRB->TRB_VALOR
+				nNcc2 += TRB->TRB_VALOR
+			Endif
+			
+			cClie := TRB->TRB_CLIE
+			cLoja := TRB->TRB_LOJA
+			cPrefixo := TRB->TRB_PREFIX
+			cNum := TRB->TRB_NUM
+			cParcel := TRB->TRB_PARCEL
+			cPedido := TRB->TRB_PEDIDO
+			
+			dbSkip()
+			
+			lOk := .F.
+			
+		EndDo
+		
+		If nCnt > 0
+			dbSelectArea("SA3")
+			dbSeek( xFilial() + cVend )
+			
+			@ ++ li , 000        Psay "Total Do Vendedor   ==>" + cVend + " " + SA3->A3_NOME
+			@    li , aCoord[09] Psay Transform( nAc1 	, "@e 99,999,999.99" )
+			@    li , aCoord[10] Psay Transform( nTLq1 	, "@e 99,999,999.99" )
+			
+			@ ++ li , 000        Psay "Total Liquido" + "(-" + Left( MV_CRNEG + "/" + MVRECANT , 6 ) + ")/Impostos"
+			@    li , aCoord[09] Psay Transform( nAc1 - nNcc2 - nTI1	, "@e 99,999,999.99" )
+			@    li , aCoord[10] Psay Transform( nTI1 					, "@e 99,999,999.99" )
+			
+			li ++
+		EndIf
+		
+		@ li , 000 Psay __PrtThinLine()
+		
+		li ++
+		
+		dbSelectArea("TRB")
+		
+		If nCnt > 0 .and. mv_par14 == 1  //Pula pagina
+			li := 60
+		EndIf
+	EndDo
+	
+ElseIf nOrdem == 6		// Por Natureza
+	
+	_cQuery	+= "SELECT * "
+	_cQuery 	+= "FROM " + RetSqlName("SE1") + " "
+	_cQuery 	+= "WHERE E1_FILIAL  = '"+ xFilial("SE1") +"' AND "
+	_cQuery 	+= 	"   E1_NUM     BETWEEN '" + mv_par01 			+ "' AND '" + mv_par02 			+ "' AND "
+	_cQuery 	+= 	"   E1_PREFIXO BETWEEN '" + mv_par06 			+ "' AND '" + mv_par17 			+ "' AND "
+	_cQuery 	+= 	"   E1_EMISSAO BETWEEN '" + DtoS(mv_par07)	+ "' AND '" + DtoS(mv_par08)	+ "' AND "
+	_cQuery 	+= 	"   E1_VENCTO  BETWEEN '" + DtoS(mv_par09)	+ "' AND '" + DtoS(mv_par10)	+ "' AND "
+	_cQuery 	+= 	"   E1_CLIENTE BETWEEN '" + mv_par11			+ "' AND '" + mv_par12			+ "' AND "
+	_cQuery 	+= 	"   E1_VEND1   BETWEEN '" + mv_par03			+ "' AND '" + mv_par04			+ "' AND "
+	_cQuery 	+= 	"   E1_NATUREZ BETWEEN '" + mv_par18			+ "' AND '" + mv_par19			+ "' AND "
+	_cQuery 	+= 	"   D_E_L_E_T_ = ' ' "
+	_cQuery 	+=	"ORDER BY E1_NATUREZ, E1_CLIENTE, E1_LOJA "
+	_cQuery	:=	ChangeQuery(_cQuery)
+	TcQuery _cQuery New Alias "QRY"
+	
+	dbSelectArea("QRY")
+	QRY->(dbGoTop())
+	
+	While !QRY->(Eof()) .and. lContinua
+		
+		IncRegua()
+		
+		If lEnd
+			@Prow()+1,001 Psay OemtoAnsi(STR0015)	//"CANCELADO PELO OPERADOR"
+			Exit
+		Endif
+		
+		If QRY->E1_TIPO $ MVABATIM .and. QRY->E1_TIPO $ _cNaoTipo .and. mv_par16 == 2
+			dbSkip()
+			Loop
+		EndIF
+		
+		If	mv_par05 == 2 .and. QRY->E1_SALDO == 0
+			dbSkip()
+			Loop
+		EndIF
+		
+		nTotal += xMoeda(QRY->E1_VALOR,QRY->E1_MOEDA,mv_par13,QRY->E1_EMISSAO)
+		
+		If lEnd
+			lContinua := .f.
+			Exit
+		EndIf
+		
+		If li > 58
+			cabec(titulo,cabec1,cabec2,nomeprog,tamanho,iif(aReturn[4]==1,GetMv("MV_COMP"),GetMv("MV_NORM")))
+		EndIf
+		
+		nCnt	:=	0
+		nAc1	:=	0
+		nTI1  :=	0
+		nTLq1 :=	0
+		nNcc2 := 0
+		_cNat	:=	QRY->E1_NATUREZ
+		
+		Do While !QRY->(Eof()) .and. QRY->E1_NATUREZ == _cNat
+			
+			If li > 58
+				cabec(titulo,cabec1,cabec2,nomeprog,tamanho,iif(aReturn[4]==1,GetMv("MV_COMP"),GetMv("MV_NORM")))
+			EndIf
+			
+			If Alltrim(QRY->E1_TIPO) $ _cNaoTipo
+				QRY->(dbSkip())
+				Loop
+			EndIF
+			
+			If	QRY->( E1_IRRF + E1_CSLL + E1_COFINS + E1_PIS + E1_ISS + E1_INSS ) > 0
+				_nNatImp	+=	QRY->( E1_IRRF + E1_CSLL + E1_COFINS + E1_PIS + E1_ISS + E1_INSS )
+			EndIf
+			
+			If	mv_par20 == 1
+				ImpNatr("QRY",QRY->E1_CLIENTE,QRY->E1_LOJA,QRY->E1_NATUREZ,aCoord,aTam, QRY->E1_VEND1)	// Verificar
+				li ++
+			EndIf
+			
+			nCnt ++
+			
+			nTI1  += QRY->( E1_IRRF + E1_CSLL + E1_COFINS + E1_PIS + E1_ISS + E1_INSS )
+			nTIG  += QRY->( E1_IRRF + E1_CSLL + E1_COFINS + E1_PIS + E1_ISS + E1_INSS )
+			nTLq1 -= QRY->( E1_IRRF + E1_CSLL + E1_COFINS + E1_PIS + E1_ISS + E1_INSS )
+			nTLqG -= QRY->( E1_IRRF + E1_CSLL + E1_COFINS + E1_PIS + E1_ISS + E1_INSS )
+			
+			If	QRY->E1_TIPO $ MVABATIM .and. !( mv_par16 == 1 )
+				If mv_par16 == 3
+					nAc1  -= QRY->E1_VALOR
+					nAg1  -= QRY->E1_VALOR
+					nTLq1 -= QRY->E1_VALOR
+					nTLqG -= QRY->E1_VALOR
+				EndIf
+			Else
+				nAc1  += QRY->E1_VALOR
+				nAg1  += QRY->E1_VALOR
+				nTLq1 += QRY->E1_VALOR
+				nTLqG += QRY->E1_VALOR
+			EndIf
+			
+			If	QRY->E1_TIPO $ ( MV_CRNEG + "/" + MVRECANT )
+				nNcc1 += QRY->E1_VALOR
+				nNcc2 += QRY->E1_VALOR
+			Endif
+			
+			pNatAnt := QRY->E1_NATUREZ
+			
+			QRY->(dbSkip())
+		EndDo
+		
+		If nCnt > 0
+			
+			dbSelectArea("SED")
+			dbSetOrder(1)
+			dbSeek( xFilial() + Alltrim(pNatAnt) )
+			
+			@ ++ li , 000       Psay "Total Da Natureza   ==>" + pNatAnt + " - " + SED->ED_DESCRIC
+			
+			@    li , aCoord[09] Psay Transform( nAc1 	, "@e 99,999,999.99" )
+			@    li , aCoord[10] Psay Transform( nTLq1 	, "@e 99,999,999.99" )
+			
+			@ ++ li , 000        Psay "Total Liquido" + "(-" + Left( MV_CRNEG + "/" + MVRECANT , 6 ) + "/Impostos)"
+			@    li , aCoord[09] Psay Transform( nAc1 - nNcc2 - nTI1 , "@e 99,999,999.99" )
+			@    li , aCoord[10] Psay Transform( nTI1 					, "@e 99,999,999.99" )
+			
+			li ++
+		EndIf
+		
+		@ li , 000 Psay __PrtThinLine()
+		
+		li ++
+		
+		dbSelectArea("QRY")
+		
+		If nCnt > 0 .and. mv_par14 == 1
+			li := 60
+		EndIf
+	EndDo
+	
+	QRY->(dbCloseArea())
+	
+Else
+	
+	dbSelectArea("SE1")
+	
+	If nOrdem = 1			// Numero
+		dbSetOrder(1)
+		dbSeek(xFilial()+mv_par06+mv_par01,.t.)
+		cCond := "E1_NUM >= mv_par01 .and. E1_NUM <= mv_par02"
+	Elseif nOrdem == 2	// Emissao
+		dbSetOrder(6)
+		dbSeek(xFilial()+DTOS(mv_par07),.t.)
+		cCond := "E1_EMISSAO >= mv_par07 .and. E1_EMISSAO <= mv_par08"
+	Elseif nOrdem == 3	// Vencrea //Criar indice por vencimento
+		dbSetOrder(23)
+		dbSeek(xFilial()+DTOS(mv_par09),.t.)
+		cCond := "E1_VENCTO >= mv_par09 .and. E1_VENCTO <= mv_par10"
+	Elseif nOrdem == 5
+		dbSetOrder(2)
+		dbSeek(xFilial()+mv_par11,.t.)
+		cCond := "E1_CLIENTE >= mv_par11 .and. E1_CLIENTE <= mv_par12"
+	Endif
+	
+	While !Eof() .and. xFilial() == E1_FILIAL .and. &cCond
+		
+		IncRegua()
+		
+		If lEnd
+			@Prow()+1,001 Psay "CANCELADO PELO OPERADOR"
+			Exit
+		Endif
+		
+		If mv_par05 = 2 .and. SE1->E1_SALDO = 0
+			dbSkip()
+			Loop
+		EndIF
+		
+		IF Alltrim(E1_TIPO) $ _cNaoTipo //Alltrim(mv_par21)
+			dbSkip()
+			Loop
+		ENDIF
+		
+		If	   E1_NUM      < mv_par01 .or.  E1_NUM      > mv_par02   .or. ;
+			E1_EMISSAO  < mv_par07 .or.  E1_EMISSAO  > mv_par08   .or. ;
+			E1_VENCTO   < mv_par09 .or.  E1_VENCTO   > mv_par10   .or. ;
+			E1_CLIENTE  < mv_par11 .or.  E1_CLIENTE  > mv_par12   .or. ;
+			E1_NATUREZ  < mv_par18 .or.  E1_NATUREZ  > mv_par19   .or. ;
+			!( E1_PREFIXO >= mv_par06 .and. E1_PREFIXO <= mv_par17 ) .or. ;
+			(  E1_TIPO     $ MVABATIM .and. mv_par16   == 2  )
+			dbSkip()
+			Loop
+		Endif
+		
+		If nOrdem == 2						// Relatorio por Data + Numero titulo
+			cCond2 := "E1_EMISSAO"
+			cCampo :=  E1_EMISSAO
+		Elseif nOrdem == 3								// Quebra por Data Vencimento
+			cCond2 := "E1_VENCTO"
+			cCampo :=  E1_VENCTO
+		Elseif nOrdem == 1
+			cCond2 := "E1_PREFIXO+E1_NUM+E1_PARCELA+E1_TIPO"
+			cCampo :=  E1_PREFIXO+E1_NUM+E1_PARCELA+E1_TIPO
+		Elseif nOrdem == 5
+			cCond2 := "E1_CLIENTE"
+			cCampo :=  E1_CLIENTE
+		Endif
+		
+		nAc1  := 0
+		nCnt  := 0
+		nTI1  := 0
+		nNcc2 := 0
+		nTLq1 := 0
+		
+		While !Eof() .and. cCampo = &cCond2 .and. E1_FILIAL == xFilial()
+			
+			IncRegua()
+			
+			If lEnd
+				lContinua := .f.
+				Exit
+			EndIf
+			
+			If mv_par05 = 2 .and. SE1->E1_SALDO = 0
+				dbSkip()
+				Loop
+			endif
+			
+			if Alltrim(SE1->E1_TIPO) $ _cNaoTipo
+				dbSkip()
+				Loop
+			endif
+			
+			If	   E1_NUM		< mv_par01 .or.  E1_NUM	     > mv_par02 .or. ;
+				E1_EMISSAO  < mv_par07 .or.  E1_EMISSAO  > mv_par08 .or. ;
+				E1_VENCTO   < mv_par09 .or.  E1_VENCTO   > mv_par10 .or. ;
+				E1_NATUREZ  < mv_par18 .or.  E1_NATUREZ  > mv_par19 .or. ;
+				E1_CLIENTE  < mv_par11 .or.  E1_CLIENTE  > mv_par12 .or. ;
+				!( E1_PREFIXO >= mv_par06 .and. E1_PREFIXO <= mv_par17 )
+				dbSkip()
+				Loop
+			Endif
+			
+			If	SE1->( E1_IRRF + E1_CSLL + E1_COFINS + E1_PIS + E1_ISS + E1_INSS ) > 0
+				_nNatImp	+=	SE1->( E1_IRRF + E1_CSLL + E1_COFINS + E1_PIS + E1_ISS + E1_INSS )
+			EndIf
+			
+			nTI1  += SE1->( E1_IRRF + E1_CSLL + E1_COFINS + E1_PIS + E1_ISS + E1_INSS )
+			nTIG  += SE1->( E1_IRRF + E1_CSLL + E1_COFINS + E1_PIS + E1_ISS + E1_INSS )
+			nTLq1 -= SE1->( E1_IRRF + E1_CSLL + E1_COFINS + E1_PIS + E1_ISS + E1_INSS )
+			nTLqG -= SE1->( E1_IRRF + E1_CSLL + E1_COFINS + E1_PIS + E1_ISS + E1_INSS )
+			
+			cProxVend := "1"
+			lProcVend := .f.
+			
+			For nx := 1 To nVend
+				cVend := FieldGet( FieldPos( "E1_VEND" + cProxVend ))
+				
+				If ( cVend >= mv_par03	.and. cVend	<= mv_par04 )
+					lProcVend := .t.
+					Exit
+				Endif
+				
+				cProxVend := Soma1(cProxVend,01)
+			Next nx
+			
+			If	!lProcVend
+				dbskip()
+				loop
+			Endif
+			
+			If li > 58
+				cabec(titulo,cabec1,cabec2,nomeprog,tamanho,iif(aReturn[4]==1,GetMv("MV_COMP"),GetMv("MV_NORM")))
+			EndIf
+			
+			If mv_par20 == 1
+				R640Impr("SE1",SE1->E1_CLIENTE,SE1->E1_LOJA, cVend, aCoord, aTam)
+				li ++
+			EndIf
+			
+			nCnt ++
+			
+			If SE1->E1_TIPO $ MVABATIM .and. !( mv_par16 == 1 )
+				If mv_par16 == 3
+					nAc1  -= xMoeda(SE1->E1_VALOR,SE1->E1_MOEDA,mv_par13, SE1->E1_EMISSAO)
+					nAg1	-= xMoeda(SE1->E1_VALOR,SE1->E1_MOEDA,mv_par13, SE1->E1_EMISSAO)
+					nTLq1	-= xMoeda(SE1->E1_VALOR,SE1->E1_MOEDA,mv_par13, SE1->E1_EMISSAO)
+					nTLqG	-= xMoeda(SE1->E1_VALOR,SE1->E1_MOEDA,mv_par13, SE1->E1_EMISSAO)
+				EndIf
+			Else
+				nAc1  += xMoeda(SE1->E1_VALOR,SE1->E1_MOEDA,mv_par13, SE1->E1_EMISSAO)
+				nAg1	+= xMoeda(SE1->E1_VALOR,SE1->E1_MOEDA,mv_par13, SE1->E1_EMISSAO)
+				nTLq1	+= xMoeda(SE1->E1_VALOR,SE1->E1_MOEDA,mv_par13, SE1->E1_EMISSAO)
+				nTLqG	+= xMoeda(SE1->E1_VALOR,SE1->E1_MOEDA,mv_par13, SE1->E1_EMISSAO)
+			EndIf
+			
+			If	SE1->E1_TIPO $ ( MV_CRNEG + "/" + MVRECANT )
+				nNcc1 += xMoeda(SE1->E1_VALOR,SE1->E1_MOEDA,mv_par13, SE1->E1_EMISSAO)
+				nNcc2 += xMoeda(SE1->E1_VALOR,SE1->E1_MOEDA,mv_par13, SE1->E1_EMISSAO)
+			Endif
+			
+			dbSkip()
+		EndDo
+		
+		If nCnt > 0 .and. nOrdem > 1
+			
+			If nOrdem == 2
+				@ ++ li , 00 Psay "Total dos Emitidos em ==>" + DtoC(cCampo)
+			Elseif nOrdem == 3
+				@ ++ li , 00 Psay "Total dos Vencidos em ==>" + DtoC(cCampo)
+			Elseif nOrdem == 5
+				dbSelectArea("SA1")
+				dbSeek( xFilial() + cCampo )
+				@ ++ li , 00 Psay "Total do Cliente ==>" + cCampo + " " + SA1->A1_NOME
+			EndIf
+			
+			@    li , aCoord[09] Psay Transform( nAc1 	, "@e 99,999,999.99" )
+			@    li , aCoord[10] Psay Transform( nTLq1 	, "@e 99,999,999.99" )
+			
+			@ ++ li , 000        Psay "Total Liquido" + "(-" + Left( MV_CRNEG + "/" + MVRECANT , 6 ) + "/Impostos)"
+			@    li , aCoord[09] Psay Transform( nAc1 - nNcc2 - nTI1 , "@e 99,999,999.99" )
+			@    li , aCoord[10] Psay Transform( nTI1 					, "@e 99,999,999.99" )
+			
+			@ ++ li , 000 Psay __PrtThinLine()
+			
+			li ++
+		Endif
+		
+		dbSelectArea("SE1")
+		
+		If nCnt > 0 .and. mv_par14 == 1
+			li := 60
+		EndIf
+	EndDo
+EndIf
+
+li ++
+
+If li > 58 .or. mv_par14 == 1
+	cabec(titulo,cabec1,cabec2,nomeprog,tamanho,iif( aReturn[4] == 1 , GetMv("MV_COMP") , GetMv("MV_NORM") ))
+Endif
+
+@prow()+1 , 000        Psay "TOTAL GERAL -------------------------------------------------------->"
+@prow()   , aCoord[09] Psay Transform( nAg1 	, "@e 99,999,999.99" )
+@prow()   , aCoord[10] Psay Transform( nTLqG	, "@e 99,999,999.99" )
+
+@prow()+1 , 000        Psay "TOTAL LIQUIDO" + "(-" + Left( MV_CRNEG + "/" + MVRECANT , 6 ) + ") - IMPOSTOS(PIS/COFINS/CSLL/IRRF/INSS/ISS) --->"
+@prow()   , aCoord[09] Psay Transform( nAg1 - nNcc1 - nTIG     , "@e 99,999,999.99" )
+@prow()   , aCoord[10] Psay Transform( nTIG                		, "@e 99,999,999.99" )
+
+Roda(cbcont,cbtxt,Titulo)
+
+dbSelectArea("SE1")
+RetIndex("SE1")
+dbSetOrder(1)
+DbClearFilter()
+
+If nOrdem == 4
+	dbSelectArea( "TRB" )
+	dbCloseArea()
+	If File(cArq+OrdBagExt())
+		Ferase(cArq+OrdBagExt())
+	Endif
+	If File(cArq+GetDBExtension())
+		Ferase(cArq+GetDBExtension())
+	Endif
+EndIf
+
+dbSelectArea("SE1")
+
+If aReturn[5] == 1
+	Set Printer To
+	dbCommitAll()
+	Ourspool(wnrel)
+EndIf
+
+Ms_Flush()
+
+Return ( .t. )
+
+/*±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡…o    ³ ImpQRY   ³ Autor ³ Cristiano D. Alves    ³ Data ³ 04/03/07 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³ Imprime os dados dos titulos (QRYurezas)                   ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Sintaxe   ³ ImpQRY()                                                   ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ MATR640REC                                                 ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß*/
+
+Static Function ImpNatr(cAlias, cCliente, cLoja, cVend, aCoord, aTam)
+
+Local nTmp		:=	QRY->( E1_IRRF + E1_CSLL + E1_COFINS + E1_PIS + E1_ISS + E1_INSS )
+Local nValor	:= xMoeda(QRY->E1_VALOR,QRY->E1_MOEDA,mv_par13,QRY->E1_EMISSAO)
+
+_cTipo 	:= QRY->E1_TIPO
+_nPerc 	:= QRY->E1_COMIS1
+
+dbSelectArea("SA1")
+dbSeek( xFilial() + cCliente + cLoja )
+
+//10-088-Valor Liquido
+//11-102-Valor IRRF
+//12-113-Valor ISS
+//13-124-Valor INSS
+//14-135-Valor PIS
+//15-146-Valor COFINS
+//16-157-Valor CSLL
+//17-168 % Comissão
+//18-175-Vlr. Comissão
+//19-186-Nome Vendedor
+//20-217-Pedido
+
+@li,aCoord[01] Psay QRY->E1_PREFIXO + "/" + SubStr(QRY->E1_NUM,1,6) + "/" + QRY->E1_PARCELA
+@li,aCoord[04] Psay Alltrim(QRY->E1_CLIENTE)
+@li,aCoord[05] Psay QRY->E1_LOJA
+@li,aCoord[06] Psay Substr( SA1->A1_NOME , 01 , 30 )
+@li,aCoord[07] Psay DtoC(StoD(QRY->E1_EMISSAO))
+@li,aCoord[08] Psay DtoC(StoD(QRY->E1_VENCTO))
+@li,aCoord[09] Psay Transform( iif( ( QRY->E1_TIPO $ MVABATIM .and. mv_par16 == 3 ) , - nValor , nValor ) , "@e 99,999,999.99" )
+@li,aCoord[10] Psay Transform( nValor - nTmp  , "@e 99,999,999.99" )
+@li,aCoord[11] Psay Transform( QRY->E1_IRRF   , "@e 999,999.99"    )
+@li,aCoord[12] Psay Transform( QRY->E1_ISS    , "@e 999,999.99"    )
+@li,aCoord[13] Psay Transform( QRY->E1_INSS   , "@e 999,999.99"    )
+@li,aCoord[14] Psay Transform( QRY->E1_PIS    , "@e 999,999.99"    )
+@li,aCoord[15] Psay Transform( QRY->E1_COFINS , "@e 999,999.99"    )
+@li,aCoord[16] Psay Transform( QRY->E1_CSLL   , "@e 999,999.99"    )
+@li,aCoord[17] Psay QRY->E1_COMIS1 Picture "@E 999.99"
+@li,aCoord[18] Psay Transform( Round( ( ( nValor * _nPerc ) / 100 ) , 2 ) , "@e 999,999.99" )
+@li,aCoord[19] Psay Substr( Posicione("SA3",1,xFilial("SA3") + QRY->E1_VEND1,"A3_NOME") , 01 , 27 )
+@li,aCoord[20] Psay Posicione("SD2",3,xFilial("SD2") + SubStr(QRY->E1_NUM,1,9) + QRY->E1_PREFIXO,"D2_CF")
+
+dbSelectArea(cAlias)
+
+Return
+
+/*
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡…o    ³ R640Impr ³ Autor ³ Cristina M. Ogura     ³ Data ³ 18/07/96 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³ Imprime os dados dos titulos                               ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Sintaxe   ³ R640Impr()                                                 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ MATR640                                                    ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+*/
+
+Static Function R640Impr(cAlias,cCliente,cLoja,cVend,aCoord,aTam)
+
+Local nTmp     :=	0
+Local nValLiq	:=	0
+Local _nPerc	:=	iif( cAlias == "SE1" , SE1->E1_COMIS1	, TRB->TRB_COMIS1 )
+Local _cTipo	:=	iif( cAlias == "SE1" , SE1->E1_TIPO 	, TRB->TRB_TIPO 	)
+Local nValTmp	:=	iif( cAlias == "SE1" , xMoeda(SE1->E1_VALOR,SE1->E1_MOEDA,mv_par13, SE1->E1_EMISSAO) , TRB->TRB_VALOR )
+Local nValor 	:=	iif( _cTipo $ MVABATIM .and. mv_par16 == 3 , - nValTmp , nValTmp )
+
+if	cAlias == "SE1"
+	nTmp	:=	SE1->( E1_IRRF  + E1_CSLL  + E1_COFINS  + E1_PIS  + E1_ISS  + E1_INSS  )
+else
+	nTmp	:=	TRB->( TRB_IRRF + TRB_CSLL + TRB_COFINS + TRB_PIS + TRB_ISS + TRB_INSS )
+endif
+
+nValLiq	:=	nValTmp - nTmp
+
+dbSelectArea("SA1")
+dbSeek( xFilial() + cCliente + cLoja )
+
+@li,aCoord[01] Psay iif( cAlias == "SE1" , SE1->E1_PREFIXO 			, 	TRB->TRB_PREFIX			) + "/"
+@li,aCoord[02] Psay iif( cAlias == "SE1" , SubStr(SE1->E1_NUM,1,6)		, 	SubStr(TRB->TRB_NUM,1,6)) + "/"
+@li,aCoord[03] Psay iif( cAlias == "SE1" , SE1->E1_PARCELA				, 	TRB->TRB_PARCEL			)
+@li,aCoord[04] Psay iif( cAlias == "SE1" , Alltrim(SE1->E1_CLIENTE)	,	Alltrim(TRB->TRB_CLIE)	)
+@li,aCoord[05] Psay iif( cAlias == "SE1" , SE1->E1_LOJA				,	TRB->TRB_LOJA				)
+@li,aCoord[06] Psay Substr( SA1->A1_NOME , 01 , 30 )
+@li,aCoord[07] Psay iif( cAlias == "SE1" , DtoC(SE1->E1_EMISSAO)		,	DtoC(TRB->TRB_EMISSA)	)
+@li,aCoord[08] Psay iif( cAlias == "SE1" , DtoC(SE1->E1_VENCTO)		,	DtoC(TRB->TRB_VENCRE)	)
+@li,aCoord[09] Psay Transform( nValor 		, "@e 99,999,999.99" )
+@li,aCoord[10] Psay Transform( nValLiq 	, "@e 99,999,999.99" )
+
+if	cAlias == "SE1"
+	@li,aCoord[11] Psay Transform( SE1->E1_IRRF   	, "@e 999,999.99"    )
+	@li,aCoord[12] Psay Transform( SE1->E1_ISS    	, "@e 999,999.99"    )
+	@li,aCoord[13] Psay Transform( SE1->E1_INSS   	, "@e 999,999.99"    )
+	@li,aCoord[14] Psay Transform( SE1->E1_PIS    	, "@e 999,999.99"    )
+	@li,aCoord[15] Psay Transform( SE1->E1_COFINS 	, "@e 999,999.99"    )
+	@li,aCoord[16] Psay Transform( SE1->E1_CSLL   	, "@e 999,999.99"    )
+else
+	@li,aCoord[11] Psay Transform( TRB->TRB_IRRF   	, "@e 999,999.99"    )
+	@li,aCoord[12] Psay Transform( TRB->TRB_ISS    	, "@e 999,999.99"    )
+	@li,aCoord[13] Psay Transform( TRB->TRB_INSS   	, "@e 999,999.99"    )
+	@li,aCoord[14] Psay Transform( TRB->TRB_PIS    	, "@e 999,999.99"    )
+	@li,aCoord[15] Psay Transform( TRB->TRB_COFINS 	, "@e 999,999.99"    )
+	@li,aCoord[16] Psay Transform( TRB->TRB_CSLL  	, "@e 999,999.99"    )
+endif
+
+@li,aCoord[17] Psay iif( cAlias == "SE1" , SE1->E1_COMIS1 , TRB->TRB_COMIS1 ) Picture "@E 999.99"
+
+If _cTipo $ MVABATIM .and. mv_par16 == 3 .and. cAlias == "SE1"
+	@li,aCoord[18] Psay Transform( Round( - nValor * _nPerc / 100 , 2 ) , "@e 999,999.99" )
+Else
+	@li,aCoord[18] Psay Transform( Round(   nValor * _nPerc / 100 , 2 ) , "@e 999,999.99" )
+EndIf
+@li,aCoord[19] Psay Substr( Posicione("SA3",1,xFilial("SA3") + cVend,"A3_NOME") , 01 , 27 )
+//@li,aCoord[20] Psay iif( cAlias == "SE1" , SE1->E1_PEDIDO , TRB->TRB_PEDIDO )
+@li,aCoord[20] Psay Posicione("SD2",3,xFilial("SD2") + SubStr(SE1->E1_NUM,1,9) + SE1->E1_PREFIXO,"D2_CF")
+dbSelectArea(cAlias)
+
+Return
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡…o    ³AjustaSX1 ³ Autor ³ Kleber Dias Gomes     ³ Data ³05/10/2004³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³ Inclui pergunta no sx1                                     ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ MATR640                                                    ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+*/
+
+Static Function AjustaSX1()
+
+Local	aHelpPor := {}
+Local	aHelpSpa := {}
+Local	aHelpEng := {}
+
+aHelpPor := {}
+aAdd(aHelpPor,"Indique o que devera ser")
+aAdd(aHelpPor,"considerado no valor da duplicata:")
+aAdd(aHelpPor,"1-Considera todos os titulos")
+aAdd(aHelpPor,"2-Desconsidera abatimentos")
+aAdd(aHelpPor,"3-Deduz abatimentos")
+
+aHelpSpa := {}
+aAdd(aHelpSpa,"Indique qué deberá ser")
+aAdd(aHelpSpa,"considerado en el valor de la factura")
+aAdd(aHelpSpa,"de crédito:")
+aAdd(aHelpSpa,"1-Considera todos los títulos")
+aAdd(aHelpSpa,"2-Ignora deducciones")
+aAdd(aHelpSpa,"3-Descuenta deducciones")
+
+aHelpEng := {}
+aAdd(aHelpEng,"Determine what must be")
+aAdd(aHelpEng,"considered in the duplicate value:")
+aAdd(aHelpEng,"1-Consider all bills")
+aAdd(aHelpEng,"2-Do not consider discounts")
+aAdd(aHelpEng,"3-Deduct discounts")
+
+PutSx1("MT640R","16","Considerar titulos ?","¿Considerar titulos?","Consider bills ?","mv_chg","N",1,0,1,"C","","","","","mv_par16",;
+"1-Todos titulos","1-Todos titulos","1-All bills","","2-Desconsidera","2-Ignora","2-Not consider","3-Deduz","3-Deduce","3-Deduct","","","","","","",aHelpPor,aHelpEng,aHelpSpa)
+//Serie Final
+aHelpPor := {}
+aAdd(aHelpPor,"Serie final a ser considerada na")
+aAdd(aHelpPor,"filtragem no cadastro de notas  ")
+aAdd(aHelpPor,"fiscais.")
+
+aHelpSpa := {}
+aAdd(aHelpSpa,"Serie final a considerarse en la")
+aAdd(aHelpSpa,"filtracion del archivo de facturas.")
+
+aHelpEng := {}
+aAdd(aHelpEng,"Final serie to be considered in ")
+aAdd(aHelpEng,"the fil tering of invoices file.")
+
+PutSx1("MT640R","17","Serie final ?","¿Serie final ?","Final serie ?","mv_chh","C",3,0,0,"G","","","","S","mv_par17","","","","zzz","","","","","","","","","","","","",aHelpPor,aHelpEng,aHelpSpa)
+
+PutSx1("MT640R","18","Da natureza ?","","","mv_chi","C",10,0,0,"G","","SED","","S","mv_par18","","","","","","","","","","","","","","","","","","","","","")
+PutSx1("MT640R","19","Ate a natureza ?","","","mv_chj","C",10,0,0,"G","","SED","","S","mv_par19","","","","","","","","","","","","","","","","","","","","","")
+PutSx1("MT640R","20","Analitico/Sintetico?","","","mv_chk","N",1,0,1,"C","","","","","mv_par20","Analitico","","","","Sintetico","","","","","","","","","","","","","")
+PutSx1("MT640R","21","Nao Imprimir Tipos ?","","","mv_chl","C",30,0,0,"G","","","","S","mv_par21","","","","","","","","","","","","","","","","","","","","","")
+
+
+Return(.t.)

@@ -359,8 +359,8 @@ Local _aTxTDesc
 Local cMemoObs
 Local nMemoObs
 Local _aTxTObs
-Local _nLimDesc := 100
-Local _nLimObs  := 100
+Local _nLimDesc := 110
+Local _nLimObs  := 110
 Local nLastLnDesc := 0
 Local nLastLnObs  := 0
 
@@ -683,7 +683,7 @@ oPrint:Say (0850,1050,"Historico"						,oFont12)
 oPrint:Say (1400,0930,"Justificativa (Se houver)"					,oFont12)
 oPrint:Say (1800,0060,"Data da Inclusão:"						,oFont12)
 oPrint:Say (1890,0270,"Solicitado por"						,oFont12)
-//oPrint:Say (2200,1130,"FÉRIAS"						,oFont12)//TEMPORARIO - FERIAS ELENN
+//oPrint:Say (2100,1130,"FÉRIAS"		         				,oFont12)//TEMPORARIO - FERIAS ELENN - ALTERADO LINHA 2200 PARA 2100
 oPrint:Say (1890,1025,"Autorizado por"						,oFont12)
 
 If !EMPTY(aIteq[i][20]) .AND. !EMPTY(aIteq[i][21])
@@ -763,7 +763,7 @@ Local nLimite 	:= 0
 Local nSaldoA	:= 0
 Local cObs		:= SPACE(30)
 
-If AllTrim(Substring(cUsuario,7,15)) $ "Administrador%Eleni Caldeira (Elenn)%Claudinei Girotti%Josiel Ferreira%Wagner Lima da Silva"
+If AllTrim(Substring(cUsuario,7,15)) $ "Administrador%Eleni Caldeira (Elenn)%Claudinei Girotti%Josiel Ferreira%Wagner Lima da Silva%Pasquale Zupi(Pasquale))"
 	
 	IF SZS->ZS_LIBERAD == "L"
 		lOk		:= .F.
@@ -771,7 +771,7 @@ If AllTrim(Substring(cUsuario,7,15)) $ "Administrador%Eleni Caldeira (Elenn)%Cla
 		lOk		:= .T.
 	ENDIF
 	
-	cQuery := "SELECT C1_NATUREZ AS NATUREZA, SUM(C7_TOTAL + C7_VALFRE + C7_DESPESA - C7_VLDESC) AS VALOR FROM SC7010 "
+	cQuery := "SELECT C1_NATUREZ AS NATUREZA, SUM(C7_TOTAL + C7_VALFRE + C7_DESPESA - C7_VLDESC + C7_VALIPI) AS VALOR FROM SC7010 "
 	cQuery += "INNER JOIN SC1010 ON "
 	cQuery += "C1_NUM = C7_NUMSC AND "
 	cQuery += "C1_PEDIDO = C7_NUM AND "
@@ -792,7 +792,7 @@ If AllTrim(Substring(cUsuario,7,15)) $ "Administrador%Eleni Caldeira (Elenn)%Cla
 	cQuery += "SC1010.D_E_L_E_T_ <> '*' "
 	cQuery += "GROUP BY C1_NATUREZ "
 	cQuery += "UNION "
-	cQuery += "SELECT C3_NATUREZ AS NATUREZA,SUM(C7_TOTAL + C7_VALFRE + C7_DESPESA - C7_VLDESC) AS VALOR FROM SC7010 "    // Busca Autorização de Contratos
+	cQuery += "SELECT C3_NATUREZ AS NATUREZA,SUM(C7_TOTAL + C7_VALFRE + C7_DESPESA - C7_VLDESC + C7_VALIPI) AS VALOR FROM SC7010 "    // Busca Autorização de Contratos
 	cQuery += "INNER JOIN SC3010 ON "
 	cQuery += "C7_NUMSC = C3_NUM AND "
 	cQuery += "C7_ITEMSC = C3_ITEM "
@@ -851,14 +851,14 @@ If AllTrim(Substring(cUsuario,7,15)) $ "Administrador%Eleni Caldeira (Elenn)%Cla
 	@ 001,022 SAY UPPER("Data :  " + DTOC(dData))
 	@ 002,001 SAY UPPER("Solicitante :  " + cSolicit)
 	@ 003,001 SAY UPPER("Departamento :  " + cDepart)
-	@ 003,022 SAY UPPER("Valor :  " + cValToChar(nVlAP))
+	@ 003,022 SAY UPPER("Valor :  " + Alltrim(Transform(nVlAP,"@e 999,999,999.99")))  
 	@ 004,001 SAY UPPER("Fornecedor :  " + ALLTRIM(cFornece) + " - " + cNomeFor)
 	@ 005,001 GET mHistori MEMO SIZE 228,035 when .F.
 	@ 008,001 SAY UPPER("Natureza :  " + ALLTRIM(cNatureza) + " - " + cNNat)
-	@ 009,001 SAY UPPER("Limite :  " + cValtoChar(nLimite)) 		//PICTURE "@E 999,999,999.99"
-	@ 010,001 SAY UPPER("Valor Utilizado :  " + cValtoChar(nTotal)) //PICTURE "@E 999,999,999.99"
-	@ 011,001 SAY UPPER("Saldo atual :  " + cValToChar(nSaldo)) 
-	@ 012,001 SAY UPPER("Saldo após aprovação :  " + cValToChar(nSaldoa)) 
+	@ 009,001 SAY UPPER("Limite :  " + Alltrim(Transform(nLimite,"@e 999,999,999.99"))) 		//PICTURE "@E 999,999,999.99"
+	@ 010,001 SAY UPPER("Valor Utilizado :  " + Alltrim(Transform(nTotal,"@e 999,999,999.99"))) //PICTURE "@E 999,999,999.99"
+	@ 011,001 SAY UPPER("Saldo atual :  " + Alltrim(Transform(nSaldo,"@e 999,999,999.99"))) 
+	@ 012,001 SAY UPPER("Saldo após aprovação :  " + Alltrim(Transform(nSaldoa,"@e 999,999,999.99"))) 
 	@ 013,001 SAY "OBSERVAÇÃO :"
 	@ 013,007 GET cObs 
 	@ 018,022 BUTTON "Pendente"	SIZE 35,10 ACTION PendenteSZS(dDataLib,cObs)	

@@ -1,0 +1,798 @@
+#include "protheus.ch"
+
+#define I_CORRECAO_MONETARIA     01
+#define I_DESCONTO               02
+#define I_JUROS                  03
+#define I_MULTA                  04
+#define I_VALOR_RECEBIDO         05
+#define I_VALOR_PAGO             06
+#define I_RECEB_ANT              07
+#define I_PAGAM_ANT              08
+#define I_MOTBX                  09
+#define I_RECPAG_REAIS         	 10
+#define I_LEI10925               12
+
+/*ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡…o    ³ FinR350  ³ Autor ³ Adrianne Furtado      ³ Data ³ 27/06/06 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³ Posicao dos Fornecedores 					           	  ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß*/
+
+User Function RecR350()
+
+Local cFilAtu := cFilAnt
+
+AjustaSX1()
+
+RecR350R3()
+
+cFilAnt := cFilAtu
+
+Return
+
+/*ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡„o	 ³AjustaSX1 ³ Autor ³ Paulo Augusto      	  ³ Data ³ 09.06.05 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡„o ³Cria nova pergunta para tratar da taxa de conversao		     ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß*/
+
+Static Function AjustaSX1()
+
+Local aHelpPor := {}
+Local aHelpEng := {}
+Local aHelpSpa := {}
+Local aHelpTmp := {"Parametro do  Relatório Personalizado Apenas"}
+
+PutSx1("FIN350","17","Conv. mov. na moeda sel. pela?","","","mv_chh","N",01,0,0,"C","","","","","mv_par17","Data Movimento","","","","Data de Hoje","","","","     ","","","","","","","",aHelpPor,aHelpEng,aHelpSpa)
+PutSx1("FIN350","18","Considera Data de Emissao     ","","","mv_chI","N",01,0,0,"C","","","","","mv_par18","Do Documento  ","","","","Do Sistema  ","","","","     ","","","","","","","",aHelpPor,aHelpEng,aHelpSpa)
+PutSx1("FIN350","19","Cons.Filiais abaixo ?         ","","","mv_chj","N",01,0,2,"C","","","","","mv_par19","Sim           ","","","","Nao         ","","","","     ","","","","","","","",aHelpPor,aHelpEng,aHelpSpa)
+PutSx1("FIN350","20","Da Filial ?                   ","","","mv_chk","C",02,0,0,"G","","","","","mv_par20","              ","","","","Nao         ","","","","     ","","","","","","","",aHelpPor,aHelpEng,aHelpSpa)
+PutSx1("FIN350","21","Ate a Filial ?                ","","","mv_chl","C",02,0,0,"G","","","","","mv_par21","              ","","","","            ","","","","     ","","","","","","","",aHelpPor,aHelpEng,aHelpSpa)
+PutSx1("FIN350","22","Tipo do Movimento ?           ","","","mv_chm","N",01,0,0,"C","","","","","mv_par22","Abertos       ","","","","Baixados    ","","","","Ambos","","","","","","","",aHelpTmp,aHelpEng,aHelpSpa)
+PutSx1("FIN350","23","Do Banco ?                    ","","","mv_chn","C",03,0,0,"G","","","","","mv_par23","              ","","","","            ","","","","     ","","","","","","","",aHelpTmp,aHelpEng,aHelpSpa)
+PutSx1("FIN350","24","Da Agencia ?                  ","","","mv_cho","C",05,0,0,"G","","","","","mv_par24","              ","","","","            ","","","","     ","","","","","","","",aHelpTmp,aHelpEng,aHelpSpa)
+PutSx1("FIN350","25","Da Conta ?                    ","","","mv_chp","C",10,0,0,"G","","","","","mv_par25","              ","","","","            ","","","","     ","","","","","","","",aHelpTmp,aHelpEng,aHelpSpa)
+PutSx1("FIN350","26","Ate o Banco ?                 ","","","mv_chq","C",03,0,0,"G","","","","","mv_par26","              ","","","","            ","","","","     ","","","","","","","",aHelpTmp,aHelpEng,aHelpSpa)
+PutSx1("FIN350","27","Ate a Agencia ?               ","","","mv_chr","C",05,0,0,"G","","","","","mv_par27","              ","","","","            ","","","","     ","","","","","","","",aHelpTmp,aHelpEng,aHelpSpa)
+PutSx1("FIN350","28","Ate a Conta ?                 ","","","mv_chs","C",10,0,0,"G","","","","","mv_par28","              ","","","","            ","","","","     ","","","","","","","",aHelpTmp,aHelpEng,aHelpSpa)
+PutSx1("FIN350","29","Mostrar Comp. Carteiras ?     ","","","mv_cht","N",01,0,0,"C","","","","","mv_par29","Sim           ","","","","Nao         ","","","","     ","","","","","","","",aHelpTmp,aHelpEng,aHelpSpa)
+
+Return ()
+
+/*ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡…o    ³ FINR350  ³ Autor ³ Paulo Boschetti       ³ Data ³ 01.06.92 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³ Posicao dos Fornecedores                                   ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß*/
+
+Static Function RecR350R3()
+
+Local nMoeda
+Local cDesc1 		:=	"Este programa irá emitir a posição dos fornecedores"
+Local cDesc2 		:=	"referente a data base do sistema."
+Local cDesc3 		:=	""
+Local cString		:=	"SE2"
+
+Private nLastKey	:=	0
+Private aLinha 	:=	{}
+Private Tamanho	:=	"G"
+Private cPerg  	:=	"FIN350    "
+Private wnrel		:=	"RECR350"
+Private nomeprog 	:=	"RECR350"
+Private Titulo		:=	"Posicao dos Fornecedores"
+Private aOrd 		:=	{ "Por Codigo" , "Por Nome" }
+Private aReturn	:=	{ "Zebrado" , 01 , "Administracao" , 01 , 02 , 01 , "" , 01 }
+Private Cabec1		:=	""
+Private Cabec2		:=	"Prf Numero       PC Tip  Valor Original   Emissao     Vencto      Baixa   Natureza          Centro de Custos        Descontos   Abatimentos         Juros         Multa        Valor Pago        Saldo Atual  Motivo"
+
+Pergunte(cPerg,.t.)
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Variaveis utilizadas para parametros                  ³
+//³ mv_par01    // Do Fornecedor                     		 ³
+//³ mv_par02    // Ate o Fornecedor                  		 ³
+//³ mv_par03    // Da Loja                           		 ³
+//³ mv_par04    // Ate a Loja                        		 ³
+//³ mv_par05    // Da Emissao                        		 ³
+//³ mv_par06    // Ate a Emissao                     		 ³
+//³ mv_par07    // Do Vencimento                     		 ³
+//³ mv_par08    // Ate o Vencimento                  		 ³
+//³ mv_par09    // Imprime os t¡tulos provis¢rios    		 ³
+//³ mv_par10    // Qual a moeda                      		 ³
+//³ mv_par11    // Reajusta pela DataBase ou Vencto  		 ³
+//³ mv_par12    // Considera Faturados               		 ³
+//³ mv_par13    // Imprime Outras Moedas             		 ³
+//³ mv_par14    // Considera Data Base               		 ³
+//³ mv_par15    // Imprime Nome?(Raz.Social/N.Reduz.)		 ³
+//³ mv_par16    // Imprime PA? Sim ou Não            		 ³
+//³ mv_par17    // Conv. val. pela Data de? Hoje ou Mov 	 ³
+//| mv_par18	// Considera Data de Emissao:"Do Documento" ou "Do Sistema"
+//³ mv_par19	// Consid Filiais  ?  						 ³
+//³ mv_par20	// da filial								 ³
+//³ mv_par21	// a flial 									 ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+Titulo += iif( mv_par22 == 1 , " - Em Aberto" ,  iif( mv_par22 == 2 , " - Baixados" , " - Em Aberto e Baixados" ))
+Cabec1 := "Da Emissao de " + DtoC(mv_par05) + " a " + DtoC(mv_par06) + " e do Vencimento de " + DtoC(mv_par07) + " a " + DtoC(mv_par08)
+
+wnrel	:=	SetPrint(cString,wnrel,,@titulo,cDesc1,cDesc2,cDesc3,.f.,aOrd,,Tamanho,,.t.)
+
+If nLastKey == 27
+	Return
+endif
+
+SetDefault(aReturn,cString)
+
+If nLastKey == 27
+	Return
+endif
+
+nMoeda := mv_par10
+
+//Titulo += " - " + GetMv( "MV_MOEDA" + Str(nMoeda,1) )
+
+RptStatus( { |lEnd| Rec350Imp(@lEnd,wnRel,cString)} , Titulo )
+
+Return
+
+/*ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡…o    ³Rec350Imp ³ Autor ³ Paulo Boschetti       ³ Data ³ 01.06.92 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³ Posicao dos Fornecedores                                   ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Sintaxe e ³ FA350Imp(lEnd,wnRel,cString)                               ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß*/
+
+Static Function Rec350Imp(lEnd,wnRel,cString)
+
+Local ni
+Local cCond1
+Local cCond2
+Local cChave
+Local cIndex
+Local cOrder
+Local cEmissao
+Local dDataMoeda
+
+Local nTit1			:=	0
+Local nTit2			:=	0
+Local nTit3			:=	0
+Local nTit4			:=	0
+Local nTit5			:=	0
+Local nTit6			:=	0
+Local nTit7			:=	0
+Local nTit8			:=	0
+Local nTit9			:=	0
+Local nTit10		:=	0
+
+Local nTot1			:=	0
+Local nTot2			:=	0
+Local nTot3			:=	0
+Local nTot4			:=	0
+Local nTot5			:=	0
+Local nTot6			:=	0
+Local nTot7			:=	0
+Local nTot8			:=	0
+Local nTot9			:=	0
+Local nTot10		:=	0
+
+Local nSaldo		:=	0
+Local nTotAbat		:=	0
+Local nTotFil1		:=	0
+Local nTotFil2		:=	0
+Local nTotFil3		:=	0
+Local nTotFil4		:=	0
+Local nTotFil5		:=	0
+Local nTotFil6		:=	0
+Local nTotFil7		:=	0
+Local nTotFil8		:=	0
+Local nTotFil9		:=	0
+Local nTotFil10	:=	0
+
+Local cbCont		:= 00
+Local lRet     	:=	.t.
+Local lContinua	:=	.t.
+Local cAliasSA2 	:=	"SA2"
+Local nConv			:= mv_par17
+Local nMoeda		:=	mv_par10
+Local CbTxt			:=	Space(10)
+Local cForAnt		:=	Space(06)
+Local nOrdem		:= aReturn[8]
+Local cFilterUser	:= aReturn[7]
+Local nRegAtu   	:= SM0->(Recno())
+Local aStru 		:=	SE2->(dbStruct())
+Local ndecs			:=	Msdecimais(mv_par10)
+Local aValor		:=	{ 0 , 0 , 0 , 0 , 0 , 0 }
+Local lImpPAPag	:= iif( mv_par16 == 2 , .t. , .f. )
+Local lPCCBaixa 	:= SuperGetMv("MV_BX10925",.t.,"2") == "1"
+Local cCpoEmis 	:= iif( mv_par18 == 1 , "E2_EMISSAO" , "E2_EMIS1" )
+
+Private cFilDe
+Private cFilAte
+Private nRegSM0 	:=	SM0->(Recno())
+Private lOk   		:= .F.
+Private nValor    := 0
+Private nPerc     := 0
+
+li    		:=	80
+m_pag 		:=	01
+dDataMoeda	:=	dDataBase
+
+SomaAbat( "" , "" , "" , "P" )
+
+cFilDe		:= iif( mv_par19 == 2 , cFilAnt , mv_par20 )
+cFilAte 		:= iif( mv_par19 == 2 , cFilAnt , mv_par21 )
+
+dbSelectArea("SM0")
+dbSeek( cEmpAnt + cFilDe , .t. )
+
+Do While SM0->(!Eof()) .and. SM0->M0_CODIGO == cEmpAnt .and. SM0->M0_CODFIL <= cFilAte
+	
+	cFilAnt 	:=	SM0->M0_CODFIL
+	
+	dbSelectArea("SE2")
+	
+	aStru 	:=	dbStruct()
+	
+	If nOrdem == 1
+		dbSetOrder(6)
+		cChave 	:=	IndexKey()
+		dbSeek( cFilial + mv_par01 + mv_par03 , .t. )
+		cCond1 	:=	"SE2->E2_FORNECE + SE2->E2_LOJA <= mv_par02 + mv_par04 .and. SE2->E2_FILIAL == xFilial('SE2') "
+		cCond2 	:= "SE2->E2_FORNECE + SE2->E2_LOJA "
+		cOrder 	:=	SqlOrder(cChave)
+	Else
+		cChave 	:=	"E2_FILIAL + E2_NOMFOR + E2_PREFIXO + E2_NUM + E2_PARCELA + E2_TIPO"
+		cOrder 	:=	SqlOrder(cChave)
+		cCond1	:= ".t."
+		cCond2 	:=	"SE2->E2_FORNECE + SE2->E2_LOJA"
+		SE2->( dbGoTop() )
+	endif
+	
+	SetRegua(RecCount())
+	
+	dbSelectArea("SE2")
+	
+	cQuery	:= " Select SE2.* , SA2.A2_COD , SA2.A2_NOME , SA2.A2_NREDUZ "
+	cQuery 	+= " From " + RetSqlName("SE2") + " SE2 , "
+	cQuery	+=				  RetSqlName("SA2") + " SA2   "
+	cQuery 	+=	" Where SE2.E2_FORNECE   = SA2.A2_COD   and "
+	cQuery 	+= 	"    SE2.E2_LOJA      = SA2.A2_LOJA  and "
+	cQuery 	+=		"    SE2.E2_FILIAL    = '" + xFilial("SE2") 				+ "' and "
+	cQuery 	+= 	"    SA2.A2_FILIAL    = '" + xFilial("SA2") 				+ "' and "
+	cQuery 	+= 	"    SE2.E2_FORNECE  >= '" + mv_par01        			+ "' and "
+	cQuery	+=		"    SE2.E2_FORNECE  <= '" + mv_par02       				+ "' and "
+	cQuery 	+= 	"    SE2.E2_LOJA     >= '" + mv_par03        			+ "' and "
+	cQuery 	+= 	"    SE2.E2_LOJA     <= '" + mv_par04        			+ "' and "
+	cQuery 	+= 	"    SE2.E2_VENCREA  >= '" + DtoS(mv_par07)  			+ "' and "
+	cQuery 	+= 	"    SE2.E2_VENCREA  <= '" + DtoS(mv_par08)  			+ "' and "
+	cQuery 	+= 	"    SE2.E2_TIPO NOT IN " 	+ FormatIn(MvAbatim,"|")	+ "  and "
+	
+	if	mv_par18 == 1
+		cQuery 	+=	"    SE2.E2_EMISSAO >= '"	+ DtoS(mv_par05)  			+ "' and "
+		cQuery 	+=	"    SE2.E2_EMISSAO <= '"	+ DtoS(mv_par06)  			+ "' and "
+		cQuery 	+= "    SE2.E2_EMISSAO <= '"	+ DtoS(dDataBase) 			+ "' and "
+	else
+		cQuery 	+=	"    SE2.E2_EMIS1   >= '"	+ DtoS(mv_par05)  			+ "' and "
+		cQuery 	+=	"    SE2.E2_EMIS1   <= '"	+ DtoS(mv_par06)  			+ "' and "
+		cQuery 	+= "    SE2.E2_EMIS1   <= '"	+ DtoS(dDataBase) 			+ "' and "
+	endif
+	
+	If mv_par09 == 2
+		cQuery	+= "    SE2.E2_TIPO    <> '"	+ MvProvis						+ "' and "
+	endif
+	
+	If mv_par12 == 2
+		cQuery 	+= "    SE2.E2_FATURA  IN('"	+ Space(Len(E2_FATURA))		+ "','NOTFAT') and "
+	endif
+	
+	if	mv_par22 == 1
+		cQuery	+=	"    SE2.E2_SALDO    = SE2.E2_VALOR and "
+	elseif mv_par22 == 2
+		cQuery	+=	"    SE2.E2_SALDO   <> SE2.E2_VALOR and "
+	endif
+	
+	cQuery 		+= "    SE2.D_E_L_E_T_ <> '*' and "
+	cQuery 		+= "    SA2.D_E_L_E_T_ <> '*' "
+	cQuery 		+= " Order By " + cOrder
+	
+	cQuery 	:=	ChangeQuery(cQuery)
+	
+	dbSelectArea("SE2")
+	dbCloseArea()
+	
+	dbUseArea( .t. , "TOPCONN" , TCGenQry(,,cQuery) , 'SE2' , .t. , .t. )
+	
+	For ni := 1 to Len(aStru)
+		If aStru[ni,2] != 'C' .and. FieldPos(aStru[ni,1]) > 0
+			TCSetField('SE2', aStru[ni,1], aStru[ni,2],aStru[ni,3],aStru[ni,4])
+		endif
+	Next ni
+	
+	cAliasSA2 := "SE2"
+	
+	Do While !Eof() .and. lContinua .and. &cCond1
+		
+		dbSelectArea("SE2")
+		
+		IF lEnd
+			@ prow() + 1 , 001 psay "Cancelado Pelo Operador"
+			Exit
+		endif
+		
+		If	!Empty(cFilterUser) .and. !(&cFilterUser)
+			dbSelectArea("SE2")
+			dbSkip()
+			Loop
+		endif
+		
+		nCont		:=	1
+		cForAnt	:=	&cCond2
+		nTit1 := nTit2 := nTit3 := nTit4 := nTit5 := nTit6 := nTit7 := nTit8 := nTit9 := nTit10 := 0
+		
+		Do While &cCond2 == cForAnt .and. lContinua .and. &cCond1 .and. !Eof()
+			
+			if	( Alltrim( SE2->E2_TIPO ) $ MV_CPNEG + "," + MVPAGANT .or. Substr(SE2->E2_TIPO,3,1) == "-" ) .and. lImpPAPag
+				dbSelectArea("SE2")
+				dbSkip()
+				Loop
+			Else
+				
+				IncRegua()
+				
+				If	!Empty(cFilterUser) .and. !(&cFilterUser)
+					dbSelectArea("SE2")
+					dbSkip()
+					Loop
+				endif
+				
+				lRet := .t.
+				
+				if	mv_par22 == 2 .or. mv_par22 == 3
+					
+					cQuery := " Select E5_BANCO , E5_AGENCIA , E5_CONTA , E5_MOTBX "
+					cQuery += " From " + RetSQLName("SE5")
+					cQuery += " Where E5_FILIAL   = '" + xFilial("SE5") 	+ "' and "
+					cQuery +=		"  E5_PREFIXO  = '" + SE2->E2_PREFIXO	+ "' and "
+					cQuery +=		"  E5_NUMERO   = '" + SE2->E2_NUM    	+ "' and "
+					cQuery +=		"  E5_PARCELA  = '" + SE2->E2_PARCELA	+ "' and "
+					cQuery +=		"  E5_TIPO     = '" + SE2->E2_TIPO   	+ "' and "
+					cQuery +=		"  E5_CLIFOR   = '" + SE2->E2_FORNECE	+ "' and "
+					cQuery +=		"  E5_LOJA     = '" + SE2->E2_LOJA   	+ "' and "
+					cQuery +=		"  E5_TIPODOC IN ('BA','VL') and "
+					cQuery +=		"  E5_RECPAG   = 'P'         and "
+					cQuery +=		"  D_E_L_E_T_  = ' '             "
+					cQuery := ChangeQuery(cQuery)
+					
+					if	Select("TQRY") > 0
+						TQRY->(dbclosearea())
+					endif
+					
+					dbUseArea( .t. , "TOPCONN" , TCGenQry(,,cQuery) , 'TQRY' , .t. , .t. )
+					
+					if	TQRY->(!Bof()) .and. TQRY->(!Eof())
+						if	TQRY->(E5_BANCO + E5_AGENCIA + E5_CONTA) < ( mv_par23 + mv_par24 + mv_par25 ) .or. ;
+							TQRY->(E5_BANCO + E5_AGENCIA + E5_CONTA) > ( mv_par26 + mv_par27 + mv_par28 )
+							lRet := .f.
+						endif
+						if	mv_par29 == 2 .and. TQRY->E5_MOTBX == "CEC"
+							lRet := .f.
+						endif
+					endif
+					
+					if	Select("TQRY") > 0
+						TQRY->(dbclosearea())
+					endif
+				endif
+				
+				if	lRet
+					cEmissao := iif( mv_par18 == 1, SE2->E2_EMISSAO , SE2->E2_EMIS1 )
+					
+					IF	SE2->E2_FORNECE < mv_par01 .or. SE2->E2_FORNECE > mv_par02 .or. ;
+						SE2->E2_LOJA    < mv_par03 .or. SE2->E2_LOJA    > mv_par04 .or. ;
+						SE2->E2_VENCREA < mv_par07 .or. SE2->E2_VENCREA > mv_par08 .or. ;
+						SE2->E2_TIPO    $ MvAbatim
+						lRet :=  .f.
+					elseif SE2->E2_TIPO $ MVPROVIS .and. mv_par09 == 2
+						lRet := .f.
+					elseif cEmissao > dDataBase .or. cEmissao < mv_par05 .or. cEmissao > mv_par06
+						lRet := .f.
+					elseif !Empty( SE2->E2_FATURA ) .and. Substr(SE2->E2_FATURA,01,06) != "NOTFAT" .and. !Empty( SE2->E2_DTFATUR ) .and. DtoS( SE2->E2_DTFATUR ) <= DtoS( mv_par06 )
+						lRet :=	iif( mv_par12 == 1 , .t. , .f. )
+					elseif mv_par13 == 2 .and. SE2->E2_MOEDA != mv_par10
+						lRet := .f.
+					endif
+				endif
+				
+				If !lRet
+					dbSelectArea("SE2")
+					dbSkip()
+					Loop
+				endif
+				
+				if	li > 58
+					Cabec(Titulo,Cabec1,Cabec2,NomeProg,Tamanho,15)
+				endif
+				
+				If nCont == 1
+					@li,0 psay "FORNECEDOR : " + (cAliasSA2)->A2_COD + " " + iif( mv_par15 == 1 , (cAliasSA2)->A2_NOME , (cAliasSA2)->A2_NREDUZ )
+					li += 2
+					nCont ++
+				endif
+				
+				dbSelectArea("SE2")
+				
+				dDataMoeda 	:=	iif( mv_par11 == 1 , dDataBase , SE1->E1_VENCREA )
+				aValor		:=	Baixas( SE2->E2_NATUREZA , SE2->E2_PREFIXO , SE2->E2_NUM , SE2->E2_PARCELA , SE2->E2_TIPO , nMoeda , "P" , SE2->E2_FORNECE , dDataBase , SE2->E2_LOJA )
+				
+				If mv_par14 == 1
+					nSaldo	:=	SaldoTit( SE2->E2_PREFIXO , SE2->E2_NUM , SE2->E2_PARCELA , SE2->E2_TIPO , SE2->E2_NATUREZA , "P" , E2_FORNECE , nMoeda , dDataMoeda , , SE2->E2_LOJA , , iif(nConv == 1 , SE2->E2_TXMOEDA , 0 ) )
+				Else
+					nSaldo 	:=	xMoeda( ( SE2->E2_SALDO + SE2->E2_SDACRES - SE2->E2_SDDECRE ) , SE2->E2_MOEDA , mv_par10 , , , iif( nConv == 1 , SE2->E2_TXMOEDA , 0 ) )
+				endif
+				
+				nTotAbat		:=	SumAbatPag( SE2->E2_PREFIXO , SE2->E2_NUM , SE2->E2_PARCELA , SE2->E2_FORNECE , mv_par10 , "V" , , SE2->E2_LOJA , iif( mv_par18 == 1 , "1" , "2" ) , mv_par05 , mv_par06 )
+				
+				aValor[I_JUROS] 		+= SE2->E2_SDACRES
+				aValor[I_DESCONTO] 	+= SE2->E2_SDDECRE
+				
+				If	!( SE2->E2_TIPO $ MVPAGANT + "/" + MV_CPNEG ) .and. !( mv_par14 == 2 .and. nSaldo == 0 )
+					nSaldo -= nTotAbat
+				endif
+				
+				If !Empty(SE2->E2_DTFATUR) .and. SE2->E2_DTFATUR <= dDataBase
+					aValor[I_MOTBX] 		:= "Faturado"
+					aValor[I_VALOR_PAGO]	-=	nTotAbat
+				endif
+				
+				@li,00 psay SE2->E2_PREFIXO + "-" + SE2->E2_NUM
+				@li,17 psay SE2->E2_PARCELA
+				@li,20 psay SE2->E2_TIPO
+				
+				@li,24 psay SayValor(Moeda(SE2->E2_VALOR,nMoeda,"P",iif(mv_par18 == 1,SE2->E2_EMISSAO,SE2->E2_EMIS1)),15,Alltrim(SE2->E2_TIPO)$"PA ,"+MV_CPNEG,nDecs)
+				
+				@li,41 psay iif( mv_par18 == 1 , SE2->E2_EMISSAO , SE2->E2_EMIS1 )
+				@li,52 psay SE2->E2_VENCREA
+				
+				IF dDataBase >= SE2->E2_BAIXA
+					@li,63 psay iif( !Empty(SE2->E2_BAIXA) , SE2->E2_BAIXA , " " )
+				endif
+				
+				If lPCCBaixa
+					@li, 74 psay SubStr(Posicione("SED",1,xFilial("SED")+SE2->E2_NATUREZ,"ED_DESCRIC"),1,16)
+				Else
+					aValor[I_LEI10925]:= (SE2->E2_COFINS+SE2->E2_PIS+SE2->E2_CSLL)
+					@li, 74 psay SubStr(Posicione("SED",1,xFilial("SED")+SE2->E2_NATUREZ,"ED_DESCRIC"),1,16)
+				endif
+				
+				// Rafael -> Impressao dos dados de acordo com necessidade da Record
+				@li,112 psay aValor[I_DESCONTO]           Picture PesqPict("SE2","E2_VALOR",13,mv_par10)
+				@li,126 psay nTotAbat                     Picture PesqPict("SE2","E2_VALOR",13,mv_par10)
+				@li,140 psay aValor[I_JUROS]    	         Picture PesqPict("SE2","E2_JUROS",13,mv_par10)
+				@li,154 psay aValor[I_MULTA]              Picture "@E 99,999,999.99"    //PesqPict("SE2","E2_MULTA",13,mv_par10)
+
+				DBSelectArea("SEZ")
+				DBSetOrder(1)
+				DBSeek(xFilial("SE2") + SE2->E2_PREFIXO + SE2->E2_NUM + SE2->E2_PARCELA + SE2->E2_TIPO + SE2->E2_FORNECE + SE2->E2_LOJA + SE2->E2_NATUREZ)
+				If !Found()
+					@li,093 psay SubStr(Posicione("CTT",1,xFilial("CTT")+SE2->E2_CCD,"CTT_DESC01"),1,20)
+				Else
+					@li,093 psay "Rateio C. Custos"
+					lOk := .T.
+					nValor := 0
+					nPerc  := 0
+				EndIf
+				@li,171 psay iif(SE2->E2_TIPO == "PA ",SayValor(aValor[I_VALOR_PAGO],15,.t.,mv_par10),SayValor(aValor[I_VALOR_PAGO],15,.f.,mv_par10))
+				@li,188 psay SayValor(nSaldo,16,alltrim(SE2->E2_TIPO)$"PA ,"+MV_CPNEG,nDecs)
+				@li,206 psay Capital( aValor[I_MOTBX] )
+				
+				If !( SE2->E2_TIPO $ MVPAGANT + "/" + MV_CPNEG )
+					nTit1	+= xMoeda(SE2->E2_VALOR,SE2->E2_MOEDA,nMoeda,iif(mv_par18 == 1,SE2->E2_EMISSAO,SE2->E2_EMIS1),ndecs+1,iif(nConv == 1,SE2->E2_TXMOEDA,0))
+					nTit9	+=	nSaldo
+					nTit7	+=	aValor[I_VALOR_PAGO]
+				Else
+					nTit1	-= xMoeda(SE2->E2_VALOR,SE2->E2_MOEDA,nMoeda,iif(mv_par18 == 1,SE2->E2_EMISSAO,SE2->E2_EMIS1)  ,ndecs+1,iif(nConv == 1,SE2->E2_TXMOEDA,0))
+					nTit9	-=	nSaldo
+					nTit7	-=	aValor[I_VALOR_PAGO]
+				endif
+				
+				nTit2		+=	aValor[I_DESCONTO]
+				nTit3		+=	nTotAbat
+				nTit4		+=	aValor[I_JUROS]
+				nTit5		+=	aValor[I_MULTA]
+				nTit6		+=	aValor[I_CORRECAO_MONETARIA]
+				nTit8		+=	aValor[I_PAGAM_ANT]
+				nTit10	+=	aValor[I_LEI10925]
+				
+				If lOk == .T.
+					li ++
+					@li,00 psay "C. Custo    Descrição                       Valor        Porc"
+					li ++
+					@li,00 psay "--------------------------------------------------------------"
+					While !EOF() .AND. (SEZ->EZ_FILIAL == xFilial("SE2") .AND. SEZ->EZ_PREFIXO == SE2->E2_PREFIXO .AND. SEZ->EZ_NUM == SE2->E2_NUM .AND. SEZ->EZ_PARCELA == SE2->E2_PARCELA .AND. SEZ->EZ_TIPO == SE2->E2_TIPO .AND. SEZ->EZ_CLIFOR == SE2->E2_FORNECE .AND. SEZ->EZ_LOJA == SE2->E2_LOJA .AND. SEZ->EZ_NATUREZ == SE2->E2_NATUREZ)
+						li ++
+						
+						@li,00 psay SEZ->EZ_CCUSTO
+						@li,12 psay SubStr(Posicione("CTT",1,xFilial("CTT")+SEZ->EZ_CCUSTO,"CTT_DESC01"),1,20)
+						@li,36 psay	SEZ->EZ_VALOR Picture "@E 99,999,999.99"
+						@li,55 psay (SEZ->EZ_PERC * 100) Picture "@E 999.99%"
+						nValor += SEZ->EZ_VALOR
+						nPerc  += SEZ->EZ_PERC * 100
+						
+						dbskip()
+						if	li > 58
+							Cabec(Titulo,Cabec1,Cabec2,NomeProg,Tamanho,15)
+						endif
+						
+					Enddo
+					li ++
+					@li,00 psay "--------------------------------------------------------------"
+					li ++
+					@li,00 psay "Total"
+					@li,36 psay  nValor Picture "@E 99,999,999.99"
+					@li,55 psay  nPerc  Picture "@E 999.99%"
+					li ++
+					@li,00 psay "--------------------------------------------------------------"
+					li ++
+				EndIf
+				
+				dbCloseArea("SEZ")
+				
+				dbSelectArea("SE2")
+				dbSkip()
+				li ++
+			endif
+			lOk := .F.
+		Enddo
+		
+		If	ABS(nTit1) + ABS(nTit2) + ABS(nTit3) + ABS(nTit4) + ABS(nTit5) + ABS(nTit6) + ABS(nTit7) + ABS(nTit8) + ABS(nTit9) + ABS(nTit10) > 0
+			ImpSubTot(nTit1,nTit2,nTit3,nTit4,nTit5,nTit6,nTit7,nTit8,nTit9,nTit10)
+			li++
+		endif
+		
+		nTot1			+=	nTit1
+		nTot2			+=	nTit2
+		nTot3			+=	nTit3
+		nTot4			+=	nTit4
+		nTot5			+=	nTit5
+		nTot6			+=	nTit6
+		nTot7			+=	nTit7
+		nTot8			+=	nTit8
+		nTot9			+=	nTit9
+		nTot10		+=	nTit10
+		
+		nTotFil1 	+= nTit1
+		nTotFil2	 	+= nTit2
+		nTotFil3 	+= nTit3
+		nTotFil4 	+= nTit4
+		nTotFil5 	+= nTit5
+		nTotFil6 	+= nTit6
+		nTotFil7 	+= nTit7
+		nTotFil8 	+= nTit8
+		nTotFil9 	+= nTit9
+		nTotFil10	+= nTit10
+	EndDo
+	
+	SE2->(DbCloseArea())
+	
+	if mv_par19 == 1 .and. SM0->(Reccount()) > 1
+		ImpFil350(nTotFil1,nTotFil2,nTotFil3,nTotFil4,nTotFil5,nTotFil6,nTotFil7,nTotFil8,nTotFil9,nTotFil10,nDecs)
+	endif
+	
+	Store 0 To nTotFil1,nTotFil2,nTotFil3,nTotFil4,nTotFil5,nTotFil6,nTotFil7,nTotFil8,nTotFil9
+	
+	If Empty(xFilial("SE2"))
+		Exit
+	endif
+	
+	nRegAtu := SM0->(Recno())
+	
+	SM0->(DbSkip())
+EndDo
+
+SM0->(DbGoto(nRegAtu))
+
+IF li > 55 .and. li != 80
+	cabec(titulo,cabec1,cabec2,nomeprog,tamanho,15)
+endif
+
+IF li != 80
+	ImpTotG(nTot1,nTot2,nTot3,nTot4,nTot5,nTot6,nTot7,nTot8,nTot9,nTot10)
+	Roda(cbcont,cbtxt,tamanho)
+endif
+
+SM0->(dbGoTo(nRegSM0))
+
+cFilAnt := SM0->M0_CODFIL
+
+Set Device To Screen
+
+dbSelectArea("SE2")
+dbCloseArea()
+ChkFile("SE2")
+dbSelectArea("SE2")
+dbSetOrder(1)
+
+If aReturn[5] == 1
+	Set Printer To
+	dbCommitAll()
+	OurSpool(wnrel)
+endif
+
+Ms_Flush()
+
+Return
+
+/*ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡…o    ³ImpSubTot ³ Autor ³ Paulo Boschetti       ³ Data ³ 01.06.92 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³Imprimir linha de SubTotal do relatorio                     ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Sintaxe e ³ImpSubTot()                                                 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Parametros³                                                            ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ Generico                                                   ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß*/
+
+Static Function ImpSubTot(nTit1,nTit2,nTit3,nTit4,nTit5,nTit6,nTit7,nTit8,nTit9,nTit10)
+
+li ++
+
+@li,000 psay "Totais : "
+@li,026 psay nTit1  Picture PesqPict("SE2","E2_VALOR",13,mv_par10)
+//@li,071 psay nTit10 PicTure PesqPict("SE2","E2_VALOR",13,mv_par10)
+@li,112 psay nTit2  PicTure PesqPict("SE2","E2_VALOR",13,mv_par10)
+@li,126 psay nTit3  PicTure PesqPict("SE2","E2_VALOR",13,mv_par10)
+@li,140 psay nTit4  PicTure PesqPict("SE2","E2_VALOR",13,mv_par10)
+@li,154 psay nTit5  PicTure PesqPict("SE2","E2_VALOR",13,mv_par10)
+//@li,140 psay nTit6  PicTure PesqPict("SE2","E2_VALOR",13,mv_par10)
+@li,170 psay nTit7  PicTure PesqPict("SE2","E2_VALOR",15,mv_par10)
+//@li,170 psay nTit8  PicTure PesqPict("SE2","E2_VALOR",15,mv_par10)
+@li,187 psay nTit9  PicTure PesqPict("SE2","E2_VALOR",16,mv_par10)
+
+li ++
+
+@li,000 psay Replicate("-",220)
+
+li ++
+
+Return ( .t. )
+
+/*ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡…o    ³ ImpTotG  ³ Autor ³ Paulo Boschetti       ³ Data ³ 01.06.92 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³ Imprimir linha de Total do Relatorio                       ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Sintaxe e ³ ImpTotG()                                                  ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß*/
+
+Static Function ImpTotg(nTot1,nTot2,nTot3,nTot4,nTot5,nTot6,nTot7,nTot8,nTot9,nTot10)
+
+li ++
+
+@li,000 psay "TOTAL GERAL ---->"
+@li,026 psay nTot1  Picture PesqPict("SE2","E2_VALOR",13,mv_par10)
+//@li,071 psay nTot10 PicTure PesqPict("SE2","E2_VALOR",13,mv_par10)
+@li,112 psay nTot2  PicTure PesqPict("SE2","E2_VALOR",13,mv_par10)
+@li,126 psay nTot3  PicTure PesqPict("SE2","E2_VALOR",13,mv_par10)
+@li,140 psay nTot4  PicTure PesqPict("SE2","E2_VALOR",13,mv_par10)
+@li,154 psay nTot5  PicTure PesqPict("SE2","E2_VALOR",13,mv_par10)
+//@li,140 psay nTot6  PicTure PesqPict("SE2","E2_VALOR",13,mv_par10)
+@li,170 psay nTot7  PicTure PesqPict("SE2","E2_VALOR",15,mv_par10)
+//@li,170 psay nTot8  PicTure PesqPict("SE2","E2_VALOR",15,mv_par10)
+@li,187 psay nTot9  PicTure PesqPict("SE2","E2_VALOR",16,mv_par10)
+
+li ++
+
+Return ( .t. )
+
+/*ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡„o	 ³SayValor  ³ Autor ³ J£lio Wittwer    	  ³ Data ³ 24.06.99 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡„o ³Retorna String de valor entre () caso Valor < 0 				  ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß*/
+
+Static Function SayValor(nNum,nTam,lInvert,nDecs)
+
+Local cPicture,cRetorno
+
+nDecs 	:= 2 //iif(nDecs == NIL, 2, nDecs)
+cPicture	:= Tm(nNum,nTam,nDecs)
+cRetorno :=	Transform(nNum,cPicture)
+
+if	nNum <0 .or. lInvert
+	cRetorno := "(" + Substr(cRetorno,2) + ")"
+endif
+
+Return cRetorno
+
+/*ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡„o	 ³PictNeg	³ Autor ³ Adrianne Furtado  	³ Data ³ 03.07.06 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡„o ³TRansforme uma Picture em Picture com "()"parenteses para   ³±±
+±±³          ³valores negativos. 						       			  ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß*/
+
+Static Function PictParent(cPict)
+
+Local cRet
+Local nAt := At("9",cPict)
+
+cRet := SubStr(cPict,1,nAt-2) + ")" + SubStr(cPict,nAt-1,Len(cPict))
+
+Return cRet
+
+/*ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡„o	 ³ ImpFil350³ Autor ³ Adrianne Furtado 	  ³ Data ³ 27.10.06   ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡„o ³ Imprimir total do relatorio								  ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß*/
+
+Static Function ImpFil350(nTotFil1,nTotFil2,nTotFil3,nTotFil4,nTotFil5,nTotFil6,nTotFil7,nTotFil8,nTotFil9,nTotFil10,nDecs)
+
+Default nDecs := MsDecimais(mv_par15)
+
+if ( li - 1 ) > 58
+	li --
+	Cabec(Titulo,Cabec1,Cabec2,NomeProg,Tamanho,GetMv("MV_COMP"))
+endif
+
+@li,000 psay "T O T A L   F I L I A L ----> " + " " + iif( mv_par19 == 1 , cFilAnt + " - " + AllTrim(SM0->M0_FILIAL) , "" )
+@li,050 psay nTotFil1        Picture Tm(nTotFil1,14,nDecs)
+//@li,074 psay nTotFil10       Picture Tm(nTotFil10,10,nDecs)
+@li,115 psay nTotFil2        Picture Tm(nTotFil2,10,nDecs)
+@li,129 psay nTotFil3        Picture Tm(nTotFil3,10,nDecs)
+@li,143 psay nTotFil4		 Picture Tm(nTotFil4,10,nDecs)
+@li,158 psay nTotFil5 		 Picture Tm(nTotFil5,10,nDecs)
+//@li,143 psay nTotFil6        Picture Tm(nTotFil6,10,nDecs)
+@li,175 psay nTotFil7		 Picture Tm(nTotFil7,10,nDecs)
+//@li,175 psay nTotFil8 	   Picture Tm(nTotFil8,10,nDecs)
+@li,193 psay nTotFil9 		 Picture Tm(nTotFil9,10,nDecs)
+
+li ++
+
+@li,000 psay Replicate("-",220)
+
+li += 2
+
+Return ( .t. )
+
+//Private Cabec1		:=	"Prf Numero       PC Tip  Valor Original   Emissao     Vencto      Baixa                                            P  A  G  A  M  E  N  T  O  S                                                                                     "
+//Private Cabec2		:=	"                                                                           Lei 10925    Descontos   Abatimentos         Juros         Multa   Corr. Monet      Valor Pago  Pagto.Antecip.        Saldo Atual  Motivo"

@@ -1,0 +1,448 @@
+#include "protheus.ch"
+#include "rwmake.ch"
+#include "topconn.ch"
+#Include "FONT.CH"
+#Include "COLORS.CH"
+#Include "winapi.ch"
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+ฑฑษออออออออออัออออออออออหอออออออัออออออออออออออออออออหออออออัอออออออออออออปฑฑ
+ฑฑบPrograma  ณRTCR126  บ Autor ณ Claudio Ferreira    บ Data ณ  02/08/07   บฑฑ
+ฑฑฬออออออออออุออออออออออสอออออออฯออออออออออออออออออออสออออออฯอออออออออออออนฑฑ
+ฑฑบDescricao ณ Relacao de Apontamentos                                    บฑฑ
+ฑฑบ          ณ                                                            บฑฑ
+ฑฑฬออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบUso       ณ TV Record                                                  บฑฑ
+ฑฑศออออออออออฯออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออผฑฑ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿
+/*/
+
+User Function RTCR126
+
+
+//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
+//ณ Declaracao de Variaveis                                             ณ
+//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
+Local cDesc1         := "Este programa tem como objetivo imprimir relatorio "
+Local cDesc2         := "de acordo com os parametros informados pelo usuario."
+Local cDesc3         := "Relacao de Apontamentos"
+Local cPict          := ""
+Local titulo       := "Relacao de Apontamentos"
+Local nLin         := 80
+
+Local Cabec1       := ""
+Local Cabec2       := ""
+Local imprime      := .T.
+Local aOrd:={OemToAnsi("Matricula"),OemToAnsi("Centro Custo"),OemToAnsi("Alfabetica")}                  
+
+
+Private lEnd         := .F.
+Private lAbortPrint  := .F.
+Private CbTxt        := ""
+Private limite           := 80
+Private tamanho          := "M"
+Private nomeprog         := "RTCR126" // Coloque aqui o nome do programa para impressao no cabecalho
+Private nTipo            := 18
+Private aReturn          := { "Zebrado", 1, "Administracao", 2, 2, 1, "", 1}
+Private nLastKey        := 0
+Private cbtxt      := Space(10)
+Private cbcont     := 00
+Private CONTFL     := 01
+Private m_pag      := 01 
+Private nOrdem     := 0
+Private wnrel      := "RTCR126" // Coloque aqui o nome do arquivo usado para impressao em disco
+Private cString := "SRA"
+Private cCentros,cEventos
+cPerg 		:= "RTC126"
+cCentros:=''  
+cMotivos:=''
+ValidPerg()          // Cria pergunta
+pergunte(cPerg,.t.)
+
+
+
+//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
+//ณ Monta a interface padrao com o usuario...                           ณ
+//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
+
+//wnrel := SetPrint(cString,NomeProg,cPerg,@titulo,cDesc1,cDesc2,cDesc3,.f.,aOrd,,Tamanho,,.T.)
+wnrel := SetPrint(cString, wnrel, cPerg, Titulo, cDesc1, cDesc2, cDesc3, .F., aOrd, ,Tamanho)
+
+If nLastKey == 27
+	Return
+Endif
+
+SetDefault(aReturn,cString)
+
+If nLastKey == 27
+   Return
+Endif
+
+nTipo := If(aReturn[4]==1,15,18)
+
+//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
+//ณ Processamento. RPTSTATUS monta janela com a regua de processamento. ณ
+//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
+
+RptStatus({|| RunReport(Cabec1,Cabec2,Titulo,nLin) },Titulo)
+Return
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+ฑฑษออออออออออัออออออออออหอออออออัออออออออออออออออออออหออออออัอออออออออออออปฑฑ
+ฑฑบFuno    ณRUNREPORT บ Autor ณ AP6 IDE            บ Data ณ  21/09/04   บฑฑ
+ฑฑฬออออออออออุออออออออออสอออออออฯออออออออออออออออออออสออออออฯอออออออออออออนฑฑ
+ฑฑบDescrio ณ Funcao auxiliar chamada pela RPTSTATUS. A funcao RPTSTATUS บฑฑ
+ฑฑบ          ณ monta a janela com a regua de processamento.               บฑฑ
+ฑฑฬออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบUso       ณ Programa principal                                         บฑฑ
+ฑฑศออออออออออฯออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออผฑฑ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿
+/*/
+
+Static Function RunReport(Cabec1,Cabec2,Titulo,nLin)
+LOCAL aSemana := {OemToAnsi("Domingo"),OemToAnsi("Segunda"),OemToAnsi("Terca  "),OemToAnsi("Quarta "),;     //#########
+						OemToAnsi("Quinta "),OemToAnsi("Sexta  "),OemToAnsi("Sabado ") }              //######
+Local nOrdem 	:= aReturn[8]
+
+cQuery := "SELECT SUBSTR(CTT_CUSTO,1,3) AS MACRO,CTT_CUSTO, "
+cQuery += "CTT_DESC01,RA_MAT,RA_NOME,RA_CATFUNC "
+cQuery += "FROM SRA010 A, CTT010 B "
+cQuery += "WHERE CTT_CUSTO=RA_CC "
+cQuery += "AND RA_FILIAL='"+ xFilial("SRA") +"' AND CTT_FILIAL='"+ xFilial("CTT") +"' "
+if !Empty(cCentros)
+  cQuery += "AND CTT_CUSTO IN ("+cCentros+") "
+endif
+cQuery += "AND RA_MAT  between '" + mv_par01 + "' AND '" + mv_par02 + "' "
+cQuery += "AND A.D_E_L_E_T_<>'*' AND B.D_E_L_E_T_<>'*' "
+if nOrdem==1
+  cQuery += "ORDER BY RA_MAT"
+endif  
+if nOrdem==2
+  cQuery += "ORDER BY RA_CC,RA_NOME"
+endif  
+if nOrdem==3
+  cQuery += "ORDER BY RA_NOME"
+endif  
+
+TCQUERY cQuery NEW ALIAS "SCTT"
+dbSelectArea("SCTT")
+dbGoTop()
+sTexto:=''
+lPuloup:=.T.
+Cabec1:='Matricula '+iif(nOrdem<>2,'Centro de Custo             ','  ')+' Nome                              Ocorrencias                      Data                Horas'
+Cabec(Titulo,Cabec1,Cabec2,NomeProg,Tamanho,nTipo)
+nLin := 8
+cCCusto:= '99'
+cCCust2:= '9999999'
+nTCC:=0  
+nTC2:=0
+nTCG:=0 
+nHun:=0
+nHCC:=0
+nHC2:=0
+nHCG:=0
+SetRegua(RecCount())
+While !EOF()
+   //ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
+   //ณ Verifica o cancelamento pelo usuario...                             ณ
+   //ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
+
+   If lAbortPrint
+      @nLin,00 PSAY "*** CANCELADO PELO OPERADOR ***"
+      Exit
+   Endif 
+   
+   // Verifica as categorias a imprimir
+   If !SCTT->RA_CATFUNC $ mv_par04
+	 dbSkip()
+     Loop
+   Endif
+   BuscaOcorr(SCTT->RA_MAT,mv_par05,mv_par06,cEventos)  
+   dbSelectArea("QSPC")    
+   dbGoTop()
+   If EOF()
+     dbclosearea()
+     dbSelectArea("SCTT")
+	  dbSkip()
+     Loop
+   Endif 
+   IF nOrdem==2 .and. cCCust2<>trim(SCTT->CTT_CUSTO)
+      IF nTC2<>0 
+      	@nLin,00 PSAY "Total de Funcionarios: "+str(nTC2,3)
+      	nTC2:=0
+      	@nLin,xCol2-10 PSAY "Total Horas"
+         @nLin,xCol2+2 PSAY Transform(nHC2, '@E 99,999.99') 
+         nHC2:=0
+      	nLin := nLin + 2
+      END
+   END                                           
+   IF nOrdem==2 .and. cCCusto<>trim(SCTT->MACRO)
+      IF nTCC<>0 
+      	@nLin,00 PSAY "("+cCCusto+") Total de Funcionarios: "+str(nTCC,3)
+      	nTCC:=0 
+      	@nLin,xCol2-10 PSAY "Total Horas"
+         @nLin,xCol2+2 PSAY Transform(nHCC, '@E 99,999.99') 
+         nHCC:=0        
+      	nLin := nLin + 1
+      END
+      cCCusto:=trim(SCTT->MACRO)
+      IF !lPuloup
+      	Cabec(Titulo,Cabec1,Cabec2,NomeProg,Tamanho,nTipo)
+      	nLin := 8
+      	lPuloup:=.T.
+      END
+      @nLin,00 PSAY "C. Custo: "+cCCusto+"-"+Posicione("CTT",1,xfilial("CTT")+cCCusto,"CTT_DESC01")
+      nLin := nLin + 1
+   END      
+   If nLin > 66 // Salto de Pแgina. Neste caso o formulario tem 55 linhas...
+      Cabec(Titulo,Cabec1,Cabec2,NomeProg,Tamanho,nTipo)
+      nLin := 8
+      cCCust2:='9999999'
+   Endif   
+   IF nOrdem==2 .and. cCCust2<>trim(SCTT->CTT_CUSTO)
+      cCCust2:=trim(SCTT->CTT_CUSTO)
+      nLin++
+      @nLin,00 PSAY "C. Custo: "+cCCust2+"-"+Posicione("CTT",1,xfilial("CTT")+cCCust2,"CTT_DESC01")
+      nLin++
+   END  
+   xPrim:=.t. 
+   xConta:=.t. 
+   dbSelectArea("QSPC")    
+   dbGoTop() 
+   While !EOF()  //Imprime ocorrencias
+     if xPrim
+       @nLin,2 PSAY SCTT->RA_MAT+"  "+iif(nOrdem<>2,Trim(SCTT->CTT_CUSTO)+" "+SUBSTR(Posicione("CTT",1,xfilial("CTT")+SCTT->CTT_CUSTO,"CTT_DESC01"),1,17)+'    ',' ')+SCTT->RA_NOME
+       xCol:=pCol()
+       xPrim:=.f.  
+       if xConta
+         nTCC++
+         nTC2++
+         nTCG++        
+         xConta:=.f.
+       endif        
+     endif 
+     @nLin,xCol+5    PSAY Posicione("SP9",1,xfilial("SP9")+QSPC->PC_PD,"P9_DESC")
+     @nLin,pCol()+11 PSAY Dtoc(QSPC->PC_DATA)+' '+aSemana[ Dow(QSPC->PC_DATA) ]  
+     xCol2:=pCol()-3
+     @nLin,pCol()+2 PSAY Transform(QSPC->PC_QUANTC, '@E 999.99')      
+     nHun:=SomaHoras(nHun,QSPC->PC_QUANTC)
+     nHCC:=SomaHoras(nHCC,QSPC->PC_QUANTC)
+     nHC2:=SomaHoras(nHC2,QSPC->PC_QUANTC)
+     nHCG:=SomaHoras(nHCG,QSPC->PC_QUANTC)
+     nLin := nLin + 1 
+     If nLin > 66 // Salto de Pแgina. Neste caso o formulario tem 55 linhas...
+      Cabec(Titulo,Cabec1,Cabec2,NomeProg,Tamanho,nTipo)
+      nLin := 8
+      cCCust2:='9999999'
+      xPrim:=.t.
+     Endif   
+     IF nOrdem==2 .and. cCCust2<>trim(SCTT->CTT_CUSTO)
+      cCCust2:=trim(SCTT->CTT_CUSTO)
+      nLin++
+      @nLin,00 PSAY "C. Custo: "+cCCust2+"-"+Posicione("CTT",1,xfilial("CTT")+cCCust2,"CTT_DESC01")
+      nLin++
+     Endif      
+     dbSkip()
+   Enddo
+   if nHun>0 
+     @nLin,xCol2-10 PSAY "Total Horas"
+     @nLin,xCol2+2 PSAY Transform(nHun, '@E 99,999.99') 
+     nLin := nLin + 2
+     nHun:=0
+   endif
+   dbSelectArea("QSPC")
+   dbclosearea()
+   dbSelectArea("SCTT")   
+   lPuloup:=.F.
+   dbSkip() // Avanca o ponteiro do registro no arquivo
+EndDo
+if nHC2>0
+  @nLin,00 PSAY "Total de Funcionarios: "+str(nTC2,3) 
+  @nLin,xCol2-10 PSAY "Total Horas"
+  @nLin,xCol2+2 PSAY Transform(nHC2, '@E 99,999.99') 
+endif
+nHC2:=0
+nLin++
+if nOrdem==2  .and. nHCC>0
+  nLin++
+  @nLin,00 PSAY "("+cCCusto+")    Total de Funcionarios: "+str(nTCC,3)
+  @nLin,xCol2-10 PSAY "Total Horas"
+  @nLin,xCol2+2 PSAY Transform(nHCC, '@E 99,999.99') 
+  nLin++
+  nLin++
+  @nLin,00 PSAY "(GERAL)  Total de Funcionarios: "+str(nTCG,3)  
+  @nLin,xCol2-10 PSAY "Total Horas"
+  @nLin,xCol2+2    PSAY Transform(nHCG, '@E 99,999.99') 
+endif  
+
+//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
+//ณ Finaliza a execucao do relatorio...                                 ณ
+//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
+
+SET DEVICE TO SCREEN
+
+//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
+//ณ Se impressao em disco, chama o gerenciador de impressao...          ณ
+//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
+
+If aReturn[5]==1
+   dbCommitAll()
+   SET PRINTER TO
+   OurSpool(wnrel)
+Endif
+
+MS_FLUSH()
+
+dbSelectArea("SCTT")
+dbclosearea()
+
+Return
+
+
+Static Function ValidPerg()
+_sAlias	:=	Alias()
+dbSelectArea("SX1")
+dbSetOrder(1)
+cPerg 	:=	PADR(cPerg,10)
+aRegs	:=	{}
+
+AADD(aRegs,{cPerg,"01","Matricula de     ?",Space(20),Space(20),"mv_ch1","C",06,0,0,"C","","mv_par01","","","","","","","","","","","","","","","","","","","","","","","","","SRA","","","","",""})
+AADD(aRegs,{cPerg,"02","Matricula ate    ?",Space(20),Space(20),"mv_ch2","C",06,0,0,"C","","mv_par02","","","","","","","","","","","","","","","","","","","","","","","","","SRA","","","","",""})
+Aadd(aRegs,{cPerg,"03","C.Custo          ?",Space(07),Space(07),"mv_ch3","C",10,0,0,"G","U_f_CC","mv_par03","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""})
+Aadd(aRegs,{cPerg,"04","Categorias       ?",Space(07),Space(07),"mv_ch4","C",10,0,0,"G","U_f_Status","mv_par04","","","","EGHIJMPST","","","","","","","","","","","","","","","","","","","","","","","","","",""})
+AADD(aRegs,{cPerg,"05","Data de          ?",Space(20),Space(20),"mv_ch5","D",08,0,0,"C","","mv_par05","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""})
+AADD(aRegs,{cPerg,"06","Data ate         ?",Space(20),Space(20),"mv_ch6","D",08,0,0,"C","","mv_par06","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""})
+Aadd(aRegs,{cPerg,"07","Eventos          ?",Space(07),Space(07),"mv_ch7","C",10,0,0,"G","U_f_Eventos","mv_par07","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""})
+
+
+For i:=1 to Len(aRegs)
+	If !dbSeek(cPerg+aRegs[i,2])
+		RecLock("SX1",.T.)
+		For j:=1 to FCount()
+			FieldPut(j,aRegs[i,j])
+		Next
+		MsUnlock()
+		dbCommit()
+	Endif
+Next
+
+dbSelectArea(_sAlias)
+
+Return
+
+
+//User Function f_CC(l1Elem,lTipoRet) 
+//RTCR114.PRX
+
+//User Function f_Status(l1Elem,lTipoRet)
+//RTCR115.PRX
+
+Static Function RTCR126Bar(oDlg,bOk,bCancel)
+Local oBar, bSet15, bSet24, lOk
+Local lVolta :=.f.
+Define BUTTONBAR oBar Size 25,25 3D Top Of oDlg
+//DEFINE BUTTON RESOURCE "BMPINCLUIR" OF oBar ACTION MAOMS02Inc() TOOLTIP "Incluir"
+//DEFINE BUTTON oBtnEdt RESOURCE "EDITABLE" OF oBar ACTION MAOMS02Edit() TOOLTIP "Edita Registro..(CTRL-E)"
+//oBtnEdt:cTitle:= "Editar"
+//SetKey(5,oBtnEdt:bAction)
+oBar:nGroups += 6
+DEFINE BUTTON oBtOk RESOURCE "OK" OF oBar GROUP ACTION ( lLoop:=lVolta,lOk:=Eval(bOk)) TOOLTIP "Ok"
+SetKEY(15,oBtOk:bAction)
+DEFINE BUTTON oBtCan RESOURCE "CANCEL" OF oBar ACTION ( lLoop:=.f.,Eval(bCancel),ButtonOff(bSet15,bSet24,.T.)) TOOLTIP "Cancelar"
+SetKEY(24,oBtCan:bAction)
+oDlg:bSet15 := oBtOk:bAction
+oDlg:bSet24 := oBtCan:bAction
+oBar:bRClicked := {|| AllwaysTrue()}
+Return nil
+
+User Function f_Eventos(l1Elem,lTipoRet)
+Local aStru   := {}
+Local nOpca := 0       
+Local cArq      
+Local oDlg1 
+Local MvPar
+Local cRetorna,lInverte := .F.
+Local aCampos	:= {}    
+Local _sAlias	:=	Alias()
+Private cMarca := GetMark()
+Private oMark
+
+MvPar:=&(Alltrim(ReadVar()))		 // Carrega Nome da Variavel do Get em Questao
+mvRet:=Alltrim(ReadVar())			 // Iguala Nome da Variavel ao Nome variavel de Retorno
+
+
+		//Cria Arq TRB
+		aAdd(aStru,{"TRB_COD","C",07,0})
+		aAdd(aStru,{"TRB_DESC","C",30,0})
+		aAdd(aStru,{"TRB_OK","C",2,0})
+	
+		cArq := CriaTrab(aStru,.T.)
+		dbUseArea(.T.,,cArq,"TRB",.T.)
+		cInd := CriaTrab(NIL,.F.)
+		//Gera as opcoes 
+      dbSelectArea("SP9")
+      dbGoTop()
+      While !Eof()
+   		RECLOCK("TRB",.T.)
+			TRB->TRB_COD  := Alltrim(SP9->P9_CODIGO)
+	    	TRB->TRB_DESC := SP9->P9_DESC
+			TRB->TRB_OK   := '  '
+			dbSelectArea("SP9")
+			DbSkip()
+		enddo		
+		dbSelectArea("TRB")
+		TRB->( dbGoTop() )
+		aAdd( aCampos, { 'TRB_OK'		,, ' '			, '  ' } )
+		aAdd( aCampos, { 'TRB_COD'	,, 'Codigo'		, '@S07' } )
+		aAdd( aCampos, { 'TRB_DESC'	,, 'Eventos'		, '@S30' } )
+		DEFINE MSDIALOG oDlg1 TITLE "Selecione os Eventos " From 9,0 To 28,80 OF oMainWnd
+		oMark:=MsSelect():New("TRB","TRB_OK",,aCampos,@lInverte,@cMarca,{12,1,143,315})
+		oMark:oBrowse:Refresh()
+		oMark:oBrowse:lhasMark = .t.
+		oMark:oBrowse:lCanAllMark := .f.
+		
+		ACTIVATE MSDIALOG oDlg1 CENTER ON INIT RTCR126Bar(oDlg1,{|| nOpca := 1,oDlg1:End()},{|| nOpca := 2,oDlg1:End()})
+		cRetorna:=''
+		cVirg:=''
+		if nOpca=1			
+			TRB->( dbGoTop() )
+			do while !TRB->(eof())
+				if TRB->TRB_OK=cMarca
+					cRetorna+=cVirg+"'"+TRB->TRB_COD+"'"
+					cVirg:=','
+				endif
+				TRB->(dbskip())
+			enddo
+		endif
+		TRB->( dbCloseArea() )
+		fErase(cArq+OrdBagExt())
+		
+		cEventos := cRetorna										 // Devolve Resultado
+    	&MvRet :='Selecao'
+dbSelectArea(_sAlias)
+Return
+ 
+static Function BuscaOcorr(cMatr,dDatai,dDataf,cEventos) 
+cQuery := "SELECT * "
+cQuery += "FROM SPC010 A "
+cQuery += "WHERE PC_FILIAL='"+ xFilial("SPC") +"' "
+cQuery += "AND PC_MAT  = '" +cMatr + "' " 
+if !Empty(cEventos)
+  cQuery += "AND PC_PD IN ("+cEventos+") "
+endif   
+cQuery += "AND PC_DATA BETWEEN '" + DTOS(dDatai) + "' AND '" + DTOS(dDataf) + "' "
+cQuery += "AND A.D_E_L_E_T_<>'*' "
+cQuery += "ORDER BY PC_DATA"
+TCQUERY cQuery NEW ALIAS "QSPC"  
+TCSetField("QSPC","PC_DATA","D")  
+dbSelectArea("QSPC")
+
+
+Return
+

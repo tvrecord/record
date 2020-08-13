@@ -36,7 +36,7 @@ Pergunte(cPerg,.T.)
 
 cArq := MV_PAR01
 
-If !MsgYesNo("29/07/18 - Processa arquivo: " + alltrim(cArq) + " e substitui dados anteriores?")
+If !MsgYesNo("02/01/20 - Processa arquivo: " + alltrim(cArq) + " e substitui dados anteriores?")
 	Return()
 EndIf
 

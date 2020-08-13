@@ -1,0 +1,321 @@
+#include "rwmake.ch"
+#include "topconn.ch"
+
+/*ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÉÍÍÍÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍ»±±
+±±ºPrograma  ³RTCR115  º Autor ³ Claudio Ferreira    º Data ³  29/05/07   º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºDescricao ³ Relacao de funcionario                                     º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºUso       ³ TV Record                                                  º±±
+±±ÈÍÍÍÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¼±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß*/
+
+User Function RTCR115
+
+Local cDesc1         := "Este programa tem como objetivo imprimir relatorio "
+Local cDesc2         := "de acordo com os parametros informados pelo usuario."
+Local cDesc3         := "Relacao de Funcionarios"
+Local cPict          := ""
+Local titulo       	:=	"Relacao de Funcionarios"
+Local nLin         	:= 80
+Local Cabec1       	:= ""
+Local Cabec2       	:= ""
+Local imprime     	:= .t.
+Local aOrd				:=	{ "Matricula" , "Centro Custo" , "Alfabetica" , "Funcao" }  
+
+Private lend         := .f.
+Private lAbortPrint  := .f.
+Private CbTxt        := ""
+Private limite     	:= 80
+Private tamanho     	:= "M"
+Private nomeprog   	:= "RTCR115" 
+Private nTipo      	:= 18
+Private aReturn    	:= { "Zebrado" , 01 , "Administracao" , 02 , 02 , 01 , "" , 01 }
+Private nLastKey   	:= 0
+Private cbtxt      	:= Space(10)
+Private cbcont     	:= 00
+Private CONTFL     	:= 01
+Private m_pag      	:= 01 
+Private nOrdem     	:= 0
+Private wnrel      	:= "RTCR115" 
+Private cString 		:= "SRA"
+Private cCentros		:=	''
+Private cPerg 			:=	"RTC115"
+
+ValidPerg()          
+
+Pergunte(cPerg,.t.)
+
+wnrel := SetPrint(cString, wnrel, cPerg, Titulo, cDesc1, cDesc2, cDesc3, .f., aOrd, ,Tamanho)
+
+if nLastKey == 27
+	Return
+endif
+
+SetDefault(aReturn,cString)
+
+if nLastKey == 27
+   Return
+endif
+
+nTipo := iif( aReturn[4] == 1 , 15 , 18 )
+
+RptStatus( { || RunReport(Cabec1,Cabec2,Titulo,nLin) } , Titulo )
+
+Return
+
+/*ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÉÍÍÍÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍ»±±
+±±ºFun‡„o    ³RUNREPORT º Autor ³ AP6 IDE            º Data ³  21/09/04   º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºDescri‡„o ³ Funcao auxiliar chamada pela RPTSTATUS. A funcao RPTSTATUS º±±
+±±º          ³ monta a janela com a regua de processamento.               º±±
+±±ÈÍÍÍÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¼±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß*/
+
+Static Function RunReport(Cabec1,Cabec2,Titulo,nLin)
+
+Local cDesc
+Local cQuery
+Local aPrint	
+Local nOrdem 	:=	aReturn[8]
+Local aOrdem	:=	{ "RA_MAT" , "RA_CC,RA_NOME" , "RA_NOME" , "RJ_DESC,RA_NOME" }
+
+cQuery	:= " Select SUBSTR(CTT_CUSTO,1,3) AS MACRO, CTT_CUSTO, CTT_DESC01,"
+cQuery	+=			" RA_MAT, RA_NOME, RA_ADMISSA, RA_CODFUNC, RA_CATFUNC, RJ_DESC "
+cQuery 	+= " From " + RetSqlName("SRA") + " A , "
+cQuery 	+=            RetSqlName("CTT") + " B , "
+cQuery 	+=            RetSqlName("SRJ") + " C   "
+cQuery 	+= " Where A.RA_CC       = B.CTT_CUSTO AND "
+cQuery	+=			" A.RA_CODFUNC  = C.RJ_FUNCAO AND "
+cQuery 	+= 		" A.RA_MAT     >= '" + mv_par01 			+ "' AND " 
+cQuery 	+= 		" A.RA_MAT     <= '" + mv_par02 			+ "' AND " 
+cQuery 	+= 		" A.RA_ADMISSA >= '" + DtoS(mv_par05) 	+ "' AND " 
+cQuery 	+= 		" A.RA_ADMISSA <= '" + DtoS(mv_par06) 	+ "' AND "
+cQuery 	+= 		" A.RA_FILIAL   = '" + xFilial("SRA") 	+ "' AND "
+cQuery 	+= 		" B.CTT_FILIAL  = '" + xFilial("CTT") 	+ "' AND "
+cQuery	+=			" C.RJ_FILIAL   = '" + xFilial("SRJ") 	+ "' AND "
+if mv_par04==2
+  cQuery += 		" A.RA_SITFOLH <> 'D' AND "
+endif  
+if !Empty(cCentros)
+  cQuery	+=			" B.CTT_CUSTO  IN (" + cCentros			+ ") AND "
+endif
+cQuery 	+= 		" A.D_E_L_E_T_  = ' ' AND "
+cQuery	+=			" B.D_E_L_E_T_  = ' ' AND "
+cQuery	+=			" C.D_E_L_E_T_  = ' ' "
+cQuery 	+=	" Order By " + aOrdem[nOrdem]
+cQuery	:=	ChangeQuery(cQuery)
+
+TcQuery cQuery New Alias "SCTT"
+
+TCSetField("SCTT","RA_ADMISSA","D")
+TCSetField("SCTT","RA_NASC"	,"D")
+
+dbSelectArea("SCTT")
+dbGoTop()
+
+sTexto	:=	''
+lPuloup	:=	.t.
+
+if	nOrdem == 2 
+	Cabec1	:=	'Matricula  Centro de Custo                          Nome                                            Admissão  Funcao 
+				  //          1         2         3         4         5         6         7         8         9        10        11        12        13
+ 				  //0123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012
+              // XXXXXX    999999999 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx xx/xx/xx  xxxxxxxxxxxxxxxxxxxx 
+else
+	Cabec1	:=	'Matricula  Nome                                                         Admissão  Funcao '
+				  //          1         2         3         4         5         6         7         8         9        10        11        12        13
+ 				  //0123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012
+              // XXXXXX    xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx  xx/xx/xx  xxxxxxxxxxxxxxxxxxxx 
+endif
+
+Cabec(Titulo,Cabec1,Cabec2,NomeProg,Tamanho,nTipo)
+
+nTCC		:=	00  
+nTC2		:=	00
+nTCG		:=	00
+nLin 		:=	08
+cCCusto	:= '99'
+cCCust2	:= '9999999'
+
+SetRegua(RecCount())
+
+Do While !Eof()
+
+   if lAbortPrint
+      @nLin,00 psay "*** CANCELADO PELO OPERADOR ***"
+      Exit
+   endif 
+   
+   If	!( SCTT->RA_CATFUNC $ mv_par07 )
+	 	dbSkip()
+    	Loop
+   endif
+   
+   if nOrdem == 2 .and. cCCust2 <> AllTrim(SCTT->CTT_CUSTO) .and. nTC2 <> 0 
+     	@nLin,00 psay "Total de Funcionarios: " + Str(nTC2,3)
+     	nTC2	:=	0
+     	nLin 	+= 2
+   endif                                           
+
+   if nOrdem == 2 .and. cCCusto <> Alltrim(SCTT->MACRO)
+
+      if nTCC <> 0 
+      	@nLin,00 psay "("+cCCusto+") Total de Funcionarios: "+str(nTCC,3)
+
+      	nLin ++
+      	nTCC := 0         
+      endif
+      
+      cCCusto	:=	Alltrim(SCTT->MACRO)
+      
+      if !lPuloup
+      	Cabec(Titulo,Cabec1,Cabec2,NomeProg,Tamanho,nTipo)
+      	nLin := 8
+      	lPuloup:=.t.
+      endif
+      
+      @nLin,00 psay "C. Custo: "+cCCusto+"-"+Posicione("CTT",1,xfilial("CTT")+cCCusto,"CTT_DESC01")
+      nLin ++
+   endif
+
+   if nLin > 70 
+      Cabec(Titulo,Cabec1,Cabec2,NomeProg,Tamanho,nTipo)
+      nLin 		:= 8
+      cCCust2	:=	'9999999'
+   endif   
+
+   if nOrdem == 2 .and. cCCust2 <> Alltrim(SCTT->CTT_CUSTO)
+      cCCust2	:=	Alltrim(SCTT->CTT_CUSTO)
+
+      @ ++ nLin,00 psay "C. Custo:  " + cCCust2 + "-" + Posicione("CTT",1,xfilial("CTT")+cCCust2,"CTT_DESC01")
+      nLin ++
+   end   
+
+   nTCC ++
+   nTC2 ++
+   nTCG ++   
+
+	if	nOrdem == 2 
+		cDesc := Alltrim(SCTT->CTT_CUSTO) + " " + Alltrim(SCTT->CTT_DESC01)
+	
+	   @ nLin , 002 psay SCTT->RA_MAT
+	   @ nLin , 011 psay Substr( cDesc , 01 , 42 )
+	   @ nLin , 052 psay Substr( Alltrim(SCTT->RA_NOME) , 01 , 47 )
+	   @ nLin , 100 psay DtoC(SCTT->RA_ADMISSA)
+	   @ nLin , 110 psay Alltrim(SCTT->RJ_DESC)
+	else
+	   @ nLin , 002 psay SCTT->RA_MAT
+	   @ nLin , 011 psay Substr( Alltrim(SCTT->RA_NOME) , 01 , 50 )
+	   @ nLin , 072 psay DtoC(SCTT->RA_ADMISSA)
+	   @ nLin , 082 psay Alltrim(SCTT->RJ_DESC)
+	endif
+
+   nLin ++
+
+   lPuloup	:=	.f.
+   dbSkip() 
+EndDo
+
+@nLin,00 psay "Total de Funcionarios: "+str(nTC2,3)
+
+nLin ++
+
+if nOrdem==2 
+  @ ++ nLin,00 psay "("+cCCusto+")    Total de Funcionarios: "+str(nTCC,3)
+  nLin ++
+  @ ++ nLin,00 psay "(GERAL)  Total de Funcionarios: "+str(nTCG,3)
+endif  
+
+Set Device to Screen
+
+if aReturn[5] == 1
+   dbCommitAll()
+   Set Printer To
+   OurSpool(wnrel)
+endif
+
+Ms_Flush()
+
+dbSelectArea("SCTT")
+dbclosearea()
+
+Return
+
+/************************************************************************************/
+
+Static Function ValidPerg()
+
+Local i , j
+Local aRegs		:=	{}
+Local _sAlias	:=	Alias()
+
+dbSelectArea("SX1")
+dbSetOrder(1)
+cPerg :=	PadR(cPerg,10)
+
+AADD(aRegs,{cPerg,"01","Matricula de     ?",Space(20),Space(20),"mv_ch1","C",06,0,0,"C","          ","mv_par01","   ","","","         ","","   ","","","","","","","","","","","","","","","","","","","SRA","","","","",""})
+AADD(aRegs,{cPerg,"02","Matricula ate    ?",Space(20),Space(20),"mv_ch2","C",06,0,0,"C","          ","mv_par02","   ","","","         ","","   ","","","","","","","","","","","","","","","","","","","SRA","","","","",""})
+Aadd(aRegs,{cPerg,"03","C.Custo          ?",Space(07),Space(07),"mv_ch3","C",10,0,0,"G","U_f_CC    ","mv_par03","   ","","","         ","","   ","","","","","","","","","","","","","","","","","","","   ","","","","",""})
+Aadd(aRegs,{cPerg,"04","Inclui demitidos ?",Space(07),Space(07),"mv_ch4","C",01,0,0,"C","          ","mv_par04","Sim","","","         ","","Nao","","","","","","","","","","","","","","","","","","","   ","","","","",""})
+AADD(aRegs,{cPerg,"05","Admissao de      ?",Space(20),Space(20),"mv_ch5","D",08,0,0,"C","          ","mv_par05","   ","","","         ","","   ","","","","","","","","","","","","","","","","","","","   ","","","","",""})
+AADD(aRegs,{cPerg,"06","Admissao ate     ?",Space(20),Space(20),"mv_ch6","D",08,0,0,"C","          ","mv_par06","   ","","","         ","","   ","","","","","","","","","","","","","","","","","","","   ","","","","",""})
+Aadd(aRegs,{cPerg,"07","Categorias       ?",Space(07),Space(07),"mv_ch7","C",10,0,0,"G","U_f_Status","mv_par07","   ","","","EGHIJMPST","","   ","","","","","","","","","","","","","","","","","","","   ","","","","",""})
+
+For i:= 1 to Len(aRegs)
+	if !dbSeek( cPerg + aRegs[i,2] )
+		RecLock("SX1",.t.)
+		For j := 1 to FCount()
+			FieldPut(j,aRegs[i,j])
+		Next j
+		MsUnlock()
+		dbCommit()
+	endif
+Next i
+
+dbSelectArea(_sAlias)
+
+Return
+
+/*******************************************************************************/
+
+User Function f_Status(l1Elem,lTipoRet)
+
+Local cTitulo:=""
+Local MvPar
+Local MvParDef:=""
+
+Private aCat	:=	{	"E - Estagiario Mensalista"	,	"G - Estagiario Horista"		,;
+							"H - Horista"						,	"I - Professor Mensalista"		,;
+							"J - Professor Aulista"			,	"M - Mensalista"					,;
+							"P - Pro-Labore"					,	"S - Semanalista"					,;
+							"T - Tarefeiro"					}
+
+lTipoRet := iif(lTipoRet = Nil , .t. , lTipoRet)
+l1Elem 	:= iif(l1Elem   = Nil , .f. , .t.)
+cAlias 	:= Alias() 				
+
+if lTipoRet
+	MvPar:=&(Alltrim(ReadVar()))	
+	mvRet:=Alltrim(ReadVar())		
+endif
+
+MvParDef	 = "EGHIJMPST"
+cTitulo 	:= "Categorias"    
+
+if lTipoRet
+	if f_Opcoes(@MvPar,cTitulo,aCat,MvParDef,12,49,l1Elem)  
+		&MvRet := mvpar										 		
+	endif
+endif
+
+dbSelectArea(cAlias) 								
+
+Return( iif( lTipoRet , .t. , MvParDef ) )
+

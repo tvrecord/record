@@ -857,7 +857,7 @@ else
 			lass01 := .T.
 		EndIF
 		
-		If TMP->CR_USER == "000166" .OR. TMP->CR_USER == "000180" .OR. TMP->CR_USER == "000190" //Claudinei Girotti ou Josiel Ferreira
+		If TMP->CR_USER == "000166" .OR. TMP->CR_USER == "000180" .OR. TMP->CR_USER == "000190" .OR. TMP->CR_USER == "000219" //Claudinei Girotti ou Josiel Ferreira
 			IF TMP->CR_LIBAPROV <> TMP->CR_APROV //.AND. !EMPTY(TMP->CR_LIBAPRO)
 				cLib02 := ALLTRIM(TMP->CR_LIBAPRO)
 			ELSE
@@ -869,8 +869,10 @@ else
 				cAprov02 := "Josiel Ferreira"
 			ELSEIF TMP->CR_USER == "000190"
 				cAprov02 := "Wagner Lima"
+			ELSEIF TMP->CR_USER == "000219"
+				cAprov02 := "Artur Fernandes"				
 			ENDIF
-			cFuncao02 := "Diretor Geral / Gerente Executivo"
+			cFuncao02 := "     Gerente Executivo"
 			cCodUser2 := TMP->CR_APROV
 			lass02 := .T.
 		EndIF
@@ -891,7 +893,7 @@ else
 			lAssElen := .T.
 			dLib01   := DTOC(STOD(TMP->CR_DATALIB))
 			//		cAprov01 := Posicione("SAK",1,xFilial("SAK")+TMP->CR_APROV,"AK_NOME")
-		ElseIf (TMP->CR_USER == "000166" .OR. TMP->CR_USER == "000180" .OR. TMP->CR_USER == "000190") .AND.  !EMPTY(TMP->CR_DATALIB) .AND. !EMPTY(TMP->CR_USERLIB) // Claudinei Girotti OU Josiel Ferreira
+		ElseIf (TMP->CR_USER == "000166" .OR. TMP->CR_USER == "000180" .OR. TMP->CR_USER == "000190" .OR. TMP->CR_USER == "000219") .AND.  !EMPTY(TMP->CR_DATALIB) .AND. !EMPTY(TMP->CR_USERLIB) // Claudinei Girotti OU Josiel Ferreira
 			lAssDir := .T.
 			dLib02   := DTOC(STOD(TMP->CR_DATALIB))
 			//		cAprov02 := Posicione("SAK",1,xFilial("SAK")+TMP->CR_APROV,"AK_NOME")
@@ -923,7 +925,7 @@ else
 	IF dDatabase >= CTOD("02/01/2018") .AND. dDatabase <= CTOD("14/01/2018") .AND. nValor >= 1000 .AND. .F. .AND. !(lAssDir1)
 		lAssDir1 := .T.
 		dLib03   := dDatabase
-		cAprov03 := "LUCIANO RIBEIRO"
+		cAprov03 := "Luciano Ribeiro"
 		cFuncao03 := "Diretor Geral"
 		cCodUser3 := "000192"
 		lass03 := .T.
@@ -933,9 +935,9 @@ else
 	IF dDatabase >= CTOD("15/01/2018") .AND. dDatabase <= CTOD("19/01/2018") .AND. .F. .AND. !(lAssDir)
 		lAssDir := .T.
 		dLib02   := dDatabase
-		cAprov02 := "WAGNER LIMA"
-		cFuncao02 := "Diretor Geral / Gerente Executivo"
-		cCodUser2 := "000190"
+		cAprov02 := "Artur Fernandes"
+		cFuncao02 := "     Gerente Executivo"
+		cCodUser2 := "000219"
 		lass02 := .T.
 		nAss += 1
 		

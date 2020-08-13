@@ -21,7 +21,7 @@ User Function ImportNat()
 ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
 */
 
-Local cArq    := "C:\TEMP\NATUREZA.CSV"
+Local cArq    := "C:\TEMP\PRACA.CSV"
 Local cLinha  := ""
 Local lPrim   := .T.
 Local aCampos := {}
@@ -64,12 +64,18 @@ For i:=1 to Len(aDados)
 	
 	IncProc("Processando SZY")
 	
+	RECLOCK("ZAF",.T.)
+	ZAF_FILIAL   := xFilial("ZAF") 
+	ZAF_CODIGO	 := STRZERO(VAL(aDados[i,1]),3)
+	ZAF_DESCRI	 := aDados[i,2]
+	ZAF_CITY	 := aDados[i,3]
+	ZAF_EST		 := aDados[i,4]
+	ZAF_CGC		 := aDados[i,5]
+	MSUNLOCK()
+	
+	
 
-	_cUpd := "UPDATE SZY010 SET "	
-	_cUpd += "ZY_MES08	= "+aDados[i,3]+",ZY_MES09	= "+aDados[i,4]+",ZY_MES10	= "+aDados[i,5]+",ZY_MES11	= "+aDados[i,6]+",ZY_MES12	= "+aDados[i,7]+"  "	
-	_cUpd += "WHERE "
-	_cUpd += "D_E_L_E_T_ = '' "
-	_cUpd += "AND ZY_CODIGO = '" + aDados[i,1] + "' "
+	
 
 
 /*	

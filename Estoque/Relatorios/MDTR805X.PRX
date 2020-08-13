@@ -1,0 +1,2023 @@
+#Include "Protheus.Ch"
+//#INCLUDE "MDTR805.ch"
+
+#DEFINE _nVERSAO 17 //Versao do fonte
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡…o    ³ MDTR805_ ³ Autor ³ Rafael França         ³ Data ³ 12.07.11 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³Recibo de entrega do epi.                                   ³±±
+±±³          ³Todo funcionario que recebe epi da empresa deve assinar o   ³±±
+±±³          ³recibo comprovando o seu recebimento. o programa inicia     ³±±
+±±³          ³lendo a tabela de epi's entregues (TNF). Conforme parametros³±±
+±±³          ³seleciona os funcionarios que receberam epi em um determina-³±±
+±±³          ³do periodo. O programa podera listar apenas os epi's ainda  ³±±
+±±³          ³lendo a tabela de epi's entregues (TNF). Conforme parametros³±±
+±±³          ³com data de emissao do recibo em branco ou todos se o usu  -³±±
+±±³          ³rio desejar.                                                ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Sintaxe e ³ MDTR805 VOID                                               ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ Generico                                                   ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß/*/
+User Function MDTR805x( aDados, aRegs )  // Relatorio de termos de Epi customizado para a Record DF
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Armazena variaveis p/ devolucao (NGRIGHTCLICK)								  ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+Local aNGBEGINPRM := NGBEGINPRM(_nVERSAO)
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Define Variaveis                                             ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+LOCAL wnrel   := "MDTR805"
+LOCAL limite  := 132
+LOCAL cDesc1  := "Relatorio de Comprovante de Entrega de EPI.                                     "
+LOCAL cDesc2  := "Conforme parametros o usuario pode selecionar os funcionarios, periodo desejado "
+LOCAL cDesc3  := "e indicar se deseja imprimir apenas epi's nao impressos ou para todos.          "
+LOCAL cString := "TNF"
+LOCAL nFor
+
+Private aOldACols := {}
+If Valtype(aRegs) == "A"
+	aOldACols := aClone(aRegs)
+Endif
+
+PRIVATE aDad695
+If Valtype(aDados) == "A"
+	aDad695 := aClone(aDados)
+Endif
+
+PRIVATE nomeprog := "MDTR805"
+PRIVATE tamanho  := "M"
+PRIVATE aReturn  := {"Zebrado", 1,"Administracao", 2, 2, 1, "",1 } //"Zebrado"###"Administracao"
+PRIVATE titulo   := UPPER("Termo de Responsabilidade")
+PRIVATE ntipo    := 0
+PRIVATE nLastKey := 0
+PRIVATE cPerg    := "MDT805    "
+PRIVATE cabec1	  := " "
+PRIVATE cabec2   := " "
+PRIVATE nSizeSI3, nSizeSRJ
+PRIVATE cFuncMat := " "
+PRIVATE dDataEnt := " "
+Private nDist    := 0
+Private cAliasCC := "SI3"
+Private cDescCC  := "SI3->I3_DESC"
+Private nSizeCC
+//Variaveis do include
+Private _xSTR0001 := "Relatorio de Comprovante de Entrega de EPI.                                     "
+Private _xSTR0002 := "Conforme parametros o usuario pode selecionar os funcionarios, periodo desejado "
+Private _xSTR0003 := "e indicar se deseja imprimir apenas epi's nao impressos ou para todos.          "
+Private _xSTR0004 := "Zebrado"
+Private _xSTR0005 := "Administracao"
+Private _xSTR0006 := "Comprovante de Entrega de EPI"
+Private _xSTR0007 := "CANCELADO PELO OPERADOR"
+Private _xSTR0008 := "COMPROVANTE DE ENTREGA DE EPI'S                                 |"
+Private _xSTR0009 := "Emissao:"
+Private _xSTR0010 := "|Funcionario.....:"
+Private _xSTR0011 := "RG.:"
+Private _xSTR0012 := "|Centro de Custo.:"
+Private _xSTR0013 := "|Funcao..........:"
+Private _xSTR0014 := "|Nascimento......:"
+Private _xSTR0015 := "Admissao.:"
+Private _xSTR0016 := "Idade.:"
+Private _xSTR0017 := "EPI"
+Private _xSTR0018 := "Nome do EPI"
+Private _xSTR0019 := "Dt. Entr"
+Private _xSTR0020 := "Dev."
+Private _xSTR0021 := "SIM"
+Private _xSTR0022 := "NAO"
+Private _xSTR0023 := "|  Data : ____/____/____"
+Private _xSTR0024 := "|  Assinatura: _______________________     Resp Empr: _______________________"
+Private _xSTR0025 := "Qtde"
+Private _xSTR0026 := "Num C.A."
+Private _xSTR0027 := "Empresa...:"
+Private _xSTR0028 := "Endereco..:"
+Private _xSTR0029  :="Cidade..:"
+Private _xSTR0030  :="Estado.."
+Private _xSTR0031 := "COMPROVANTE DE ENTREGA DE EPI'S                                            |"
+Private _xSTR0032 := "|SIGA/MDTR805"
+Private _xSTR0033 := "Num. CRF"
+Private _xSTR0034 := "Num. CRI"
+Private _xSTR0035 := "TERMO DE RESPONSABILIDADE                                               |"
+Private _xSTR0036 := "|       Data : ____/____/____"
+Private _xSTR0037 := "|       Assinatura: _______________________                                   Resp Empr: _______________________"
+Private _xSTR0038 := "COMPROVANTE DE ENTREGA DE EPI'S"
+Private _xSTR0039 := "anos"
+Private _xSTR0040  :="Hora"
+Private _xSTR0041 := "TERMO DE RESPONSABILIDADE"
+Private _xSTR0042  :="Dt. Devo"
+Private _xSTR0043 := "De Centro de Custo ?"
+Private _xSTR0044 := "Até Centro de Custo ?"
+Private _xSTR0045 := "Considerar func. demitidos?"
+Private _xSTR0046  :="Sim"
+Private _xSTR0047  :="Não"
+Private _xSTR0048 := "Numero de vias ?"
+Private _xSTR0049  :="Uma"
+Private _xSTR0050  :="Duas"
+Private _xSTR0051 := "Ordenar Recibos Por ?"
+Private _xSTR0052 := "Matricula"
+Private _xSTR0053 := "Centro de Custo"
+Private _xSTR0054 := "Nome Funcionar."
+Private _xSTR0055 := "Cod. C. Custo"
+Private _xSTR0056 := "Nome C. Custo"
+Private _xSTR0057 := "Ordenar EPIs Por ?"
+Private _xSTR0058 := "Cod. EPI"
+Private _xSTR0059 := "Nome EPI"
+Private _xSTR0060 := "De Data de Admissão ?"
+Private _xSTR0061 := "Até Data de Admissão ?"
+Private _xSTR0062 := "De Cliente ?"
+Private _xSTR0063  :="Loja"
+Private _xSTR0064 := "Até Cliente ?"
+Private _xSTR0065  :="Listar EPIs ?"
+Private _xSTR0066 := "Categoria Func.:"
+Private _xSTR0067 := "Considerar func. demitidos ?"
+Private _xSTR0068 := "Ate Data Entrega ?"
+Private _xSTR0069 := "No. de Vias ?"
+Private _xSTR0070  :="Termo Responsab. ?"
+Private _xSTR0071 := "Todos ?"
+Private _xSTR0072 := "De  Data Entrega ?"
+Private _xSTR0073 := "Ate Funcionario ?"
+Private _xSTR0074 := "De  Funcionario ?"
+Private _xSTR0075 := "CGC..:"
+Private _xSTR0076  :="Ass.: _________________"
+Private _xSTR0077 := "De Filial ?"
+Private _xSTR0078 := "Ate Filial ?"
+Private _xSTR0079  :="Não existem dados para montar o relatório."
+Private _xSTR0080  :="Atenção"
+Private _xSTR0081  :="Filial....:"
+Private _xSTR0082 := "Num. SA"
+Private _xSTR0083  :="Item SA"
+
+Private cUsaInt1  := AllTrim(GetMv("MV_NGMDTES"))
+Private lMdtGerSA := If( SuperGetMv("MV_NG2SA",.F.,"N") == "S", .T. , .F. ) //Indica se gera SA ao inves de requisitar do estoque
+Private lGera_SA  := If(NGCADICBASE("TNF_ITEMSA","D","TNF",.F.) .and. NGCADICBASE("TNF_NUMSA","D","TNF",.F.) , .T. , .F. )
+
+If lMdtGerSA .and. !lGera_SA .and. cUsaInt1 == "S"
+	If !NGINCOMPDIC("UPDMDT52","23534/2009")
+		Return .F.
+	Endif
+Endif
+
+If cUsaInt1 != "S" .or. !lMdtGerSA
+	lGera_SA := .f.
+Endif
+
+nSizeCod := If((TAMSX3("B1_COD")[1]) < 1,2,(TAMSX3("B1_COD")[1]))
+If nSizeCod > 15
+	nDist   := (nSizeCod/2) + 2
+Endif
+
+nSizeSI3 := If((TAMSX3("I3_CUSTO" )[1]) < 1,9 ,(TAMSX3("I3_CUSTO" )[1]))
+nSizeSRJ := If((TAMSX3("RJ_FUNCAO")[1]) < 1,4 ,(TAMSX3("RJ_FUNCAO")[1]))
+nSizeCC  := If((TAMSX3("CTT_CUSTO")[1]) < 1,20,(TAMSX3("CTT_CUSTO")[1]))
+Private nSizeFil:= If(FindFunction("FWSizeFilial"),FwSizeFilial(),Len(SRA->RA_FILIAL))
+
+If Alltrim(GETMV("MV_MCONTAB")) == "CTB"
+	cAliasCC := "CTT"
+	cDescCC  := "CTT->CTT_DESC01"
+Endif
+
+lSigaMdtPS := If( SuperGetMv("MV_MDTPS",.F.,"N") == "S", .t. , .f. )
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Variaveis utilizadas para parametros                                     ³
+//³ mv_par01             // De Funcionario                                   ³
+//³ mv_par02             // Ate Funcionario                                  ³
+//³ mv_par03             // De Data Entrega                                  ³
+//³ mv_par04             // Ate Data Entrega                                 ³
+//³ mv_par05             // So nao Impresos / Todos / Ultima retirada        ³
+//³ mv_par06             // Termo de Responsabilidade                        ³
+//³ mv_par07             // Duas vias                                        ³
+//³ mv_par08             // Ordenar por                                      ³
+//³ mv_par09             // De Centro de Custo                               ³
+//³ mv_par10             // Ate Centro de Custo                              ³
+//³ mv_par11             // Considerar funcionarios demitidos                ³
+//³                            1 - Sim                                       ³
+//³                            2 - Nao                                       ³
+//³ mv_par12             // Ordenar EPIs por:                                ³
+//³                            1 - Cod                                       ³
+//³                            2 - Nome                                      ³
+//³ mv_par13             // De Data Admissao                                 ³
+//³ mv_par14             // Ate Data Admissao                                ³
+//³ mv_par15             // De Filial                                        ³
+//³ mv_par16             // Ate Filial                                       ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+If lSigaMdtps
+	
+	/* Perguntas
+	MDT805    ¦01      ¦De Cliente ?
+	MDT805    ¦02      ¦Loja
+	MDT805    ¦03      ¦Até Cliente ?
+	MDT805    ¦04      ¦Loja
+	MDT805    ¦05      ¦De  Funcionario ?
+	MDT805    ¦06      ¦Ate Funcionario ?
+	MDT805    ¦07      ¦De  Data Entrega ?
+	MDT805    ¦08      ¦Ate Data Entrega ?
+	MDT805    ¦09      ¦Todos ?
+	MDT805    ¦10      ¦Termo Responsab. ?
+	MDT805    ¦11      ¦No. de Vias ?
+	MDT805    ¦12      ¦Ordenar Recibos Por ?
+	MDT805    ¦13      ¦De Centro de Custo ?
+	MDT805    ¦14      ¦AtÚ Centro de Custo ?
+	MDT805    ¦15      ¦Considerar func. demitidos ?
+	MDT805    ¦16      ¦Ordenar EPIs Por ?
+	MDT805    ¦17      ¦De Data de AdmissÒo ?
+	MDT805    ¦18      ¦AtÚ Data de AdmissÒo ?
+	*/
+	
+	cPerg    :=  "MDT805PS  "
+	dbSelectArea("SX1")
+	dbSetOrder(01)
+	If !dbSeek(cPerg)
+		MdtCopyX1("MDT805","MDT805PS")
+	Endif
+	
+	Dbseek(cPerg+"14")
+	If AllTrim(SX1->X1_PERGUNT)	== _xSTR0061 //"Até Data de Admissão ?"
+		RecLock("SX1",.F.)
+		SX1->X1_ORDEM   := "18"
+		SX1->X1_VARIAVL := "mv_chi"
+		SX1->X1_VAR01   := "mv_par18"
+		SX1->X1_VALID   := "(mv_par18 >= mv_par17)"
+		MsUnLock("SX1")
+	Elseif AllTrim(SX1->X1_PERGUNT)	== _xSTR0044 //"Até Centro de Custo ?"
+		If AllTrim(SX1->X1_F3) != cAliasCC
+			RecLock("SX1",.F.)
+			SX1->X1_F3 := cAliasCC
+			MsUnLock("SX1")
+		Endif
+	Endif
+	
+	Dbseek(cPerg+"13")
+	If AllTrim(SX1->X1_PERGUNT)	== _xSTR0060 //"De Data de Admissão ?"
+		RecLock("SX1",.F.)
+		SX1->X1_ORDEM   := "17"
+		SX1->X1_VARIAVL := "mv_chh"
+		SX1->X1_VAR01   := "mv_par17"
+		MsUnLock("SX1")
+	ElseIf AllTrim(SX1->X1_PERGUNT)	== _xSTR0043 //"De Centro de Custo ?"
+		If AllTrim(SX1->X1_F3) != cAliasCC
+			RecLock("SX1",.F.)
+			SX1->X1_F3 := cAliasCC
+			MsUnLock("SX1")
+		Endif
+	Endif
+	
+	Dbseek(cPerg+"12")
+	If AllTrim(SX1->X1_PERGUNT)	== _xSTR0057 //"Ordenar EPIs Por ?"
+		RecLock("SX1",.F.)
+		SX1->X1_ORDEM   := "16"
+		SX1->X1_VARIAVL := "mv_chg"
+		SX1->X1_VAR01   := "mv_par16"
+		MsUnLock("SX1")
+	Endif
+	
+	Dbseek(cPerg+"11")
+	If AllTrim(SX1->X1_PERGUNT)	== _xSTR0067 //"Considerar func. demitidos ?"
+		RecLock("SX1",.F.)
+		SX1->X1_ORDEM   := "15"
+		SX1->X1_VARIAVL := "mv_chf"
+		SX1->X1_VAR01   := "mv_par15"
+		MsUnLock("SX1")
+	Endif
+	
+	Dbseek(cPerg+"10")
+	If AllTrim(SX1->X1_PERGUNT)	== _xSTR0044 //"Até Centro de Custo ?"
+		RecLock("SX1",.F.)
+		SX1->X1_ORDEM   := "14"
+		SX1->X1_VARIAVL := "mv_che"
+		SX1->X1_VAR01   := "mv_par14"
+		SX1->X1_VALID   := "If(AteCodigo('CTT',mv_par09,mv_par10),.T.,.F.)"
+		SX1->X1_TAMANHO := nSizeSI3
+		SX1->X1_CNT01   := Replicate("Z",nSizeSI3)
+		SX1->X1_F3      := cAliasCC
+		MsUnLock("SX1")
+	EndIf
+	
+	Dbseek(cPerg+"09")
+	If AllTrim(SX1->X1_PERGUNT)	== _xSTR0043 //"De Centro de Custo ?"
+		RecLock("SX1",.F.)
+		SX1->X1_ORDEM   := "13"
+		SX1->X1_VARIAVL := "mv_chd"
+		SX1->X1_VAR01   := "mv_par13"
+		SX1->X1_VALID   := 'If(empty(mv_par13),.t.,ExistCpo("SI3",mv_par13))'
+		SX1->X1_TAMANHO := nSizeSI3
+		SX1->X1_F3      := cAliasCC
+		MsUnLock("SX1")
+	Endif
+	
+	Dbseek(cPerg+"08")
+	If AllTrim(SX1->X1_PERGUNT)	!= _xSTR0068 //"Ate Data Entrega ?"
+		RecLock("SX1",.F.)
+		SX1->X1_ORDEM   := "12"
+		SX1->X1_VARIAVL := "mv_chc"
+		SX1->X1_VAR01   := "mv_par12"
+		SX1->X1_PERGUNT := _xSTR0051  //"Ordenar Recibos Por ?"
+		SX1->X1_DEF01   := _xSTR0052  //"Matricula"
+		SX1->X1_DEF02   := _xSTR0054  //"Nome Funcionar."
+		SX1->X1_DEF03   := _xSTR0055  //"Cod. C. Custo"
+		SX1->X1_DEF04   := _xSTR0056  //"Nome C. Custo"
+		MsUnLock("SX1")
+	Endif
+	
+	Dbseek(cPerg+"07")
+	If AllTrim(SX1->X1_PERGUNT)	== _xSTR0069 //"No. de Vias ?"
+		RecLock("SX1",.F.)
+		SX1->X1_ORDEM   := "11"
+		SX1->X1_VARIAVL := "mv_chb"
+		SX1->X1_VAR01   := "mv_par11"
+		MsUnLock("SX1")
+	Endif
+	
+	Dbseek(cPerg+"06")
+	If AllTrim(SX1->X1_PERGUNT)	== _xSTR0070 //"Termo Responsab. ?"
+		RecLock("SX1",.F.)
+		SX1->X1_ORDEM   := "10"
+		SX1->X1_VARIAVL := "mv_cha"
+		SX1->X1_VAR01   := "mv_par10"
+		SX1->X1_VALID   := 'EXISTCPO("TMZ",MV_PAR10)'
+		MsUnLock("SX1")
+	Endif
+	
+	Dbseek(cPerg+"05")
+	If AllTrim(SX1->X1_PERGUNT)	== _xSTR0071 .Or. AllTrim(SX1->X1_PERGUNT) == _xSTR0065 //"Todos ?"###"Listar EPIs ?"
+		RecLock("SX1",.F.)
+		SX1->X1_ORDEM   := "09"
+		SX1->X1_VARIAVL := "mv_ch9"
+		SX1->X1_VAR01   := "mv_par09"
+		MsUnLock("SX1")
+	Endif
+	
+	Dbseek(cPerg+"04")
+	If AllTrim(SX1->X1_PERGUNT)	== _xSTR0068 //"Ate Data Entrega ?"
+		RecLock("SX1",.F.)
+		SX1->X1_ORDEM   := "08"
+		SX1->X1_VARIAVL := "mv_ch8"
+		SX1->X1_VAR01   := "mv_par08"
+		SX1->X1_VALID   := "(mv_par08>=mv_par07)"
+		MsUnLock("SX1")
+	Endif
+	
+	Dbseek(cPerg+"03")
+	If AllTrim(SX1->X1_PERGUNT)	== _xSTR0072 //"De  Data Entrega ?"
+		RecLock("SX1",.F.)
+		SX1->X1_ORDEM   := "07"
+		SX1->X1_VARIAVL := "mv_ch7"
+		SX1->X1_VAR01   := "mv_par07"
+		MsUnLock("SX1")
+	Endif
+	
+	Dbseek(cPerg+"02")
+	If AllTrim(SX1->X1_PERGUNT)	== _xSTR0073 //"Ate Funcionario ?"
+		RecLock("SX1",.F.)
+		SX1->X1_ORDEM   := "06"
+		SX1->X1_VARIAVL := "mv_ch6"
+		SX1->X1_VAR01   := "mv_par06"
+		SX1->X1_VALID   := 'If(atecodigo("SRA",mv_par05,mv_par06,6),.t.,.f.)'
+		MsUnLock("SX1")
+	Endif
+	
+	Dbseek(cPerg+"01")
+	If AllTrim(SX1->X1_PERGUNT)	== _xSTR0074 //"De  Funcionario ?"
+		RecLock("SX1",.F.)
+		SX1->X1_ORDEM   := "05"
+		SX1->X1_VARIAVL := "mv_ch5"
+		SX1->X1_VAR01   := "mv_par05"
+		SX1->X1_VALID   := 'If(empty(mv_par05),.t.,ExCpoMDT("SRA",mv_par05))'
+		MsUnLock("SX1")
+	Endif
+	
+	nTa1 := If((TAMSX3("A1_COD")[1]) < 1,6,(TAMSX3("A1_COD")[1]))
+	nTa1L := If((TAMSX3("A1_LOJA")[1]) < 1,2,(TAMSX3("A1_LOJA")[1]))
+	nSizeTD := nTa1+nTa1L
+	
+	If !Dbseek(cPerg+"01")
+		RecLock("SX1",.T.)
+		SX1->X1_GRUPO   := cPerg
+		SX1->X1_ORDEM   := "01"
+		SX1->X1_PERGUNT := _xSTR0062  //"De Cliente ?"
+		SX1->X1_PERSPA  := _xSTR0062
+		SX1->X1_PERENG  := _xSTR0062
+		SX1->X1_VARIAVL := "mv_ch1"
+		SX1->X1_TIPO    := "C"
+		SX1->X1_TAMANHO := nTa1
+		SX1->X1_GSC     := "G"
+		SX1->X1_VALID   := "ValCli(1,mv_par01,'mv_par02',mv_par03,'mv_par04',nTa1,nTa1L)"
+		SX1->X1_VAR01   := "mv_par01"
+		SX1->X1_F3      := "SA1"
+		MsUnLock("SX1")
+	Endif
+	If !Dbseek(cPerg+"02")
+		RecLock("SX1",.T.)
+		SX1->X1_GRUPO   := cPerg
+		SX1->X1_ORDEM   := "02"
+		SX1->X1_PERGUNT := _xSTR0063  //"Loja"
+		SX1->X1_PERSPA  := _xSTR0063
+		SX1->X1_PERENG  := _xSTR0063
+		SX1->X1_VARIAVL := "mv_ch2"
+		SX1->X1_TIPO    := "C"
+		SX1->X1_TAMANHO := nTa1L
+		SX1->X1_GSC     := "G"
+		SX1->X1_VALID   := "ValCli(3,mv_par01,'mv_par02',mv_par03,'mv_par04',nTa1,nTa1L)"
+		SX1->X1_VAR01   := "mv_par02"
+		MsUnLock("SX1")
+	Endif
+	If !Dbseek(cPerg+"03")
+		RecLock("SX1",.T.)
+		SX1->X1_GRUPO   := cPerg
+		SX1->X1_ORDEM   := "03"
+		SX1->X1_PERGUNT := _xSTR0064  //"Até Cliente ?"
+		SX1->X1_PERSPA  := _xSTR0064
+		SX1->X1_PERENG  := _xSTR0064
+		SX1->X1_VARIAVL := "mv_ch3"
+		SX1->X1_TIPO    := "C"
+		SX1->X1_TAMANHO := nTa1
+		SX1->X1_GSC     := "G"
+		SX1->X1_VALID   := "ValCli(2,mv_par01,'mv_par02',mv_par03,'mv_par04',nTa1,nTa1L)"
+		SX1->X1_VAR01   := "mv_par03"
+		SX1->X1_CNT01   := Replicate("Z",nTa1)
+		SX1->X1_F3      := "SA1"
+		MsUnLock("SX1")
+	Endif
+	If !Dbseek(cPerg+"04")
+		RecLock("SX1",.T.)
+		SX1->X1_GRUPO   := cPerg
+		SX1->X1_ORDEM   := "04"
+		SX1->X1_PERGUNT := _xSTR0063  //"Loja"
+		SX1->X1_PERSPA  := _xSTR0063
+		SX1->X1_PERENG  := _xSTR0063
+		SX1->X1_VARIAVL := "mv_ch4"
+		SX1->X1_TIPO    := "C"
+		SX1->X1_TAMANHO := nTa1L
+		SX1->X1_GSC     := "G"
+		SX1->X1_VALID   := "ValCli(4,mv_par01,'mv_par02',mv_par03,'mv_par04',nTa1,nTa1L)"
+		SX1->X1_VAR01   := "mv_par04"
+		SX1->X1_CNT01   := Replicate("Z",nTa1L)
+		MsUnLock("SX1")
+	Endif
+	If Dbseek(cPerg+"09") .And. AllTrim(SX1->X1_PERGUNT) <> _xSTR0065 //"Listar EPIs ?"
+		RecLock("SX1",.F.)
+		SX1->X1_PERGUNT   := _xSTR0065
+		MsUnLock("SX1")
+	Endif
+	
+	If !Dbseek(cPerg+"16")
+		RecLock("SX1",.T.)
+		SX1->X1_GRUPO   := cPerg
+		SX1->X1_ORDEM   := "16"
+		SX1->X1_PERGUNT := _xSTR0057  //"Ordenar EPIs Por ?"
+		SX1->X1_VARIAVL := "mv_chg"
+		SX1->X1_TIPO    := "N"
+		SX1->X1_TAMANHO := 01
+		SX1->X1_GSC     := "C"
+		SX1->X1_VALID   := "naovazio()"
+		SX1->X1_DEF01   := _xSTR0058  //"Cod. EPI"
+		SX1->X1_DEF02   := _xSTR0059  //"Nome EPI"
+		SX1->X1_VAR01   := "mv_par16"
+		MsUnLock("SX1")
+	Endif
+	If !Dbseek(cPerg+"17")
+		RecLock("SX1",.T.)
+		SX1->X1_GRUPO   := cPerg
+		SX1->X1_ORDEM   := "17"
+		SX1->X1_PERGUNT := _xSTR0060  //"De Data de Admissão ?"
+		SX1->X1_VARIAVL := "mv_chh"
+		SX1->X1_TIPO    := "D"
+		SX1->X1_TAMANHO := 01
+		SX1->X1_GSC     := "G"
+		SX1->X1_VALID   := "naovazio()"
+		SX1->X1_VAR01   := "mv_par17"
+		MsUnLock("SX1")
+	Endif
+	If !Dbseek(cPerg+"18")
+		RecLock("SX1",.T.)
+		SX1->X1_GRUPO   := cPerg
+		SX1->X1_ORDEM   := "18"
+		SX1->X1_PERGUNT := _xSTR0061  //"Até Data de Admissão ?"
+		SX1->X1_VARIAVL := "mv_chi"
+		SX1->X1_TIPO    := "D"
+		SX1->X1_TAMANHO := 01
+		SX1->X1_GSC     := "G"
+		SX1->X1_VALID   := "(mv_par18 >= mv_par17)"
+		SX1->X1_VAR01   := "mv_par18"
+		MsUnLock("SX1")
+	Endif
+	If !Dbseek(cPerg+"19")
+		RecLock("SX1",.T.)
+		SX1->X1_GRUPO   := cPerg
+		SX1->X1_ORDEM   := "19"
+		SX1->X1_PERGUNT := "Nº Assinaturas:"
+		SX1->X1_PERSPA  := "Nº Assinaturas:"
+		SX1->X1_PERENG  := "Nº Assinaturas:"
+		SX1->X1_VARIAVL := "mv_ch19"
+		SX1->X1_TIPO    := "C"
+		SX1->X1_TAMANHO := 2
+		SX1->X1_GSC     := "G"
+		SX1->X1_VALID   := "naovazio()"
+		SX1->X1_VAR01   := "mv_par19"
+		SX1->X1_CNT01   := "01"
+		MsUnLock("SX1")
+	Endif
+	
+Else
+	
+	//Colocar no ATUSX e remover daqui.
+	dbSelectArea("SX1")
+	dbSetOrder(01)
+	If Dbseek(cPerg+"08")
+		If AllTrim(SX1->X1_DEF01) != _xSTR0052 .OR. AllTrim(SX1->X1_DEF02) != _xSTR0054 .OR.;
+			AllTrim(SX1->X1_DEF03) != _xSTR0055 .OR. AllTrim(SX1->X1_DEF04) != _xSTR0056 .OR. AllTrim(SX1->X1_PERGUNT) != _xSTR0051
+			RecLock("SX1",.F.)
+			SX1->X1_PERGUNT := _xSTR0051  //"Ordenar Recibos Por ?"
+			SX1->X1_DEF01   := _xSTR0052  //"Matricula"
+			SX1->X1_DEF02   := _xSTR0054  //"Nome Funcionar."
+			SX1->X1_DEF03   := _xSTR0055  //"Cod. C. Custo"
+			SX1->X1_DEF04   := _xSTR0056  //"Nome C. Custo"
+			MsUnLock("SX1")
+		Endif
+	Endif
+	
+	If Dbseek(cPerg+"09") .AND. AllTrim(SX1->X1_PERGUNT) == _xSTR0043 //"De Centro de Custo ?"
+		If AllTrim(SX1->X1_F3) != cAliasCC
+			RecLock("SX1",.F.)
+			SX1->X1_F3 := cAliasCC
+			MsUnLock("SX1")
+		Endif
+	Endif
+	If Dbseek(cPerg+"05") .And. AllTrim(SX1->X1_PERGUNT) <> _xSTR0065 //"Listar EPIs ?"
+		RecLock("SX1",.F.)
+		SX1->X1_PERGUNT   := _xSTR0065
+		MsUnLock("SX1")
+	Endif
+	If Dbseek(cPerg+"10") .AND. AllTrim(SX1->X1_PERGUNT) == _xSTR0044 //"Até Centro de Custo ?"
+		If AllTrim(SX1->X1_F3) != cAliasCC
+			RecLock("SX1",.F.)
+			SX1->X1_F3 := cAliasCC
+			MsUnLock("SX1")
+		Endif
+	Endif
+	
+	If dbSeek(cPerg+"10")
+		RecLock("SX1",.F.)
+		SX1->X1_CNT01   := Replicate("Z",nSizeCC)
+		SX1->X1_VALID   := "If(AteCodigo('CTT',mv_par09,mv_par10),.T.,.F.)"
+		MsUnLock("SX1")
+	Endif
+	
+	If !Dbseek(cPerg+"12")
+		RecLock("SX1",.T.)
+		SX1->X1_GRUPO   := cPerg
+		SX1->X1_ORDEM   := "12"
+		SX1->X1_PERGUNT := _xSTR0057  //"Ordenar EPIs Por ?"
+		SX1->X1_VARIAVL := "mv_chc"
+		SX1->X1_TIPO    := "N"
+		SX1->X1_TAMANHO := 01
+		SX1->X1_GSC     := "C"
+		SX1->X1_VALID   := "naovazio()"
+		SX1->X1_DEF01   := _xSTR0058  //"Cod. EPI"
+		SX1->X1_DEF02   := _xSTR0059  //"Nome EPI"
+		SX1->X1_VAR01   := "mv_par12"
+		MsUnLock("SX1")
+	Endif
+	If !Dbseek(cPerg+"13")
+		RecLock("SX1",.T.)
+		SX1->X1_GRUPO   := cPerg
+		SX1->X1_ORDEM   := "13"
+		SX1->X1_PERGUNT := _xSTR0060  //"De Data de Admissão ?"
+		SX1->X1_VARIAVL := "mv_chd"
+		SX1->X1_TIPO    := "D"
+		SX1->X1_TAMANHO := 01
+		SX1->X1_GSC     := "G"
+		SX1->X1_VALID   := "naovazio()"
+		SX1->X1_VAR01   := "mv_par13"
+		MsUnLock("SX1")
+	Endif
+	If !Dbseek(cPerg+"14")
+		RecLock("SX1",.T.)
+		SX1->X1_GRUPO   := cPerg
+		SX1->X1_ORDEM   := "14"
+		SX1->X1_PERGUNT := _xSTR0061  //"Até Data de Admissão ?"
+		SX1->X1_VARIAVL := "mv_che"
+		SX1->X1_TIPO    := "D"
+		SX1->X1_TAMANHO := 01
+		SX1->X1_GSC     := "G"
+		SX1->X1_VALID   := "(mv_par14 >= mv_par13)"
+		SX1->X1_VAR01   := "mv_par14"
+		MsUnLock("SX1")
+	Endif
+	If !dbSeek(cPerg+"15")
+		RecLock("SX1",.T.)
+		SX1->X1_GRUPO   := cPerg
+		SX1->X1_ORDEM   := "15"
+		SX1->X1_PERGUNT := _xSTR0077 //"De Filial ?"
+		SX1->X1_PERSPA  := _xSTR0077 //"De Filial ?"
+		SX1->X1_PERENG  := _xSTR0077 //"De Filial ?"
+		SX1->X1_TAMANHO := nSizeFil
+		SX1->X1_GSC     := "G"
+		SX1->X1_VALID   := "MDTVLFIL(mv_par15,mv_par16,1)"
+		SX1->X1_VAR01   := "mv_par15"
+		SX1->X1_VARIAVL := "mv_chf"
+		SX1->X1_TIPO    := "C"
+		SX1->X1_CNT01   := cFilAnt
+		SX1->X1_F3      := "XM0"
+		SX1->X1_HELP    := ".MDTFILDE2."
+		SX1->X1_GRPSXG	:= "033"
+		SX1->(MsUnLock())
+	ENDIF
+	If !dbSeek(cPerg+"16")
+		RecLock("SX1",.T.)
+		SX1->X1_GRUPO   := cPerg
+		SX1->X1_ORDEM   := "16"
+		SX1->X1_PERGUNT := _xSTR0078 //"Ate Filial ?"
+		SX1->X1_PERSPA  := _xSTR0078 //"Ate Filial ?"
+		SX1->X1_PERENG  := _xSTR0078 //"Ate Filial ?"
+		SX1->X1_TAMANHO := nSizeFil
+		SX1->X1_GSC     := "G"
+		SX1->X1_VALID   := "MDTVLFIL(mv_par15,mv_par16,2)"
+		SX1->X1_VAR01   := "mv_par16"
+		SX1->X1_VARIAVL := "mv_chg"
+		SX1->X1_TIPO    := "C"
+		SX1->X1_CNT01   := cFilAnt
+		SX1->X1_F3      := "XM0"
+		SX1->X1_HELP    := ".MDTFILAT2."
+		SX1->X1_GRPSXG	:= "033"
+		SX1->(MsUnLock())
+	Endif
+	If !Dbseek(cPerg+"19")
+		RecLock("SX1",.T.)
+		SX1->X1_GRUPO   := cPerg
+		SX1->X1_ORDEM   := "19"
+		SX1->X1_PERGUNT := "Nº Assinaturas:"
+		SX1->X1_PERSPA  := "Nº Assinaturas:"
+		SX1->X1_PERENG  := "Nº Assinaturas:"
+		SX1->X1_VARIAVL := "mv_ch19"
+		SX1->X1_TIPO    := "C"
+		SX1->X1_TAMANHO := 2
+		SX1->X1_GSC     := "G"
+		SX1->X1_VALID   := "naovazio()"
+		SX1->X1_VAR01   := "mv_par19"
+		SX1->X1_CNT01   := "01"
+		MsUnLock("SX1")
+	Endif
+Endif
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Verifica as perguntas selecionadas                           ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+pergunte(cPerg,.F.)
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Envia controle para a funcao SETPRINT                        ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+wnrel:="MDTR805"
+
+If Valtype(aDad695) == "A"
+	wnrel:=SetPrint(cString,wnrel,,titulo,cDesc1,cDesc2,cDesc3,.F.,"")
+	For nFor := 1 To Len(aDad695)
+		&(aDad695[nFor,1]) := aDad695[nFor,2]
+	Next nFor
+Else
+	wnrel:=SetPrint(cString,wnrel,cPerg,titulo,cDesc1,cDesc2,cDesc3,.F.,"")
+Endif
+
+If nLastKey == 27
+	Set Filter to
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³ Devolve variaveis armazenadas (NGRIGHTCLICK)                          ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	NGRETURNPRM(aNGBEGINPRM)
+	Return
+Endif
+
+SetDefault(aReturn,cString)
+
+If nLastKey == 27
+	Set Filter to
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³ Devolve variaveis armazenadas (NGRIGHTCLICK)                          ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	NGRETURNPRM(aNGBEGINPRM)
+	Return
+Endif
+
+RptStatus({|lEnd| R805Imp_(@lEnd,wnRel,titulo,tamanho)},titulo)
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Devolve variaveis armazenadas (NGRIGHTCLICK)                          ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+NGRETURNPRM(aNGBEGINPRM)
+
+Return NIL
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡„o    ³ R805Imp  ³ Autor ³ Thiago Machado        ³ Data ³ 20/09/00 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡„o ³ Chamada do Relat¢rio                                       ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ MDTR805                                                    ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß/*/
+Static Function R805Imp_(lEnd,wnRel,titulo,tamanho)
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Define Variaveis                                             ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+LOCAL cRodaTxt := ""
+LOCAL nCntImpr := 0
+LOCAL cCC := ""
+Local i
+Local lImp := .F.
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Variaveis para controle do cursor de progressao do relatorio ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+LOCAL nTotRegs := 0 ,nMult := 1 ,nPosAnt := 4 ,nPosAtu := 4 ,nPosCnt := 0
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Variaveis locais exclusivas deste programa                   ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+LOCAL lContinua := .T.
+LOCAL nRegAtual := 0
+Local nCont
+Local nPOSCOD
+Local nPOSNUM
+Local nPOSDAT
+Local nPOSHOR
+Local lExistOld
+Local aFiliais := {}
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Contadores de linha e pagina                                 ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+PRIVATE li := 80 ,m_pag := 1
+PRIVATE lCPONumcap := .t.,lCPODtVenc := .t.
+If TNF->(FieldPos("TNF_NUMCAP")) <= 0
+	lCPONumcap := .f.
+Endif
+
+Private cTRB := GetNextAlias()
+aDBF := {}
+AADD(aDBF,{"FUNCI"  , "C", 06,0})
+AADD(aDBF,{"NOME"   , "C", 40,0})
+AADD(aDBF,{"RG"     , "C", 15,0})
+AADD(aDBF,{"NASC"   , "D", 08,0})
+AADD(aDBF,{"ADMIS"  , "D", 08,0})
+AADD(aDBF,{"IDADE"  , "C", 03,0})
+AADD(aDBF,{"CC"     , "C", nSizeSI3,0})
+AADD(aDBF,{"DESCC"  , "C", 60,0})
+AADD(aDBF,{"FUNCAO" , "C", nSizeSRJ,0})
+AADD(aDBF,{"DESCFUN", "C", 20,0})
+AADD(aDBF,{"CODEPI" , "C", nSizeCod,0})
+AADD(aDBF,{"DESEPI" , "C", 40,0})
+AADD(aDBF,{"DTENT"  , "D", 08,0})
+AADD(aDBF,{"HRENT"  , "C", 05,0})
+AADD(aDBF,{"QTDE"   , "N", 06,2})
+AADD(aDBF,{"DEV"    , "C", 01,0})
+AADD(aDBF,{"NUMCAP" , "C", 12,0})
+AADD(aDBF,{"NUMCRI" , "C", 12,0})
+AADD(aDBF,{"NUMCRF" , "C", 12,0})
+AADD(aDBF,{"DTDEVO" , "D", 08,0})
+AADD(aDBF,{"CATFUNC", "C", 01,0})
+AADD(aDBF,{"NUMSA"  , "C", 06,0})
+AADD(aDBF,{"ITEMSA" , "C", 02,0})
+
+If lSigaMdtps
+	AADD(aDBF,{"CLIENT"	, "C", nTa1,0})
+	AADD(aDBF,{"LOJA"	, "C", nTa1L,0})
+Else
+	AADD(aDBF,{"FILIAL"	, "C", nSizeFil	,0})
+	AADD(aDBF,{"NOMFIL"	, "C", 40		,0})
+Endif
+
+If Len(aOldACols) > 0
+	nPOSCOD := aSCAN( aHEADER, { |x| Trim( Upper(x[2]) ) == "TNF_CODEPI" }) // Codigo do Epi
+	nPOSNUM := aSCAN( aHEADER, { |x| Trim( Upper(x[2]) ) == "TNF_NUMCAP" }) // Num C. A.
+	nPOSDAT := aSCAN( aHEADER, { |x| Trim( Upper(x[2]) ) == "TNF_DTENTR" }) // Data da Entrega
+	nPOSHOR := aSCAN( aHEADER, { |x| Trim( Upper(x[2]) ) == "TNF_HRENTR" }) // Hora da Entrega
+EndIf
+
+cArqTrab := CriaTrab(aDBF,.t.)
+cIDX1 := SUBSTR(cArqTrab,1,7)+"1"
+cIDX2 := SUBSTR(cArqTrab,1,7)+"2"
+cIDX3 := SUBSTR(cArqTrab,1,7)+"3"
+cIDX4 := SUBSTR(cArqTrab,1,7)+"4"
+Use (cArqTrab) NEW Exclusive Alias (cTRB)
+
+If lSigaMdtps
+	If mv_par16 == 1  //Cod EPI
+		#IFDEF CDX
+			INDEX ON FUNCI+CODEPI+DTOS(DTENT) TAG (cIDX1) TO (cArqTrab)
+			INDEX ON NOME+CODEPI+DTOS(DTENT) TAG (cIDX2) TO (cArqTrab)
+			INDEX ON CC+FUNCI+CODEPI+DTOS(DTENT) TAG (cIDX3) TO (cArqTrab)
+			INDEX ON DESCC+FUNCI+CODEPI+DTOS(DTENT) TAG (cIDX4) TO (cArqTrab)
+		#ELSE
+			INDEX ON FUNCI+CODEPI+DTOS(DTENT) TAG (cIDX1) TO (cArqTrab)
+			INDEX ON NOME+CODEPI+DTOS(DTENT) TAG (cIDX2) TO (cArqTrab)
+			INDEX ON CC+FUNCI+CODEPI+DTOS(DTENT) TAG (cIDX3) TO (cArqTrab)
+			INDEX ON DESCC+FUNCI+CODEPI+DTOS(DTENT) TAG (cIDX4) TO (cArqTrab)
+			SET INDEX TO (cIDX1),(cIDX2),(cIDX3),(cIDX4)
+		#ENDIF
+	Else  //Nome EPI
+		#IFDEF CDX
+			INDEX ON FUNCI+DESEPI+DTOS(DTENT) TAG (cIDX1) TO (cArqTrab)
+			INDEX ON NOME+DESEPI+DTOS(DTENT) TAG (cIDX2) TO (cArqTrab)
+			INDEX ON CC+FUNCI+DESEPI+DTOS(DTENT) TAG (cIDX3) TO (cArqTrab)
+			INDEX ON DESCC+FUNCI+DESEPI+DTOS(DTENT) TAG (cIDX4) TO (cArqTrab)
+		#ELSE
+			INDEX ON FUNCI+DESEPI+DTOS(DTENT) TAG (cIDX1) TO (cArqTrab)
+			INDEX ON NOME+DESEPI+DTOS(DTENT) TAG (cIDX2) TO (cArqTrab)
+			INDEX ON CC+FUNCI+DESEPI+DTOS(DTENT) TAG (cIDX3) TO (cArqTrab)
+			INDEX ON DESCC+FUNCI+DESEPI+DTOS(DTENT) TAG (cIDX4) TO (cArqTrab)
+			SET INDEX TO (cIDX1),(cIDX2),(cIDX3),(cIDX4)
+		#ENDIF
+	Endif
+	
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³ Verifica se deve comprimir ou nao                            ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	nTipo  := IIF(aReturn[4]==1,15,18)
+	
+	dbSelectArea("TNF")
+	If mv_par09 == 3
+		dbSetOrder(10) //TNF_FILIAL+TNF_CLIENT+TNF_LOJACL+TNF_MAT+DTOS(TNF_DTENTR)+TNF_HRENTR+TNF_CODEPI
+	Else  //parei aki
+		dbSetOrder(08) //TNF_FILIAL+TNF_CLIENT+TNF_LOJACL+TNF_MAT+TNF_CODEPI+DTOS(TNF_DTENTR)+TNF_HRENTR
+	EndIf
+	dbSeek(xFilial("TNF")+MV_PAR01+MV_PAR02,.T.)
+	
+	SetRegua(LastRec())
+	
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³ Correr TNF para ler os  EPI's Entregues aos Funcionarios ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	
+	While !Eof()                             	.AND.;
+		TNF->TNF_FILIAL == xFIlial("TNF")  	.AND.;
+		TNF->(TNF_CLIENT+TNF_LOJACL) >= mv_par01+mv_par02 .AND. TNF->(TNF_CLIENT+TNF_LOJACL) <= mv_par03+mv_par04
+		
+		IncRegua()
+		
+		If TNF->TNF_MAT < MV_PAR05 .OR. TNF->TNF_MAT > MV_PAR06
+			dbSkip()
+			Loop
+		Endif
+		
+		DbSelectArea("SRA")
+		DbSetOrder(01)
+		DbSeek(xFilial("SRA")+TNF->TNF_MAT)
+		
+		If mv_par11 == 2  //Nao considerar funcionarios demitidos
+			If ( SRA->RA_SITFOLH == "D" ) .OR. ( !Empty( SRA->RA_DEMISSA ) )
+				dbSelectArea("TNF")
+				dbSkip()
+				Loop
+			Endif
+		Endif
+		
+		//Data de Admissao
+		If SRA->RA_ADMISSA < mv_par17 .OR. SRA->RA_ADMISSA > mv_par18
+			dbSelectArea("TNF")
+			dbSkip()
+			Loop
+		Endif
+		
+		cCC := SRA->RA_CC
+		
+		If ValType(mv_par13) == "C" .AND. ValType(mv_par14) == "C"
+			If (cCC < mv_par13) .OR. (cCC > mv_par14)
+				dbselectarea("TNF")
+				DbSkip()
+				Loop
+			EndIf
+		EndIf
+		
+		If TNF->TNF_DTENTR < MV_PAR07 .OR. TNF->TNF_DTENTR > MV_PAR08
+			dbSelectArea("TNF")
+			dbSkip()
+			loop
+		Endif
+		
+		If MV_PAR09 == 2 .AND. !EMPTY(TNF->TNF_DTRECI)
+			dbSelectArea("TNF")
+			dbSkip()
+			loop
+		EndIf
+		
+		lExistOld := .F.
+		If Len(aOldACols) > 0
+			For nCont := 1 To Len(aOldACols)
+				If aOldACols[nCont][nPOSCOD] == TNF->TNF_CODEPI
+					If aOldACols[nCont][nPOSNUM] == TNF->TNF_NUMCAP
+						If aOldACols[nCont][nPOSDAT] == TNF->TNF_DTENTR
+							If aOldACols[nCont][nPOSHOR] == TNF->TNF_HRENTR
+								lExistOld := .T.
+								Exit
+							EndIf
+						EndIf
+					EndIf
+				EndIf
+			Next nCont
+			
+			If lExistOld
+				dbSelectArea("TNF")
+				dbSkip()
+				Loop
+			EndIf
+		EndIf
+		
+		cFuncMat := TNF->TNF_MAT
+		
+		If mv_par09 == 3
+			DbSelectArea("TNF")
+			dDataEnt := TNF->TNF_DTENTR
+			nRegAtual := RecNo()
+			DbSkip()
+			If cFuncMat <> TNF->TNF_MAT
+				DbSkip(-1)
+				While !Bof()								.AND.;
+					TNF->TNF_FILIAL == xFIlial("TNF")  	.AND.;
+					TNF->TNF_MAT	== cFuncMat           	.AND.;
+					TNF->TNF_DTENTR == dDataEnt
+					AddRec805_()
+					DbSelectArea ("TNF")
+					Reclock("TNF",.f.)
+					TNF->TNF_DTRECI := Date()
+					MsUnlock("TNF")
+					DbSkip(-1)
+				EndDo
+				DbGoTo(nRegAtual)
+				DbSkip()
+			EndIf
+			Loop
+		Else
+			AddRec805_()
+			dbSelectArea("TNF")
+			Reclock("TNF",.f.)
+			TNF->TNF_DTRECI := Date()
+			MsUnlock("TNF")
+			dbSetOrder(03)
+			DbSkip()
+		EndIf
+		
+	EndDo
+	
+Else
+	
+	If mv_par12 == 1  //Cod EPI
+		#IFDEF CDX
+			INDEX ON FILIAL+FUNCI+CODEPI+DTOS(DTENT) TAG (cIDX1) TO (cArqTrab)
+			INDEX ON FILIAL+NOME+CODEPI+DTOS(DTENT) TAG (cIDX2) TO (cArqTrab)
+			INDEX ON FILIAL+CC+FUNCI+CODEPI+DTOS(DTENT) TAG (cIDX3) TO (cArqTrab)
+			INDEX ON FILIAL+DESCC+FUNCI+CODEPI+DTOS(DTENT) TAG (cIDX4) TO (cArqTrab)
+		#ELSE
+			INDEX ON FILIAL+FUNCI+CODEPI+DTOS(DTENT) TAG (cIDX1) TO (cArqTrab)
+			INDEX ON FILIAL+NOME+CODEPI+DTOS(DTENT) TAG (cIDX2) TO (cArqTrab)
+			INDEX ON FILIAL+CC+FUNCI+CODEPI+DTOS(DTENT) TAG (cIDX3) TO (cArqTrab)
+			INDEX ON FILIAL+DESCC+FUNCI+CODEPI+DTOS(DTENT) TAG (cIDX4) TO (cArqTrab)
+			SET INDEX TO (cIDX1),(cIDX2),(cIDX3),(cIDX4)
+		#ENDIF
+	Else  //Nome EPI
+		#IFDEF CDX
+			INDEX ON FILIAL+FUNCI+DESEPI+DTOS(DTENT) TAG (cIDX1) TO (cArqTrab)
+			INDEX ON FILIAL+NOME+DESEPI+DTOS(DTENT) TAG (cIDX2) TO (cArqTrab)
+			INDEX ON FILIAL+CC+FUNCI+DESEPI+DTOS(DTENT) TAG (cIDX3) TO (cArqTrab)
+			INDEX ON FILIAL+DESCC+FUNCI+DESEPI+DTOS(DTENT) TAG (cIDX4) TO (cArqTrab)
+		#ELSE
+			INDEX ON FILIAL+FUNCI+DESEPI+DTOS(DTENT) TAG (cIDX1) TO (cArqTrab)
+			INDEX ON FILIAL+NOME+DESEPI+DTOS(DTENT) TAG (cIDX2) TO (cArqTrab)
+			INDEX ON FILIAL+CC+FUNCI+DESEPI+DTOS(DTENT) TAG (cIDX3) TO (cArqTrab)
+			INDEX ON FILIAL+DESCC+FUNCI+DESEPI+DTOS(DTENT) TAG (cIDX4) TO (cArqTrab)
+			SET INDEX TO (cIDX1),(cIDX2),(cIDX3),(cIDX4)
+		#ENDIF
+	Endif
+	
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³ Define Filiais a percorrer                                   ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	If Valtype(aDad695) == "A"
+		aFiliais := {{cFilAnt, Upper(Substr(SM0->M0_NOME, 1, 40)) }}
+	Else
+		aFiliais := MDTRETFIL("TNF", MV_PAR15, MV_PAR16)
+	EndIf
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³ Verifica se deve comprimir ou nao                            ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	nTipo  := IIF(aReturn[4]==1,15,18)
+	
+	For i:=1 to Len(aFiliais)
+		dbSelectArea("TNF")
+		If mv_par05 == 3
+			dbSetOrder(05) //TNF_MAT + DTOS(TNF_DTENTR) + TNF_HRENTR + TNF_CODEPI
+		Else
+			dbSetOrder(03) //TNF_MAT + TNF_CODEPI + DTOS(TNF_DTENTR) + TNF_HRENTR
+		EndIf
+		dbSeek(xFilial("TNF",aFiliais[i,1])+MV_PAR01,.T.)
+		
+		SetRegua(LastRec())
+		
+		//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+		//³ Correr TNF para ler os  EPI's Entregues aos Funcionarios ³
+		//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+		While !Eof() .AND. TNF->TNF_FILIAL == xFilial("TNF",aFiliais[i,1]) .AND. TNF->TNF_MAT <= MV_PAR02
+			
+			IncRegua()
+			
+			DbSelectArea("SRA")
+			DbSetOrder(01)
+			DbSeek(xFilial("SRA",aFiliais[i,1])+TNF->TNF_MAT)
+			
+			If mv_par11 == 2  //Nao considerar funcionarios demitidos
+				If ( SRA->RA_SITFOLH == "D" ) .OR. ( !Empty( SRA->RA_DEMISSA ) )
+					dbSelectArea("TNF")
+					dbSkip()
+					Loop
+				Endif
+			Endif
+			
+			//Data de Admissao
+			If SRA->RA_ADMISSA < mv_par13 .OR. SRA->RA_ADMISSA > mv_par14
+				dbSelectArea("TNF")
+				dbSkip()
+				Loop
+			Endif
+			
+			cCC := SRA->RA_CC
+			
+			If ValType(mv_par09) == "C" .AND. ValType(mv_par10) == "C"
+				If (cCC < mv_par09) .OR. (cCC > mv_par10)
+					dbselectarea("TNF")
+					DbSkip()
+					Loop
+				EndIf
+			EndIf
+			
+			If TNF->TNF_DTENTR < MV_PAR03 .OR. TNF->TNF_DTENTR > MV_PAR04
+				dbSelectArea("TNF")
+				dbSkip()
+				loop
+			Endif
+			
+			If MV_PAR05 == 2 .AND. !EMPTY(TNF->TNF_DTRECI)
+				dbSelectArea("TNF")
+				dbSkip()
+				loop
+			EndIf
+			
+			lExistOld := .F.
+			If Len(aOldACols) > 0
+				For nCont := 1 To Len(aOldACols)
+					If aOldACols[nCont][nPOSCOD] == TNF->TNF_CODEPI
+						If aOldACols[nCont][nPOSNUM] == TNF->TNF_NUMCAP
+							If aOldACols[nCont][nPOSDAT] == TNF->TNF_DTENTR
+								If aOldACols[nCont][nPOSHOR] == TNF->TNF_HRENTR
+									lExistOld := .T.
+									Exit
+								EndIf
+							EndIf
+						EndIf
+					EndIf
+				Next nCont
+				
+				If lExistOld
+					dbSelectArea("TNF")
+					dbSkip()
+					Loop
+				EndIf
+			EndIf
+			
+			cFuncMat := TNF->TNF_MAT
+			
+			If mv_par05 == 3
+				DbSelectArea("TNF")
+				dDataEnt := TNF->TNF_DTENTR
+				nRegAtual := RecNo()
+				DbSkip()
+				If cFuncMat <> TNF->TNF_MAT
+					DbSkip(-1)
+					While !Bof() .AND. TNF->TNF_FILIAL == xFIlial("TNF",aFiliais[i,1]) .AND.;
+						TNF->TNF_MAT	== cFuncMat .AND. TNF->TNF_DTENTR == dDataEnt
+						AddRec805_(aFiliais[i,1], aFiliais[i,2])
+						DbSelectArea ("TNF")
+						Reclock("TNF",.f.)
+						TNF->TNF_DTRECI := Date()
+						MsUnlock("TNF")
+						DbSkip(-1)
+					EndDo
+					DbGoTo(nRegAtual)
+					DbSkip()
+				EndIf
+				Loop
+			Else
+				AddRec805_(aFiliais[i,1], aFiliais[i,2])
+				dbSelectArea("TNF")
+				Reclock("TNF",.f.)
+				TNF->TNF_DTRECI := Date()
+				MsUnlock("TNF")
+				dbSetOrder(03)
+				DbSkip()
+			EndIf
+			
+		End
+	Next i
+Endif
+
+NGIMP805TRB_()
+
+If (cTRB)->(RecCount()) > 0
+	lImp := .T.
+Endif
+
+dbSelectArea(cTRB)
+USE
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Devolve a condicao original do arquivo principal             ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+RetIndex("TNF")
+Set Filter To
+
+If lImp
+	Set device to Screen
+	
+	If aReturn[5] = 1
+		Set Printer To
+		dbCommitAll()
+		OurSpool(wnrel)
+	Endif
+	MS_FLUSH()
+Else
+	MsgStop(_xSTR0079, _xSTR0080) //"Não existem dados para montar o relatório."###"Atenção"
+Endif
+
+dbSelectArea("TNF")
+dbSetOrder(1)
+
+Return NIL
+/*/
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³ Fun‡…o   ³Somalinha_³ Autor ³ Inacio Luiz Kolling   ³ Data ³   /06/97 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Descri‡…o³ Incrementa Linha e Controla Salto de Pagina                ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Sintaxe  ³ Somalinha_()                                               ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ MDTR805                                                    ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±/*/
+Static Function Somalinha_()
+Li++
+If Li > 70
+	Cabec(titulo,cabec1,cabec2,nomeprog,tamanho,nTipo)
+EndIf
+Return
+
+Static Function Somalinha2_() //Rafael França - Colocar assinaturas extras no termo de funcionario
+
+Local nAssinaturas := 1
+
+
+For nAssinaturas := 1 TO Val(MV_PAR19)
+	Li += 3
+	If Li > 70
+		Cabec(titulo,cabec1,cabec2,nomeprog,tamanho,nTipo)
+	EndIf
+	
+	@Li,001 PSAY "ASS: __________________________"
+	
+Next nAssinaturas
+
+
+
+Return
+
+
+/*
+1         2         3         4         5         6         7         8         9         0         1         2         3
+0123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012
+ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+³XXXXXXXXXXXXX                                      COMPROVANTE DE ENTREGA DE EPI'S                                                 ³
+³SIGA/MDTR805                                    xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx                Emissao: 99/99/99   hh:mm    ³
+ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+³Funcionario.....: xxxxxx - xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx                         RG.: xxx.xxx.xxx			        				³
+³Centro de Custo.: xxxxxxxxx - xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx						 		                                    			³
+³Funcao..........: xxxx  -  xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx   					                                     					³
+³Nascimento......: xx/xx/xx                                                               Admissao.: xx/xx/xx     Idade.: xx  		³
+ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄEPI'sÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+³EPI              Nome do EPI                        Dt. Entr  Hora     Qtde  Dev. Dt. Devo  Num. CA 	                            	³
+³  Num. CRF      Num. CRI      Num. SA  Item SA                   													                           ³
+³xxxxxxxxxxxxxxx  xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx  xx/xx/xx  xx:xx  xxx,xx  xxx  xx/xx/xx  xxxxxxxxxxxx  Ass.: _________________  ³
+³  xxxxxxxxxxxx  xxxxxxxxxxxx  xxxxxx   xx                                                                                          ³
+³xxxxxxxxxxxxxxx  xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx  xx/xx/xx  xx:xx  xxx,xx  xxx  xx/xx/xx  xxxxxxxxxxxx  Ass.: _________________  ³
+³xxxxxxxxxxxxxxx  xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx  xx/xx/xx  xx:xx  xxx,xx  xxx  xx/xx/xx  xxxxxxxxxxxx  Ass.: _________________  ³
+³                                                                               																		³
+ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+³       Data : ___/___/___                                                           							              	    			³
+³                                                                               																		³
+|       Assinatura: _______________________                                   Resp Empr: _______________________                    ³
+³                                                                               																		³
+ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+*/
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡…o    ³NGIMP805TRB³ Autor ³                       ³ Data ³          ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³Impressao do relatorio                                       ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ MDTR805                                                     ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß/*/
+Static Function NGIMP805TRB_()   //Rafael alterado Function -> Static Function
+Local LinhaCorrente
+Local lPrimvez := .t.
+
+If lSigaMdtps
+	
+	DBSELECTAREA(cTRB)
+	If mv_par12 == 1  //Matricula
+		dbSetOrder(1)
+	Elseif mv_par12 == 2  //Nome Funcionario
+		dbSetOrder(2)
+	Elseif mv_par12 == 3  //Cod. C. Custo
+		dbSetOrder(3)
+	Elseif mv_par12 == 4  //Nome C. Custo
+		dbSetOrder(4)
+	Endif
+	
+	Dbgotop()
+	
+	DO WHILE !EOF()
+		
+		dbSelectArea("SA1")
+		dbSetOrder(1)
+		dbSeek(xFilial("SA1")+(cTRB)->CLIENT+(cTRB)->LOJA)
+		
+		CFUNC := (cTRB)->FUNCI
+		nVolta := 0
+		Somalinha_()
+		@ Li,000 PSay " "+Replicate("_",131)
+		Somalinha_()
+		@ Li,000 PSay "|"
+		@ Li,001 Psay _xSTR0027+ SubStr(SA1->A1_NOME,1,60) //"Empresa...:"
+		@ Li,083 Psay _xSTR0075+ SA1->A1_CGC //"CGC..:"
+		@ Li,132 PSay "|"
+		Somalinha_()
+		
+		@ Li,000 PSay "|"
+		@ Li,001 Psay _xSTR0028+ SA1->A1_END //"Endereco..:"
+		@ Li,083 Psay _xSTR0029 + SA1->A1_MUN //"Cidade..:"
+		@ Li,118 Psay _xSTR0030 +":"+ SA1->A1_EST  //"Estado.."
+		@ Li,132 PSay "|"
+		Somalinha_()
+		@ Li,000 PSay "|"
+		@ Li,001 PSay Replicate("_",131)
+		@ Li,132 PSay "|"
+		
+		Somalinha_()
+		@ Li,000 PSay _xSTR0010 //"|Funcionario.....:"
+		@ Li,019 PSay CFUNC PICTURE "@!"
+		@ Li,026 PSAY " - " + (cTRB)->NOME
+		@ Li,083 PSay _xSTR0011 //"RG.:"
+		@ Li,088 PSay (cTRB)->RG PICTURE "@!"
+		@ Li,132 PSay "|"
+		
+		Somalinha_()
+		@ Li,000 PSay _xSTR0012 //"|Centro de Custo.:"
+		
+		@ Li,019 PSay Alltrim((cTRB)->CC) +" - "+ Alltrim((cTRB)->DESCC)
+		@ Li,083 PSay _xSTR0066 //"Categoria Func.:"
+		dbSelectArea("SX5")
+		dbSetOrder(01)
+		dbSeek(xFilial("SX5")+"28"+(cTRB)->CATFUNC)
+		@ Li,100 PSay Substr(SX5->X5_DESCRI,1,30) PICTURE "@!"
+		@ Li,132 PSay "|"
+		
+		Somalinha_()
+		@ Li,000 PSay _xSTR0013 //"|Funcao..........:"
+		@ Li,019 PSay Alltrim((cTRB)->FUNCAO) +" - "+ Alltrim((cTRB)->DESCFUN) PICTURE "@!"
+		@ Li,132 PSay "|"
+		
+		Somalinha_()
+		@ Li,000 PSay _xSTR0014 //"|Nascimento......:"
+		@ Li,019 PSay (cTRB)->NASC PICTURE "99/99/9999"
+		@ Li,083 PSay _xSTR0015 //"Admissao.:"
+		@ Li,094 PSay (cTRB)->ADMIS PICTURE "99/99/9999"
+		@ Li,113 PSay _xSTR0016 //"Idade.:"
+		@ Li,121 PSay (cTRB)->IDADE +" "+ _xSTR0039 //"anos"
+		@ Li,132 PSay "|"
+		
+		lLinha := .f.
+		lFirst := .t.
+		
+		Somalinha_()
+		@ Li,000 PSay "|"
+		@ Li,001 PSay Replicate("_",131)
+		@ Li,132 PSay "|"
+		Somalinha_()
+		@ Li,000 Psay "|"
+		@ Li,001 PSay "Item" //_xSTR0017     //"EPI"
+		@ Li,017+nDist PSay "Descrição" //_xSTR0018     //"Nome do EPI"
+		@ Li,053+nDist PSay _xSTR0019     //"Dt. Entr"
+		@ Li,063+nDist PSay _xSTR0040     //"Hora"
+		@ Li,072+nDist PSay _xSTR0025     //"Qtde"
+		@ Li,078+nDist PSay _xSTR0020     //"Dev."
+		If TNF->(FieldPos("TNF_DTDEVO")) > 0
+			@ Li,083+nDist PSay _xSTR0042 //"Dt. Devo"
+		EndIf
+		@ Li,093+nDist PSay "Func. outra Filial"
+		@ Li,132 Psay "|"
+		Somalinha_()
+		@ Li,000 Psay "|"
+		//DbSelectArea("TN3")
+		If TNF->(FieldPos("TNF_OBS")) > 0
+			@ Li,002 PSay "Observação"
+			lLinha := .t.
+		EndIf
+		//If TN3->(FieldPos("TN3_NUMCRI")) > 0
+		//	@ Li,016 PSay _xSTR0034  //"Num. CRI"
+		//	lLinha := .t.
+		//EndIf
+		//If lGera_SA
+		//	@ Li,031 PSay _xSTR0082  //"Num. SA"
+		//	@ Li,040 PSay _xSTR0083  //"Item SA"
+		//	lLinha := .t.
+		//EndIf
+		
+		//Rafael
+		
+		//termo
+		dbSelectArea("TMZ")
+		dbSetOrder(01)
+		If dbSeek(xFilial("TMZ")+MV_PAR06)
+			Somalinha_()
+			@ Li,000 PSay "|"
+			@ Li,001 PSay Replicate("_",131)
+			@ Li,132 PSay "|"
+			Somalinha_()
+			@ Li,000 PSay "|"
+			@ Li,048 PSay _xSTR0041 //"TERMO DE RESPONSABILIDADE"
+			@ Li,132 PSay "|"
+			Somalinha_()
+			@ Li,000 PSay "|"
+			lPrimeiro := .T.
+			
+			nLinhasMemo := MLCOUNT(TMZ->TMZ_DESCRI,130)
+			For LinhaCorrente := 1 to nLinhasMemo
+				If lPrimeiro
+					if !empty((MemoLine(TMZ->TMZ_DESCRI,56,LinhaCorrente)))
+						@ Li,001 PSAY (MemoLine(TMZ->TMZ_DESCRI,130,LinhaCorrente))
+						@ Li,132 PSay "|"
+						lPrimeiro := .f.
+					Else
+						Exit
+					Endif
+				Else
+					@ Li,000 PSay "|"
+					@ Li,001 PSAY (MemoLine(TMZ->TMZ_DESCRI,130,LinhaCorrente))
+					@ Li,132 PSay "|"
+				EndIf
+				Somalinha_()
+			Next
+			If !lPrimeiro
+				@ Li,000 PSay "|"
+			Endif
+			@ Li,132 PSay "|"
+		EndIf
+		// fim do termo
+		
+		
+		
+		
+		DBSELECTAREA(cTRB)
+		While !Eof() .AND. (cTRB)->FUNCI == CFUNC
+			If lLinha .and. lFirst
+				@ Li,132 Psay "|"
+				Somalinha_()
+				@ Li,000 PSay "|"
+			EndIf
+			If !lFirst
+				Somalinha_()
+				@ Li,000 PSay "|"
+			EndIf
+			lFirst := .f.
+			@ Li,001 PSAY (cTRB)->CODEPI
+			@ Li,017+nDist PSay substr(alltrim((cTRB)->DESEPI),1,32) PICTURE "@!"
+			@ Li,053+nDist PSay NG805DATE_((cTRB)->DTENT) PICTURE "99/99/9999"
+			@ Li,063+nDist PSay (cTRB)->HRENT PICTURE "99:99"
+			@ Li,070+nDist PSay (cTRB)->QTDE  PICTURE "@E 999.99"
+			IF (cTRB)->DEV = "1"
+				@ LI,078+nDist PSAY _xSTR0021 //"SIM"
+			ELSE
+				@ LI,078+nDist PSAY _xSTR0022  //"NAO"
+			ENDIF
+			If TNF->(FieldPos("TNF_DTDEVO")) > 0
+				@ Li,083+nDist PSay NG805DATE_((cTRB)->DTDEVO) PICTURE "99/99/9999"
+			ENDIF
+			If !Empty(TNF->TNF_MATFUN)
+				@ Li,093+nDist PSay Alltrim(SUBSTR(TNF->TNF_MATFUN,1,9))
+				@ Li,103 PSay Alltrim(SUBSTR(TNF->TNF_FUNNAM,1,28))
+			EndIf
+			If lLinha
+				@ Li,132 Psay "|"
+				Somalinha_()
+				@ Li,000 Psay "|"
+			EndIf
+			//DbSelectArea("TN3")
+			If TNF->(FieldPos("TNF_OBS")) > 0
+				@ Li,002 PSay TNF->TNF_OBS
+			EndIf
+			//IF TN3->(FieldPos("TN3_NUMCRI") > 0)
+			//	@ Li,016 PSay (cTRB)->NUMCRI
+			//ENDIF
+			//If lGera_SA
+			//	@ Li,031 PSay (cTRB)->NUMSA
+			//	@ Li,040 PSay (cTRB)->ITEMSA
+			//EndIf
+			//@ Li,107 PSay _xSTR0076 //"Ass.: _________________"
+			@ Li,132 PSay "|"
+			nVolta++
+			DBSELECTAREA(cTRB)
+			DBSKIP()
+		ENDDO
+		DBSKIP(-1)
+		
+		/*
+		//termo
+		dbSelectArea("TMZ")
+		dbSetOrder(01)
+		If dbSeek(xFilial("TMZ")+MV_PAR10)
+		Somalinha_()
+		@ Li,000 PSay "|"
+		@ Li,001 PSay Replicate("_",131)
+		@ Li,132 PSay "|"
+		Somalinha_()
+		@ Li,000 PSay "|"
+		@ Li,048 PSay _xSTR0041 //"TERMO DE RESPONSABILIDADE"
+		@ Li,132 PSay "|"
+		Somalinha_()
+		@ Li,000 PSay "|"
+		lPrimeiro := .T.
+		
+		nLinhasMemo := MLCOUNT(TMZ->TMZ_DESCRI,130)
+		For LinhaCorrente := 1 to nLinhasMemo
+		If lPrimeiro
+		if !empty((MemoLine(TMZ->TMZ_DESCRI,56,LinhaCorrente)))
+		@ Li,001 PSAY (MemoLine(TMZ->TMZ_DESCRI,130,LinhaCorrente))
+		@ Li,132 PSay "|"
+		lPrimeiro := .f.
+		Else
+		Exit
+		Endif
+		Else
+		@ Li,000 PSay "|"
+		@ Li,001 PSAY (MemoLine(TMZ->TMZ_DESCRI,130,LinhaCorrente))
+		@ Li,132 PSay "|"
+		EndIf
+		Somalinha_()
+		Next
+		If !lPrimeiro
+		@ Li,000 PSay "|"
+		Endif
+		@ Li,132 PSay "|"
+		EndIf
+		// fim do termo
+		*/
+		Somalinha_()
+		@ Li,000 PSay "|"
+		@ Li,001 PSay Replicate("_",131)
+		@ Li,132 PSay "|"
+		Somalinha_()
+		@ Li,000 PSay "|"
+		@ Li,003 PSay PADC(UPPER("Usuário:"),38)
+		@ Li,044 Psay "|"
+		@ Li,047 PSay PADC(UPPER("Chefia Imediata:"),38)
+		@ Li,088 Psay "|"
+		@ Li,091 PSay PADC(UPPER("Gerência ou Diretoria:"),38)
+		@ Li,132 PSay "|"
+		Somalinha_()
+		//@ Li,000 PSay _xSTR0036 //"|       Data : ____/____/____"
+		//@ Li,132 PSay "|"
+		//Somalinha_()
+		@ Li,000 PSay "|"
+		@ Li,044 Psay "|"
+		@ Li,088 Psay "|"
+		@ Li,132 PSay "|"
+		Somalinha_()
+		@ Li,000 PSay "|"
+		@ Li,044 Psay "|"
+		@ Li,088 Psay "|"
+		@ Li,132 PSay "|"
+		Somalinha_()
+		//@ Li,000 PSay _xSTR0037 //"|       Assinatura: _______________________                                   Resp Empr: _______________________"
+		//@ Li,132 Psay "|"
+		//Somalinha_()
+		@ Li,000 PSay "|"
+		@ Li,003 PSay PADC("______________________",38)
+		@ Li,044 Psay "|"
+		@ Li,047 PSay PADC("______________________",38)
+		@ Li,088 Psay "|"
+		@ Li,091 PSay PADC("______________________",38)
+		@ Li,132 PSay "|"
+		Somalinha_()
+		@ Li,000 PSay "|"
+		@ Li,044 Psay "|"
+		@ Li,088 Psay "|"
+		@ Li,132 PSay "|"
+		Somalinha_()
+		@ Li,000 PSay "|"
+		@ Li,001 PSay Replicate("_",131)
+		@ Li,132 PSay "|"
+		LI := 80
+		If mv_par11 == 2 .and. lPrimvez
+			DbSelectArea(cTRB)
+			DbSkip(-(nVolta-1))
+			lPrimvez := .f.
+		Else
+			DbSelectArea(cTRB)
+			DbSkip()
+			lPrimvez := .t.
+		EndIf
+		
+	EndDo
+	
+Else
+	
+	DBSELECTAREA(cTRB)
+	If mv_par08 == 1  //Matricula
+		dbSetOrder(1)
+	Elseif mv_par08 == 2  //Nome Funcionario
+		dbSetOrder(2)
+	Elseif mv_par08 == 3  //Cod. C. Custo
+		dbSetOrder(3)
+	Elseif mv_par08 == 4  //Nome C. Custo
+		dbSetOrder(4)
+	Endif
+	
+	Dbgotop()
+	
+	WHILE !EOF()
+		
+		CFUNC := (cTRB)->FUNCI
+		nVolta := 0
+		Somalinha_()
+		@ Li,000 PSay " "+Replicate("_",131)
+		Somalinha_()
+		@ Li,000 PSay "|"
+		@ Li,001 Psay _xSTR0027+ Substr(SM0->M0_NOMECOM,1,60) //"Empresa...:"
+		@ Li,083 Psay _xSTR0075+ SM0->M0_CGC //"CGC..:"
+		@ Li,132 PSay "|"
+		If NGSX2MODO("TNF") != "C"
+			Somalinha_()
+			@ Li,000 PSay "|"
+			@ Li,001 Psay _xSTR0081+AllTrim((cTRB)->FILIAL) + " - " + (cTRB)->NOMFIL //"Filial....:"
+			@ Li,132 PSay "|"
+		Endif
+		Somalinha_()
+		
+		@ Li,000 PSay "|"
+		@ Li,001 Psay _xSTR0028 + SM0->M0_ENDENT //"Endereco..:"
+		@ Li,083 Psay _xSTR0029 + SM0->M0_CIDCOB //"Cidade..:"
+		@ Li,118 Psay _xSTR0030 +":"+ SM0->M0_ESTCOB //"Estado.."
+		@ Li,132 PSay "|"
+		Somalinha_()
+		@ Li,000 PSay "|"
+		@ Li,001 PSay Replicate("_",131)
+		@ Li,132 PSay "|"
+		
+		Somalinha_()
+		@ Li,000 PSay _xSTR0010 //"|Funcionario.....:"
+		@ Li,019 PSay CFUNC PICTURE "@!"
+		@ Li,026 PSAY " - " + (cTRB)->NOME
+		@ Li,083 PSay _xSTR0011 //"RG.:"
+		@ Li,088 PSay (cTRB)->RG PICTURE "@!"
+		@ Li,132 PSay "|"
+		
+		Somalinha_()
+		@ Li,000 PSay _xSTR0012 //"|Centro de Custo.:"
+		
+		@ Li,019 PSay Alltrim((cTRB)->CC) +" - "+ Alltrim((cTRB)->DESCC)
+		@ Li,083 PSay _xSTR0066 //"Categoria Func.:"
+		dbSelectArea("SX5")
+		dbSetOrder(01)
+		dbSeek(xFilial("SX5")+"28"+(cTRB)->CATFUNC)
+		@ Li,100 PSay Substr(SX5->X5_DESCRI,1,30) PICTURE "@!"
+		@ Li,132 PSay "|"
+		
+		Somalinha_()
+		@ Li,000 PSay _xSTR0013 //"|Funcao..........:"
+		@ Li,019 PSay Alltrim((cTRB)->FUNCAO) +" - "+ Alltrim((cTRB)->DESCFUN) PICTURE "@!"
+		@ Li,132 PSay "|"
+		
+		Somalinha_()
+		@ Li,000 PSay _xSTR0014 //"|Nascimento......:"
+		@ Li,019 PSay (cTRB)->NASC PICTURE "99/99/9999"
+		@ Li,083 PSay _xSTR0015 //"Admissao.:"
+		@ Li,094 PSay (cTRB)->ADMIS PICTURE "99/99/9999"
+		@ Li,113 PSay _xSTR0016 //"Idade.:"
+		@ Li,121 PSay (cTRB)->IDADE +" "+ _xSTR0039 //"anos"
+		@ Li,132 PSay "|"
+		
+		lLinha := .f.
+		lFirst := .t.
+		
+		//Rafael
+		
+		//termo
+		dbSelectArea("TMZ")
+		dbSetOrder(01)
+		If dbSeek(xFilial("TMZ")+MV_PAR06)
+			Somalinha_()
+			@ Li,000 PSay "|"
+			@ Li,001 PSay Replicate("_",131)
+			@ Li,132 PSay "|"
+			Somalinha_()
+			@ Li,000 PSay "|"
+			@ Li,048 PSay _xSTR0041 //"TERMO DE RESPONSABILIDADE"
+			@ Li,132 PSay "|"
+			Somalinha_()
+			@ Li,000 PSay "|"
+			lPrimeiro := .T.
+			
+			nLinhasMemo := MLCOUNT(TMZ->TMZ_DESCRI,130)
+			For LinhaCorrente := 1 to nLinhasMemo
+				If lPrimeiro
+					if !empty((MemoLine(TMZ->TMZ_DESCRI,56,LinhaCorrente)))
+						@ Li,001 PSAY (MemoLine(TMZ->TMZ_DESCRI,130,LinhaCorrente))
+						@ Li,132 PSay "|"
+						lPrimeiro := .f.
+					Else
+						Exit
+					Endif
+				Else
+					@ Li,000 PSay "|"
+					@ Li,001 PSAY (MemoLine(TMZ->TMZ_DESCRI,130,LinhaCorrente))
+					@ Li,132 PSay "|"
+				EndIf
+				Somalinha_()
+			Next
+			If !lPrimeiro
+				@ Li,000 PSay "|"
+			Endif
+			@ Li,132 PSay "|"
+		EndIf
+		// fim do termo
+		
+		
+		Somalinha_()
+		@ Li,000 PSay "|"
+		@ Li,001 PSay Replicate("_",131)
+		@ Li,132 PSay "|"
+		Somalinha_()
+		@ Li,000 Psay "|"
+		@ Li,001 PSay "Item" //_xSTR0017     //"EPI"
+		@ Li,017+nDist PSay "Descrição" //_xSTR0018     //"Nome do EPI"
+		@ Li,053+nDist PSay _xSTR0019     //"Dt. Entr"
+		@ Li,063+nDist PSay _xSTR0040     //"Hora"
+		@ Li,072+nDist PSay _xSTR0025     //"Qtde"
+		@ Li,078+nDist PSay _xSTR0020     //"Dev."
+		If TNF->(FieldPos("TNF_DTDEVO")) > 0
+			@ Li,083+nDist PSay _xSTR0042 //"Dt. Devo"
+		EndIf
+		@ Li,093+nDist PSay "Func. outra Filial"
+		@ Li,132 Psay "|"
+		Somalinha_()
+		@ Li,000 Psay "|"
+		//DbSelectArea("TN3")
+		If TNF->(FieldPos("TNF_OBS")) > 0
+			@ Li,002 PSay "Observação"
+			lLinha := .t.
+		EndIf
+		//If TN3->(FieldPos("TN3_NUMCRI")) > 0
+		//	@ Li,016 PSay _xSTR0034  //"Num. CRI"
+		//	lLinha := .t.
+		//EndIf
+		//If lGera_SA
+		//	@ Li,031 PSay _xSTR0082  //"Num. SA"
+		//	@ Li,040 PSay _xSTR0083  //"Item SA"
+		//	lLinha := .t.
+		//EndIf
+		DBSELECTAREA(cTRB)
+		While !Eof() .AND. (cTRB)->FUNCI == CFUNC
+			If lLinha .and. lFirst
+				@ Li,132 Psay "|"
+				Somalinha_()
+				@ Li,000 PSay "|"
+			EndIf
+			If !lFirst
+				Somalinha_()
+				@ Li,000 PSay "|"
+			EndIf
+			lFirst := .f.
+			@ Li,001 PSAY (cTRB)->CODEPI
+			@ Li,017+nDist PSay substr(alltrim((cTRB)->DESEPI),1,32) PICTURE "@!"
+			@ Li,053+nDist PSay NG805DATE_((cTRB)->DTENT) PICTURE "99/99/9999"
+			@ Li,063+nDist PSay (cTRB)->HRENT PICTURE "99:99"
+			@ Li,070+nDist PSay (cTRB)->QTDE  PICTURE "@E 999.99"
+			IF (cTRB)->DEV = "1"
+				@ LI,078+nDist PSAY _xSTR0021 //"SIM"
+			ELSE
+				@ LI,078+nDist PSAY _xSTR0022  //"NAO"
+			ENDIF
+			If TNF->(FieldPos("TNF_DTDEVO")) > 0
+				@ Li,083+nDist PSay NG805DATE_((cTRB)->DTDEVO) PICTURE "99/99/9999"
+			ENDIF
+			
+			If !Empty(Posicione("TNF",3,xFilial("TNF") + CFUNC + (cTRB)->CODEPI + DTOS((cTRB)->DTENT) + (cTRB)->HRENT,"TNF_MATFUN"))
+				//TNF_FILIAL+TNF_FORNEC+TNF_LOJA+TNF_CODEPI+TNF_NUMCAP+TNF_MAT+DTOS(TNF_DTENTR)+TNF_HRENTR
+				//TNF_FILIAL+TNF_MAT+TNF_CODEPI+DTOS(TNF_DTENTR)+TNF_HRENTR
+				//Posicione("TNF",1,xFilial("TNF") + "999999" + "01" + (cTRB)->CODEPI + (cTRB)->NUMCAP + DTOS((cTRB)->DTENT) + (cTRB)->HRENT,"TNF_MATFUN"),1,12)
+				@ Li,093+nDist PSay Alltrim(SUBSTR(Posicione("TNF",3,xFilial("TNF") + CFUNC + (cTRB)->CODEPI + DTOS((cTRB)->DTENT) + (cTRB)->HRENT,"TNF_MATFUN"),1,9))
+				@ Li,103 PSay Alltrim(SUBSTR(Posicione("TNF",3,xFilial("TNF") + CFUNC + (cTRB)->CODEPI + DTOS((cTRB)->DTENT) + (cTRB)->HRENT,"TNF_FUNNAM"),1,28))
+			EndIf
+			If lLinha
+				@ Li,132 Psay "|"
+				Somalinha_()
+				@ Li,000 Psay "|"
+			EndIf
+			//DbSelectArea("TN3")
+			If TNF->(FieldPos("TNF_OBS")) > 0
+				@ Li,002 PSay TNF->TNF_OBS
+			EndIf
+			//IF TN3->(FieldPos("TN3_NUMCRI") > 0)
+			//	@ Li,016 PSay (cTRB)->NUMCRI
+			//ENDIF
+			//If lGera_SA
+			//	@ Li,031 PSay (cTRB)->NUMSA
+			//	@ Li,040 PSay (cTRB)->ITEMSA
+			//EndIf
+			//@ Li,107 PSay _xSTR0076 //"Ass.: _________________"
+			@ Li,132 PSay "|"
+			nVolta++
+			DBSELECTAREA(cTRB)
+			DBSKIP()
+		ENDDO
+		DBSKIP(-1)
+		
+		/*
+		//termo
+		dbSelectArea("TMZ")
+		dbSetOrder(01)
+		If dbSeek(xFilial("TMZ")+MV_PAR06)
+		Somalinha_()
+		@ Li,000 PSay "|"
+		@ Li,001 PSay Replicate("_",131)
+		@ Li,132 PSay "|"
+		Somalinha_()
+		@ Li,000 PSay "|"
+		@ Li,048 PSay _xSTR0041 //"TERMO DE RESPONSABILIDADE"
+		@ Li,132 PSay "|"
+		Somalinha_()
+		@ Li,000 PSay "|"
+		lPrimeiro := .T.
+		
+		nLinhasMemo := MLCOUNT(TMZ->TMZ_DESCRI,130)
+		For LinhaCorrente := 1 to nLinhasMemo
+		If lPrimeiro
+		if !empty((MemoLine(TMZ->TMZ_DESCRI,56,LinhaCorrente)))
+		@ Li,001 PSAY (MemoLine(TMZ->TMZ_DESCRI,130,LinhaCorrente))
+		@ Li,132 PSay "|"
+		lPrimeiro := .f.
+		Else
+		Exit
+		Endif
+		Else
+		@ Li,000 PSay "|"
+		@ Li,001 PSAY (MemoLine(TMZ->TMZ_DESCRI,130,LinhaCorrente))
+		@ Li,132 PSay "|"
+		EndIf
+		Somalinha_()
+		Next
+		If !lPrimeiro
+		@ Li,000 PSay "|"
+		Endif
+		@ Li,132 PSay "|"
+		EndIf
+		// fim do termo
+		*/
+		
+		Somalinha_()
+		@ Li,000 PSay "|"
+		@ Li,001 PSay Replicate("_",131)
+		@ Li,132 PSay "|"
+		Somalinha_()
+		@ Li,000 PSay "|"
+		@ Li,003 PSay PADC(UPPER("Usuário:"),38)
+		@ Li,044 Psay "|"
+		@ Li,047 PSay PADC(UPPER("Chefia Imediata:"),38)
+		@ Li,088 Psay "|"
+		@ Li,091 PSay PADC(UPPER("Gerência ou Diretoria:"),38)
+		@ Li,132 PSay "|"
+		Somalinha_()
+		//@ Li,000 PSay _xSTR0036 //"|       Data : ____/____/____"
+		//@ Li,132 PSay "|"
+		//Somalinha_()
+		@ Li,000 PSay "|"
+		@ Li,044 Psay "|"
+		@ Li,088 Psay "|"
+		@ Li,132 PSay "|"
+		Somalinha_()
+		@ Li,000 PSay "|"
+		@ Li,044 Psay "|"
+		@ Li,088 Psay "|"
+		@ Li,132 PSay "|"
+		Somalinha_()
+		//@ Li,000 PSay _xSTR0037 //"|       Assinatura: _______________________                                   Resp Empr: _______________________"
+		//@ Li,132 Psay "|"
+		//Somalinha_()
+		@ Li,000 PSay "|"
+		@ Li,003 PSay PADC("______________________",38)
+		@ Li,044 Psay "|"
+		@ Li,047 PSay PADC("______________________",38)
+		@ Li,088 Psay "|"
+		@ Li,091 PSay PADC("______________________",38)
+		@ Li,132 PSay "|"
+		Somalinha_()
+		@ Li,000 PSay "|"
+		@ Li,044 Psay "|"
+		@ Li,088 Psay "|"
+		@ Li,132 PSay "|"
+		Somalinha_()
+		@ Li,000 PSay "|"
+		@ Li,001 PSay Replicate("_",131)
+		@ Li,132 PSay "|"
+		Somalinha2_()	//Rafael França - Colocar assinaturas extras no termo de funcionario
+		
+		LI := 80
+		If mv_par07 == 2 .and. lPrimvez
+			DbSelectArea(cTRB)
+			DbSkip(-(nVolta-1))
+			lPrimvez := .f.
+		Else
+			DbSelectArea(cTRB)
+			DbSkip()
+			lPrimvez := .t.
+		EndIf
+		
+	End
+Endif
+
+Return
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡…o    ³NG805DATE  ³ Autor ³                       ³ Data ³          ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³Faz tratamento das datas                                     ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ MDTR805                                                     ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß/*/
+Static Function NG805DATE_(dDtPPP)  //Rafael alterado Function -> Static Function
+Local cRet,cDia,cMes,cAno
+
+If Empty(dDtPPP)
+	Return "  /  /  "
+Endif
+
+cDia := Strzero(Day(dDtPPP),2)
+cMes := Strzero(Month(dDtPPP),2)
+cAno := Substr(Str(Year(dDtPPP),4),3,2)
+
+cRet := cDia+"/"+cMes+"/"+cAno
+
+Return cRet
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡„o    ³AddRec805 ³ Autor ³Andre E. Perez Alvarez ³ Data ³ 17/01/06 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡„o ³Armazena informacoes de um recibo para impressao.           ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ MDTR805                                                    ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+Static Function AddRec805_(cCodFil, cNomFil) //Rafael alterado Function -> Static Function
+Default cCodFil := "", cNomFil := ""
+
+If lSigaMdtps
+	
+	DBSELECTAREA("TN3")
+	DBSETORDER(5)  //TN3_FILIAL+TN3_CLIENT+TN3_LOJACL+TN3_FORNEC+TN3_LOJA+TN3_CODEPI+TN3_NUMCAP
+	DBSEEK(XFILIAL("TN3")+TNF->TNF_CLIENT+TNF->TNF_LOJACL+TNF->TNF_FORNEC+TNF->TNF_LOJA+TNF->TNF_CODEPI+TNF->TNF_NUMCAP)
+	
+	DbSelectArea("SRA")
+	DbSetOrder(01)
+	DbSeek(xFilial("SRA")+cFuncMat)
+	
+	dbSelectArea(cTRB)
+	(cTRB)->(DbAppend())
+	(cTRB)->FUNCI    := cFuncMat
+	(cTRB)->NOME     := SubStr(SRA->RA_NOME,1,40)
+	(cTRB)->RG       := SRA->RA_RG
+	(cTRB)->CATFUNC  := SRA->RA_CATFUNC
+	(cTRB)->NASC     := SRA->RA_NASC
+	(cTRB)->ADMIS    := SRA->RA_ADMISSA
+	//	(cTRB)->IDADE    := Alltrim( Str( YEAR(DATE())-YEAR((cTRB)->NASC),3 ) )
+	(cTRB)->IDADE    := substr(alltrim(str((date() - CTOD(DTOC((cTRB)->NASC))) /365)),1,2) // Bruno Alves
+	(cTRB)->CC       := SRA->RA_CC
+	(cTRB)->DESCC    := NgSeek(cAliasCC,(cTRB)->CC,1,cDescCC)
+	(cTRB)->FUNCAO   := SRA->RA_CODFUNC
+	(cTRB)->DESCFUN  := Alltrim (NgSeek("SRJ",(cTRB)->FUNCAO,1,"SRJ->RJ_DESC"))
+	(cTRB)->CODEPI   := TNF->TNF_CODEPI
+	(cTRB)->DESEPI   := NgSeek("SB1",TNF->TNF_CODEPI,1,"SB1->B1_DESC")
+	(cTRB)->DTENT    := TNF->TNF_DTENTR
+	(cTRB)->HRENT    := TNF->TNF_HRENTR
+	(cTRB)->QTDE     := TNF->TNF_QTDENT
+	(cTRB)->DEV      := TNF->TNF_INDDEV
+	(cTRB)->NUMCAP   := If(lCPONumcap,TNF->TNF_NUMCAP,TN3->TN3_NUMCAP)
+	
+	IF TN3->(FieldPos("TN3_NUMCRI")) > 0
+		(cTRB)->NUMCRI := TN3->TN3_NUMCRI
+	Endif
+	IF TN3->(FieldPos("TN3_NUMCRF")) > 0
+		(cTRB)->NUMCRF := TN3->TN3_NUMCRF
+	Endif
+	If TNF->(FieldPos("TNF_DTDEVO")) > 0
+		(cTRB)->DTDEVO := TNF->TNF_DTDEVO
+	Endif
+	If lGera_SA
+		(cTRB)->NUMSA  := TNF->TNF_NUMSA
+		(cTRB)->ITEMSA := TNF->TNF_ITEMSA
+	EndIf
+	
+	(cTRB)->CLIENT    := TNF->TNF_CLIENT
+	(cTRB)->LOJA      := TNF->TNF_LOJACL
+	
+Else
+	
+	DBSELECTAREA("TN3")
+	DBSETORDER(1)
+	DBSEEK(XFILIAL("TN3",cCodFil)+TNF->TNF_FORNEC+TNF->TNF_LOJA+TNF->TNF_CODEPI+TNF->TNF_NUMCAP)
+	
+	DbSelectArea("SRA")
+	DbSetOrder(01)
+	DbSeek(xFilial("SRA",cCodFil)+cFuncMat)
+	
+	DbSelectArea(cAliasCC)
+	DbSetOrder(01)
+	DbSeek(xFilial(cAliasCC,cCodFil)+SRA->RA_CC)
+	
+	DbSelectArea("SRJ")
+	DbSetOrder(01)
+	DbSeek(xFilial("SRJ",cCodFil)+SRA->RA_CODFUNC)
+	
+	DbSelectArea("SB1")
+	DbSetOrder(01)
+	DbSeek(xFilial("SB1",cCodFil)+TNF->TNF_CODEPI)
+	
+	dbSelectArea(cTRB)
+	(cTRB)->(DbAppend())
+	(cTRB)->FUNCI    := cFuncMat
+	(cTRB)->NOME     := SubStr(SRA->RA_NOME,1,40)
+	(cTRB)->RG       := SRA->RA_RG
+	(cTRB)->CATFUNC  := SRA->RA_CATFUNC
+	(cTRB)->NASC     := SRA->RA_NASC
+	(cTRB)->ADMIS    := SRA->RA_ADMISSA
+	//	(cTRB)->IDADE    := Alltrim( Str( YEAR(DATE())-YEAR((cTRB)->NASC),3 ) )
+	(cTRB)->IDADE    := substr(alltrim(str((date() - CTOD(DTOC((cTRB)->NASC))) /365)),1,2) // Bruno Alves
+	(cTRB)->CC       := SRA->RA_CC
+	(cTRB)->DESCC    := AllTrim(&(cDescCC))
+	(cTRB)->FUNCAO   := SRA->RA_CODFUNC
+	(cTRB)->DESCFUN  := Alltrim(SRJ->RJ_DESC)
+	(cTRB)->CODEPI   := TNF->TNF_CODEPI
+	(cTRB)->DESEPI   := IIF(!Empty(SB1->B1_MODEL),Alltrim(SB1->B1_MODEL) + " - " + AllTrim(SB1->B1_DESC),AllTrim(SB1->B1_DESC)) // Imprimir o modelo dos celulares e nexteis - Bruno Alves (26/01/2012)
+	(cTRB)->DTENT    := TNF->TNF_DTENTR
+	(cTRB)->HRENT    := TNF->TNF_HRENTR
+	(cTRB)->QTDE     := TNF->TNF_QTDENT
+	(cTRB)->DEV      := TNF->TNF_INDDEV
+	(cTRB)->NUMCAP   := If(lCPONumcap,TNF->TNF_NUMCAP,TN3->TN3_NUMCAP)
+	
+	IF TN3->(FieldPos("TN3_NUMCRI")) > 0
+		(cTRB)->NUMCRI := TN3->TN3_NUMCRI
+	Endif
+	IF TN3->(FieldPos("TN3_NUMCRF")) > 0
+		(cTRB)->NUMCRF := TN3->TN3_NUMCRF
+	Endif
+	If TNF->(FieldPos("TNF_DTDEVO")) > 0
+		(cTRB)->DTDEVO := TNF->TNF_DTDEVO
+	Endif
+	If lGera_SA
+		(cTRB)->NUMSA  := TNF->TNF_NUMSA
+		(cTRB)->ITEMSA := TNF->TNF_ITEMSA
+	EndIf
+	
+	(cTRB)->FILIAL    := xFilial("SRA",cCodFil)
+	(cTRB)->NOMFIL    := cNomFil
+Endif
+
+Return
