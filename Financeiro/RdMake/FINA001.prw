@@ -19,7 +19,7 @@ User Function FINA001()
 
 	//Local cArq    := "clientes.csv"
 	Local _aArea	:= GetArea()
-	Local cLinha  := ""	
+	Local cLinha  := ""
 	Local aCampos := {}
 	Local aDados  := {}
 	Local cPerg   := "FINA001"
@@ -35,30 +35,30 @@ User Function FINA001()
 	Private lOkGeral := .T.
 	Private cProd := ""
 	Private cPracaNeg := ""
-	
 
-	cTexto := "Rotina ir· fazer o calculo do repasse das praÁas atraves do arquivo de importaÁ„o .CSV. As colunas precisam est· na seguinte ordem:" + Chr(13) + Chr(10)	
+
+	cTexto := "Rotina ir· fazer o calculo do repasse das praÁas atraves do arquivo de importaÁ„o .CSV. As colunas precisam est· na seguinte ordem:" + Chr(13) + Chr(10)
 	cTexto += "1∫ : RP					" + Chr(13) + Chr(10)
 	cTexto += "2∫ : UT					" + Chr(13) + Chr(10)
-	cTexto += "3∫ : EMP. VENDA			" + Chr(13) + Chr(10)	
-	cTexto += "4∫ : EMP. EXIB			" + Chr(13) + Chr(10)	
-	cTexto += "5∫ : SIGLA EXIB.			" + Chr(13) + Chr(10)	
-	cTexto += "6∫ : COD EMP REPASSE		" + Chr(13) + Chr(10)	
-	cTexto += "7∫ : CLIENTE				" + Chr(13) + Chr(10)	
-	cTexto += "8∫ : AGENCIA				" + Chr(13) + Chr(10)	
-	cTexto += "9∫ : VALOR				" + Chr(13) + Chr(10)	
-	cTexto += "10∫: NC ESPECIE			" + Chr(13) + Chr(10)	
-	cTexto += "11∫: NC ESPA«O			" + Chr(13) + Chr(10)	
-	cTexto += "12∫: BAIXA NC ESPA«O		" + Chr(13) + Chr(10)	
-	cTexto += "13∫: DESC FINANC.		" + Chr(13) + Chr(10)	
-	cTexto += "14∫: % INDAIMPLENCIA		" + Chr(13) + Chr(10)	
-	cTexto += "15∫: FIM INADIMPLENCIA	" + Chr(13) + Chr(10)	
-	cTexto += "16∫: DEDU«’ES			" + Chr(13) + Chr(10)	
-	cTexto += "17∫: COMISS√O REPASSE	" + Chr(13) + Chr(10)	
-	cTexto += "18∫: BV					" + Chr(13) + Chr(10)	
-	cTexto += "19∫: VALOR PARA CALCULO	" + Chr(13) + Chr(10)	
-	cTexto += "20∫: % REPASSE			" + Chr(13) + Chr(10)	
-	cTexto += "21∫: REPASSE COMPETENCIA	" + Chr(13) + Chr(10)	
+	cTexto += "3∫ : EMP. VENDA			" + Chr(13) + Chr(10)
+	cTexto += "4∫ : EMP. EXIB			" + Chr(13) + Chr(10)
+	cTexto += "5∫ : SIGLA EXIB.			" + Chr(13) + Chr(10)
+	cTexto += "6∫ : COD EMP REPASSE		" + Chr(13) + Chr(10)
+	cTexto += "7∫ : CLIENTE				" + Chr(13) + Chr(10)
+	cTexto += "8∫ : AGENCIA				" + Chr(13) + Chr(10)
+	cTexto += "9∫ : VALOR				" + Chr(13) + Chr(10)
+	cTexto += "10∫: NC ESPECIE			" + Chr(13) + Chr(10)
+	cTexto += "11∫: NC ESPA«O			" + Chr(13) + Chr(10)
+	cTexto += "12∫: BAIXA NC ESPA«O		" + Chr(13) + Chr(10)
+	cTexto += "13∫: DESC FINANC.		" + Chr(13) + Chr(10)
+	cTexto += "14∫: % INDAIMPLENCIA		" + Chr(13) + Chr(10)
+	cTexto += "15∫: FIM INADIMPLENCIA	" + Chr(13) + Chr(10)
+	cTexto += "16∫: DEDU«’ES			" + Chr(13) + Chr(10)
+	cTexto += "17∫: COMISS√O REPASSE	" + Chr(13) + Chr(10)
+	cTexto += "18∫: BV					" + Chr(13) + Chr(10)
+	cTexto += "19∫: VALOR PARA CALCULO	" + Chr(13) + Chr(10)
+	cTexto += "20∫: % REPASSE			" + Chr(13) + Chr(10)
+	cTexto += "21∫: REPASSE COMPETENCIA	" + Chr(13) + Chr(10)
 	cTexto += "22∫: REPASSE TOTA		" + Chr(13) + Chr(10)
 
 
@@ -107,18 +107,18 @@ User Function FINA001()
 	For i:=1 to Len(aDados)
 
 		IncProc("Validando InformaÁıes...")
-	
+
 		//Verifico se existe periodo superior cadastrado, caso tenha ir· abortar a execuÁ„o da rotina
 		DbSelectArea("ZAG");DbSetOrder(3)
-		If DbSeek(xFilial("ZAG") + SUBSTRING(DTOS(MonthSum(MV_PAR02,1)),5,2) + SUBSTRING(DTOS(MonthSum(MV_PAR02,1)),1,4)  )		
+		If DbSeek(xFilial("ZAG") + SUBSTRING(DTOS(MonthSum(MV_PAR02,1)),5,2) + SUBSTRING(DTOS(MonthSum(MV_PAR02,1)),1,4)  )
 			Alert("N„o È possivel iniciar o processamento com periodo superior processado, favor verificar. Periodo processado: " + DTOC(MonthSum(MV_PAR02,1)))
 			RestArea(_aARea)
-			Return		
+			Return
 		EndIf
 
 		//Verifico se existe periodo cadastrado, caso tenha ir· abortar a execuÁ„o da rotina
 		DbSelectArea("ZAG");DbSetOrder(3)
-		If DbSeek(xFilial("ZAG") + cPeriodo  )		
+		If DbSeek(xFilial("ZAG") + cPeriodo  )
 			Alert("N„o È possivel iniciar o processamento com periodo "+ SUBSTRING(DTOS(MV_PAR02),5,2) + "/" + SUBSTRING(DTOS(MV_PAR02),1,4) + " processado, favor exclui-lo!" + cPeriodo)
 			If MsgYesNo("Deseja excluir o periodo " + SUBSTRING(DTOS(MV_PAR02),5,2) + "/" + SUBSTRING(DTOS(MV_PAR02),1,4) + " de todas as praÁas?")
 				DelPeriodo(cPeriodo,SUBSTRING(DTOS(MonthSum(MV_PAR02,1)),5,2) + SUBSTRING(DTOS(MonthSum(MV_PAR02,1)),1,4))
@@ -127,7 +127,7 @@ User Function FINA001()
 			Else
 				RestArea(_aARea)
 				Return
-			EndIf		
+			EndIf
 		EndIf
 
 
@@ -149,29 +149,29 @@ User Function FINA001()
 		EndIf
 
 		aAdd(aInfo,{;
-		aDados[i,01],;//1∫ : RP
-		aDados[i,02],;//2∫ : UT
-		aDados[i,03],;//3∫ : EMP. VENDA	
-		aDados[i,04],;//4∫ : EMP. EXIB	
-		aDados[i,05],;//5∫ : SIGLA EXIB.	
-		cCodPraca,;	 //6∫ : COD EMP REPASSE	
-		aDados[i,07],;//7∫ : CLIENTE	
-		aDados[i,08],;//8∫ : AGENCIA	
-		aDados[i,09],;//9∫ : VALOR	
-		aDados[i,10],;//10∫: NC ESPECIE	
-		aDados[i,11],;//11∫: NC ESPA«O	
-		aDados[i,12],;//12∫: BAIXA NC ESPA«O	
-		aDados[i,13],;//13∫: DESC FINANC.	
-		aDados[i,14],;//14∫: % INDAIMPLENCIA	
-		aDados[i,15],;//15∫: FIM INADIMPLENCIA	
-		aDados[i,16],;//16∫: DEDU«’ES	
-		aDados[i,17],;//17∫: COMISS√O REPASSE	
-		aDados[i,18],;//18∫: BV	
-		aDados[i,19],;//19∫: VALOR PARA CALCULO	
-		aDados[i,20],;//20∫: % REPASSE	
-		aDados[i,21],;//21∫: REPASSE COMPETENCIA	
-		aDados[i,22];//22∫: REPASSE TOTA
-		})
+			aDados[i,01],;//1∫ : RP
+			aDados[i,02],;//2∫ : UT
+			aDados[i,03],;//3∫ : EMP. VENDA
+			aDados[i,04],;//4∫ : EMP. EXIB
+			aDados[i,05],;//5∫ : SIGLA EXIB.
+			cCodPraca,;	 //6∫ : COD EMP REPASSE
+			aDados[i,07],;//7∫ : CLIENTE
+			aDados[i,08],;//8∫ : AGENCIA
+			aDados[i,09],;//9∫ : VALOR
+			aDados[i,10],;//10∫: NC ESPECIE
+			aDados[i,11],;//11∫: NC ESPA«O
+			aDados[i,12],;//12∫: BAIXA NC ESPA«O
+			aDados[i,13],;//13∫: DESC FINANC.
+			aDados[i,14],;//14∫: % INDAIMPLENCIA
+			aDados[i,15],;//15∫: FIM INADIMPLENCIA
+			aDados[i,16],;//16∫: DEDU«’ES
+			aDados[i,17],;//17∫: COMISS√O REPASSE
+			aDados[i,18],;//18∫: BV
+			aDados[i,19],;//19∫: VALOR PARA CALCULO
+			aDados[i,20],;//20∫: % REPASSE
+			aDados[i,21],;//21∫: REPASSE COMPETENCIA
+			aDados[i,22];//22∫: REPASSE TOTA
+			})
 
 	Next i
 
@@ -181,7 +181,7 @@ User Function FINA001()
 		//Ordena todas as informaÁıes Praca e Numero RP
 		ASORT(aInfo,,,{|x,y|x[6]+x[1] < y[6]+y[1]})
 
-		Processa({||ExecImport()}, "FINA001 - ExecImport", "Importando repasse atraves do  arquivo .csv.")		
+		Processa({||ExecImport()}, "FINA001 - ExecImport", "Importando repasse atraves do  arquivo .csv.")
 		Processa({||ExecRateio()}, "FINA001 - ExecRateio", "Executando Rateio apÛs importaÁ„o.")
 
 	Else
@@ -231,11 +231,11 @@ Static Function ExecImport()
 
 		//Gera o codigo sequencial para o cadastramento
 		If cPraca != aInfo[n][6]
-			cCodSeq := GetSXENum("ZAG","ZAG_CODIGO")	
+			cCodSeq := GetSXENum("ZAG","ZAG_CODIGO")
 			ConfirmSX8()
 
 			//Toda vez que troca a praÁa do repasse verifico se existe saldo acumulado ate localizar o registro da praÁa
-			For i:= 1 to 999999 		
+			For i:= 1 to 999999
 				//FunÁ„o que verifica se existe saldo no acumulado
 				If SumTotZAH(2,aInfo[n][6],SUBSTRING(DTOS(MonthSub(MV_PAR02,i)),5,2) + SUBSTRING(DTOS(MonthSub(MV_PAR02,i)),1,4))
 					//Caso existe soma apenas uma vez na variavel acumulado
@@ -266,18 +266,20 @@ Static Function ExecImport()
 
 
 		RECLOCK("ZAG",.T.)
-		
+
 		//Prepara a mascara para transformar em valor
 
 		nValComp := TrataVal(aInfo[n][21]) // Repasse Competencia
 		nValRep :=  TrataVal(aInfo[n][22]) // Valor para Calculo
 
-
-		If nValComp < 0 .and. nValRep == 0
-			nValor := nValComp		
+		//Financeiro solicitou a retirada da regra abaixo - 21/08/2020 - Bruno Alves
+		//If nValComp < 0 .and. nValRep == 0
+		nValor := nValComp
+		/*
 		Else
 			nValor := nValRep
 		EndIf
+		*/
 
 
 
@@ -285,18 +287,18 @@ Static Function ExecImport()
 		ZAG->ZAG_CODIGO     := cCodSeq
 		ZAG->ZAG_PRACA    	:= aInfo[n][6] //EMP VENDA
 		ZAG->ZAG_NUMRP		:= aInfo[n][1] //RP
-		ZAG->ZAG_PERIODO	:= cPeriodo		 
-		ZAG->ZAG_VALOR		:= nValor	
-		ZAG->ZAG_EMISSA		:= MV_PAR02		
+		ZAG->ZAG_PERIODO	:= cPeriodo
+		ZAG->ZAG_VALOR		:= nValor
+		ZAG->ZAG_EMISSA		:= MV_PAR02
 		ZAG->ZAG_EMPVEN		:= aInfo[n][3]
 		ZAG->ZAG_EMPRES		:= Posicione("SX5",1,xFilial("SX5")+"ZC" + aInfo[n][3],"X5_DESCRI")
 		ZAG->ZAG_EMPEXI		:= aInfo[n][4]
 		ZAG->ZAG_SIGEXI		:= aInfo[n][5]
 		ZAG->ZAG_EMPREP		:= aInfo[n][6]
-		ZAG->(MSUNLOCK())		
+		ZAG->(MSUNLOCK())
 
 
-		RECLOCK("ZAH",.T.)		
+		RECLOCK("ZAH",.T.)
 		ZAH->ZAH_FILIAL	  	:= xFilial("ZAH")
 		ZAH->ZAH_CODIGO     := cCodSeq
 		ZAH->ZAH_PRACA    	:= aInfo[n][6]
@@ -312,9 +314,10 @@ Static Function ExecImport()
 		ZAH->ZAH_NCESPE		:= TrataVal(aInfo[n][10])
 		ZAH->ZAH_NCESPA		:= TrataVal(aInfo[n][11])
 		ZAH->ZAH_BXNCPA		:= TrataVal(aInfo[n][12])
+		ZAH->ZAH_DESCFI		:= TrataVal(aInfo[n][13])
 		ZAH->ZAH_INADIM		:= TrataVal(aInfo[n][14])
 		ZAH->ZAH_LINADI		:= If(Empty(aInfo[n][15]),.F.,.T.) //Logico
-		ZAH->ZAH_DEDUCO		:= TrataVal(aInfo[n][16]) 
+		ZAH->ZAH_DEDUCO		:= TrataVal(aInfo[n][16])
 		ZAH->ZAH_COMREP		:= TrataVal(aInfo[n][17])
 		ZAH->ZAH_BV    		:= TrataVal(aInfo[n][18])
 		ZAH->ZAH_VLCALC		:= TrataVal(aInfo[n][19])
@@ -363,7 +366,7 @@ Static Function ExecRateio()
 	Local cRatPraca := ""
 
 
-	cQuery += "SELECT * FROM ZAH010 WHERE " 
+	cQuery += "SELECT * FROM ZAH010 WHERE "
 	cQuery += "ZAH_PERIOD = '" + cPeriodo + "' AND "
 	cQuery += "D_E_L_E_T_ = '' "
 	cQuery += "ORDER BY ZAH_PRACA "
@@ -384,7 +387,7 @@ Static Function ExecRateio()
 
 	ProcRegua(nCont)
 
-	While !TMP->(EOF()) 
+	While !TMP->(EOF())
 
 
 
@@ -404,31 +407,31 @@ Static Function ExecRateio()
 					nQtd++
 
 					RECLOCK("ZAH",.F.)
-					ZAH->ZAH_VLACUM	:= 0				
+					ZAH->ZAH_VLACUM	:= 0
 					ZAH->ZAH_RATEIO	:= Round(nPercRat,2)
-					ZAH->ZAH_VLRAT  := TMP->ZAH_VALOR - ((SUM->VALDESC*(nPercRat/100))*-1)		
+					ZAH->ZAH_VLRAT  := TMP->ZAH_VALOR - ((SUM->VALDESC*(nPercRat/100))*-1)
 					ZAH->(MSUNLOCK())
 
 				Else
 
 					RECLOCK("ZAH",.F.)
-					ZAH->ZAH_VLACUM	:= 0						
+					ZAH->ZAH_VLACUM	:= 0
 					ZAH->(MSUNLOCK())
 
 				EndIf
 				//Tratativa da funÁ„o quando o valor do desconto È maior que o valor do pagamento
 			Else
 				//Entra na condiÁ„o quando ir· incluir valor no acumulado
-				//Desconta do acumulado apenas uma vez em cada praÁa	
-				If cRatPraca != TMP->ZAH_PRACA				
+				//Desconta do acumulado apenas uma vez em cada praÁa
+				If cRatPraca != TMP->ZAH_PRACA
 					//Quantidade de informaÁıes rateadas
 					nQtd++
 
 					RECLOCK("ZAH",.F.)
-					ZAH->ZAH_VLACUM	:= SUM->VALDESC + SUM->VALPAG					
+					ZAH->ZAH_VLACUM	:= SUM->VALDESC + SUM->VALPAG
 					ZAH->(MSUNLOCK())
 
-				EndIf		
+				EndIf
 
 
 			EndIf
@@ -465,7 +468,7 @@ Static Function SumTotZAH(nOpcao,cPraRep,cMesAno)
 	Local lOk := .T.
 	Local nCont := 0
 
-	cQuery := "SELECT ZAH_PRACA,SUM(ZAH_VALOR) AS VALPAG,SUM(ZAH_VLDESC) + SUM(ZAH_ACUCAL) AS VALDESC, SUM(ZAH_VLACUM) AS VLACUM FROM ZAH010 WHERE " 
+	cQuery := "SELECT ZAH_PRACA,SUM(ZAH_VALOR) AS VALPAG,SUM(ZAH_VLDESC) + SUM(ZAH_ACUCAL) AS VALDESC, SUM(ZAH_VLACUM) AS VLACUM FROM ZAH010 WHERE "
 	cQuery += "ZAH_PRACA = '" + cPraRep + "' AND "
 	cQuery += "ZAH_PERIOD = '" + cMesAno + "' AND "
 	cQuery += "D_E_L_E_T_ = '' "
@@ -499,7 +502,7 @@ Static Function SumTotZAH(nOpcao,cPraRep,cMesAno)
 
 	EndIf
 
-Return(lOk)	
+Return(lOk)
 
 
 /*‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹
@@ -573,7 +576,7 @@ Static Function DelPeriodo(cPeriodo,cPerSum)
 	Else
 
 		//Exclui tabela ZAG - CabeÁalho Repasse
-		cDel := "UPDATE ZAG010 SET "    
+		cDel := "UPDATE ZAG010 SET "
 		cDel += "D_E_L_E_T_ = '*' WHERE "
 		cDel += "ZAG_PERIOD = " + cPeriodo + " AND D_E_L_E_T_ = '' "
 
@@ -582,7 +585,7 @@ Static Function DelPeriodo(cPeriodo,cPerSum)
 			Return
 		EndIf
 
-		cDel := "UPDATE ZAH010 SET "    
+		cDel := "UPDATE ZAH010 SET "
 		cDel += "D_E_L_E_T_ = '*' WHERE "
 		cDel += "ZAH_PERIOD = " + cPeriodo + " AND D_E_L_E_T_ = '' "
 
@@ -611,11 +614,11 @@ Static Function TrataVal(cValor)
 	Local lNeg 	 := .F.
 
 
-	cValor := StrTran(cValor, ".","") 
+	cValor := StrTran(cValor, ".","")
 	cValor := StrTran(cValor,",",".")
 	cValor := StrTran(cValor,"%","")
 
-	//Verifico se È valor negativo. Caso seja negativo ter· o caracter "(" no inicio e ")" no final		
+	//Verifico se È valor negativo. Caso seja negativo ter· o caracter "(" no inicio e ")" no final
 	If ( ")" $ cValor ) .or. ("(" $ cValor ) //Se a variavel estiver com parenteses, entra na tratativa devido o valor ser negativo
 		cValor := StrTran(cValor, "(","")
 		cValor := StrTran(cValor, ")","")
@@ -623,7 +626,7 @@ Static Function TrataVal(cValor)
 	Endif
 
 	nValor := Val(cValor)
-	
+
 	If lNeg
 		nValor := nValor * -1
 	EndIf
