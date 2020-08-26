@@ -311,6 +311,7 @@ Static Function ExecImport()
 		ZAH->ZAH_VALOR		:= IIF(nValor > 0,nValor,0)
 		ZAH->ZAH_CLIENT		:= aInfo[n][7]
 		ZAH->ZAH_AGENCI		:= aInfo[n][8]
+		ZAH->ZAH_VALLIQ		:= TrataVal(aInfo[n][9])
 		ZAH->ZAH_NCESPE		:= TrataVal(aInfo[n][10])
 		ZAH->ZAH_NCESPA		:= TrataVal(aInfo[n][11])
 		ZAH->ZAH_BXNCPA		:= TrataVal(aInfo[n][12])
