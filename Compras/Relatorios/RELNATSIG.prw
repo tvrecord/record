@@ -528,6 +528,13 @@ Static Function RunReport(Cabec1,Cabec2,Titulo,nLin)
 				If nLin > 55 // Salto de Página. Neste caso o formulario tem 65 linhas...
 					Cabec(Titulo,Cabec1,Cabec2,NomeProg,Tamanho,nTipo)
 					nLin := 9
+					nLin 	+= 1
+					@nLin,001 PSAY aPedidos[_I,1]
+					@nLin,011 PSAY Posicione("SZY",1,xFilial("SZY")+PADR(Alltrim(aPedidos[_I,1]),6)+MV_PAR04,"ZY_DESCRI")
+					@nLin,150 PSAY "(Continuação)"
+					nLin 	+= 1
+					@nLin,001 PSAY REPLICATE("-",LIMITE)
+					nLin 	+= 1
 				Endif
 
 				If cSIG	!= aPedidos[_I,1]  .AND. !EMPTY(aPedidos[_I,1])
@@ -566,7 +573,7 @@ Static Function RunReport(Cabec1,Cabec2,Titulo,nLin)
 					ELSEIF aPedidos[_I,3] == "AE"
 						@nLin,178 PSAY "ORÇADO"
 					ENDIF
-					@nLin,188 PSAY cAprov						//LIBERADO
+					@nLin,189 PSAY cAprov						//LIBERADO
 					@nLin,193 PSAY STOD(aPedidos[_I,12]) 		//DT LIBERAÇÃO
 					@nLin,206 PSAY aPedidos[_I,13] PICTURE "@E 999,999,999.99"	//VALOR
 				ELSE
@@ -1181,4 +1188,4 @@ Static Function ValidPerg()
 
 	dbSelectArea(_sAlias)
 
-Return              
+Return
