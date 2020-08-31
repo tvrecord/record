@@ -300,6 +300,7 @@ Static Function ExecImport()
 
 		RECLOCK("ZAH",.T.)
 		ZAH->ZAH_FILIAL	  	:= xFilial("ZAH")
+		ZAH->ZAH_UTILIZ		:= aInfo[n][2]
 		ZAH->ZAH_CODIGO     := cCodSeq
 		ZAH->ZAH_PRACA    	:= aInfo[n][6]
 		ZAH->ZAH_NUMRP		:= aInfo[n][1]
