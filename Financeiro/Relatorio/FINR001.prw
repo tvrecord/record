@@ -21,7 +21,7 @@ Relatorio do rateio do Repasse
 User Function FINR001()
 
 	Local oSay      := Nil
-	Local _cPerg    := "FINR001A"
+	Local _cPerg    := "FINR001D"
 	Local _lOk      := .T.
 
 	//Private lLogin    := Type("cEmpAnt") != "U"
@@ -39,6 +39,11 @@ User Function FINR001()
 	ValidPerg( _cPerg )
 	If !Pergunte(_cPerg)
 		ApMsgStop("Operação cancelada pelo usuário!")
+		Return
+	EndIf
+
+	If Empty(MV_PAR07)
+		ApMsgStop("Favor preencher o caminho do destino aonde será gravado os arquivos gerados pelo relatório!")
 		Return
 	EndIf
 
@@ -75,15 +80,16 @@ Static Function fProcPdf()
 	Local cDep		:= ""
 	Local aUsuario	:= {}
 	Local cUsuario	:= ""
+	Local nQtd		:= 0
 
 
 	Private cSubTitle	:= ""
-	Private nPag 		:= 1
+	Private nPag 		:= 0
 	Private nLin 		:= 0
 	Private oFonte 		:= u_xFonte(8,,,,"Arial")
 	Private oFonteN 	:= u_xFonte(8,.T.,,,"Arial")
-	Private cDir 		:= GetTempPath(.T.) + "totvsprinter\"
-	Private cFileName 	:= "RELATORIO_RATEIO_FINR001" + "_" +DTOS(Date())+ "_" + StrTran(Time(),":","_")
+	//Private cDir 		:= GetTempPath(.T.) + "totvsprinter\"
+	Private cDir 		:= Alltrim(MV_PAR07) + "\"
 
 	// Query para buscar as informações
 	GetData()
@@ -94,40 +100,33 @@ Static Function fProcPdf()
 
 	(cTmp1)->(DbGoTop())
 
-	oPrint := FWMSPrinter():New(cFileName, IMP_PDF, .F., cDir, .T.)
-	oPrint:SetLandScape()
-	oPrint:SetPaperSize(DMPAPER_A4)
-	oPrint:cPathPDF := cDir
-
-
-
-	oPrint:StartPage()
-	cSubTitle := "COMPETÊNCIA: " + Alltrim(MesExtenso(Val(Substring((cTmp1)->ZAG_PERIOD,1,2)))) + "/" + Substring((cTmp1)->ZAG_PERIOD,3,4) + " - CNPJ: " + Transform(Alltrim((cTmp1)->ZAF_CGC),"@R 99.999.999/9999-99")
-	nLin := PXCABECA(@oPrint, "REPASSE A PAGAR (" + Alltrim((cTmp1)->ZAF_CODIGO) + " - " + Alltrim((cTmp1)->ZAF_DESCRI) + ")" , cSubTitle  , nPag)
-
-	oPrint:Say( nLin,020, "RP",oFonteN)
-	oPrint:Say( nLin,048, "Utilização",oFonteN)
-	oPrint:Say( nLin,088, "NF",oFonte)
-	oPrint:Say( nLin,116, "Emissao",oFonte)
-	oPrint:Say( nLin,160, "Venc.",oFonteN)
-	oPrint:Say( nLin,200, "Cliente",oFonteN)
-	oPrint:Say( nLin,300, "Agencia",oFonteN)
-	oPrint:Say( nLin,410, "Val Liq.",oFonteN)
-	oPrint:Say( nLin,458, "Ded Ag.",oFonteN)
-	oPrint:Say( nLin,500, "Desc Fin",oFonteN)
-	oPrint:Say( nLin,535, "Inad.",oFonteN)
-	oPrint:Say( nLin,565, "Ded Imp.",oFonteN)
-	oPrint:Say( nLin,600, "Ded Comis",oFonteN)
-	oPrint:Say( nLin,640, "Ded BV",oFonteN)
-	oPrint:Say( nLin,685, "Vl Calc",oFonteN)
-	oPrint:Say( nLin,740, "Repasse",oFonteN)
-	oPrint:Say( nLin,780, "Rep. Comp.",oFonteN)
-
-	oPrint:line(nLin+5,REL_LEFT,nLin+5,REL_RIGHT )
-	nLin += REL_VERT_STD
-
 	While (cTmp1)->(!Eof())
 
+		//Faço as tratativas da impressão dos valores positivos e negativos
+		If MV_PAR06 == 1
+			If (cTmp1)->VALTOT < 0
+				(cTmp1)->(DbSkip())
+				Loop
+			EndIf
+		ElseIf MV_PAR06 == 2
+			If (cTmp1)->VALTOT >= 0
+				(cTmp1)->(DbSkip())
+				Loop
+			EndIf
+		EndIf
+
+		If nLin > REL_END .or. cPraca != Alltrim((cTmp1)->ZAG_PRACA)
+
+			cFileName 	:= "PRACA_"+Alltrim((cTmp1)->ZAG_PRACA)+"_PERIODO_"+cPeriodo+"_FINR001" + "_" +DTOS(Date())+ "_" + StrTran(Time(),":","_")
+			oPrint := FWMSPrinter():New(cFileName, IMP_PDF, .F., cDir, .T.)
+			oPrint:SetLandScape()
+			oPrint:SetPaperSize(DMPAPER_A4)
+			oPrint:cPathPDF := cDir
+
+			ImpProxPag()//Monta cabeçario da primeira e proxima pagina
+		EndIf
+
+		nQtd++
 
 		cPraca := Alltrim((cTmp1)->ZAG_PRACA)
 		//Usuario responsavel pela assinatura
@@ -216,6 +215,7 @@ Static Function fProcPdf()
 				nLin += REL_VERT_STD
 
 				If nLin > REL_END
+					oPrint:EndPage()
 					ImpProxPag()//Monta cabeçario da proxima pagina
 
 					oPrint:Say( nLin,020, "RP"			,oFonteN)
@@ -253,33 +253,25 @@ Static Function fProcPdf()
 				nLin += REL_VERT_STD
 
 				oPrint:Say( nLin,458, PADC("Gerente Adm./Financeiro",50) ,oFonteN)
-				oPrint:Say( nLin,620, PADC(Alltrim(aUsuario[1][12]),50) ,oFonteN)
+				oPrint:Say( nLin,620, PADC(Alltrim(aUsuario[1][13]),50) ,oFonteN)
 
-			EndIf
-
-
-			If !(cTmp1)->(Eof())
-				ImpProxPag()//Monta cabeçario da proxima pagina
 			EndIf
 
 			//Zero o vetor para o proxima praça
 			aInfo := {}
 
+			PXRODAPE(@oPrint,"FINR001.PRW","")
+			oPrint:EndPage()
+			oPrint:Preview()
 
-		EndIf
-
-		If nLin > REL_END .And. !(cTmp1)->(Eof())
-			ImpProxPag()//Monta cabeçario da proxima pagina
 		EndIf
 
 	EndDo
 
+	If nQtd == 0
+		MsgInfo("Não existem registros a serem impressos, favor verificar os parametros","FINR001")
+	EndIf
 
-
-	PXRODAPE(@oPrint,"FINR001.PRW","")
-	oPrint:EndPage()
-
-	oPrint:Preview()
 
 	(cTmp1)->(DbCloseArea())
 
@@ -296,8 +288,6 @@ Return
 
 Static Function ImpProxPag()
 
-	PXRODAPE(@oPrint,"FINR001.PRW","")
-	oPrint:EndPage()
 	nPag++
 	oPrint:StartPage()
 	cSubTitle := "COMPETÊNCIA: " + Alltrim(MesExtenso(Val(Substring((cTmp1)->ZAG_PERIOD,1,2)))) + "/" + Substring((cTmp1)->ZAG_PERIOD,3,4)  + " - CNPJ: " + Transform(Alltrim((cTmp1)->ZAF_CGC),"@R 99.999.999/9999-99")
@@ -345,6 +335,7 @@ Static Function GetData()
 		ZAF_CODIGO,ZAF_DESCRI,ZAF_CGC,
 		ZAH_REPTOT,ZAH_DESCFI,ZAH_INADIM,ZAH_DEDUCO,ZAH_COMREP,ZAH_BV,ZAH_VLCALC,ZAH_REPASS,ZAH_REPCOM,ZAH_AGENCI,ZAH_VALLIQ,ZAH_CLIENT,ZAH_RATEIO,ZAH_VLRAT,ZAH_UTILIZ,
 		QTD,
+		VALTOT,
 		C5_XTPFAT,C5_COMIS1,
 		F2_SERIE,F2_DOC,F2_EMISSAO,F2_VALBRUT,F2_CLIENTE,F2_LOJA,
 		A1_NOME,
@@ -357,7 +348,7 @@ Static Function GetData()
 		ZAH_NUMRP = ZAG_NUMRP AND
 		ZAH_PERIOD = ZAG_PERIOD
 		LEFT JOIN (
-		SELECT  ZAH_FILIAL,ZAH_PRACA,ZAH_PERIOD,COUNT(*) AS QTD FROM %table:ZAH% ZAH01
+		SELECT  ZAH_FILIAL,ZAH_PRACA,ZAH_PERIOD, COUNT(*) AS QTD FROM %table:ZAH% ZAH01
 		WHERE
 		ZAH01.D_E_L_E_T_ = ''
 		GROUP BY ZAH_FILIAL,ZAH_PRACA,ZAH_PERIOD
@@ -365,6 +356,15 @@ Static Function GetData()
 		ZA.ZAH_FILIAL   = ZAG_FILIAL AND
 		ZA.ZAH_PRACA	= ZAG_PRACA AND
 		ZA.ZAH_PERIOD	= %Exp:cPeriodoAnt%
+		LEFT JOIN (
+		SELECT  ZAH_FILIAL,ZAH_PRACA,ZAH_PERIOD,SUM(ZAH_REPCOM) AS VALTOT FROM %table:ZAH% ZAH02
+		WHERE
+		ZAH02.D_E_L_E_T_ = ''
+		GROUP BY ZAH_FILIAL,ZAH_PRACA,ZAH_PERIOD
+		)  ZAA1  ON
+		ZAA1.ZAH_FILIAL   = ZAG_FILIAL AND
+		ZAA1.ZAH_PRACA	= ZAG_PRACA AND
+		ZAA1.ZAH_PERIOD	= %Exp:cPeriodo%
 		INNER JOIN %table:ZAF% AS ZAF ON
 		ZAF_FILIAL = ZAG_FILIAL AND
 		ZAF_CODIGO = ZAG_PRACA
@@ -574,11 +574,13 @@ Static Function ValidPerg(cPerg)
 	SX1->(DbSetOrder(1))
 	cPerg := PADR(cPerg,10)
 	//          Grupo Ordem Desc Por               Desc Espa   Desc Ingl  Variavel  Tipo  Tamanho  Decimal  PreSel  GSC  Valid   Var01       Def01     DefSpa01  DefEng01  CNT01  Var02  Def02     DefSpa02  DefEng02  CNT02  Var03  Def03  DefEsp03  DefEng03  CNT03     Var04  Def04  DefEsp04  DefEng04  CNT04  Var05  Def05  DefEsp05  DefEng05  CNT05  F3        PYME  GRPSXG   HELP  PICTURE  IDFIL
-	aAdd(aRegs,{cPerg,"01", "Periodo Apuracao?"	, "",         "",        "mv_ch1", "D",  08,      00,      0,      "G", "",     "mv_par01", "",       "",       "",       "",    "",    "",       "",       "",       "",    "",    "",    "",       "",       "",       "",    "",    "",       "",       "",    "",    "",    "",       "",       "",    "",       "",   "",      "",   "",      ""   })
-	aAdd(aRegs,{cPerg,"02", "Da Praça?"			, "",         "",        "mv_ch2", "C",  03,      00,      0,      "G", "",     "mv_par02", "",       "",       "",       "",    "",    "",       "",       "",       "",    "",    "",    "",       "",       "",       "",    "",    "",       "",       "",    "",    "",    "",       "",       "",    "ZAF",       "",   "",      "",   "",      ""   })
-	aAdd(aRegs,{cPerg,"03", "Ate Praça?"		, "",         "",        "mv_ch3", "C",  03,      00,      0,      "G", "",     "mv_par03", "",       "",       "",       "",    "",    "",       "",       "",       "",    "",    "",    "",       "",       "",       "",    "",    "",       "",       "",    "",    "",    "",       "",       "",    "ZAF",       "",   "",      "",   "",      ""   })
-	aAdd(aRegs,{cPerg,"04", "Do Nº RP?"			, "",         "",        "mv_ch4", "C",  06,      00,      0,      "G", "",     "mv_par04", "",       "",       "",       "",    "",    "",       "",       "",       "",    "",    "",    "",       "",       "",       "",    "",    "",       "",       "",    "",    "",    "",       "",       "",    "",       "",   "",      "",   "",      ""   })
-	aAdd(aRegs,{cPerg,"05", "Ate Nº RP?"		, "",         "",        "mv_ch5", "C",  06,      00,      0,      "G", "",     "mv_par05", "",       "",       "",       "",    "",    "",       "",       "",       "",    "",    "",    "",       "",       "",       "",    "",    "",       "",       "",    "",    "",    "",       "",       "",    "",       "",   "",      "",   "",      ""   })
+	aAdd(aRegs,{cPerg,"01", "Periodo Apuracao?"	 , "",         "",        "mv_ch1", "D",  08,      00,      0,      "G", "",     "mv_par01", "",       "",       "",       "",    "",    "",       "",       "",       "",    "",    "",    "",       "",       "",       "",    "",    "",       "",       "",    "",    "",    "",       "",       "",    "",       "",   "",      "",   "",      ""   })
+	aAdd(aRegs,{cPerg,"02", "Da Praça?"			 , "",         "",        "mv_ch2", "C",  03,      00,      0,      "G", "",     "mv_par02", "",       "",       "",       "",    "",    "",       "",       "",       "",    "",    "",    "",       "",       "",       "",    "",    "",       "",       "",    "",    "",    "",       "",       "",    "ZAF",       "",   "",      "",   "",      ""   })
+	aAdd(aRegs,{cPerg,"03", "Ate Praça?"		 , "",         "",        "mv_ch3", "C",  03,      00,      0,      "G", "",     "mv_par03", "",       "",       "",       "",    "",    "",       "",       "",       "",    "",    "",    "",       "",       "",       "",    "",    "",       "",       "",    "",    "",    "",       "",       "",    "ZAF",       "",   "",      "",   "",      ""   })
+	aAdd(aRegs,{cPerg,"04", "Do Nº RP?"			 , "",         "",        "mv_ch4", "C",  06,      00,      0,      "G", "",     "mv_par04", "",       "",       "",       "",    "",    "",       "",       "",       "",    "",    "",    "",       "",       "",       "",    "",    "",       "",       "",    "",    "",    "",       "",       "",    "",       "",   "",      "",   "",      ""   })
+	aAdd(aRegs,{cPerg,"05", "Ate Nº RP?"		 , "",         "",        "mv_ch5", "C",  06,      00,      0,      "G", "",     "mv_par05", "",       "",       "",       "",    "",    "",       "",       "",       "",    "",    "",    "",       "",       "",       "",    "",    "",       "",       "",    "",    "",    "",       "",       "",    "",       "",   "",      "",   "",      ""   })
+	aAdd(aRegs,{cPerg,"06", "Imprime Valor?"     ,"",          "",        "mv_ch6", "N",  01,      00,      0,      "C", "",     "mv_par06","Positivo","","","","","Negativo","","","","","Todos","","","","","","","","","","","","","",""})
+	aAdd(aRegs,{cPerg,"07", "Destino do(s) Arq.?", "",         "",        "mv_ch7", "C",  99,      00,      0,      "G", "",     "mv_par07", "",       "",       "",       "",    "",    "",       "",       "",       "",    "",    "",    "",       "",       "",       "",    "",    "",       "",       "",    "",    "",    "",       "",       "",    "",       "",   "",      "",   "",      ""   })
 
 	For i:=1 to Len(aRegs)
 		If !dbSeek(PADR(cPerg,10)+aRegs[i,2])
