@@ -146,11 +146,11 @@ Static Function fProcPdf()
 		_nRegAtu++
 		IncProc( "Imprimindo Registro " + cValToChar( _nRegAtu ) + " De " + cValToChar( _nTotReg ) + " [" + StrZero( Round( ( _nRegAtu / _nTotReg ) * 100 , 0 ) , 3 ) +"%]" )
 
-		If Alltrim((cTmp1)->C5_XTPFAT) == "2"
-			nComissao := 20
-		Else
-			nComissao := (cTmp1)->C5_COMIS1
-		EndIf
+		//If Alltrim((cTmp1)->C5_XTPFAT) == "2" //Rafael França - 25/09/2020 - Todas os repasses tem 20% de desconto
+		nComissao := 20
+		//Else
+		//	nComissao := (cTmp1)->C5_COMIS1
+		//EndIf
 
 
 		oPrint:Say( nLin,020, (cTmp1)->ZAG_NUMRP			  					  ,oFonte)
