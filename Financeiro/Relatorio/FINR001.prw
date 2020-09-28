@@ -196,7 +196,7 @@ Static Function fProcPdf()
 			oPrint:Say( nLin,020, "RP"			,oFonteN)
 			oPrint:Say( nLin,052, "NF"			,oFonteN)
 			oPrint:Say( nLin,084, "CLIENTE"		,oFonteN)
-			oPrint:Say( nLin,300, "RATEIO"		,oFonteN)
+			//oPrint:Say( nLin,300, "RATEIO"		,oFonteN)
 			oPrint:Say( nLin,345, "VALOR"		,oFonteN)
 
 			nLin += REL_VERT_STD
@@ -207,7 +207,7 @@ Static Function fProcPdf()
 				oPrint:Say( nLin,020, aInfo[i][1] ,oFonte)
 				oPrint:Say( nLin,052, aInfo[i][2] ,oFonte)
 				oPrint:Say( nLin,084, aInfo[i][3] ,oFonte)
-				oPrint:Say( nLin,300, Transform( aInfo[i][4], "@E 999.99%") ,oFonte)
+				//	oPrint:Say( nLin,300, Transform( aInfo[i][4], "@E 999.99%") ,oFonte)
 				oPrint:Say( nLin,335, Transform( aInfo[i][5], "@E 999,999,999.99") ,oFonte)
 
 				nTotRat += aInfo[i][5]
@@ -221,7 +221,7 @@ Static Function fProcPdf()
 					oPrint:Say( nLin,020, "RP"			,oFonteN)
 					oPrint:Say( nLin,052, "NF"			,oFonteN)
 					oPrint:Say( nLin,084, "CLIENTE"		,oFonteN)
-					oPrint:Say( nLin,300, "RATEIO"		,oFonteN)
+					//		oPrint:Say( nLin,300, "RATEIO"		,oFonteN)
 					oPrint:Say( nLin,345, "VALOR"		,oFonteN)
 
 					nLin += REL_VERT_STD
