@@ -402,15 +402,17 @@ Static Function ExecRateio()
 
 				If TMP->ZAH_VALOR > 0
 
-					nPercRat := Round((TMP->ZAH_VALOR*100)/SUM->VALPAG,2)
+					//nPercRat := Round((TMP->ZAH_VALOR*100)/SUM->VALPAG,2)
+					nPercRat := (TMP->ZAH_VALOR*100)/SUM->VALPAG // Rafael - 23/10/2020
 					//Quantidade de informações rateadas
 					nQtd++
 
 
 					RECLOCK("ZAH",.F.)
 					ZAH->ZAH_VLACUM	:= 0
-					ZAH->ZAH_RATEIO	:= nPercRat
-					ZAH->ZAH_VLRAT  := ROUND(TMP->ZAH_VALOR - ROUND(((SUM->VALDESC*(nPercRat/100))*-1),3),2)
+					ZAH->ZAH_RATEIO	:= ROUND(nPercRat,2)
+					//ZAH->ZAH_VLRAT  := ROUND(TMP->ZAH_VALOR - ROUND(((SUM->VALDESC*(nPercRat/100))*-1),3),2)
+					ZAH->ZAH_VLRAT  := ROUND(TMP->ZAH_VALOR - ((SUM->VALDESC*(nPercRat/100))*-1),2) // Rafael - 23/10/2020
 					ZAH->(MSUNLOCK())
 				Else
 
