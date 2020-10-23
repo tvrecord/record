@@ -23,7 +23,7 @@ User Function AXZAB
 	//³ Declaracao de Variaveis                                             ³
 	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 
-	Private cCadastro := "Cadastro BV"
+	Private cCadastro := "Calculo BV"
 	Private nOpca := 0
 	Private aParam := {}
 
@@ -33,6 +33,7 @@ User Function AXZAB
 		{"Alterar","AxAltera",0,4},;
 		{"Excluir","AxDeleta",0,5},;
 		{"Importar","u_IMPORTSE2",0,5},;
+		{"Relatorio","u_RGovVar()",0,2},;
 		{"Rel BV","u_RelBV()",0,5},;
 		{"Export xls","u_COMISSBV()",0,2}}
 
@@ -55,11 +56,11 @@ User Function IMPORTSE2
 	@ 011,020 Say "Da Baixa:"
 	@ 010,060 Get dBaixa1  SIZE 40,020
 	@ 011,150 Say "Ate a Baixa:"
-	@ 010,190 Get dBaixa2 SIZE 40,020
+	@ 010,200 Get dBaixa2 SIZE 40,020
 	@ 035,020 Say "Do Faturamento:"
 	@ 035,060 Get dFat1 SIZE 40,020
 	@ 035,150 Say "Ate o Faturamento:"
-	@ 035,190 Get dFat2 SIZE 40,020
+	@ 035,200 Get dFat2 SIZE 40,020
 	@ 060,170 BMPBUTTON TYPE 01 ACTION IMPORTBV(dBaixa1,dBaixa2,dFat1,dFat2)
 	@ 060,200 BMPBUTTON TYPE 02 ACTION Close(oDlg)
 	ACTIVATE DIALOG oDlg CENTERED
@@ -82,7 +83,7 @@ Static Function IMPORTBV(dBaixa1,dBaixa2,dFat1,dFat2)
 	Local lOk		:= .T.
 	Local nCont		:= 0
 
-	cQuery := "SELECT E2_PREFIXO,E2_NUM,E2_PARCELA,E2_TIPO,E2_FORNECE,E2_LOJA,E2_NOMFOR,E2_EMISSAO,E2_VENCREA,E2_BAIXA,(E2_ISS + E2_IRRF + E2_VALOR) AS E2_VALOR,E2_NATUREZ,E2_HIST,A2_CGC "
+	cQuery := "SELECT E2_PREFIXO,E2_NUM,E2_PARCELA,E2_TIPO,E2_FORNECE,E2_LOJA,E2_NOMFOR,E2_EMISSAO,E2_VENCREA,E2_BAIXA,(E2_IRRF + E2_VALOR) AS E2_VALOR,E2_NATUREZ,E2_HIST,A2_CGC, E2_FATINI, E2_FATFIM "
 	cQuery += "FROM SE2010 "
 	cQuery += "INNER JOIN SED010 ON E2_NATUREZ = ED_CODIGO "
 	cQuery += "INNER JOIN SA2010 ON A2_COD = E2_FORNECE AND A2_LOJA = E2_LOJA "
@@ -131,8 +132,13 @@ Static Function IMPORTBV(dBaixa1,dBaixa2,dFat1,dFat2)
 			ZAB->ZAB_OBS    := TMPBV->E2_HIST
 			ZAB->ZAB_VLSE2	:= TMPBV->E2_VALOR
 			ZAB->ZAB_VEND   := Posicione("SA3",3,xFilial("SA3")+TMPBV->A2_CGC,"A3_COD")
-			ZAB->ZAB_FATINI := dFat1
-			ZAB->ZAB_FATFIN := dFat2
+			IF EMPTY(TMPBV->E2_FATINI) .AND. EMPTY(TMPBV->E2_FATFIM)
+				ZAB->ZAB_FATINI := dFat1
+				ZAB->ZAB_FATFIN := dFat2
+			ELSE
+				ZAB->ZAB_FATINI := TMPBV->E2_FATINI
+				ZAB->ZAB_FATFIN := TMPBV->E2_FATFIM
+			ENDIF
 			MsUnlock()
 		ELSE
 			Reclock("ZAB",.F.)
@@ -333,3 +339,221 @@ Static Function IMPORTBV(dBaixa1,dBaixa2,dFat1,dFat2)
 	Close(oDlg)
 
 RETURN
+
+User Function RGOVVAR
+
+
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³ Declaracao de Variaveis                                             ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+	Local cDesc1        := "Este programa tem como objetivo imprimir relatorio "
+	Local cDesc2        := "de acordo com os parametros informados pelo usuario."
+	Local cDesc3        := ""
+	Local cPict         := ""
+	Local titulo       	:= "Relatorio BV"
+	Local nLin         	:= 80
+	Local Cabec1		:= UPPER(" Empresa                    Nota Fiscal       Emissao         Baixa                Governo              Varejo               Total")
+	Local Cabec2       	:= ""
+	Local imprime      	:= .T.
+	Local aOrd := {}
+
+	Private lEnd        := .F.
+	Private lAbortPrint := .F.
+	Private CbTxt       := ""
+	Private limite          := 132
+	Private tamanho         := "M"
+	Private nomeprog        := "RGOVVAR" // Coloque aqui o nome do programa para impressao no cabecalho
+	Private nTipo           := 18
+	Private aReturn         := { "Zebrado", 1, "Administracao", 2, 2, 1, "", 1}
+	Private nLastKey        := 0
+	Private cPerg      := "RGOVVAR"
+	Private CONTFL     := 01
+	Private m_pag      := 01
+	Private wnrel      := "RGOVVAR" // Coloque aqui o nome do arquivo usado para impressao em disco
+	Private cQuery     := ""
+
+	Private cString := "ZAB"
+
+	ValidPerg(cPerg)
+
+	If !Pergunte(cPerg,.T.)
+		alert("Operação cancelada pelo usuário")
+		return
+	ENDIF
+
+	titulo := "Relatorio Período " + DTOC(MV_PAR01) + " - " + DTOC(MV_PAR02)
+
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³ Monta a interface padrao com o usuario...                           ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+	wnrel := SetPrint(cString,NomeProg,cPerg,@titulo,cDesc1,cDesc2,cDesc3,.T.,aOrd,.T.,Tamanho,,.T.)
+
+	cQuery2 := "SELECT ZAB_NATURE, ZAB_NOME, ZAB_TITULO, ZAB_EMISSA, ZAB_BAIXA, ZAB_SPOT, ZAB_LOCAL, ZAB_VALOR FROM ZAB010 "
+	cQuery2 += "WHERE D_E_L_E_T_ = '' AND ZAB_BAIXA BETWEEN '"+DTOS(MV_PAR01)+"' AND '"+DTOS(MV_PAR02)+"' "
+	cQuery2 += "ORDER BY ZAB_NATURE, ZAB_TITULO "
+
+	tcQuery cQuery2 New Alias "TMPZAB"
+
+	If Eof()
+		MsgInfo("Nao existem dados a serem impressos!","Verifique")
+		dbSelectArea("TMPZAB")
+		dbCloseArea("TMPZAB")
+		Return
+	Endif
+
+	If nLastKey == 27
+		dbSelectArea("TMPZAB")
+		dbCloseArea("TMPZAB")
+		Return
+	Endif
+
+	SetDefault(aReturn,cString)
+
+	If nLastKey == 27
+		dbSelectArea("TMPZAB")
+		dbCloseArea("TMPZAB")
+		Return
+	Endif
+
+	nTipo := If(aReturn[4]==1,15,18)
+
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³ Processamento. RPTSTATUS monta janela com a regua de processamento. ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+	RptStatus({|| RunReport(Cabec1,Cabec2,Titulo,nLin) },Titulo)
+
+Return
+
+
+Static Function RunReport(Cabec1,Cabec2,Titulo,nLin)
+
+	Private nVlTotalV	 := 0
+	Private nVlTotalG	 := 0
+	Private cNaturez	 := ""
+	Private nSubTotV	 := 0
+	Private nSubTotG	 := 0
+	Private lok		 := .T.
+	Private cQuery2  := ""
+
+	dbSelectArea("TMPZAB")
+
+	SetRegua(RecCount())
+
+	dbGoTop()
+	While !EOF()
+
+
+		If lAbortPrint
+			@nLin,00 PSAY "*** CANCELADO PELO OPERADOR ***"
+			Exit
+		Endif
+
+		If nLin > 50  // Salto de Página. Neste caso o formulario tem 55 linhas...
+			Cabec(Titulo,Cabec1,Cabec2,NomeProg,Tamanho,nTipo)
+			nLin := 8
+		Endif
+
+		IF (cNaturez != TMPZAB->ZAB_NATURE)
+			nLin 	:= nLin + 1
+			@nLin, 001 PSAY TMPZAB->ZAB_NATURE
+			@nLin, 010 PSAY ALLTRIM(Posicione("SED",1,xFilial("SED")+TMPZAB->ZAB_NATURE,"ED_DESCRIC"))
+			nLin 	:= nLin + 1 // Avanca a linha de impressao
+			@nLin, 000 PSAY REPLICATE("-",LIMITE)
+			nLin 	:= nLin + 1 // Avanca a linha de impressao
+		ENDIF
+
+		@nLin, 001 PSAY SUBSTR(TMPZAB->ZAB_NOME,1,30)
+		@nLin, 033 PSAY SUBSTR(TMPZAB->ZAB_TITULO,1,6)
+		@nLin, 045 PSAY STOD(TMPZAB->ZAB_EMISSA)
+		@nLin, 060 PSAY STOD(TMPZAB->ZAB_BAIXA)
+		@nLin, 080 PSAY TMPZAB->ZAB_SPOT  PICTURE "@E 999,999.99"
+		@nLin, 100 PSAY TMPZAB->ZAB_LOCAL PICTURE "@E 999,999.99"
+		@nLin, 122 PSAY TMPZAB->ZAB_VALOR PICTURE "@E 999,999.99"
+
+		nVlTotalV	 += TMPZAB->ZAB_LOCAL
+		nVlTotalG	 += TMPZAB->ZAB_SPOT
+		cNaturez	 := TMPZAB->ZAB_NATURE
+		nSubTotV	 += TMPZAB->ZAB_LOCAL
+		nSubTotG	 += TMPZAB->ZAB_SPOT
+
+		dbSelectArea("TMPZAB")
+
+
+		dbSkip() // Avanca o ponteiro do registro no arquivo
+
+		IF (cNaturez != TMPZAB->ZAB_NATURE)
+			nLin     := nLin + 1
+			@nLin, 000 PSAY REPLICATE("-",LIMITE)
+			nLin     := nLin + 1
+			@nLin, 001 PSAY "SUBTOTAL:"
+			@nLin, 010 PSAY ALLTRIM(Posicione("SED",1,xFilial("SED")+cNaturez,"ED_DESCRIC"))
+			@nLin, 080 PSAY nSubTotG  PICTURE "@E 999,999.99"
+			@nLin, 100 PSAY nSubTotV  PICTURE "@E 999,999.99"
+			@nLin, 122 PSAY nSubTotV + nSubTotG PICTURE "@E 999,999.99"
+			nSubTotV	 := 0
+			nSubTotG	 := 0
+		ENDIF
+
+		nLin := nLin + 1 // Avanca a linha de impressao
+
+	EndDo
+
+	nLin += 1
+	@nLin, 001 PSAY "TOTAL:"
+	@nLin, 080 PSAY nVlTotalG  PICTURE "@E 999,999.99"
+	@nLin, 100 PSAY nVlTotalV  PICTURE "@E 999,999.99"
+	@nLin, 122 PSAY nVlTotalG + nVlTotalV PICTURE "@E 999,999.99"
+
+	nLin := nLin + 10
+
+	@nLin, 030 PSAY "___________________          ___________________         ___________________"
+	nLin += 1
+	@nLin, 030 PSAY "   Alarico Neves               Elenn Caldeira               Pâmela Aguiar   "
+	nLin += 1
+	@nLin, 030 PSAY " Diretor Comercial          Gerente Adm/Financeiro         Ass. Financeiro  "
+
+	dbSelectArea("TMPZAB")
+	dbCloseArea("TMPZAB")
+
+	SET DEVICE TO SCREEN
+
+	If aReturn[5]==1
+		dbCommitAll()
+		SET PRINTER TO
+		OurSpool(wnrel)
+	Endif
+
+	MS_FLUSH()
+
+Return
+
+Static Function ValidPerg(cPerg)
+
+	_sAlias := Alias()
+	cPerg := PADR(cPerg,10)
+	dbSelectArea("SX1")
+	dbSetOrder(1)
+	aRegs:={}
+
+	// Grupo/Ordem/Pergunta/Variavel/Tipo/Tamanho/Decimal/Presel/GSC/Valid/Var01/Def01/Cnt01/Var02/Def02/Cnt02/Var03/Def03/Cnt03/Var04/Def04/Cnt04/Var05/Def05/Cnt05
+	AADD(aRegs,{cPerg,"01","Da Baixa			","","","mv_ch01","D",08,0,0,"G","","mv_par01","","","","","","","","","","","","","","","","","","","","","","","","",""})
+	AADD(aRegs,{cPerg,"02","Ate a Baixa		 	","","","mv_ch02","D",08,0,0,"G","","mv_par02","","","","","","","","","","","","","","","","","","","","","","","","",""})
+
+	For i:=1 to Len(aRegs)
+		If !dbSeek(cPerg+aRegs[i,2])
+			RecLock("SX1",.T.)
+			For j:=1 to FCount()
+				If j <= Len(aRegs[i])
+					FieldPut(j,aRegs[i,j])
+				Endif
+			Next
+			MsUnlock()
+		Endif
+	Next
+
+	dbSelectArea(_sAlias)
+
+Return

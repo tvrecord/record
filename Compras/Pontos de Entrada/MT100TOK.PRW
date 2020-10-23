@@ -323,7 +323,7 @@ Static Function ValidRep(nOpc)
 		SELECT
 		F1_SERIE,F1_DOC,F1_FORNECE,F1_LOJA,COUNT(*) AS QTD
 		FROM %table:SF1% AS SF1 WHERE
-		F1_XNUMRP = %Exp:Alltrim(cNumRep)% AND
+		F1_XNUMREP = %Exp:Alltrim(cNumRep)% AND
 		SF1.D_E_L_E_T_ = ''
 		GROUP BY F1_SERIE,F1_DOC,F1_FORNECE,F1_LOJA
 
