@@ -343,9 +343,6 @@ Static Function ExecImport()
 Return
 
 
-
-
-
 /*ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
 ±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 ±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
@@ -366,6 +363,7 @@ Static Function ExecRateio()
 	Local nPercRat := 0
 	Local nQtd	   := 0
 	Local cRatPraca := ""
+
 
 
 	cQuery += "SELECT * FROM ZAH010 WHERE "
@@ -449,6 +447,15 @@ Static Function ExecRateio()
 		cRatPraca := TMP->ZAH_PRACA
 
 		DbSkip()
+
+		/* -- Em Construção....
+		//Faço o ajuste do rateio caso seja necessário por questão de arrendondamento
+		If cRatPraca != TMP->ZAH_PRACA
+			//Função responsavel pelo arrendondamento caso necessário
+			AjustVlRat(cRatPraca)
+
+		EndIf
+		*/
 
 	EndDo
 
@@ -635,3 +642,16 @@ Static Function TrataVal(cValor)
 
 
 Return(nValor)
+
+//Função responsavel pelo ajuste dos valores por conta dos arrendondamentos
+
+Static Function AjustVlRat(cPraca)
+
+	//Faço a Query da soma do rateio e do valor
+
+	//Faço o comparativo de valores que também pode ser feito na query
+
+	//Localizo um registro valido com a chave posicionada e faço os devidos procedimentos
+
+
+Return

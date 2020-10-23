@@ -24,11 +24,25 @@ User Function FINR001()
 	Local _cPerg    := "FINR001D"
 	Local _lOk      := .T.
 
+	Private nTotCalc 	:= 0
+	Private nTotRepas := 0
+	Private nTotRat   := 0
+
 	//Private lLogin    := Type("cEmpAnt") != "U"
 	Private cTmp1     := GetNextAlias()
-	Private _nTotReg  := 0            // Total de Registros
-	Private _nRegAtu  := 0            // Registro atual da regua de processamento
 	Private cPeriodo,cPeriodoAnt
+
+
+	Private oPrint
+	Private cSubTitle	:= ""
+	Private nPag 		:= 0
+	Private nLin 		:= 0
+	Private oFonte 		:= u_xFonte(8,,,,"Arial")
+	Private oFonteN 	:= u_xFonte(8,.T.,,,"Arial")
+
+	Private aImpNeg := {}
+
+
 
 	//If !lLogin
 	//PREPARE ENVIRONMENT EMPRESA "01" FILIAL "01" MODULO "FIN"
@@ -70,10 +84,6 @@ imprimir relatorio em pdf
 Static Function fProcPdf()
 
 
-	Local nTotCalc 	:= 0
-	Local nTotRepas := 0
-	Local nTotRat   := 0
-	Local nComissao := 0
 	Local i
 	Local cPraca 	:= ""
 	Local aInfo		:= {}
@@ -81,18 +91,14 @@ Static Function fProcPdf()
 	Local aUsuario	:= {}
 	Local cUsuario	:= ""
 	Local nQtd		:= 0
+	Local _nTotReg  := 0            // Total de Registros
+	Local _nRegAtu  := 0            // Registro atual da regua de processamento
+	Local cDir 		:= Alltrim(MV_PAR07) + "\"
 
-
-	Private cSubTitle	:= ""
-	Private nPag 		:= 0
-	Private nLin 		:= 0
-	Private oFonte 		:= u_xFonte(8,,,,"Arial")
-	Private oFonteN 	:= u_xFonte(8,.T.,,,"Arial")
-	//Private cDir 		:= GetTempPath(.T.) + "totvsprinter\"
-	Private cDir 		:= Alltrim(MV_PAR07) + "\"
+	Local cBkpTmp := ""
 
 	// Query para buscar as informações
-	GetData()
+	GetData(cPeriodo,MV_PAR02,MV_PAR03,MV_PAR04,MV_PAR05)
 
 	// Carrega regua de processamento
 	Count To _nTotReg
@@ -123,7 +129,32 @@ Static Function fProcPdf()
 			oPrint:SetPaperSize(DMPAPER_A4)
 			oPrint:cPathPDF := cDir
 
+			DbSelectArea("ZAF");DbSetOrder(1)
+			DbSeek(xFilial("ZAF") + (cTmp1)->ZAG_PRACA)
+
 			ImpProxPag()//Monta cabeçario da primeira e proxima pagina
+
+			If cPraca != Alltrim((cTmp1)->ZAG_PRACA)
+				//Verifico se é necessário imprimir periodos negativos
+				aImpNeg := PerNeg(Alltrim((cTmp1)->ZAG_PRACA),(cTmp1)->ZAG_PERIOD)
+
+				If Len(aImpNeg) > 0
+					//Guardo o backup da tabela temporaria
+					cBkpTmp := cTmp1
+					//Reservo uma alias para tabela temporaria
+					cTmp1     := GetNextAlias()
+					//Imprimo os periodos que foram compensados
+					ImpPerComp()
+					//Volto ao normal para continuar com a impressão
+					cTmp1 := cBkpTmp
+				EndIf
+
+				oPrint:Say( nLin,020, "Competência: " + MesExtenso(Val(Substr((cTmp1)->ZAG_PERIOD,1,2))) + "/" + Substr((cTmp1)->ZAG_PERIOD,3,4)			 	  ,oFonteN)
+				nLin += REL_VERT_STD
+
+			EndIf
+
+
 		EndIf
 
 		nQtd++
@@ -146,36 +177,9 @@ Static Function fProcPdf()
 		_nRegAtu++
 		IncProc( "Imprimindo Registro " + cValToChar( _nRegAtu ) + " De " + cValToChar( _nTotReg ) + " [" + StrZero( Round( ( _nRegAtu / _nTotReg ) * 100 , 0 ) , 3 ) +"%]" )
 
-		//If Alltrim((cTmp1)->C5_XTPFAT) == "2" //Rafael França - 25/09/2020 - Todas os repasses tem 20% de desconto
-		nComissao := 20
-		//Else
-		//	nComissao := (cTmp1)->C5_COMIS1
-		//EndIf
+		//Imprime o detalhe do relatório
 
-
-		oPrint:Say( nLin,020, (cTmp1)->ZAG_NUMRP			  					  ,oFonte)
-		oPrint:Say( nLin,052, (cTmp1)->ZAH_UTILIZ  					  			  ,oFonte)
-		oPrint:Say( nLin,084, (cTmp1)->F2_DOC				  					  ,oFonte)
-		oPrint:Say( nLin,116, DTOC(STOD((cTmp1)->F2_EMISSAO)) 					  ,oFonte)
-		oPrint:Say( nLin,160, DTOC(STOD((cTmp1)->E1_VENCREA)) 					  ,oFonte)
-		oPrint:Say( nLin,200, Substring((cTmp1)->ZAH_CLIENT,1,22)	    		  ,oFonte)
-		oPrint:Say( nLin,300, Substring((cTmp1)->ZAH_AGENCI,1,17)				  ,oFonte)
-		oPrint:Say( nLin,400, Transform( (cTmp1)->ZAH_VALLIQ, "@E 999,999,999.99"),oFonte)
-		oPrint:Say( nLin,465, Transform( nComissao, "@E 999.99%")		  		  ,oFonte)
-		oPrint:Say( nLin,500, Transform( (cTmp1)->ZAH_DESCFI, "@E 999.99%")		  ,oFonte)
-		oPrint:Say( nLin,535, Transform( (cTmp1)->ZAH_INADIM, "@E 999.99%")		  ,oFonte)
-		oPrint:Say( nLin,570, Transform( (cTmp1)->ZAH_DEDUCO, "@E 999.99%")		  ,oFonte)
-		oPrint:Say( nLin,605, Transform( (cTmp1)->ZAH_COMREP, "@E 999.99%")		  ,oFonte)
-		oPrint:Say( nLin,640, Transform( (cTmp1)->ZAH_BV,	  "@E 999.99%")		  ,oFonte)
-		oPrint:Say( nLin,675, Transform( (cTmp1)->ZAH_VLCALC, "@E 999,999,999.99"),oFonte)
-		oPrint:Say( nLin,745, Transform( (cTmp1)->ZAH_REPASS, "@E 999.99%")		  ,oFonte)
-		oPrint:Say( nLin,780, Transform( (cTmp1)->ZAH_REPCOM, "@E 999,999,999.99"),oFonte)
-
-		nLin += REL_VERT_STD
-
-
-		nTotCalc 	+= (cTmp1)->ZAH_VLCALC
-		nTotRepas 	+= (cTmp1)->ZAH_REPCOM
+		ImpDetalhe()
 
 
 		(cTmp1)->(DbSkip())
@@ -288,10 +292,11 @@ Return
 
 Static Function ImpProxPag()
 
+
 	nPag++
 	oPrint:StartPage()
-	cSubTitle := "COMPETÊNCIA: " + Alltrim(MesExtenso(Val(Substring((cTmp1)->ZAG_PERIOD,1,2)))) + "/" + Substring((cTmp1)->ZAG_PERIOD,3,4)  + " - CNPJ: " + Transform(Alltrim((cTmp1)->ZAF_CGC),"@R 99.999.999/9999-99")
-	nLin := PXCABECA(@oPrint, "REPASSE A PAGAR (" + Alltrim((cTmp1)->ZAF_CODIGO) + " - " + Alltrim((cTmp1)->ZAF_DESCRI) + ")" , cSubTitle  , nPag)
+	cSubTitle := "COMPETÊNCIA: " + Alltrim(MesExtenso(Val(Substring(cPeriodo,1,2)))) + "/" + Substring(cPeriodo,3,4)  + " - CNPJ: " + Transform(Alltrim(ZAF->ZAF_CGC),"@R 99.99.999/9999-99")
+	nLin := PXCABECA(@oPrint, "REPASSE A PAGAR (" + Alltrim(ZAF->ZAF_CODIGO) + " - " + Alltrim(ZAF->ZAF_DESCRI) + ")" , cSubTitle  , nPag)
 
 
 	oPrint:Say( nLin,020, "RP",oFonteN)
@@ -325,7 +330,7 @@ Return
     @author  Bruno Alves de Oliveira
     @since   24-08-2020
 /*/
-Static Function GetData()
+Static Function GetData(cPPeriodo,cPPracaDe,cPPracaAte,cPRpDe,cPRpAte)
 
 	// Busca os registros a serem impressos no relatório
 	BeginSql Alias cTmp1
@@ -394,15 +399,17 @@ Static Function GetData()
 		SE1.D_E_L_E_T_ = ''
 		WHERE
 		ZAG_FILIAL = '01' AND
-		ZAG_PERIOD = %Exp:cPeriodo% AND
-		ZAG_PRACA BETWEEN %Exp:MV_PAR02% AND %Exp:MV_PAR03% AND
-		ZAG_NUMRP BETWEEN %Exp:MV_PAR04% AND %Exp:MV_PAR05% AND
+		ZAG_PERIOD = %Exp:cPPeriodo% AND
+		ZAG_PRACA BETWEEN %Exp:cPPracaDe% AND %Exp:cPPracaAte% AND
+		ZAG_NUMRP BETWEEN %Exp:cPRpDe% AND %Exp:cPRpAte% AND
 		ZAF.D_E_L_E_T_ = '' AND
 		ZAG.D_E_L_E_T_ = '' AND
 		ZAH.D_E_L_E_T_ = ''
 		ORDER BY 1,2
 
 	EndSql
+
+
 
 Return
 
@@ -556,6 +563,122 @@ User Function PXVERSAO()
 	EndIf
 Return cPXVersao
 
+/*/{Protheus.doc} ImpPerComp
+//Função responsavel pela impressão do periodo de compensação
+@author Bruno Alves
+@since 22/10/2020
+@version 1.0
+@return ${return}, ${return_description}
+@param cPerg, characters, descricao
+@type function
+/*/
+
+Static Function ImpPerComp()
+
+	Local n
+	//Imprimo todos os meses que foram compensados
+	For n:=1 to Len(aImpNeg)
+
+
+		//Executo a query para impressão
+		GetData(aImpNeg[n][4],aImpNeg[n][2],aImpNeg[n][2],"","ZZZZZZ")
+
+		(cTmp1)->(DbGoTop())
+
+		oPrint:Say( nLin,020, "Competência: " + MesExtenso(Val(Substr((cTmp1)->ZAG_PERIOD,1,2))) + "/" + Substr((cTmp1)->ZAG_PERIOD,3,4)			 	  ,oFonteN)
+		nLin += REL_VERT_STD
+
+		While (cTmp1)->(!Eof())
+
+			//Imprimo os detalhes
+			ImpDetalhe()
+
+			(cTmp1)->(DbSkip())
+
+		EndDo
+
+		//ImpressÃ£o dos totalizadores
+		oPrint:Say( nLin,675, Transform( nTotCalc,  "@E 999,999,999.99"),oFonteN)
+		oPrint:Say( nLin,780, Transform( nTotRepas, "@E 999,999,999.99"),oFonteN)
+		nTotCalc  := 0
+		nTotRepas := 0
+
+		nLin += REL_VERT_STD
+
+
+		(cTmp1)->(DbCloseArea())
+
+	Next
+
+
+
+
+Return
+
+/*/{Protheus.doc} PerNeg
+//Função responsavel pela montagem dos periodos que serão impressos para justificar o desconto do mes/ano
+@author Bruno Alves
+@since 22/10/2020
+@version 1.0
+@return ${return}, ${return_description}
+@param cPerg, characters, descricao
+@type function
+/*/
+
+Static Function PerNeg(cPraca,cMesAno)
+
+	Local cTmp := GetNextAlias()
+	Local lOk  := .T.
+	Local aPerNeg   := {}
+	Local i
+
+	For i:=1 to 999
+
+
+		// Busca os registros a serem impressos no relatório
+		BeginSql Alias cTmp
+
+			SELECT ZAH_CODIGO,ZAH_DTACUM,ZAH_PRACA,ZAH_PERIOD FROM %table:ZAH% AS ZAH
+			WHERE
+			ZAH_PRACA = %Exp:cPraca% AND
+			ZAH_DTACUM <> '' AND
+			ZAH_ACUCAL < 0 AND
+			ZAH_PERIOD = %Exp:cMesAno% AND
+			D_E_L_E_T_ = ''
+
+		EndSql
+
+
+		If (cTmp)->(!Eof())
+
+			aAdd(aPerNeg,{(cTmp)->ZAH_CODIGO,; //01 Codigo
+				(cTmp)->ZAH_PRACA,;			   //02 Praça
+				(cTmp)->ZAH_PERIOD,;		   //03 Periodo
+				(cTmp)->ZAH_DTACUM })		   //04 Periodo Negativo
+
+			cPraca 	 	:= (cTmp)->ZAH_PRACA
+			cMesAno 	:= (cTmp)->ZAH_DTACUM
+
+		Else
+			//Se não encontrou sai
+			(cTmp)->(DbCloseArea())
+			Exit
+
+		EndIf
+
+		(cTmp)->(DbCloseArea())
+
+	Next
+
+	//Se tiver alguma compensação, será necessário a ordenação
+	If Len(aPerNeg) > 0
+		aPerNeg := aSort(aPerNeg,,, { |x, y| x[4] < y[4] })
+	EndIf
+
+
+
+Return(aPerNeg)
+
 /*/{Protheus.doc} ValidPerg
 //TODO Funï¿½ï¿½o que cria as perguntas.
 @author Eduardo Cevoli
@@ -596,3 +719,46 @@ Static Function ValidPerg(cPerg)
 	RestArea(aArea)
 Return()
 
+
+/*/{Protheus.doc} ImpDetalhe
+//Função responsavel pela impressão do detalhe
+@author Bruno Alves de Oliveira
+@since 22/10/2020
+@version 1.0
+@return ${return}, ${return_description}
+@param cPerg, characters, descricao
+@type function
+/*/
+
+Static Function ImpDetalhe()
+
+	oPrint:Say( nLin,020, (cTmp1)->ZAG_NUMRP			  					  ,oFonte)
+	oPrint:Say( nLin,052, (cTmp1)->ZAH_UTILIZ  					  			  ,oFonte)
+	oPrint:Say( nLin,084, (cTmp1)->F2_DOC				  					  ,oFonte)
+	oPrint:Say( nLin,116, DTOC(STOD((cTmp1)->F2_EMISSAO)) 					  ,oFonte)
+	oPrint:Say( nLin,160, DTOC(STOD((cTmp1)->E1_VENCREA)) 					  ,oFonte)
+	oPrint:Say( nLin,200, Substring((cTmp1)->ZAH_CLIENT,1,20)	    		  ,oFonte)
+	oPrint:Say( nLin,300, Substring((cTmp1)->ZAH_AGENCI,1,17)				  ,oFonte)
+	oPrint:Say( nLin,400, Transform( (cTmp1)->ZAH_VALLIQ, "@E 999,999,999.99"),oFonte)
+	oPrint:Say( nLin,465, Transform( 20, "@E 999.99%")		  		  		  ,oFonte)
+	oPrint:Say( nLin,500, Transform( (cTmp1)->ZAH_DESCFI, "@E 999.99%")		  ,oFonte)
+	oPrint:Say( nLin,535, Transform( (cTmp1)->ZAH_INADIM, "@E 999.99%")		  ,oFonte)
+	oPrint:Say( nLin,570, Transform( (cTmp1)->ZAH_DEDUCO, "@E 999.99%")		  ,oFonte)
+	oPrint:Say( nLin,605, Transform( (cTmp1)->ZAH_COMREP, "@E 999.99%")		  ,oFonte)
+	oPrint:Say( nLin,640, Transform( (cTmp1)->ZAH_BV,	  "@E 999.99%")		  ,oFonte)
+	oPrint:Say( nLin,675, Transform( (cTmp1)->ZAH_VLCALC, "@E 999,999,999.99"),oFonte)
+	oPrint:Say( nLin,745, Transform( (cTmp1)->ZAH_REPASS, "@E 999.99%")		  ,oFonte)
+	oPrint:Say( nLin,780, Transform( (cTmp1)->ZAH_REPCOM, "@E 999,999,999.99"),oFonte)
+
+	nLin += REL_VERT_STD
+
+
+	nTotCalc 	+= (cTmp1)->ZAH_VLCALC
+	nTotRepas 	+= (cTmp1)->ZAH_REPCOM
+
+	If nLin > REL_END
+		oPrint:EndPage()
+		ImpProxPag()//Monta cabeçario da proxima pagina
+	EndIf
+
+Return
