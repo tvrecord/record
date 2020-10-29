@@ -26,6 +26,12 @@ Private cNomeTabela	:= ""
 
 	Pergunte(cPerg,.T.) //FAZ A PERGUNTA PARA USUARIO
 
+If !ApOleClient("MsExcel")
+	MsgStop("Microsoft Excel nao instalado.")  //"Microsoft Excel nao instalado."
+	RestArea(aArea)
+	Return
+EndIf
+
 //TRATO AS PERGUNTAS PARA USO NOS FILTROS
 cMesAnt		:= SUBSTRING(DTOS(MonthSub(MV_PAR01, 1)),1,6)
 cMesAtu		:= SUBSTRING(DTOS(MV_PAR01),1,6)
@@ -33,16 +39,6 @@ cNomeTabela	:= UPPER("Banco de Horas - " + ALLTRIM(MesExtenso(Month(MV_PAR01))))
 
 //COMEÇO A MINHA CONSULTA SQL
 BeginSql Alias cAlias
-
-/*
-//Query que traz apenas quem fez hora extra na tabela spi do mês
-SELECT ZF_MAT AS MATRICULA, RA_NOME AS NOME, ZF_SALDATU AS SLDANT, PI_PD AS EVENTO, PI_QUANT AS HORAS, P9_TIPOCOD AS TIPO FROM %table:SZF%
-INNER JOIN %table:SRA% ON ZF_MAT = RA_MAT
-INNER JOIN %table:SPI% ON ZF_MAT = PI_MAT AND SUBSTRING(PI_DATA,1,6) = %exp:cMesAtu%
-INNER JOIN %table:SP9% ON PI_PD = P9_CODIGO
-WHERE SZF010.D_E_L_E_T_ = '' AND SZF010.D_E_L_E_T_ = '' AND SPI010.D_E_L_E_T_ = '' AND SP9010.D_E_L_E_T_ = ''
-AND ZF_COMPET = %exp:cMesAnt% ORDER BY MATRICULA, TIPO
-*/
 
 //Query que traz todos coloboradores que tem saldo na SZF, independente da SPI do mês
 SELECT ZF_MAT AS MATRICULA, RA_NOME AS NOME, ZF_SALDATU AS SLDANT, PI_PD AS EVENTO, PI_QUANT AS HORAS,
@@ -73,7 +69,7 @@ EndSql //FINALIZO A MINHA QUERY
 
 While !(cAlias)->(Eof())
 
-	 		If TIPO == "1"
+	 		If TIPO == "1" //VErifica o tipo de hora 1 = positivo e 2 = negativo
 				nExtraMes 	:= SomaHoras(nExtraMes,HORAS)
 			ElseIf TIPO == "2"
 				nFaltaMes   := SomaHoras(nFaltaMes,HORAS)
@@ -102,6 +98,7 @@ While !(cAlias)->(Eof())
 
 Enddo
 
+	//Calcula e imprime o ultimo registro da tabela
 	nSaldoAtu	:= nSaldoAnt
 	nSaldoAtu	:= SomaHoras (nSaldoAtu,nExtraMes)
 	nSaldoAtu	:= SubHoras (nSaldoAtu,nFaltaMes)
@@ -122,6 +119,7 @@ Enddo
 
 Return
 
+//Programa usado para criar perguntas na tabela SX1 (Tabela de perguntas)
 Static Function ValidPerg(cPerg)
 
 	_sAlias := Alias()
@@ -146,6 +144,8 @@ Static Function ValidPerg(cPerg)
 	dbSelectArea(_sAlias)
 Return
 
+
+/*
 Static Function ValHora(nValor)
 
 	Local cHora 	:= ""
@@ -168,3 +168,4 @@ Static Function ValHora(nValor)
 	EndIf
 
 Return cHora
+*/
