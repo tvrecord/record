@@ -29,7 +29,7 @@ User Function SF1100I()
 
 		//Gravo o numero do RP no cabeçalho da NF
 		Reclock("SF1",.F.)
-		SF1->F1_XNUMRP	:= aXNumRep[nPosRP][2]
+		SF1->F1_XNUMREP	:= aXNumRep[nPosRP][2]
 		MsUnlock()
 
 		//Gravo numero do RP em todos os titulos do contas a pagar
