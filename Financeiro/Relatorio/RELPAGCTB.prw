@@ -1,7 +1,7 @@
 #INCLUDE "rwmake.ch"
 #INCLUDE "topconn.ch"
 
-// Relatório localizado no Financeiro/Relatorios/Especificos/Entradas a pagar Contabil 
+// Relatório localizado no Financeiro/Relatorios/Especificos/Entradas a pagar Contabil
 // Objetivo e conferencia de entradas no contas a pagar de acordo com a entrada - Contabilidade - Eurilene.
 // Rafael França - 03/04/2020
 
@@ -57,7 +57,7 @@ User Function RELPAGCTB
 	cQuery := "SELECT E2_NATUREZ AS NATUREZA, ED_DESCRIC AS DESCRICAO, ED_CONTA AS CCONTABIL "
 	cQuery += ",E2_PREFIXO AS PREFIXO, E2_NUM AS NUMERO, E2_PARCELA AS PARCELA, E2_TIPO AS TIPO "
 	cQuery += ",E2_FORNECE AS FORNECE, E2_LOJA AS LOJA, A2_CGC AS CNPJ, A2_NOME AS NOME "
-	cQuery += ",E2_EMIS1 AS ENTRADA " 
+	cQuery += ",E2_EMIS1 AS ENTRADA "
 	cQuery += ",CASE WHEN E2_BASECOF <> 0 AND E2_DESDOBR <> 'S' THEN E2_BASECOF "
 	cQuery += "WHEN E2_BASECSL <> 0 AND E2_DESDOBR <> 'S' THEN E2_BASECSL "
 	cQuery += "WHEN E2_BASEINS <> 0 AND E2_DESDOBR <> 'S' THEN E2_BASEINS "
@@ -74,9 +74,9 @@ User Function RELPAGCTB
 	cQuery += "INNER JOIN SA2010 ON E2_FORNECE = A2_COD AND E2_LOJA = A2_LOJA AND SA2010.D_E_L_E_T_ = '' "
 	cQuery += "INNER JOIN SED010 ON E2_NATUREZ = ED_CODIGO AND SED010.D_E_L_E_T_ = '' "
 	cQuery += "WHERE SE2010.D_E_L_E_T_ = '' "
-	cQuery += "AND E2_EMIS1 BETWEEN '" + DTOS(MV_PAR03) + "' AND '" + DTOS(MV_PAR04) + "' " 
-	cQuery += "AND E2_BAIXA BETWEEN '" + DTOS(MV_PAR06) + "' AND '" + DTOS(MV_PAR07) + "' " 	
-	cQuery += "AND E2_NATUREZ BETWEEN '" +  (MV_PAR01) + "' AND '" + (MV_PAR02) + "' " 		
+	cQuery += "AND E2_EMIS1 BETWEEN '" + DTOS(MV_PAR03) + "' AND '" + DTOS(MV_PAR04) + "' "
+	cQuery += "AND E2_BAIXA BETWEEN '" + DTOS(MV_PAR06) + "' AND '" + DTOS(MV_PAR07) + "' "
+	cQuery += "AND E2_NATUREZ BETWEEN '" +  (MV_PAR01) + "' AND '" + (MV_PAR02) + "' "
 	cQuery += "AND E2_TIPO NOT IN ('ISS','INS','PA','TX') " // Impostos e pagamentos antecipados
 	cQuery += "AND E2_STATUS NOT IN ('D') "	// Desdobramentos
 	cQuery += "AND E2_FILIAL = '" + (MV_PAR05) + "' AND E2_MULTNAT <> '1' "
@@ -84,7 +84,7 @@ User Function RELPAGCTB
 	cQuery += "SELECT EV_NATUREZ AS NATUREZA, ED_DESCRIC AS DESCRICAO, ED_CONTA AS CCONTABIL "
 	cQuery += ",E2_PREFIXO AS PREFIXO, E2_NUM AS NUMERO, E2_PARCELA AS PARCELA, E2_TIPO AS TIPO "
 	cQuery += ",E2_FORNECE AS FORNECE, E2_LOJA AS LOJA, A2_CGC AS CNPJ, A2_NOME AS NOME "
-	cQuery += ",E2_EMIS1 AS ENTRADA " 
+	cQuery += ",E2_EMIS1 AS ENTRADA "
 	cQuery += ",EV_VALOR AS VLBRUTO "
 	cQuery += ",E2_HIST AS HISTORICO "
 	cQuery += ",E2_EMISSAO AS EMISSAO "
@@ -95,14 +95,20 @@ User Function RELPAGCTB
 	cQuery += "INNER JOIN SA2010 ON E2_FORNECE = A2_COD AND E2_LOJA = A2_LOJA AND SA2010.D_E_L_E_T_ = '' "
 	cQuery += "INNER JOIN SEV010 ON EV_FILIAL = E2_FILIAL AND EV_PREFIXO = E2_PREFIXO AND EV_NUM = E2_NUM AND EV_TIPO = E2_TIPO AND EV_PARCELA = E2_PARCELA AND EV_CLIFOR = E2_FORNECE AND EV_LOJA = E2_LOJA AND SEV010.D_E_L_E_T_ = '' "
 	cQuery += "INNER JOIN SED010 ON EV_NATUREZ = ED_CODIGO AND SED010.D_E_L_E_T_ = '' "
-	cQuery += "WHERE SE2010.D_E_L_E_T_ = '' " 
-	cQuery += "AND E2_EMIS1 BETWEEN '" + DTOS(MV_PAR03) + "' AND '" + DTOS(MV_PAR04) + "' " 
-	cQuery += "AND E2_BAIXA BETWEEN '" + DTOS(MV_PAR06) + "' AND '" + DTOS(MV_PAR07) + "' " 	
-	cQuery += "AND EV_NATUREZ BETWEEN '" +  (MV_PAR01) + "' AND '" + (MV_PAR02) + "' " 	
+	cQuery += "WHERE SE2010.D_E_L_E_T_ = '' "
+	cQuery += "AND E2_EMIS1 BETWEEN '" + DTOS(MV_PAR03) + "' AND '" + DTOS(MV_PAR04) + "' "
+	cQuery += "AND E2_BAIXA BETWEEN '" + DTOS(MV_PAR06) + "' AND '" + DTOS(MV_PAR07) + "' "
+	cQuery += "AND EV_NATUREZ BETWEEN '" +  (MV_PAR01) + "' AND '" + (MV_PAR02) + "' "
 	cQuery += "AND E2_TIPO NOT IN ('ISS','INS','PA','TX') " // Impostos e pagamentos antecipados
 	cQuery += "AND E2_STATUS NOT IN ('D') "	// Desdobramentos
 	cQuery += "AND E2_FILIAL = '" + (MV_PAR05) + "' AND E2_MULTNAT = '1' "
-	cQuery += "ORDER BY NATUREZA, NUMERO, PARCELA "
+	IF MV_PAR08 == 1
+	cQuery += "ORDER BY NATUREZA, ENTRADA, NUMERO, PREFIXO, PARCELA "
+	ELSEIF MV_PAR08 == 2
+	cQuery += "ORDER BY NATUREZA, NUMERO, PREFIXO, PARCELA "
+	ELSE
+	cQuery += "ORDER BY NATUREZA, FORNECE, ENTRADA, NUMERO, PREFIXO, PARCELA "
+	ENDIF
 
 	TcQuery cQuery New Alias "TMPSE2"
 
@@ -215,7 +221,7 @@ Static Function RunReport(Cabec1,Cabec2,Titulo,nLin)
 		@nLin,000 PSAY ALLTRIM(TMPSE2->NUMERO) + "/" + TMPSE2->PARCELA
 		@nLin,016 PSAY ALLTRIM(TMPSE2->FORNECE) + "/" + TMPSE2->LOJA
 		@nLin,026 PSAY TMPSE2->CNPJ
-		@nLin,042 PSAY SUBSTR(TMPSE2->NOME,1,40)	
+		@nLin,042 PSAY SUBSTR(TMPSE2->NOME,1,40)
 		@nLin,086 PSAY STOD(TMPSE2->ENTRADA)
 		@nLin,098 PSAY TRANSFORM(TMPSE2->VLBRUTO,"@e 99,999,999.99")
 		@nLin,120 PSAY SUBSTR(TMPSE2->HISTORICO,1,75)
@@ -237,15 +243,15 @@ Static Function RunReport(Cabec1,Cabec2,Titulo,nLin)
 
 		If cNat <> TMPSE2->NATUREZA
 
-			@nLin,00 PSAY REPLICATE("-",limite)	
+			@nLin,00 PSAY REPLICATE("-",limite)
 
-			nLin 	+= 1 	
+			nLin 	+= 1
 
 			@nLin,000 PSAY cNat
-			@nLin,010 PSAY cDescri	
+			@nLin,010 PSAY cDescri
 			@nLin,060 PSAY cConta
 			@nLin,098 PSAY TRANSFORM(nNat,"@e 99,999,999.99")
-			
+
 			nNat := 0
 
 			nLin += 2
@@ -295,7 +301,7 @@ Static Function ValidPerg(cPerg)
 	AADD(aRegs,{cPerg,"05","Filial			","","","mv_ch05","C",06,0,0,"G","","mv_par05","","","","","","","","","","","","","","","","","","","","","","","","","SM0"})
 	AADD(aRegs,{cPerg,"06","Da Baixa 		","","","mv_ch06","D",08,0,0,"G","","mv_par06","","","","","","","","","","","","","","","","","","","","","","","","",""})
 	AADD(aRegs,{cPerg,"07","Ate a Baixa	 	","","","mv_ch07","D",08,0,0,"G","","mv_par07","","","","","","","","","","","","","","","","","","","","","","","","",""})
-
+	AADD(aRegs,{cPerg,"08","Ordem			","","","mv_ch08","C",01,0,0,"C","","mv_par08","Dt. Digitação","","","","","Titulo","","","","","Fornecedor","","","","","","","","","","","","","",""})
 	For i:=1 to Len(aRegs)
 		If !dbSeek(cPerg+aRegs[i,2])
 			RecLock("SX1",.T.)
@@ -307,7 +313,7 @@ Static Function ValidPerg(cPerg)
 			MsUnlock()
 		EndIf
 	Next
-	
+
 	dbSelectArea(_sAlias)
-	
+
 Return
