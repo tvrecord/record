@@ -1,6 +1,8 @@
 #INCLUDE "TOPCONN.CH"
 #INCLUDE "PROTHEUS.CH"
 
+//Rafael França - 28/10/2020 - Relatorio de controle de banco de horas por periodo
+
 User Function PONR001()
 
 Local cAlias 		:= GetNextAlias() //Declarei meu ALIAS
