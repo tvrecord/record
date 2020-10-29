@@ -1,0 +1,168 @@
+#INCLUDE "TOPCONN.CH"
+#INCLUDE "PROTHEUS.CH"
+
+User Function PONR001()
+
+Local cAlias 		:= GetNextAlias() //Declarei meu ALIAS
+Local aArea        	:= GetArea()
+Local oFWMsExcel
+Local oExcel
+Local cArquivo    	:= GetTempPath()+'PONR001.xml'
+
+Private cPerg  		:= "PONR001"
+Private cMesAnt		:= ""
+Private cMesAtu		:= ""
+Private nExtraMes	:= 0
+Private nFaltaMes	:= 0
+Private cMat 		:= ""
+Private cNome   	:= ""
+Private nSaldoAnt	:= 0
+Private nSaldoAtu	:= 0
+Private cNomeTabela	:= ""
+
+	ValidPerg(cPerg) //INICIA A STATIC FUNCTION PARA CRIAÇÃO DAS PERGUNTAS
+
+	Pergunte(cPerg,.T.) //FAZ A PERGUNTA PARA USUARIO
+
+//TRATO AS PERGUNTAS PARA USO NOS FILTROS
+cMesAnt		:= SUBSTRING(DTOS(MonthSub(MV_PAR01, 1)),1,6)
+cMesAtu		:= SUBSTRING(DTOS(MV_PAR01),1,6)
+cNomeTabela	:= UPPER("Banco de Horas - " + ALLTRIM(MesExtenso(Month(MV_PAR01))))
+
+//COMEÇO A MINHA CONSULTA SQL
+BeginSql Alias cAlias
+
+/*
+//Query que traz apenas quem fez hora extra na tabela spi do mês
+SELECT ZF_MAT AS MATRICULA, RA_NOME AS NOME, ZF_SALDATU AS SLDANT, PI_PD AS EVENTO, PI_QUANT AS HORAS, P9_TIPOCOD AS TIPO FROM %table:SZF%
+INNER JOIN %table:SRA% ON ZF_MAT = RA_MAT
+INNER JOIN %table:SPI% ON ZF_MAT = PI_MAT AND SUBSTRING(PI_DATA,1,6) = %exp:cMesAtu%
+INNER JOIN %table:SP9% ON PI_PD = P9_CODIGO
+WHERE SZF010.D_E_L_E_T_ = '' AND SZF010.D_E_L_E_T_ = '' AND SPI010.D_E_L_E_T_ = '' AND SP9010.D_E_L_E_T_ = ''
+AND ZF_COMPET = %exp:cMesAnt% ORDER BY MATRICULA, TIPO
+*/
+
+//Query que traz todos coloboradores que tem saldo na SZF, independente da SPI do mês
+SELECT ZF_MAT AS MATRICULA, RA_NOME AS NOME, ZF_SALDATU AS SLDANT, PI_PD AS EVENTO, PI_QUANT AS HORAS,
+(SELECT P9_TIPOCOD FROM %table:SP9% WHERE PI_PD = P9_CODIGO AND SP9010.D_E_L_E_T_ = '') AS TIPO
+FROM %table:SZF%
+INNER JOIN %table:SRA% ON ZF_MAT = RA_MAT AND SRA010.D_E_L_E_T_ = ''
+FULL OUTER JOIN %table:SPI% ON ZF_MAT = PI_MAT AND SUBSTRING(PI_DATA,1,6) = '202010' AND SPI010.D_E_L_E_T_ = ''
+WHERE SZF010.D_E_L_E_T_ = ''
+AND ZF_COMPET = '202009'  AND ZF_SALDATU <> 0
+ORDER BY MATRICULA
+
+EndSql //FINALIZO A MINHA QUERY
+
+    //Criando o objeto que irá gerar o conteúdo do Excel
+    oFWMsExcel := FWMSExcel():New()
+
+    //Aba 01 - Teste
+    oFWMsExcel:AddworkSheet("Banco de Horas") //Não utilizar número junto com sinal de menos. Ex.: 1-
+        //Criando a Tabela
+        oFWMsExcel:AddTable("Banco de Horas",cNomeTabela)
+        //Criando Colunas
+        oFWMsExcel:AddColumn("Banco de Horas",cNomeTabela,"MATRICULA",1,1) //1,1 = Modo Texto  // 2,2 = Valor sem R$  //  3,3 = Valor com R$
+        oFWMsExcel:AddColumn("Banco de Horas",cNomeTabela,"NOME",1,1)
+        oFWMsExcel:AddColumn("Banco de Horas",cNomeTabela,"SLD ATUAL",1,1)
+        oFWMsExcel:AddColumn("Banco de Horas",cNomeTabela,"HORAS EXTRAS",1,1)
+		oFWMsExcel:AddColumn("Banco de Horas",cNomeTabela,"HORAS NEGATIVAS",1,1)
+        oFWMsExcel:AddColumn("Banco de Horas",cNomeTabela,"SLD TOTAL",1,1)
+
+While !(cAlias)->(Eof())
+
+	 		If TIPO == "1"
+				nExtraMes 	:= SomaHoras(nExtraMes,HORAS)
+			ElseIf TIPO == "2"
+				nFaltaMes   := SomaHoras(nFaltaMes,HORAS)
+			Endif
+
+	IF cMat <> MATRICULA .AND. cMat <> ""
+
+	nSaldoAtu	:= nSaldoAnt
+	nSaldoAtu	:= SomaHoras (nSaldoAtu,nExtraMes)
+	nSaldoAtu	:= SubHoras (nSaldoAtu,nFaltaMes)
+
+	//Criando as Linhas
+    oFWMsExcel:AddRow("Banco de Horas",cNomeTabela,{cMat,cNome,nSaldoAnt,nExtraMes,nFaltaMes,nSaldoAtu})
+
+	nSaldoAtu	:= 0
+	nExtraMes 	:= 0
+	nFaltaMes   := 0
+
+	Endif
+
+ 	cMat 		:= MATRICULA
+ 	cNome   	:= NOME
+	nSaldoAnt	:= SLDANT
+
+	(cAlias)->(dbSkip()) //PASSAR PARA O PRÓXIMO REGISTRO DA MINHA QUERY
+
+Enddo
+
+	nSaldoAtu	:= nSaldoAnt
+	nSaldoAtu	:= SomaHoras (nSaldoAtu,nExtraMes)
+	nSaldoAtu	:= SubHoras (nSaldoAtu,nFaltaMes)
+    oFWMsExcel:AddRow("Banco de Horas",cNomeTabela,{cMat,cNome,nSaldoAnt,nExtraMes,nFaltaMes,nSaldoAtu})
+
+    oFWMsExcel:Activate()
+    oFWMsExcel:GetXMLFile(cArquivo)
+
+    //Abrindo o excel e abrindo o arquivo xml
+    oExcel:= MsExcel():New()            	//Abre uma nova conexão com Excel
+    oExcel:WorkBooks:Open(cArquivo)     	//Abre uma planilha
+    oExcel:SetVisible(.T.)              	//Visualiza a planilha
+    oExcel:Destroy()                    	//Encerra o processo do gerenciador de tarefas
+
+	(cAlias)->(dbClosearea()) 				//FECHO A TABELA APOS O USO
+
+	RestArea(aArea)
+
+Return
+
+Static Function ValidPerg(cPerg)
+
+	_sAlias := Alias()
+	cPerg := PADR(cPerg,10)
+	dbSelectArea("SX1")
+	dbSetOrder(1)
+	aRegs:={}
+
+	AADD(aRegs,{cPerg,"01","Data Referência:  ","","","mv_ch01","D",08,0,0,"G","","mv_par01","","","","","","","","","","","","","","","","","","","","","","","","",""})
+
+	For i:=1 to Len(aRegs)
+		If !dbSeek(cPerg+aRegs[i,2])
+			RecLock("SX1",.T.)
+			For j:=1 to FCount()
+				If j <= Len(aRegs[i])
+					FieldPut(j,aRegs[i,j])
+				EndIf
+			Next
+			MsUnlock()
+		EndIf
+	Next
+	dbSelectArea(_sAlias)
+Return
+
+Static Function ValHora(nValor)
+
+	Local cHora 	:= ""
+    Local cMinutos 	:= ""
+
+	cMinutos 	:= STRZERO((nValor - Int(nValor))*100,2)
+
+	If nValor < 0
+		If nValor <= -100
+			cHora 		:= "-" + cValToChar(Int(nValor)) + ":" + cMinutos
+		Else
+			cHora 		:= "-" + cValToChar(Int(nValor)) + ":" + cMinutos
+		Endif
+	Else
+		If nValor >= 100
+			cHora 		:= cValToChar(Int(nValor)) + ":" + cMinutos
+		Else
+			cHora 		:= cValToChar(Int(nValor)) + ":" + cMinutos
+		Endif
+	EndIf
+
+Return cHora
