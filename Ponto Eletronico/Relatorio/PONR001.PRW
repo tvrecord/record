@@ -45,9 +45,9 @@ SELECT ZF_MAT AS MATRICULA, RA_NOME AS NOME, ZF_SALDATU AS SLDANT, PI_PD AS EVEN
 (SELECT P9_TIPOCOD FROM %table:SP9% WHERE PI_PD = P9_CODIGO AND SP9010.D_E_L_E_T_ = '') AS TIPO
 FROM %table:SZF%
 INNER JOIN %table:SRA% ON ZF_MAT = RA_MAT AND SRA010.D_E_L_E_T_ = ''
-FULL OUTER JOIN %table:SPI% ON ZF_MAT = PI_MAT AND SUBSTRING(PI_DATA,1,6) = '202010' AND SPI010.D_E_L_E_T_ = ''
+FULL OUTER JOIN %table:SPI% ON ZF_MAT = PI_MAT AND SUBSTRING(PI_DATA,1,6) = %exp:cMesAtu% AND SPI010.D_E_L_E_T_ = ''
 WHERE SZF010.D_E_L_E_T_ = ''
-AND ZF_COMPET = '202009'  AND ZF_SALDATU <> 0
+AND ZF_COMPET = %exp:cMesAnt%  AND ZF_SALDATU <> 0
 ORDER BY MATRICULA
 
 EndSql //FINALIZO A MINHA QUERY
@@ -69,7 +69,7 @@ EndSql //FINALIZO A MINHA QUERY
 
 While !(cAlias)->(Eof())
 
-	 		If TIPO == "1" //VErifica o tipo de hora 1 = positivo e 2 = negativo
+	 		If TIPO == "1" //Verifica o tipo de hora 1 = positivo e 2 = negativo
 				nExtraMes 	:= SomaHoras(nExtraMes,HORAS)
 			ElseIf TIPO == "2"
 				nFaltaMes   := SomaHoras(nFaltaMes,HORAS)
@@ -143,7 +143,6 @@ Static Function ValidPerg(cPerg)
 	Next
 	dbSelectArea(_sAlias)
 Return
-
 
 /*
 Static Function ValHora(nValor)
