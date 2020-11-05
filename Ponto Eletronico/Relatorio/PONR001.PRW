@@ -2,6 +2,7 @@
 #INCLUDE "PROTHEUS.CH"
 
 //Rafael França - 28/10/2020 - Relatorio de controle de banco de horas por periodo
+//SIGAPON -> Relatorios -> Especificos Record -> saldo Banco de Horas
 
 User Function PONR001()
 
