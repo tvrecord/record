@@ -356,13 +356,15 @@ Return
 
 Static Function ExecRateio()
 
-	Local lOk := .T.
-	Local cQuery  := ""
-	Local nCont   := 0
-	Local nValTot := 0
-	Local nPercRat := 0
-	Local nQtd	   := 0
+	Local lOk     	:= .T.
+	Local lRat    	:= .F.
+	Local cQuery  	:= ""
+	Local nCont   	:= 0
+	Local nValTot 	:= 0
+	Local nPercRat  := 0
+	Local nQtd	    := 0
 	Local cRatPraca := ""
+	Local nRecno    := 0
 
 
 
@@ -389,7 +391,7 @@ Static Function ExecRateio()
 
 	While !TMP->(EOF())
 
-
+		lRat := .F.
 
 		IncProc("Rateando o valor do Numero RP" + TMP->ZAH_NUMRP)
 
@@ -414,6 +416,9 @@ Static Function ExecRateio()
 					//ZAH->ZAH_VLRAT  := ROUND(TMP->ZAH_VALOR - ROUND(((SUM->VALDESC*(nPercRat/100))*-1),3),2)
 					ZAH->ZAH_VLRAT  := ROUND(TMP->ZAH_VALOR - ((SUM->VALDESC*(nPercRat/100))*-1),2) // Rafael - 23/10/2020
 					ZAH->(MSUNLOCK())
+
+					lRat := .T. //Vou verificar no final se teve diferença de centavos por conta do arrendondamento
+					nRecno := ZAH->(Recno())
 				Else
 
 					RECLOCK("ZAH",.F.)
@@ -450,14 +455,25 @@ Static Function ExecRateio()
 
 		DbSkip()
 
-		/* -- Em Construção....
+
 		//Faço o ajuste do rateio caso seja necessário por questão de arrendondamento
-		If cRatPraca != TMP->ZAH_PRACA
-			//Função responsavel pelo arrendondamento caso necessário
-			AjustVlRat(cRatPraca)
+		If cRatPraca != TMP->ZAH_PRACA .and. lRat
+			//Verifico se existe diferença
+			If !SumTotZAH(3,cRatPraca,cPeriodo)
+				//Caso exista, faço a correção
+				DbGoto(nRecno)
+				RECLOCK("ZAH",.F.)
+				ZAH->ZAH_VLRAT  += IIF(SUM->DIFREP > 0,ROUND(SUM->DIFREP,2) * -1,ROUND(SUM->DIFREP,2))
+				ZAH->(MSUNLOCK())
+
+			EndIf
+
+			//Fecho a tabela temporaria para a função SumTotZAH receber outra chamada dentro do loop
+			DBSelectArea("SUM")
+			DbCloseArea("SUM")
 
 		EndIf
-		*/
+
 
 	EndDo
 
@@ -471,7 +487,7 @@ Static Function ExecRateio()
 Return
 
 //Descobre o valor total da praça no determinado periodo para fazer o rateio
-//nOpcao = 1 Tratativa para o rateio; 2 Tratativa para fazer o calculo do acumulado do mes seguinte
+//nOpcao = 1 Tratativa para o rateio; 2 Tratativa para fazer o calculo do acumulado do mes seguinte; valor total do valor rateio
 Static Function SumTotZAH(nOpcao,cPraRep,cMesAno)
 
 
@@ -479,7 +495,7 @@ Static Function SumTotZAH(nOpcao,cPraRep,cMesAno)
 	Local lOk := .T.
 	Local nCont := 0
 
-	cQuery := "SELECT ZAH_PRACA,SUM(ZAH_VALOR) AS VALPAG,SUM(ZAH_VLDESC) + SUM(ZAH_ACUCAL) AS VALDESC, SUM(ZAH_VLACUM) AS VLACUM FROM ZAH010 WHERE "
+	cQuery := "SELECT ZAH_PRACA,SUM(ZAH_VALOR) AS VALPAG,SUM(ZAH_VLDESC) + SUM(ZAH_ACUCAL) AS VALDESC, SUM(ZAH_VLACUM) AS VLACUM, (SUM(ZAH_VLRAT) - SUM(ZAH_REPCOM)) AS DIFREP FROM ZAH010 WHERE "
 	cQuery += "ZAH_PRACA = '" + cPraRep + "' AND "
 	cQuery += "ZAH_PERIOD = '" + cMesAno + "' AND "
 	cQuery += "D_E_L_E_T_ = '' "
@@ -504,12 +520,20 @@ Static Function SumTotZAH(nOpcao,cPraRep,cMesAno)
 
 		cPracaNeg := TMP->ZAH_PRACA
 
-	Else
+	ElseIf nOpcao == 2
 
 		//Tratativa para localizar o acumulado, se não localizar
 		If nCont == 0
 			lOk := .F.
 		EndIf
+
+	ElseIf nOpcao == 3
+
+		//Verifico se o valor da praça bateu com o valor do rateio
+		If SUM->DIFREP >= -0.05 .AND. SUM->DIFREP <= 0.05 .AND. SUM->DIFREP != 0
+			lOk := .F.
+		EndIf
+
 
 	EndIf
 
@@ -644,16 +668,3 @@ Static Function TrataVal(cValor)
 
 
 Return(nValor)
-
-//Função responsavel pelo ajuste dos valores por conta dos arrendondamentos
-
-Static Function AjustVlRat(cPraca)
-
-	//Faço a Query da soma do rateio e do valor
-
-	//Faço o comparativo de valores que também pode ser feito na query
-
-	//Localizo um registro valido com a chave posicionada e faço os devidos procedimentos
-
-
-Return

@@ -94,6 +94,7 @@ Static Function fProcPdf()
 	Local _nTotReg  := 0            // Total de Registros
 	Local _nRegAtu  := 0            // Registro atual da regua de processamento
 	Local cDir 		:= Alltrim(MV_PAR07) + "\"
+	Local cImpTot   := ""
 
 	Local cBkpTmp := ""
 
@@ -159,7 +160,8 @@ Static Function fProcPdf()
 
 		nQtd++
 
-		cPraca := Alltrim((cTmp1)->ZAG_PRACA)
+		cPraca  := Alltrim((cTmp1)->ZAG_PRACA)
+		cImpTot := Alltrim((cTmp1)->ZAF_IMPTOT)
 		//Usuario responsavel pela assinatura
 		If Empty(cUsuario)
 			cUsuario	:= Substr(Embaralha((cTmp1)->ZAG_USERGI,1),3,6)
@@ -187,7 +189,6 @@ Static Function fProcPdf()
 
 		If cPraca != Alltrim((cTmp1)->ZAG_PRACA)
 
-
 			//ImpressÃ£o dos totalizadores
 			oPrint:Say( nLin,675, Transform( nTotCalc,  "@E 999,999,999.99"),oFonteN)
 			oPrint:Say( nLin,780, Transform( nTotRepas, "@E 999,999,999.99"),oFonteN)
@@ -195,47 +196,67 @@ Static Function fProcPdf()
 			nTotRepas := 0
 			nTotRat	  := 0
 
-			nLin += REL_VERT_STD
 
-			oPrint:Say( nLin,020, "RP"			,oFonteN)
-			oPrint:Say( nLin,052, "NF"			,oFonteN)
-			oPrint:Say( nLin,084, "CLIENTE"		,oFonteN)
-			//oPrint:Say( nLin,300, "RATEIO"		,oFonteN)
-			oPrint:Say( nLin,345, "VALOR"		,oFonteN)
-
-			nLin += REL_VERT_STD
-
-			//Criar uma array para impressão das NFs
-			For i:=1 to Len(aInfo)
-
-				oPrint:Say( nLin,020, aInfo[i][1] ,oFonte)
-				oPrint:Say( nLin,052, aInfo[i][2] ,oFonte)
-				oPrint:Say( nLin,084, aInfo[i][3] ,oFonte)
-				//	oPrint:Say( nLin,300, Transform( aInfo[i][4], "@E 999.99%") ,oFonte)
-				oPrint:Say( nLin,335, Transform( aInfo[i][5], "@E 999,999,999.99") ,oFonte)
-
-				nTotRat += aInfo[i][5]
+			//Verifico se imprime apenas o total ou não
+			If cImpTot == "N"
 
 				nLin += REL_VERT_STD
 
-				If nLin > REL_END
-					oPrint:EndPage()
-					ImpProxPag()//Monta cabeçario da proxima pagina
+				oPrint:Say( nLin,020, "RP"			,oFonteN)
+				oPrint:Say( nLin,052, "NF"			,oFonteN)
+				oPrint:Say( nLin,084, "CLIENTE"		,oFonteN)
+				//oPrint:Say( nLin,300, "RATEIO"		,oFonteN)
+				oPrint:Say( nLin,345, "VALOR"		,oFonteN)
 
-					oPrint:Say( nLin,020, "RP"			,oFonteN)
-					oPrint:Say( nLin,052, "NF"			,oFonteN)
-					oPrint:Say( nLin,084, "CLIENTE"		,oFonteN)
-					//		oPrint:Say( nLin,300, "RATEIO"		,oFonteN)
-					oPrint:Say( nLin,345, "VALOR"		,oFonteN)
+				nLin += REL_VERT_STD
+
+				//Criar uma array para impressão das NFs
+				For i:=1 to Len(aInfo)
+
+					oPrint:Say( nLin,020, aInfo[i][1] ,oFonte)
+					oPrint:Say( nLin,052, aInfo[i][2] ,oFonte)
+					oPrint:Say( nLin,084, aInfo[i][3] ,oFonte)
+					//	oPrint:Say( nLin,300, Transform( aInfo[i][4], "@E 999.99%") ,oFonte)
+					oPrint:Say( nLin,335, Transform( aInfo[i][5], "@E 999,999,999.99") ,oFonte)
+
+					nTotRat += aInfo[i][5]
 
 					nLin += REL_VERT_STD
 
-				EndIf
+					If nLin > REL_END
+						oPrint:EndPage()
+						ImpProxPag()//Monta cabeçario da proxima pagina
+
+						oPrint:Say( nLin,020, "RP"			,oFonteN)
+						oPrint:Say( nLin,052, "NF"			,oFonteN)
+						oPrint:Say( nLin,084, "CLIENTE"		,oFonteN)
+						//		oPrint:Say( nLin,300, "RATEIO"		,oFonteN)
+						oPrint:Say( nLin,345, "VALOR"		,oFonteN)
+
+						nLin += REL_VERT_STD
+
+					EndIf
 
 
-			Next
+				Next
 
-			oPrint:Say( nLin,335, Transform( nTotRat, "@E 999,999,999.99") ,oFonteN)
+				oPrint:Say( nLin,335, Transform( nTotRat, "@E 999,999,999.99") ,oFonteN)
+
+			Else
+
+				For i:=1 to Len(aInfo)
+
+					nTotRat += aInfo[i][5]
+
+				Next
+
+				nLin += REL_VERT_STD
+				oPrint:Say( nLin,020, "EMITIR UMA ÚNICA NF - REP. COMPETÊNCIA"			,oFonteN)
+				nLin += REL_VERT_STD
+				oPrint:Say( nLin,020, "TOTAL"			,oFonteN)
+				oPrint:Say( nLin,130, Transform( nTotRat, "@E 999,999,999.99") ,oFonteN)
+
+			EndIf
 
 			nLin := 420
 
@@ -295,7 +316,7 @@ Static Function ImpProxPag()
 
 	nPag++
 	oPrint:StartPage()
-	cSubTitle := "COMPETÊNCIA: " + Alltrim(MesExtenso(Val(Substring(cPeriodo,1,2)))) + "/" + Substring(cPeriodo,3,4)  + " - CNPJ: " + Transform(Alltrim(ZAF->ZAF_CGC),"@R 99.99.999/9999-99")
+	cSubTitle := "COMPETÊNCIA: " + Alltrim(MesExtenso(Val(Substring(cPeriodo,1,2)))) + "/" + Substring(cPeriodo,3,4)  + " - CNPJ: " + Transform(Alltrim(ZAF->ZAF_CGC),"@R 99.999.999/9999-99")
 	nLin := PXCABECA(@oPrint, "REPASSE A PAGAR (" + Alltrim(ZAF->ZAF_CODIGO) + " - " + Alltrim(ZAF->ZAF_DESCRI) + ")" , cSubTitle  , nPag)
 
 
@@ -337,7 +358,7 @@ Static Function GetData(cPPeriodo,cPPracaDe,cPPracaAte,cPRpDe,cPRpAte)
 
 		SELECT
 		ZAG_PRACA,ZAG_NUMRP,ZAG_EMISSA,ZAG_PERIOD,ZAG_USERGI,
-		ZAF_CODIGO,ZAF_DESCRI,ZAF_CGC,
+		ZAF_CODIGO,ZAF_DESCRI,ZAF_CGC,ZAF_IMPTOT,
 		ZAH_REPTOT,ZAH_DESCFI,ZAH_INADIM,ZAH_DEDUCO,ZAH_COMREP,ZAH_BV,ZAH_VLCALC,ZAH_REPASS,ZAH_REPCOM,ZAH_AGENCI,ZAH_VALLIQ,ZAH_CLIENT,ZAH_RATEIO,ZAH_VLRAT,ZAH_UTILIZ,
 		QTD,
 		VALTOT,
