@@ -81,6 +81,7 @@ Static Function RunReport(Cabec1,Cabec2,Titulo,nLin)
 	Local nTotal	:= 0
 	Local lOk		:= .F.
 	Local cCampo	:= "ZY_MES" + MV_PAR03
+	Local cCampo1 	:= "ZY_USO" + MV_PAR03
 	Local cMemo		:= ""
 	Local nAprov    := 0
 	Local nBApro	:= 0
@@ -513,6 +514,17 @@ Static Function RunReport(Cabec1,Cabec2,Titulo,nLin)
 					@nLin,125 PSAY (nOrcSig - nSIG) PICTURE "@E 999,999,999.99"
 					@nLin,179 PSAY "TOTAL:"
 					@nLin,206 PSAY nSIG PICTURE "@E 999,999,999.99"
+
+						//Rafael França - 09/11/2020 - Grava saldo utilizado para controle do orçamento
+						dbSelectArea("SZY")
+						dbSetOrder(1)
+
+						IF dbSeek(xFilial("SZY")+PADR(Alltrim(cSIG),6)+MV_PAR04)
+						Reclock("SZY",.F.)
+						@cCampo1  := nAprov
+						SZY->(MsUnlock())
+						Endif
+
 					nLin 	+= 2
 					nAprov  := 0
 					nBApro	:= 0
@@ -712,6 +724,7 @@ Static Function RunReport(Cabec1,Cabec2,Titulo,nLin)
 	ELSE // Calculo Normal
 
 	*/
+
 	nOrcSig := Posicione("SZY",1,xFilial("SZY")+PADR(Alltrim(cSIG),6)+MV_PAR04,@cCampo)
 
 	//ENDIF
@@ -741,6 +754,17 @@ Static Function RunReport(Cabec1,Cabec2,Titulo,nLin)
 	@nLin,125 PSAY (nOrcSig - nSIG) PICTURE "@E 999,999,999.99"
 	@nLin,179 PSAY "TOTAL:"
 	@nLin,206 PSAY nSIG PICTURE "@E 999,999,999.99"
+
+	//Rafael França - 09/11/2020 - Grava saldo utilizado para controle do orçamento
+	dbSelectArea("SZY")
+	dbSetOrder(1)
+
+	IF dbSeek(xFilial("SZY")+PADR(Alltrim(cSIG),6)+MV_PAR04)
+	Reclock("SZY",.F.)
+	@cCampo1  := nAprov
+	SZY->(MsUnlock())
+	Endif
+
 	nLin 	+= 2
 	nAprov  := 0
 	nBApro	:= 0
@@ -858,7 +882,6 @@ Static Function RunReport(Cabec1,Cabec2,Titulo,nLin)
 
 		EndDo
 
-
 		dbSelectArea("TMP1")
 		dbCloseArea("TMP1")
 
@@ -954,7 +977,6 @@ Static Function RunReport(Cabec1,Cabec2,Titulo,nLin)
 
 					nOrcSigF := Posicione("SZY",1,xFilial("SZY")+PADR(Alltrim(cSIGF),6)+MV_PAR04,@cCampo)
 
-
 					If cSIGF	!= aPedidosF[_I,1] .AND. lOk
 						@nLin,001 PSAY REPLICATE("-",LIMITE)
 						nLin 	+= 1
@@ -975,6 +997,17 @@ Static Function RunReport(Cabec1,Cabec2,Titulo,nLin)
 						@nLin,125 PSAY (nOrcSigF - nSIGF) PICTURE "@E 999,999,999.99"
 						@nLin,179 PSAY "TOTAL:"
 						@nLin,206 PSAY nSIGF PICTURE "@E 999,999,999.99"
+
+						//Rafael França - 09/11/2020 - Grava saldo utilizado para controle do orçamento
+						dbSelectArea("SZY")
+						dbSetOrder(1)
+
+						IF dbSeek(xFilial("SZY")+PADR(Alltrim(cSIGF),6)+MV_PAR04)
+						Reclock("SZY",.F.)
+						@cCampo1  := nAprovF
+						SZY->(MsUnlock())
+						Endif
+
 						nLin 	+= 2
 						nAprovF  := 0
 						nBAproF	:= 0
