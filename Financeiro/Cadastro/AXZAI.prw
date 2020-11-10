@@ -108,7 +108,7 @@ User Function ImpMerch()
 			aDados[i,28],;//6º : Inicio Veiculacao
 			aDados[i,30],;//7º : Fim Veiculacao
 			aDados[i,34],;//8º : Desconto
-			aDados[i,35],;//9º: N de Acões
+			aDados[i,35],;//9º : N de Acões
 			aDados[i,37],;//10º: Valor Tabela
 			aDados[i,40],;//11º: Valor liquido
 			aDados[i,43],;//12º: Valor Fatudado
@@ -119,10 +119,9 @@ User Function ImpMerch()
 	If Len(aInfo) > 0
 
 		//Ordena todas as informações Praca e Numero RP
-		ASORT(aInfo,,,{|x,y|x[6]+x[1] < y[6]+y[1]})
+		ASORT(aInfo,,,{|x,y|x[1]+x[2] < y[1]+y[2]})
 
 		Processa({||ExecImp1()}, "ImpMerch - ExecImport", "Importando Merchandising atraves do  arquivo .csv.")
-		//Processa({||ExecRateio()}, "ImpMerch - ExecRateio", "Executando Merchandising após importação.")
 
 	Else
 
@@ -137,7 +136,6 @@ User Function ImpMerch()
 Return
 
 //Rafael França - Importa merchandising por meio de arquivo csv
-
 Static Function ExecImp1()
 
 	Local n
@@ -151,7 +149,6 @@ Static Function ExecImp1()
 		IncProc("Importando Merchandising")
 
 		//Gera o codigo sequencial para o cadastramento
-
 		If ALLTRIM(aInfo[n][1]) <> "" .OR. ALLTRIM(aInfo[n][1]) <> "Programa"
 
 			RECLOCK("ZAI",.T.)
@@ -184,7 +181,6 @@ TcSqlExec(cDelete)
 Return
 
 //Cria e valida as perguntas na tabela de perguntas SX1
-
 Static Function ValidPerg(cPerg)
 
 	Local _sAlias := Alias()
@@ -221,8 +217,7 @@ Static Function ValidPerg(cPerg)
 
 Return
 
-//Função para excluir o periodo do cadastro do repasse das praças
-
+//Função para excluir o periodo do cadastro de merchandising
 Static Function DelPer1(cPeriodo,cPerSum)
 
 	Local cDel	 := ""
@@ -241,7 +236,6 @@ Static Function DelPer1(cPeriodo,cPerSum)
 Return
 
 //Trata valores da planilha
-
 Static Function TrataVal(cValor)
 
 	Local nValor := 0
