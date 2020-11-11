@@ -58,7 +58,7 @@ User Function RATECC
 	Private nTot		 := 0
 	Private lOk 		 := .T.
 	Private cPath		 := ""
-	Private nArq 		 := 0 
+	Private nArq 		 := 0
 	Private cCusto		 := ""
 	Private cDescri		 := ""
 
@@ -82,7 +82,7 @@ User Function RATECC
 	elseIf MV_PAR06 == 3
 		titulo := "Rateio do Plano Odontologico Referente ao Período: " + SUBSTR(DTOS(MV_PAR09),5,2) + "/" + SUBSTR(DTOS(MV_PAR09),1,4) + ""
 	elseIf MV_PAR06 == 4
-		titulo := "Rateio de Plano Medico Referente ao Período: " + SUBSTR(DTOS(MV_PAR09),5,2) + "/" + SUBSTR(DTOS(MV_PAR09),1,4) + ""		
+		titulo := "Rateio de Plano Medico Referente ao Período: " + SUBSTR(DTOS(MV_PAR09),5,2) + "/" + SUBSTR(DTOS(MV_PAR09),1,4) + ""
 	EndIf
 
 
@@ -142,12 +142,12 @@ User Function RATECC
 		cQuery += "INNER JOIN RCC010 ON "
 		cQuery += "RHK_PLANO = SUBSTRING(RCC_CONTEU,1,2) AND "
 		cQuery += "RCC_CODIGO = '" + cRCC_Cod + "'  AND "
-		cQuery += "RCC010.D_E_L_E_T_ = '' "   
+		cQuery += "RCC010.D_E_L_E_T_ = '' "
 		cQuery += "WHERE "
 		cQuery += "RHK010.D_E_L_E_T_ = '' AND "
 		cQuery += "RHK_PERFIM = '' AND "
-		cQuery += "RHK_TPFORN = '" + cTpForn + "' AND " 
-		cQuery += "RHK_CODFOR = '" + cCodFor + "' " 
+		cQuery += "RHK_TPFORN = '" + cTpForn + "' AND "
+		cQuery += "RHK_CODFOR = '" + cCodFor + "' "
 		cQuery += "GROUP BY RHK_FILIAL,RHK_PLANO,RHK_MAT,RHK_PERFIM,RHK_TPFORN,RHK_CODFOR) AS RHK010 ON "
 		cQuery += "RHK_FILIAL = RA_FILIAL AND "
 		cQuery += "RHK_MAT = RA_MAT "
@@ -158,12 +158,12 @@ User Function RATECC
 		cQuery += "INNER JOIN RCC010 ON "
 		cQuery += "RHL_PLANO = SUBSTRING(RCC_CONTEU,1,2) AND "
 		cQuery += "RCC_CODIGO = '" + cRCC_Cod + "'  AND "
-		cQuery += "RCC010.D_E_L_E_T_ = '' "  
+		cQuery += "RCC010.D_E_L_E_T_ = '' "
 		cQuery += "WHERE "
 		cQuery += "RHL010.D_E_L_E_T_ = '' AND "
 		cQuery += "RHL_PERFIM = '' AND "
-		cQuery += "RHL_TPFORN = '" + cTpForn + "' AND " 
-		cQuery += "RHL_CODFOR = '" + cCodFor + "' "  
+		cQuery += "RHL_TPFORN = '" + cTpForn + "' AND "
+		cQuery += "RHL_CODFOR = '" + cCodFor + "' "
 		cQuery += "GROUP BY RHL_FILIAL,RHL_PLANO,RHL_MAT,RHL_PERFIM,RHL_TPFORN,RHL_CODFOR) AS RHL010 ON "
 		cQuery += "RHL_FILIAL = RA_FILIAL AND "
 		cQuery += "RHL_MAT = RA_MAT "
@@ -172,7 +172,7 @@ User Function RATECC
 
 		cQuery += "SRA010.RA_FILIAL = '" + (MV_PAR01) + "' AND "
 		cQuery += "SRA010.RA_MAT BETWEEN '" + (MV_PAR02) + "' AND '" + (MV_PAR03) + "' AND "
-		cQuery += "SRA010.RA_CC BETWEEN '" + (MV_PAR04) + "' AND '" + (MV_PAR05) + "' AND "		
+		cQuery += "SRA010.RA_CC BETWEEN '" + (MV_PAR04) + "' AND '" + (MV_PAR05) + "' AND "
 		cQuery += "RA_SITFOLH <> 'D' AND "
 		cQuery += "RA_CC BETWEEN '' AND 'zzzzzzzzz'  AND "
 		cQuery += "SRA010.D_E_L_E_T_ = ''  AND "
@@ -233,7 +233,7 @@ Return
 ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
 /*/
 
-Static Function RunReport(Cabec1,Cabec2,Titulo,nLin) 
+Static Function RunReport(Cabec1,Cabec2,Titulo,nLin)
 
 	IF MV_PAR08 == 1
 
@@ -295,10 +295,10 @@ Static Function RunReport(Cabec1,Cabec2,Titulo,nLin)
 
 
 		If !EMPTY(MV_PAR07)
-			nLin += 3		
+			nLin += 3
 			@nLin, 000 PSAY "----------------------------------------------------------------------------------"
 			nLin++
-			@nLin, 000 PSAY "Observação: " + ALLTRIM(MV_PAR07)                                      
+			@nLin, 000 PSAY "Observação: " + ALLTRIM(MV_PAR07)
 			nLin++
 			@nLin, 000 PSAY "----------------------------------------------------------------------------------"
 		Endif
@@ -325,29 +325,29 @@ Static Function RunReport(Cabec1,Cabec2,Titulo,nLin)
 		DBSelectArea("TMP")
 		DBCloseArea("TMP")
 
-		Return          
+		Return
 
-	ELSE 
+	ELSE
 
 		Processa({|| RatMedImp() },"Exportando Rateio...")
 
-	ENDIF 
+	ENDIF
 
-Static Function RatMedImp  
+Static Function RatMedImp
 
 	If MV_PAR06 == 1
-		cPath := "C:\RATEIO\SEGVIDA"
+		cPath := "C:\RATEIO\SEGVIDA.CSV"
 	ELSEIF MV_PAR06 == 2
-		cPath := "C:\RATEIO\PREVERMED"
+		cPath := "C:\RATEIO\PREVERMED.CSV"
 	ELSEIF MV_PAR06 == 3
-		cPath := "C:\RATEIO\ODONTOLOGICO"		
+		cPath := "C:\RATEIO\ODONTOLOGICO.CSV"
 	ELSEIF MV_PAR06 == 4
-		cPath := "C:\RATEIO\MEDICO"
+		cPath := "C:\RATEIO\MEDICO.CSV"
 	EndIf
 
-	nArq  := FCreate(cPath + ".CSV")
+	nArq  := FCreate(cPath)
 
-	If nArq == -1 
+	If nArq == -1
 		DBSelectARea("TMP")
 		DBCloseARea("TMP")
 		MsgAlert("Nao conseguiu criar o arquivo!")
@@ -360,14 +360,14 @@ Static Function RatMedImp
 	While !EOF()
 		nValTot += TMP->QUANTIDADE
 		dbSkip()
-	Enddo   
+	Enddo
 
-	FWrite(nArq, "CCUSTO" + ";" + "DESCRICAO" + ";" + "PERCENTUAL" + Chr(13) + Chr(10))	
+	FWrite(nArq, "CCUSTO" + ";" + "DESCRICAO" + ";" + "PERCENTUAL" + Chr(13) + Chr(10))
 
 	DBSelectArea("TMP")
-	DBGotop()	
+	DBGotop()
 
-	While !EOF()		
+	While !EOF()
 
 		cCusto 		:= TMP->RA_CC
 		cDescri 	:= TMP->CTT_DESC01
@@ -375,12 +375,12 @@ Static Function RatMedImp
 
 		FWrite(nArq, ALLTRIM(cCusto) + ";" + ALLTRIM(cDescri) + ";" + Transform(ROUND(nPerc,2),"@R 99.99") + Chr(13) + Chr(10))
 
-		dbskip()		
+		dbskip()
 
-	ENDDO 
+	ENDDO
 
 
-	FClose(nArq)   
+	FClose(nArq)
 
 	DBSelectARea("TMP")
 	DBCloseARea("TMP")
@@ -390,7 +390,7 @@ Static Function RatMedImp
 	oExcel:SetVisible(.T.)
 	oExcel:Destroy()
 
-	FErase(cPath + ".CSV")	
+	FErase(cPath + ".CSV")
 
 Return
 
@@ -409,7 +409,7 @@ Static Function ValidPerg(cPerg)
 	AADD(aRegs,{cPerg,"04","C. Custo De ?","","","mv_ch04","C",09,0,0,"G","","mv_par04","","","","","","","","","","","","","","","","","","","","","","","","","CTT"})
 	AADD(aRegs,{cPerg,"05","C. Custo Ate ?","","","mv_ch05","C",09,0,0,"G","","mv_par05","","","","","","","","","","","","","","","","","","","","","","","","","CTT"})
 	AADD(aRegs,{cPerg,"06","Rateio De ?","","","mv_ch06","N",01,0,2,"C","","mv_par06","Seguro de Vida","","","","","Prevermed","","","","","Plano Odontologico","","","","","Plano Medico","","","","","","","","",""})
-	AADD(aRegs,{cPerg,"07","Observação ","","","mv_ch07","C",99,0,0,"G","","mv_par07","","","","","","","","","","","","","","","","","","","","","","","","",""}) 
+	AADD(aRegs,{cPerg,"07","Observação ","","","mv_ch07","C",99,0,0,"G","","mv_par07","","","","","","","","","","","","","","","","","","","","","","","","",""})
 	AADD(aRegs,{cPerg,"08","Formato 		","","","mv_ch08","N",01,0,2,"C","","mv_par08","Relatorio","","","","","CSV","","","","","","","","","","","","","","","","","","","","","","",""})
 	AADD(aRegs,{cPerg,"09","Periodo?","","","mv_ch09","D",08,0,0,"G","","mv_par09","","","","","","","","","","","","","","","","","","","","","","","","","",""})
 
