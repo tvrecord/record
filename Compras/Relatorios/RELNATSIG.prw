@@ -30,7 +30,6 @@ User Function RELNATSIG
 
 	Private lEnd        := .F.
 	Private lAbortPrint := .F.
-	Private CbTxt       := ""
 	Private limite      := 220
 	Private tamanho     := "G"
 	Private nomeprog    := "RELNATSIG"
@@ -38,7 +37,6 @@ User Function RELNATSIG
 	Private aReturn     := { "Zebrado", 1, "Administracao", 1, 2, 1, "", 1}
 	Private nLastKey    := 0
 	Private cPerg       := "RELNATS2"
-	Private cbtxt      	:= Space(10)
 	Private cbcont     	:= 00
 	Private CONTFL     	:= 01
 	Private m_pag      	:= 01
@@ -81,7 +79,7 @@ Static Function RunReport(Cabec1,Cabec2,Titulo,nLin)
 	Local nTotal	:= 0
 	Local lOk		:= .F.
 	Local cCampo	:= "ZY_MES" + MV_PAR03
-	Local cCampo1 	:= "ZY_USO" + MV_PAR03
+	Local cCampo1	:= "ZY_USO" + MV_PAR03
 	Local cMemo		:= ""
 	Local nAprov    := 0
 	Local nBApro	:= 0
@@ -521,7 +519,31 @@ Static Function RunReport(Cabec1,Cabec2,Titulo,nLin)
 
 						IF dbSeek(xFilial("SZY")+PADR(Alltrim(cSIG),6)+MV_PAR04)
 						Reclock("SZY",.F.)
-						@cCampo1  := nAprov
+	IF MV_PAR03 == "01"
+		ZY_USO01  := nAprov
+	ELSEIF MV_PAR03 == "02"
+		ZY_USO02  := nAprov
+	ELSEIF MV_PAR03 == "03"
+		ZY_USO03  := nAprov
+	ELSEIF MV_PAR03 == "04"
+		ZY_USO04  := nAprov
+	ELSEIF MV_PAR03 == "05"
+		ZY_USO05  := nAprov
+	ELSEIF MV_PAR03 == "06"
+		ZY_USO06  := nAprov
+	ELSEIF MV_PAR03 == "07"
+		ZY_USO07  := nAprov
+	ELSEIF MV_PAR03 == "08"
+		ZY_USO08  := nAprov
+	ELSEIF MV_PAR03 == "09"
+		ZY_USO09  := nAprov
+	ELSEIF MV_PAR03 == "10"
+		ZY_USO10  := nAprov
+	ELSEIF MV_PAR03 == "11"
+		ZY_USO11  := nAprov
+	ELSEIF MV_PAR03 == "12"
+		ZY_USO12  := nAprov
+	ENDIF
 						SZY->(MsUnlock())
 						Endif
 
@@ -761,7 +783,31 @@ Static Function RunReport(Cabec1,Cabec2,Titulo,nLin)
 
 	IF dbSeek(xFilial("SZY")+PADR(Alltrim(cSIG),6)+MV_PAR04)
 	Reclock("SZY",.F.)
-	@cCampo1  := nAprov
+	IF MV_PAR03 == "01"
+		ZY_USO01  := nAprov
+	ELSEIF MV_PAR03 == "02"
+		ZY_USO02  := nAprov
+	ELSEIF MV_PAR03 == "03"
+		ZY_USO03  := nAprov
+	ELSEIF MV_PAR03 == "04"
+		ZY_USO04  := nAprov
+	ELSEIF MV_PAR03 == "05"
+		ZY_USO05  := nAprov
+	ELSEIF MV_PAR03 == "06"
+		ZY_USO06  := nAprov
+	ELSEIF MV_PAR03 == "07"
+		ZY_USO07  := nAprov
+	ELSEIF MV_PAR03 == "08"
+		ZY_USO08  := nAprov
+	ELSEIF MV_PAR03 == "09"
+		ZY_USO09  := nAprov
+	ELSEIF MV_PAR03 == "10"
+		ZY_USO10  := nAprov
+	ELSEIF MV_PAR03 == "11"
+		ZY_USO11  := nAprov
+	ELSEIF MV_PAR03 == "12"
+		ZY_USO12  := nAprov
+	ENDIF
 	SZY->(MsUnlock())
 	Endif
 
@@ -1004,7 +1050,31 @@ Static Function RunReport(Cabec1,Cabec2,Titulo,nLin)
 
 						IF dbSeek(xFilial("SZY")+PADR(Alltrim(cSIGF),6)+MV_PAR04)
 						Reclock("SZY",.F.)
-						@cCampo1  := nAprovF
+	IF MV_PAR03 == "01"
+		ZY_USO01  := nAprovF
+	ELSEIF MV_PAR03 == "02"
+		ZY_USO02  := nAprovF
+	ELSEIF MV_PAR03 == "03"
+		ZY_USO03  := nAprovF
+	ELSEIF MV_PAR03 == "04"
+		ZY_USO04  := nAprovF
+	ELSEIF MV_PAR03 == "05"
+		ZY_USO05  := nAprovF
+	ELSEIF MV_PAR03 == "06"
+		ZY_USO06  := nAprovF
+	ELSEIF MV_PAR03 == "07"
+		ZY_USO07  := nAprovF
+	ELSEIF MV_PAR03 == "08"
+		ZY_USO08  := nAprovF
+	ELSEIF MV_PAR03 == "09"
+		ZY_USO09  := nAprovF
+	ELSEIF MV_PAR03 == "10"
+		ZY_USO10  := nAprovF
+	ELSEIF MV_PAR03 == "11"
+		ZY_USO11  := nAprovF
+	ELSEIF MV_PAR03 == "12"
+		ZY_USO12  := nAprovF
+	ENDIF
 						SZY->(MsUnlock())
 						Endif
 
