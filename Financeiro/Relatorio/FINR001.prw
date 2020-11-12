@@ -285,7 +285,7 @@ Static Function fProcPdf()
 			//Zero o vetor para o proxima praça
 			aInfo := {}
 
-			PXRODAPE(@oPrint,"FINR001.PRW","")
+			u_PXRODAPE(@oPrint,"FINR001.PRW","")
 			oPrint:EndPage()
 			oPrint:Preview()
 
@@ -317,7 +317,7 @@ Static Function ImpProxPag()
 	nPag++
 	oPrint:StartPage()
 	cSubTitle := "COMPETÊNCIA: " + Alltrim(MesExtenso(Val(Substring(cPeriodo,1,2)))) + "/" + Substring(cPeriodo,3,4)  + " - CNPJ: " + Transform(Alltrim(ZAF->ZAF_CGC),"@R 99.999.999/9999-99")
-	nLin := PXCABECA(@oPrint, "REPASSE A PAGAR (" + Alltrim(ZAF->ZAF_CODIGO) + " - " + Alltrim(ZAF->ZAF_DESCRI) + ")" , cSubTitle  , nPag)
+	nLin := u_PXCABECA(@oPrint, "REPASSE A PAGAR (" + Alltrim(ZAF->ZAF_CODIGO) + " - " + Alltrim(ZAF->ZAF_DESCRI) + ")" , cSubTitle  , nPag)
 
 
 	oPrint:Say( nLin,020, "RP",oFonteN)
@@ -465,7 +465,7 @@ Return oFonte
 	@since     05/07/2020
 /*/
 
-Static Function PXCABECA(oPrint,cTitle,cSubTitle,nPage, lBlackWhite)
+User Function PXCABECA(oPrint,cTitle,cSubTitle,nPage, lBlackWhite)
 
 	Local oFont24 := u_xFonte(16,,,,"Arial")
 	Local oFont14 := u_xFonte(14,,,,"Arial")
@@ -520,7 +520,7 @@ Return 130
 	@since     05/07/2020
 /*/
 
-Static Function PXRODAPE(oPrint,cFonteBase,cMsgPad)
+User Function PXRODAPE(oPrint,cFonteBase,cMsgPad)
 	Local oFont8 := u_xFonte(8)
 	cMsgPad := If(cMsgPad == Nil,"",AllTrim(cMsgPad) + " ")
 
