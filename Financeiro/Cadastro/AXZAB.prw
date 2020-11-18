@@ -2,20 +2,7 @@
 #INCLUDE "rwmake.ch"
 #INCLUDE "TopConn.ch"
 
-/*/
-ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
-ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
-ฑฑษออออออออออัออออออออออหอออออออัออออออออออออออออออออหออออออัอออออออออออออปฑฑ
-ฑฑบPrograma  ณAxSZK     บ Autor ณ Rafael Franca      บ Data ณ  13  บฑฑ
-ฑฑฬออออออออออุออออออออออสอออออออฯออออออออออออออออออออสออออออฯอออออออออออออนฑฑ
-ฑฑบDescricao ณ Cadastro de situacoes de ativos no sistema.                บฑฑ
-ฑฑบ          ณ                                                            บฑฑ
-ฑฑฬออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
-ฑฑบUso       ณ Record Centro-Oeste                                        บฑฑ
-ฑฑศออออออออออฯออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออผฑฑ
-ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
-฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿
-/*/
+//RAfael Fran็a - 25/09/2020 - Calculo de pagamento de BV com base no contas a pagar SE2 e folha de pagamento SRD
 
 User Function AXZAB
 
@@ -83,22 +70,31 @@ Static Function IMPORTBV(dBaixa1,dBaixa2,dFat1,dFat2)
 	Local lOk		:= .T.
 	Local nCont		:= 0
 
+	//Consulta no conta a pagar e grava็ใo na tabela ZAB
+
 	cQuery := "SELECT E2_PREFIXO,E2_NUM,E2_PARCELA,E2_TIPO,E2_FORNECE,E2_LOJA,E2_NOMFOR,E2_EMISSAO,E2_VENCREA,E2_BAIXA,(E2_IRRF + E2_VALOR) AS E2_VALOR,E2_NATUREZ,E2_HIST,A2_CGC, E2_FATINI, E2_FATFIM "
+	cQuery += ", CASE WHEN E2_BASECOF <> 0 AND E2_DESDOBR <> 'S' THEN E2_BASECOF "
+	cQuery += "WHEN E2_BASECSL > 0 AND E2_DESDOBR <> 'S' THEN E2_BASECSL "
+	cQuery += "WHEN E2_BASEINS > 0 AND E2_DESDOBR <> 'S' THEN E2_BASEINS "
+	cQuery += "WHEN E2_BASEIRF > 0 AND E2_DESDOBR <> 'S' THEN E2_BASEIRF "
+	cQuery += "WHEN E2_BASEISS > 0 AND E2_DESDOBR <> 'S' THEN E2_BASEISS "
+	cQuery += "WHEN E2_BASEPIS > 0 AND E2_DESDOBR <> 'S' THEN E2_BASEPIS "
+	cQuery += "WHEN E2_VALOR   > 0 THEN E2_VALOR END AS VLBRUTO "
 	cQuery += "FROM SE2010 "
 	cQuery += "INNER JOIN SED010 ON E2_NATUREZ = ED_CODIGO "
 	cQuery += "INNER JOIN SA2010 ON A2_COD = E2_FORNECE AND A2_LOJA = E2_LOJA "
 	cQuery += "WHERE SED010.D_E_L_E_T_ = '' AND SE2010.D_E_L_E_T_ = '' AND SA2010.D_E_L_E_T_ = '' "
+	// Filtro os titulos das naturezas de pagamento de BV baixados dentro dos parametros
 	cQuery += "AND ED_COMBV = '1' "
 	cQuery += "AND E2_BAIXA BETWEEN '" + DTOS(dBaixa1) + "' AND '" + DTOS(dBaixa2) + "' "
-	//cQuery += "AND E2_VENCREA BETWEEN '" + DTOS(dFat1) + "' AND '" + DTOS(dFat2) + "' "
 	cQuery += "ORDER BY E2_NATUREZ "
 
 	tcQuery cQuery New Alias "TMPBV"
 
 	If Eof()
-		MsgInfo("Nใo existem dados no periodo informado!","Verifique")
-		dbSelectArea("TMPBV" )
-		dbCloseArea("TMPBV" )
+		MsgInfo("Nใo existem dados no contas a pagar do periodo informado!","Verifique")
+		dbSelectArea("TMPBV")
+		dbCloseArea()
 		Return
 	Endif
 
@@ -130,14 +126,18 @@ Static Function IMPORTBV(dBaixa1,dBaixa2,dFat1,dFat2)
 			ZAB->ZAB_BAIXA 	:= STOD(TMPBV->E2_BAIXA)
 			ZAB->ZAB_NATURE := TMPBV->E2_NATUREZ
 			ZAB->ZAB_OBS    := TMPBV->E2_HIST
-			ZAB->ZAB_VLSE2	:= TMPBV->E2_VALOR
+			ZAB->ZAB_VLSE2	:= TMPBV->VLBRUTO
 			ZAB->ZAB_VEND   := Posicione("SA3",3,xFilial("SA3")+TMPBV->A2_CGC,"A3_COD")
+			IF ALLTRIM(TMPBV->E2_FORNECE) $ "000970/005191"
+			ZAB->ZAB_VALOR	:= TMPBV->VLBRUTO
+			ZAB->ZAB_SPOT	:= TMPBV->VLBRUTO
+			ENDIF
 			IF EMPTY(TMPBV->E2_FATINI) .AND. EMPTY(TMPBV->E2_FATFIM)
 				ZAB->ZAB_FATINI := dFat1
 				ZAB->ZAB_FATFIN := dFat2
 			ELSE
-				ZAB->ZAB_FATINI := TMPBV->E2_FATINI
-				ZAB->ZAB_FATFIN := TMPBV->E2_FATFIM
+				ZAB->ZAB_FATINI := STOD(TMPBV->E2_FATINI)
+				ZAB->ZAB_FATFIN := STOD(TMPBV->E2_FATFIM)
 			ENDIF
 			MsUnlock()
 		ELSE
@@ -148,7 +148,11 @@ Static Function IMPORTBV(dBaixa1,dBaixa2,dFat1,dFat2)
 			ZAB->ZAB_BAIXA 	:= STOD(TMPBV->E2_BAIXA)
 			ZAB->ZAB_NATURE := TMPBV->E2_NATUREZ
 			ZAB->ZAB_OBS    := TMPBV->E2_HIST
-			ZAB->ZAB_VLSE2	:= TMPBV->E2_VALOR
+			ZAB->ZAB_VLSE2	:= TMPBV->VLBRUTO
+			IF ALLTRIM(TMPBV->E2_FORNECE) $ "000970/005191"
+			ZAB->ZAB_VALOR	:= TMPBV->VLBRUTO
+			ZAB->ZAB_SPOT	:= TMPBV->VLBRUTO
+			ENDIF
 			MsUnlock()
 		END
 
@@ -158,18 +162,100 @@ Static Function IMPORTBV(dBaixa1,dBaixa2,dFat1,dFat2)
 	EndDo
 
 	dbSelectArea("TMPBV")
-	dbCloseArea("TMPBV")
+	dbCloseArea()
 
-	//Agora sใo separados os titulos para grava็ใo das notas de faturamento.
+	//Consulta no movimento da folha SRD e grava็ใo na tabela ZAB
 
-	cQuery := "SELECT ZAB_PREFIX, ZAB_TITULO, ZAB_PARC, ZAB_TIPO, ZAB_FORNEC, ZAB_LOJA, ZAB_NOME, ZAB_VEND, ZAB_FATINI, ZAB_FATFIN FROM ZAB010 "
-	cQuery += "WHERE D_E_L_E_T_ = '' AND ZAB_BAIXA BETWEEN '" + DTOS(dBaixa1) + "' AND '" + DTOS(dBaixa2) + "'  "
+	cQuery := "SELECT SUBSTRING(RD_DATPGT,1,6) AS DOCUMENTO, RD_MAT AS MATRICULA, RA_NOME AS NOME, RD_PD AS VERBA, RD_DATPGT AS DTPAG, RD_VALOR AS VALOR FROM SRD010 "
+	cQuery += "INNER JOIN SRA010 ON RA_MAT = RD_MAT "
+	cQuery += "WHERE SRD010.D_E_L_E_T_ = '' AND SRA010.D_E_L_E_T_ = '' "
+	//Filtro os pagamentos na folha referentes a BV. Verba 135.
+	cQuery += "AND RD_PD = '135' AND RD_DATPGT BETWEEN '" + DTOS(dBaixa1) + "' AND '" + DTOS(dBaixa2) + "' "
+	cQuery += "ORDER BY RD_DATPGT "
 
 	tcQuery cQuery New Alias "TMPBV"
 
 	If Eof()
-		dbSelectArea("TMPBV" )
-		dbCloseArea("TMPBV" )
+		MsgInfo("Nใo existem dados no folha do periodo informado!","Verifique")
+		dbSelectArea("TMPBV")
+		dbCloseArea()
+Else
+
+	Count To nRec
+
+	dbSelectArea("TMPBV")
+	dbGoTop()
+
+	ProcRegua(nRec)
+
+	While !EOF()
+
+		IncProc()
+
+		dbSelectArea("ZAB")
+		dBSetOrder(1)
+		If !dbSeek(xFilial("ZAB") + "FOL" + TMPBV->DOCUMENTO + "   " + "   " + TMPBV->MATRICULA + "  ") .AND. TMPBV->MATRICULA <> "000784"
+			Reclock("ZAB",.T.)
+			ZAB->ZAB_FILIAL := xFilial("ZAB")
+			ZAB->ZAB_PREFIX := "FOL"
+			ZAB->ZAB_TITULO := TMPBV->DOCUMENTO
+			ZAB->ZAB_PARC   := "   "
+			ZAB->ZAB_TIPO   := "   "
+			ZAB->ZAB_FORNEC := TMPBV->MATRICULA
+			ZAB->ZAB_LOJA 	:= "  "
+			ZAB->ZAB_NOME	:= TMPBV->NOME
+			ZAB->ZAB_EMISSA := STOD(TMPBV->DTPAG)
+			ZAB->ZAB_VENCTO := STOD(TMPBV->DTPAG)
+			ZAB->ZAB_BAIXA 	:= STOD(TMPBV->DTPAG)
+			ZAB->ZAB_NATURE := "1204001"
+			ZAB->ZAB_OBS    := "VALOR RECIBIDO POR MEIO DA FOLHA DE PAGAMENTO VERBA 135, DATA: " + DTOC(STOD(TMPBV->DTPAG))
+			ZAB->ZAB_VLSE2	:= TMPBV->VALOR
+			ZAB->ZAB_VALOR	:= TMPBV->VALOR
+			IF ALLTRIM(TMPBV->MATRICULA) $ "000398/001599/001567"
+			ZAB->ZAB_SPOT	:= TMPBV->VALOR
+			ELSEIF ALLTRIM(TMPBV->MATRICULA) $ "001563/001284"
+			ZAB->ZAB_LOCAL	:= TMPBV->VALOR
+			ENDIF
+			MsUnlock()
+		ELSEIF dbSeek(xFilial("ZAB") + "FOL" + TMPBV->DOCUMENTO + "   " + "   " + TMPBV->MATRICULA + "  ") .AND. TMPBV->MATRICULA <> "000784"
+			Reclock("ZAB",.F.)
+			ZAB->ZAB_NOME	:= TMPBV->NOME
+			ZAB->ZAB_EMISSA := STOD(TMPBV->DTPAG)
+			ZAB->ZAB_VENCTO := STOD(TMPBV->DTPAG)
+			ZAB->ZAB_BAIXA 	:= STOD(TMPBV->DTPAG)
+			ZAB->ZAB_NATURE := "1204001"
+			ZAB->ZAB_OBS    := "VALOR RECIBIDO POR FOLHA DE PAGAMENTO VERBA 135, DATA: " + DTOC(STOD(TMPBV->DTPAG))
+			ZAB->ZAB_VLSE2	:= TMPBV->VALOR
+			ZAB->ZAB_VALOR	:= TMPBV->VALOR
+			IF ALLTRIM(TMPBV->MATRICULA) $ "000398/001599/001567"
+			ZAB->ZAB_SPOT	:= TMPBV->VALOR
+			ELSEIF ALLTRIM(TMPBV->MATRICULA) $ "001563/001284"
+			ZAB->ZAB_LOCAL	:= TMPBV->VALOR
+			ENDIF
+			MsUnlock()
+		END
+
+		dbSelectArea("TMPBV")
+		dbSkip()
+
+	EndDo
+
+	dbSelectArea("TMPBV")
+	dbCloseArea()
+
+	EndIF
+
+	//Agora sใo separados os titulos para conferencia no contas a receber SE1 e grava็ใo das notas de faturamento na ZAB.
+
+	cQuery := "SELECT ZAB_PREFIX, ZAB_TITULO, ZAB_PARC, ZAB_TIPO, ZAB_FORNEC, ZAB_LOJA, ZAB_NOME, ZAB_VEND, ZAB_FATINI, ZAB_FATFIN FROM ZAB010 "
+	cQuery += "WHERE D_E_L_E_T_ = '' AND ZAB_BAIXA BETWEEN '" + DTOS(dBaixa1) + "' AND '" + DTOS(dBaixa2) + "'  AND ZAB_LOJA <> '' "
+	cQuery += "AND ZAB_FORNEC NOT IN ('000970','005191') "
+
+	tcQuery cQuery New Alias "TMPBV"
+
+	If Eof()
+		dbSelectArea("TMPBV")
+		dbCloseArea()
 	Endif
 
 	dbSelectArea("TMPBV")
@@ -200,8 +286,8 @@ Static Function IMPORTBV(dBaixa1,dBaixa2,dFat1,dFat2)
 		tcQuery cQuery New Alias "TMPFAT"
 
 		If Eof()
-			dbSelectArea("TMPFAT" )
-			dbCloseArea("TMPFAT" )
+			dbSelectArea("TMPFAT")
+			dbCloseArea()
 			lOk := .F.
 		Endif
 
@@ -293,7 +379,7 @@ Static Function IMPORTBV(dBaixa1,dBaixa2,dFat1,dFat2)
 			aContrato := {}
 
 			dbSelectArea("TMPFAT")
-			dbCloseArea("TMPFAT")
+			dbCloseArea()
 
 			dbSelectArea("ZAB")
 			dBSetOrder(1)
@@ -333,8 +419,8 @@ Static Function IMPORTBV(dBaixa1,dBaixa2,dFat1,dFat2)
 
 	EndDo
 
-	dbSelectArea("TMPBV" )
-	dbCloseArea("TMPBV" )
+	dbSelectArea("TMPBV")
+	dbCloseArea()
 
 	Close(oDlg)
 
@@ -350,12 +436,10 @@ User Function RGOVVAR
 	Local cDesc1        := "Este programa tem como objetivo imprimir relatorio "
 	Local cDesc2        := "de acordo com os parametros informados pelo usuario."
 	Local cDesc3        := ""
-	Local cPict         := ""
 	Local titulo       	:= "Relatorio BV"
 	Local nLin         	:= 80
-	Local Cabec1		:= UPPER(" Empresa                    Nota Fiscal       Emissao         Baixa                Governo              Varejo               Total")
+	Local Cabec1		:= UPPER(" Empresa                         Nota        Emissใo         Baixa                 Governo              Varejo                Total")
 	Local Cabec2       	:= ""
-	Local imprime      	:= .T.
 	Local aOrd := {}
 
 	Private lEnd        := .F.
@@ -399,13 +483,13 @@ User Function RGOVVAR
 	If Eof()
 		MsgInfo("Nao existem dados a serem impressos!","Verifique")
 		dbSelectArea("TMPZAB")
-		dbCloseArea("TMPZAB")
+		dbCloseArea()
 		Return
 	Endif
 
 	If nLastKey == 27
 		dbSelectArea("TMPZAB")
-		dbCloseArea("TMPZAB")
+		dbCloseArea()
 		Return
 	Endif
 
@@ -413,7 +497,7 @@ User Function RGOVVAR
 
 	If nLastKey == 27
 		dbSelectArea("TMPZAB")
-		dbCloseArea("TMPZAB")
+		dbCloseArea()
 		Return
 	Endif
 
@@ -516,7 +600,7 @@ Static Function RunReport(Cabec1,Cabec2,Titulo,nLin)
 	@nLin, 030 PSAY " Diretor Comercial          Gerente Adm/Financeiro         Ass. Financeiro  "
 
 	dbSelectArea("TMPZAB")
-	dbCloseArea("TMPZAB")
+	dbCloseArea()
 
 	SET DEVICE TO SCREEN
 
