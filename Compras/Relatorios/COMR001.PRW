@@ -14,13 +14,16 @@ Local cArquivo    		:= GetTempPath()+'COMR001.xml'
 
 Private cPerg  			:= "COMR001"
 Private cFiltro			:= ""
-Private cFiltro1		:= ""
 Private cNomeTabela		:= ""
 Private cNomeTabela1	:= ""
 Private cDescricao		:= ""
 Private cOrcado			:= ""
 Private cPDiaSem  		:= ""
 Private cUDiaSem		:= ""
+Private cCampo1			:= ""
+Private cCampo2			:= ""
+Private nPrevisao		:= 0
+Private nSaldo			:= 0
 Private cSubTot			:= ""
 Private nSubTot			:= 0
 Private nTotal			:= 0
@@ -36,6 +39,7 @@ If !ApOleClient("MsExcel")
 	Return
 EndIf
 
+IF MV_PAR02 == 1
 //VERIFICO O PRIMEIRO E O ULTIMO DIA DA SEMANA PARA USAR NO FILTRO
 For n := 0 To 7
    If Dow(MV_PAR01 - n) == 1
@@ -43,18 +47,23 @@ For n := 0 To 7
      cUDiaSem := DTOS(MV_PAR01 - n + 7)
    EndIf
 Next
+ELSEIF MV_PAR02 == 2
+//FILTRO PEDIDOS EM ABERTO PARA O DIRETOR NOS ULTIMOS 45 DIAS
+     cPDiaSem := DTOS(MV_PAR01 - 60)
+     cUDiaSem := DTOS(MV_PAR01 + 5)
+ENDIF
 
 //TRATO AS PERGUNTAS PARA USO NOS FILTROS
 IF MV_PAR02 == 1
 cNomeTabela		:= "MAPAS PARA LIBERAÇÃO NO MICROSIGA - " + DTOC(STOD(cPDiaSem)) + " - " + DTOC(STOD(cUDiaSem))
-cFiltro			:= "%AND C7_EMISSAO BETWEEN '"+cPDiaSem+"' AND '"+cUDiaSem+"' AND C7_TIPO = '1' AND CR_APROV = '000001'%" //Aprovados pela Sra. Elenn durante a semana
-cFiltro1		:= "%HAVING SUM(C7_TOTAL) BETWEEN 1000 AND 10000 %" //Pedidos entre R$ 1.000,00 e R$ 10.000,00
+cFiltro			:= "%AND C7_EMISSAO BETWEEN '"+cPDiaSem+"' AND '"+cUDiaSem+"' AND C7_TIPO = '1' AND CR_APROV = '000001' AND CR_TOTAL BETWEEN 1000 AND 10000 %" //Aprovados pela Sra. Elenn durante a semana
 ELSEIF MV_PAR02 == 2
 cNomeTabela		:= "MAPAS PARA LIBERAÇÃO NO MICROSIGA - " + DTOC(MV_PAR01)
-cFiltro			:= "%AND CR_APROV = '000028' AND CR_DATALIB = '' %" //Apenas pedidos enviados para aprovação do diretor
+cFiltro			:= "%AND C7_EMISSAO BETWEEN '"+cPDiaSem+"' AND '"+cUDiaSem+"' AND CR_APROV = '000028' AND CR_DATALIB = '' %" //Apenas pedidos enviados para aprovação do diretor
 ENDIF
 
-cNomeTabela1	:= "TOTAIS POR DEPARTAMENTO"
+cCampo1			:= "ZY_MES" + SUBSTR(DTOS(MV_PAR01),5,2)
+cCampo2			:= "ZY_USO" + SUBSTR(DTOS(MV_PAR01),5,2)
 
 //COMEÇO A MINHA CONSULTA SQL
 BeginSql Alias cAlias
@@ -62,7 +71,7 @@ BeginSql Alias cAlias
 //Query para selecionar os pedidos aprovados pela Sra. Elenn com natureza, nome do fornecedor, condição de pagamento e centro de custo
 SELECT C7_NUM AS PEDIDO, ED_DESCRIC AS NATUREZA, A2_NOME AS FORNECEDOR, ZL_PEDORC AS ORCADO, SUM(C7_TOTAL) AS VALOR, E4_DESCRI AS CONDPAG
 , (SELECT CTT_DESC01 FROM CTT010 WHERE C7_CC = CTT_CUSTO AND CTT010.D_E_L_E_T_ = '') AS CCUSTO
-, CR_APROV AS APROVADOR
+, CR_APROV AS APROVADOR, ED_CONTSIG AS SIG, CR_TOTAL AS VLAPROV
 FROM %table:SC7%
 INNER JOIN %table:SC1% ON C1_FILIAL = C7_FILIAL AND C1_NUM = C7_NUMSC AND C1_ITEM = C7_ITEMSC
 INNER JOIN %table:SA2% ON A2_COD = C7_FORNECE AND A2_LOJA = C7_LOJA
@@ -72,11 +81,12 @@ INNER JOIN %table:SCR% ON CR_NUM = C7_NUM
 FULL OUTER JOIN %table:SZL% ON ZL_PEDIDO = C7_NUM
 WHERE SC7010.D_E_L_E_T_ = '' AND SC1010.D_E_L_E_T_ = '' AND SA2010.D_E_L_E_T_ = '' AND SED010.D_E_L_E_T_ = '' AND SE4010.D_E_L_E_T_ = '' AND SCR010.D_E_L_E_T_ = ''
 %exp:cFiltro%
-GROUP BY C7_NUM, ED_DESCRIC, A2_NOME, ZL_PEDORC, E4_DESCRI, C7_CC, CR_APROV
-%exp:cFiltro1%
+GROUP BY C7_NUM, ED_DESCRIC, A2_NOME, ZL_PEDORC, E4_DESCRI, C7_CC, CR_APROV, ED_CONTSIG, CR_TOTAL
 ORDER BY PEDIDO
 
 EndSql //FINALIZO A MINHA QUERY
+
+IF MV_PAR03 == 1
 
     //Criando o objeto que irá gerar o conteúdo do Excel
     oFWMsExcel := FWMSExcel():New()
@@ -116,8 +126,11 @@ While !(cAlias)->(Eof())
 						cOrcado := "NÃO"
 						ENDIF
 
+	nPrevisão := Posicione("SZY",1,xFilial("SZY")+PADR(Alltrim(SIG),6)+SUBSTR(cUDiaSem,1,4),@cCampo1)
+	nSaldo	  := (Posicione("SZY",1,xFilial("SZY")+PADR(Alltrim(SIG),6)+SUBSTR(cUDiaSem,1,4),@cCampo1) - Posicione("SZY",1,xFilial("SZY")+PADR(Alltrim(SIG),6)+SUBSTR(cUDiaSem,1,4),@cCampo2) - VLAPROV)
+
 	//Criando as Linhas
-    oFWMsExcel:AddRow("Mapas",cNomeTabela,{PEDIDO,NATUREZA,FORNECEDOR,UPPER(cDescricao),cOrcado,VALOR,0,0,CONDPAG,CCUSTO})
+    oFWMsExcel:AddRow("Mapas",cNomeTabela,{PEDIDO,NATUREZA,FORNECEDOR,UPPER(cDescricao),cOrcado,VLAPROV,nPrevisão,nSaldo,CONDPAG,CCUSTO})
 
 	(cAlias)->(dbSkip()) //PASSAR PARA O PRÓXIMO REGISTRO DA MINHA QUERY
 
@@ -139,24 +152,23 @@ FULL OUTER JOIN %table:SZL% ON ZL_PEDIDO = C7_NUM
 WHERE SC7010.D_E_L_E_T_ = '' AND SC1010.D_E_L_E_T_ = '' AND SA2010.D_E_L_E_T_ = '' AND SED010.D_E_L_E_T_ = '' AND SE4010.D_E_L_E_T_ = '' AND SCR010.D_E_L_E_T_ = ''
 %exp:cFiltro%
 GROUP BY C7_CC, C7_NUM
-%exp:cFiltro1%
 ORDER BY CCUSTO
 
 EndSql //FINALIZO A MINHA QUERY
 
 		oFWMsExcel:AddworkSheet("Totais")
         //Criando a Tabela
-        oFWMsExcel:AddTable("Totais",cNomeTabela1)
+        oFWMsExcel:AddTable("Totais",cNomeTabela)
         //Criando Colunas
-		oFWMsExcel:AddColumn("Totais",cNomeTabela1,"DEPARTAMENTO SOLICITANTE",1,1)
-        oFWMsExcel:AddColumn("Totais",cNomeTabela1,"TOTAL",3,3)
+		oFWMsExcel:AddColumn("Totais",cNomeTabela,"DEPARTAMENTO SOLICITANTE",1,1)
+        oFWMsExcel:AddColumn("Totais",cNomeTabela,"TOTAL",3,3)
 
 While !(cAlias)->(Eof())
 
 	If cSubTot <> CCUSTO .AND. cSubTot <> ""
 
 	//Criando as Linhas
-    oFWMsExcel:AddRow("Totais",cNomeTabela1,{cSubTot,nSubTot})
+    oFWMsExcel:AddRow("Totais",cNomeTabela,{cSubTot,nSubTot})
 	nSubTot			:= 0
 
 	EndIf
@@ -170,9 +182,9 @@ While !(cAlias)->(Eof())
 Enddo
 
 	//Adiciona a ultima linha com subtotal
-	oFWMsExcel:AddRow("Totais",cNomeTabela1,{cSubTot,nSubTot})
+	oFWMsExcel:AddRow("Totais",cNomeTabela,{cSubTot,nSubTot})
 	//Adiciona os totais
-  	oFWMsExcel:AddRow("Totais",cNomeTabela1,{"TOTAL",nTotal})
+  	oFWMsExcel:AddRow("Totais",cNomeTabela,{"TOTAL",nTotal})
 
 	(cAlias)->(dbClosearea()) 				//FECHO A TABELA APOS O USO
 
@@ -187,6 +199,12 @@ Enddo
 
 	RestArea(aArea)
 
+	ELSEIF MV_PAR03 == 2
+
+
+
+	ENDIF
+
 Return
 
 //Programa usado para criar perguntas na tabela SX1 (Tabela de perguntas)
@@ -199,7 +217,8 @@ Static Function ValidPerg(cPerg)
 	aRegs:={}
 
 	AADD(aRegs,{cPerg,"01","Data Referência:  	","","","mv_ch01","D",08,0,0,"G","","mv_par01","","","","","","","","","","","","","","","","","","","","","","","","",""})
-	AADD(aRegs,{cPerg,"02","Tipo            	","","","mv_ch02","N",01,0,1,"C","","mv_par02","Liberado Elenn","","","","","Liber. Diretor","","","","","","","","","","","","","","","","","","","" })
+	AADD(aRegs,{cPerg,"02","Tipo:            	","","","mv_ch02","N",01,0,1,"C","","mv_par02","Lib. Gerência","","","","","Pend. Diretor","","","","","","","","","","","","","","","","","","","" })
+	AADD(aRegs,{cPerg,"03","Formato:           	","","","mv_ch03","N",01,0,1,"C","","mv_par03","Planilha","","","","","PDF","","","","","","","","","","","","","","","","","","","" })
 
 	For i:=1 to Len(aRegs)
 		If !dbSeek(cPerg+aRegs[i,2])
@@ -212,5 +231,7 @@ Static Function ValidPerg(cPerg)
 			MsUnlock()
 		EndIf
 	Next
+
 	dbSelectArea(_sAlias)
+
 Return
