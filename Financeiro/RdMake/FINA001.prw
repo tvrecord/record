@@ -28,13 +28,14 @@ User Function FINA001()
 	Local nQtdProd := 0
 	Local cTexto := ""
 
-	Private cCodPraca := ""
-	Private cPeriodo := ""
-	Private aErro := {}
-	Private aInfo := {}
-	Private lOkGeral := .T.
-	Private cProd := ""
-	Private cPracaNeg := ""
+	Private cCodPraca  := ""
+	Private cPeriodo   := ""
+	Private aErro      := {}
+	Private aInfo 	   := {}
+	Private lOkGeral   := .T.
+	Private cProd 	   := ""
+	Private cPracaNeg  := ""
+	Private nDifRep    := 0
 
 
 	cTexto := "Rotina irá fazer o calculo do repasse das praças atraves do arquivo de importação .CSV. As colunas precisam está na seguinte ordem:" + Chr(13) + Chr(10)
@@ -463,7 +464,7 @@ Static Function ExecRateio()
 				//Caso exista, faço a correção
 				DbGoto(nRecno)
 				RECLOCK("ZAH",.F.)
-				ZAH->ZAH_VLRAT  += IIF(SUM->DIFREP > 0,ROUND(SUM->DIFREP,2) * -1,ROUND(SUM->DIFREP,2))
+				ZAH->ZAH_VLRAT  -= nDifRep
 				ZAH->(MSUNLOCK())
 
 			EndIf
@@ -491,11 +492,13 @@ Return
 Static Function SumTotZAH(nOpcao,cPraRep,cMesAno)
 
 
-	Local cQuery := ""
-	Local lOk := .T.
-	Local nCont := 0
+	Local cQuery  := ""
+	Local lOk  	  := .T.
+	Local nCont   := 0
 
-	cQuery := "SELECT ZAH_PRACA,SUM(ZAH_VALOR) AS VALPAG,SUM(ZAH_VLDESC) + SUM(ZAH_ACUCAL) AS VALDESC, SUM(ZAH_VLACUM) AS VLACUM, (SUM(ZAH_VLRAT) - SUM(ZAH_REPCOM)) AS DIFREP FROM ZAH010 WHERE "
+	nDifRep := 0
+
+	cQuery := "SELECT ZAH_PRACA,SUM(ZAH_VALOR) AS VALPAG,SUM(ZAH_VLDESC) + SUM(ZAH_ACUCAL) AS VALDESC, SUM(ZAH_VLACUM) AS VLACUM, SUM(ZAH_VLRAT) AS VLRAT,SUM(ZAH_REPCOM) AS VLREP  FROM ZAH010 WHERE "
 	cQuery += "ZAH_PRACA = '" + cPraRep + "' AND "
 	cQuery += "ZAH_PERIOD = '" + cMesAno + "' AND "
 	cQuery += "D_E_L_E_T_ = '' "
@@ -529,8 +532,9 @@ Static Function SumTotZAH(nOpcao,cPraRep,cMesAno)
 
 	ElseIf nOpcao == 3
 
+		nDifRep := SUM->VLRAT - SUM->VLREP
 		//Verifico se o valor da praça bateu com o valor do rateio
-		If SUM->DIFREP >= -0.05 .AND. SUM->DIFREP <= 0.05 .AND. SUM->DIFREP != 0
+		If nDifRep >= -0.05 .AND. nDifRep <= 0.05 .AND. nDifRep != 0
 			lOk := .F.
 		EndIf
 
