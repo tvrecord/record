@@ -1,23 +1,12 @@
 #INCLUDE "rwmake.ch"
 
 /*
-ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
-ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
-ฑฑษออออออออออัออออออออออหอออออออัออออออออออออออออออออหออออออัอออออออออออออปฑฑ
-ฑฑบPrograma  ณMT100OK บAutor  ณBruno Alves           บ Data ณ  11/09/13   บฑฑ
-ฑฑฬออออออออออุออออออออออสอออออออฯออออออออออออออออออออสออออออฯอออออออออออออนฑฑ
-ฑฑบDesc.     ณPonto de entrada para validacao da inclusao de Nota Fiscal   ฑฑ
-ฑฑบ          ณdeEntrada.                                                 บฑฑ
-ฑฑฬออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
-ฑฑบUso       ณClientes Microsiga                                          บฑฑ
-ฑฑศออออออออออฯออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออผฑฑ
-ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
-฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿
+Programa  ณMT100OK บAutor  ณBruno Alves           บ Data ณ  11/09/13
+Desc.     ณPonto de entrada para validacao da inclusao de Nota Fiscal de Entrada.
 */
+
 User Function MT100TOK()
 
-	Local nPosPrd  	 := Ascan(aHeader,{|x| Alltrim(x[2]) == 'D1_COD'})
-	Local nPosItem 	 := Ascan(aHeader,{|x| Alltrim(x[2]) == 'D1_ITEM'})
 	Local nPosRat  	 := Ascan(aHeader,{|x| Alltrim(x[2]) == 'D1_RATEIO'})
 	Local nPosCC   	 := Ascan(aHeader,{|x| Alltrim(x[2]) == 'D1_CC'})
 	Local nPosPed  	 := Ascan(aHeader,{|x| Alltrim(x[2]) == 'D1_PEDIDO'})
@@ -26,8 +15,6 @@ User Function MT100TOK()
 	Private nPosPerm   := Ascan(aHeader,{|x| Alltrim(x[2]) == 'D1_PERMUTA'})
 	Private nPosPos    := Ascan(aHeader,{|x| Alltrim(x[2]) == 'D1_ITEMPER'})
 	Private nTes   	   := Ascan(aHeader,{|x| Alltrim(x[2]) == 'D1_TES'})
-	Private cAutoriz   := ""
-	Private cFornece   := ""
 	Private cLoja	   := ""
 	Private nAutori	   := Ascan(aHeader,{|x| Alltrim(x[2]) == 'D1_AUTORIZ'})
 	Private nFornece   := Ascan(aHeader,{|x| Alltrim(x[2]) == 'D1_FORNECE'})
@@ -49,6 +36,7 @@ User Function MT100TOK()
 	1: Documento de Entrada + Fornecedor
 	2: Numero do RP
 	*/
+
 	Public aXNumRep	   := {}
 
 	//Grava a Posicao atual
@@ -106,7 +94,6 @@ User Function MT100TOK()
 
 		EndIf
 
-
 		//Nao permite incluir um novo produto alem dos que foram importados pelo pedido
 		//Essa validacao vale somente para as  notas fiscais que estao vinculadas aos pedidos de compras
 		//Autor: Bruno Alves
@@ -128,7 +115,6 @@ User Function MT100TOK()
 					//Exit
 				EndIf
 
-
 			Next i
 
 			// Utilizado para controlar contratos de PERMUTA
@@ -147,7 +133,6 @@ User Function MT100TOK()
 			EndIf
 
 		EndIf
-
 
 		If lValido == .T. .AND. lTes == .T. .AND. Posicione("SED",1,xFilial("SED") + ALLTRIM(aCols[1][nPosNat]),"ED_AUTNF") == "1" .AND. ;
 				xFilial("SF1") <> "05" .AND. !(AllTrim(cUserName) $ "Marina de Jesus Santana - Radio%Administrador%WYLL VICTOR DE SOUSA MARTINS - wvsmartins%WYLL MARTINS - wyllmartins") .AND. Posicione("SA2",1,xFilial("SA2")+ cA100FOR + CLOJA,"A2_AUTNF") == "1"
@@ -192,10 +177,7 @@ User Function MT100TOK()
 	DbSetOrder(aSvAlias[2])
 	DbGoto(aSvAlias[3])
 
-
-
 Return(lValido)
-
 
 Static Function TelaDes()
 
@@ -222,11 +204,10 @@ Static Function TelaDes()
 
 		If EMPTY(cItem)//Verifica se a configura็ใo do contrato foi realizada com sucesso
 			Close(oDlg)
-			MsgInfo("ษ necessแrio configurar o contrato:  (" + cContrato + ") corretamente!!")
+			MsgInfo("ษ necessแrio configurar o contrato:  (" + cContrato + ") corretamente!!","Aten็ใo")
 			lValido := .F.
 			Return // Se nใo utilizar o Return, o ponto de entrada se perde
 		Endif
-
 
 		nDesconto := SC3->C3_TOTAL - MaFisRet(,"NF_TOTAL")
 
@@ -246,17 +227,16 @@ Static Function TelaDes()
 
 			For i := 1 to Len(aCols)
 
-
 				aCols[i][nPosPerm] :=  ALLTRIM(SC3->C3_NUM)
 				aCols[i][nPosPos]  :=  ALLTRIM(SC3->C3_ITEM)
 
 			Next i
 
 			Close(oDlg)
-			MsgInfo("Valor do Contrato: " + aCols[1][nPosPerm] + " Item: " + aCols[1][nPosPos] + " alterado para: " + cValToChar(nDesconto) + "" )
+			MsgInfo("Valor do Contrato: " + aCols[1][nPosPerm] + " Item: " + aCols[1][nPosPos] + " alterado para: " + cValToChar(nDesconto),"Aten็ใo")
 
 			DBSelectArea("SC3")
-			DBCloseArea("SC3")
+			DBCloseArea()
 
 		EndIf
 
@@ -289,9 +269,6 @@ Static Function TelaAut()
 	ENDIF
 
 Return
-
-
-
 
 /*/{Protheus.doc} ValidRep
 Valida็ใo do preenchimento do c๓digo do repasse
@@ -354,7 +331,4 @@ Static Function ValidRep(nOpc)
 		Close(oDlg)
 	EndIf
 
-
-
 Return()
-
