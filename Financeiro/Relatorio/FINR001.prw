@@ -258,7 +258,7 @@ Static Function fProcPdf()
 
 			EndIf
 
-			nLin := 420
+			nLin := 500
 
 			//Imprime as Assinaturas
 			oPrint:Say( nLin,458, "_______________________________" ,oFonteN)

@@ -6,7 +6,8 @@
 
 #DEFINE REL_VERT_STD 16
 #DEFINE REL_START  65
-#DEFINE REL_END 560
+//#DEFINE REL_END 560 //Paisagem
+#DEFINE REL_END 700 //Retrato
 #DEFINE REL_RIGHT 820
 #DEFINE REL_LEFT 10
 
@@ -29,6 +30,8 @@ User Function FINR002()
 	Private nLin 		:= 0
 	Private oFonte 		:= u_xFonte(12,,,,"Arial")
 	Private oFonteN 	:= u_xFonte(12,.T.,,,"Arial")
+	Private oFonte10 	:= u_xFonte(10,,,,"Arial")
+	Private oFonte10N 	:= u_xFonte(10,.T.,,,"Arial")
 
 
 	//If !lLogin
@@ -101,7 +104,8 @@ Static Function fProcPdf()
 
 	cFileName 	:= "TOTAL_REPASSE_PERIODO_"+cPeriodo+"_FINR002" + "_" +DTOS(Date())+ "_" + StrTran(Time(),":","_")
 	oPrint := FWMSPrinter():New(cFileName, IMP_PDF, .F., cDir, .T.)
-	oPrint:SetLandScape()
+	oPrint:SetPortrait()//Retrato
+	//	oPrint:SetLandScape()//Paisagem
 	oPrint:SetPaperSize(DMPAPER_A4)
 	oPrint:cPathPDF := cDir
 
@@ -156,38 +160,39 @@ Static Function fProcPdf()
 	oPrint:Say( nLin,520, PADL(Transform( nTotal, "@E 999,999,999.99"),14),oFonteN)
 
 	nLin += (REL_VERT_STD * 3)
-
+	/*
 	If nLin > REL_END .OR. (REL_END - nLin) < 3
 		u_PXRODAPE(@oPrint,"FINR002.PRW","")
 		oPrint:EndPage()
 		ImpProxPag()//Monta cabeçario da proxima pagina
 		nLin += (REL_VERT_STD * 6)
 	EndIf
+	*/
 
 	//Imprime linha das assinaturas
 	If !Empty(MV_PAR05) .and. PswSeek( 	MV_PAR05, .T. )
-		oPrint:Say( nLin,084, "_______________________________" ,oFonteN)
+		oPrint:Say( nLin,024, "_________________________" ,oFonte10N)
 		aUsuario := PswRet() // Retorna vetor com informações do usuário
 		cAssin1 := Alltrim(aUsuario[1][4])
 		cCargo1 := Alltrim(aUsuario[1][13])
 	EndIf
 
 	If !Empty(MV_PAR06) .and. PswSeek( 	MV_PAR06, .T. )
-		oPrint:Say( nLin,265, "_______________________________" ,oFonteN)
+		oPrint:Say( nLin,175, "_________________________" ,oFonte10N)
 		aUsuario := PswRet() // Retorna vetor com informações do usuário
 		cAssin2 := Alltrim(aUsuario[1][4])
 		cCargo2 := Alltrim(aUsuario[1][13])
 	EndIf
 
 	If !Empty(MV_PAR07) .and. PswSeek( 	MV_PAR07, .T. )
-		oPrint:Say( nLin,438, "_______________________________" ,oFonteN)
+		oPrint:Say( nLin,318, "_________________________" ,oFonte10N)
 		aUsuario := PswRet() // Retorna vetor com informações do usuário
 		cAssin3 := Alltrim(aUsuario[1][4])
 		cCargo3 := Alltrim(aUsuario[1][13])
 	EndIf
 
 	If !Empty(MV_PAR08) .and. PswSeek( 	MV_PAR08, .T. )
-		oPrint:Say( nLin,620, "_______________________________" ,oFonteN)
+		oPrint:Say( nLin,470, "_________________________" ,oFonte10N)
 		aUsuario := PswRet() // Retorna vetor com informações do usuário
 		cAssin4 := Alltrim(aUsuario[1][4])
 		cCargo4 := Alltrim(aUsuario[1][13])
@@ -198,38 +203,38 @@ Static Function fProcPdf()
 	//Imprime o nome das assinaturas
 
 	If !Empty(cAssin1)
-		oPrint:Say( nLin,084, PADC(cAssin1,50) ,oFonte)
+		oPrint:Say( nLin,024, PADC(cAssin1,40) ,oFonte10)
 	EndIf
 
 	If !Empty(cAssin2)
-		oPrint:Say( nLin,265, PADC(cAssin2,50) ,oFonte)
+		oPrint:Say( nLin,175, PADC(cAssin2,40) ,oFonte10)
 	EndIf
 
 	If !Empty(cAssin3)
-		oPrint:Say( nLin,438, PADC(cAssin3,50) ,oFonte)
+		oPrint:Say( nLin,318, PADC(cAssin3,40) ,oFonte10)
 	EndIf
 
 	If !Empty(cAssin4)
-		oPrint:Say( nLin,620, PADC(cAssin4,50) ,oFonte)
+		oPrint:Say( nLin,470, PADC(cAssin4,40) ,oFonte10)
 	EndIf
 
 
 	nLin += REL_VERT_STD
 
 	If !Empty(cCargo1)
-		oPrint:Say( nLin,084, PADC(cCargo1,50) ,oFonteN)
+		oPrint:Say( nLin,024, PADC(cCargo1,33) ,oFonte10N)
 	EndIf
 
 	If !Empty(cCargo2)
-		oPrint:Say( nLin,265, PADC(cCargo2,50) ,oFonteN)
+		oPrint:Say( nLin,175, PADC(cCargo2,33) ,oFonte10N)
 	EndIf
 
 	If !Empty(cCargo3)
-		oPrint:Say( nLin,438, PADC(cCargo3,50) ,oFonteN)
+		oPrint:Say( nLin,318, PADC(cCargo3,33) ,oFonte10N)
 	EndIf
 
 	If !Empty(cCargo4)
-		oPrint:Say( nLin,620, PADC(cCargo4,50) ,oFonteN)
+		oPrint:Say( nLin,470, PADC(cCargo4,33) ,oFonte10N)
 	EndIf
 
 	u_PXRODAPE(@oPrint,"FINR002.PRW","")
