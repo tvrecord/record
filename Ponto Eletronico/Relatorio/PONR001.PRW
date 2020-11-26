@@ -25,7 +25,11 @@ Private cNomeTabela	:= ""
 
 	ValidPerg(cPerg) //INICIA A STATIC FUNCTION PARA CRIAÇÃO DAS PERGUNTAS
 
-	Pergunte(cPerg,.T.) //FAZ A PERGUNTA PARA USUARIO
+	If !Pergunte(cPerg) //Verifica se usuario respondeu as perguntas ou cancelou
+		MsgAlert("Operação Cancelada!")
+		RestArea(aArea)
+		Return
+	EndIf
 
 If !ApOleClient("MsExcel")
 	MsgStop("Microsoft Excel nao instalado.")  //"Microsoft Excel nao instalado."
@@ -142,7 +146,9 @@ Static Function ValidPerg(cPerg)
 			MsUnlock()
 		EndIf
 	Next
+
 	dbSelectArea(_sAlias)
+
 Return
 
 /*
