@@ -94,7 +94,7 @@ User Function MT100TOK()
 			@ 000,003 TO 145,315 DIALOG oDlg TITLE "Repasse - Periodo Faturamento"
 			@ 005,003 Say "Informe o Numero do Repasse"
 			@ 015,003 Say "Nº Repasse:"
-			@ 014,040 Get cNumRep  F3 "XREP"  WHEN lRepasse Valid  EXISTCPO("SC5",cNumRep,10) .AND. !Vazio()
+			@ 014,040 Get cNumRep  F3 "XREP"  WHEN lRepasse Valid  !Vazio() //EXISTCPO("SC5",cNumRep,10) .AND. !Vazio() //Rafael França - 26/11/20 - Retirada a validação da SC5, porque tem RPs que só vão ser lançadas depois
 			@ 030,003 Say "Informe o Periodo do Faturamento"
 			@ 040,003 Say "Data Inicial:"
 			@ 039,036 Get dDataIni Picture "99/99/9999" WHEN lPeriodo Valid !Vazio() SIZE 40,020
