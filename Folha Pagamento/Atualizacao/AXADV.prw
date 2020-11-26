@@ -196,9 +196,9 @@ wcDtIni     := SZG->ZG_DTINI
 
 
 If (SZG->ZG_TIPOADV == "S")
-	cPathDot := "J:\suspensao.docx"
+	cPathDot := "C:\Docs\suspensao.docx"
 Else
-	cPathDot := "J:\advertencia.docx"
+	cPathDot := "C:\Docs\advertencia.docx"
 EndIf
 
 
