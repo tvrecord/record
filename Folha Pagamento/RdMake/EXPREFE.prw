@@ -26,26 +26,19 @@ User Function EXPREFE
 Local cDesc1         := "Este programa tem como objetivo imprimir relatorio "
 Local cDesc2         := "de acordo com os parametros informados pelo usuario."
 Local cDesc3         := ""
-Local cPict          := ""
 Local titulo       	 := "Relação dos pedidos de vale de refeicao"
 Local nLin           := 100
 Local Cabec1         := ""
 Local Cabec2         := ""
-Local Cabec3         := ""
-Local imprime        := .T.
-Local aOrd := {}
-
 Private cTpVal		 := ""
 Private lEnd         := .F.
 Private lAbortPrint  := .F.
-Private CbTxt        := ""
 Private limite       := 180
 Private tamanho      := "M"
 Private nomeprog     := "EXPREFE" // Coloque aqui o nome do programa para impressao no cabecalho
 Private nTipo        := 15
 Private aReturn      := {"Zebrado", 1, "Administracao", 1, 2, 1, "", 1}
 Private nLastKey     := 0
-Private cbtxt        := Space(10)
 Private cbcont       := 00
 Private CONTFL       := 01
 Private m_pag        := 01
@@ -72,7 +65,7 @@ wnrel := SetPrint("",NomeProg,cPerg,@titulo,cDesc1,cDesc2,cDesc3,.T.,,.T.,Tamanh
 
 IF MV_PAR02 == 1
 cTpVal := "VR"
-ELSEIF MV_PAR02 == 2             
+ELSEIF MV_PAR02 == 2
 cTpVal := "VA"
 ELSEIF MV_PAR02 == 3
 cTpVal := "CALI"
@@ -106,13 +99,13 @@ tcQuery cQuery New Alias "TMP"
 If Eof()
 	MsgInfo("Nao existem dados a serem impressos!","Verifique")
 	dbSelectArea("TMP")
-	dbCloseArea("TMP")
+	dbCloseArea()
 	Return
-Endif                                      
+Endif
 
 If nLastKey == 27
 	dbSelectArea("TMP")
-	dbCloseArea("TMP")
+	dbCloseArea()
 	Return
 Endif
 
@@ -188,7 +181,7 @@ Static Function RunExcel()
 		_aItem[02] := ALLTRIM(SUBSTR(TMP->RA_NOME,1,42))
 		_aItem[03] := TMP->RA_CIC
 		_aItem[04] := STOD(TMP->RA_NASC)
-		_aItem[05] := TMP->RA_SEXO		
+		_aItem[05] := TMP->RA_SEXO
 		_aItem[06] := TMP->ZO_VALOR
 		_aItem[07] := "FI"
 		_aItem[08] := "169"
@@ -196,19 +189,21 @@ Static Function RunExcel()
 		_aItem[10] := ""
 
 		AADD(_aIExcel,_aItem)
-		_aItem := {}			
+		_aItem := {}
 
 
-		DBSELECTAREA("TMP")	
-		dbskip()	
+		DBSELECTAREA("TMP")
+		dbskip()
 
 
 	ENDDO
 
+		DBSelectArea("TMP")
+		DBCloseArea()
 
 	//-----------------------------------------------------------------------
 	//³ Finaliza a execucao do relatorio...
-	//-----------------------------------------------------------------------	
+	//-----------------------------------------------------------------------
 
 	cCab := "Relação dos pedidos de vale de refeição"
 
@@ -218,8 +213,7 @@ Static Function RunExcel()
 	ELSE
 		MSGALERT("Nenhum Registro foi encontrado.","GPEREL001")
 		_lRet := .F.
-	ENDIF	
-
+	ENDIF
 
 Return
 
@@ -232,24 +226,22 @@ DBGotop()
 //DEFINE FONT oFont NAME "Courier New" SIZE 0,-11 BOLD
 
 While !EOF()
-	
+
 	SetRegua(RecCount())
-	
+
 	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 	//³ Verifica o cancelamento pelo usuario...                             ³
 	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-	
+
 	If lAbortPrint
 		@nLin,00 PSAY "*** CANCELADO PELO OPERADOR ***"
 		Exit
 	Endif
-	
 
 	If nLin > 70 // Salto de Página. Neste caso o formulario tem 55 linhas...
 		Cabec(Titulo,Cabec1,Cabec2,NomeProg,Tamanho,nTipo)
 		nLin := 8
 	Endif
-	
 
 	@nLin, 000 PSAY "%"
 	@nLin, 006 PSAY ALLTRIM(SUBSTR(TMP->RA_NOME,1,42))
@@ -261,16 +253,15 @@ While !EOF()
 	@nLin, 106 PSAY "169"
 	@nLin, 118 PSAY TMP->RA_MAT
 	@nLin, 127 PSAY "%"
-   
 
 	dbskip()
-	
-	nLin 			+= 1 // Avanca a linha de impressao 
 
+	nLin 			+= 1 // Avanca a linha de impressao
 
 ENDDO
 
-
+		DBSelectArea("TMP")
+		DBCloseArea()
 
 //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 //³ Finaliza a execucao do relatorio...                                 ³
@@ -290,8 +281,7 @@ Endif
 
 MS_FLUSH()
 
-DBSelectArea("TMP")
-DBCloseArea("TMP")
+
 
 Return
 
