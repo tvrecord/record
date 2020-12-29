@@ -233,18 +233,18 @@ User Function TelaZAA
 	@ 030,100 SAY UPPER("Funcionário :  " + alltrim(cMat) + " - " + SUBSTR(cNome,1,40))
 	@ 045,005 SAY UPPER("EPI :  " + ALLTRIM(cEPI) + " - " + substr(cDescri,1,40))
 	@ 060,005 SAY UPPER("Quantidade :  " + cValToChar(nQTD))
-	@ 060,100 SAY UPPER("Valor :  ")
-	@ 060,155 SAY nCusto PICTURE "@E 999,999.99"
+	@ 060,100 SAY UPPER("Valor : ")
+	@ 060,135 SAY nCusto SIZE 040,020 PICTURE "@E 999,999.99"
 	@ 075,005 SAY UPPER("Data Devolução :  ")
 	@ 075,100 GET dDevol SIZE 050,020
 	@ 090,005 SAY UPPER("Quantidade Devolvida :  ")
-	@ 090,100 GET nQTDDev
+	@ 090,100 GET nQTDDev SIZE 020,020 PICTURE "@E 99"
 	@ 105,005 SAY UPPER("Repor ao Estoque :  ")
-	@ 105,100 COMBOBOX oArquivo ITEMS aItems SIZE 050,020 OF oDlg PIXEL FONT oFont
-	@ 120,005 SAY "OBSERVAÇÃO :"
-	@ 120,100 GET cObs
-	@ 135,100 BUTTON "Devolver" SIZE 35,10 ACTION DevolveZAA(dDevol,nQtdDev,cObs)
-	@ 135,150 BUTTON "Fechar" 	SIZE 35,10 ACTION Close(oDlg)
+	@ 105,100 COMBOBOX oArquivo ITEMS aItems SIZE 040,015 OF oDlg PIXEL FONT oFont
+	@ 125,005 SAY "OBSERVAÇÃO :"
+	@ 125,100 GET cObs
+	@ 175,150 BUTTON "Devolver" SIZE 35,10 ACTION DevolveZAA(dDevol,nQtdDev,cObs)
+	@ 175,200 BUTTON "Fechar" 	SIZE 35,10 ACTION Close(oDlg)
 	ACTIVATE DIALOG oDlg CENTERED
 
 Return
