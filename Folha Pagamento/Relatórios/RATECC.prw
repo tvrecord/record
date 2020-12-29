@@ -62,14 +62,12 @@ User Function RATECC
 	Private cCusto		 := ""
 	Private cDescri		 := ""
 
-
 	ValidPerg(cPerg)
 
 	If !Pergunte(cPerg,.T.)
 		alert("OPERAÇÃO CANCELADA")
 		return
 	ENDIF
-
 
 	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 	//³ Monta a interface padrao com o usuario...                           ³
@@ -84,7 +82,6 @@ User Function RATECC
 	elseIf MV_PAR06 == 4
 		titulo := "Rateio de Plano Medico Referente ao Período: " + SUBSTR(DTOS(MV_PAR09),5,2) + "/" + SUBSTR(DTOS(MV_PAR09),1,4) + ""
 	EndIf
-
 
 	wnrel := SetPrint("",NomeProg,cPerg,@titulo,cDesc1,cDesc2,cDesc3,.T.,,.T.,Tamanho,,.T.)
 
@@ -181,8 +178,6 @@ User Function RATECC
 		cQuery += "GROUP BY RA_FILIAL,RA_CC,CTT_DESC01 "
 		cQuery += "ORDER BY RA_CC "
 
-
-
 	EndIf
 
 	tcQuery cQuery New Alias "TMP"
@@ -211,7 +206,6 @@ User Function RATECC
 	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 	//³ Processamento. RPTSTATUS monta janela com a regua de processamento. ³
 	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-
 
 
 	RptStatus({|| RunReport(Cabec1,Cabec2,Titulo,nLin) },Titulo)
