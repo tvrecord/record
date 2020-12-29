@@ -77,6 +77,7 @@ User Function RELPAGCTB
 	cQuery += "AND E2_EMIS1 BETWEEN '" + DTOS(MV_PAR03) + "' AND '" + DTOS(MV_PAR04) + "' "
 	cQuery += "AND E2_BAIXA BETWEEN '" + DTOS(MV_PAR06) + "' AND '" + DTOS(MV_PAR07) + "' "
 	cQuery += "AND E2_NATUREZ BETWEEN '" +  (MV_PAR01) + "' AND '" + (MV_PAR02) + "' "
+	cQuery += "AND E2_FORNECE BETWEEN '" +  (MV_PAR09) + "' AND '" + (MV_PAR10) + "' "
 	cQuery += "AND E2_TIPO NOT IN ('ISS','INS','PA','TX') " // Impostos e pagamentos antecipados
 	cQuery += "AND E2_STATUS NOT IN ('D') "	// Desdobramentos
 	cQuery += "AND E2_FILIAL = '" + (MV_PAR05) + "' AND E2_MULTNAT <> '1' "
@@ -99,6 +100,7 @@ User Function RELPAGCTB
 	cQuery += "AND E2_EMIS1 BETWEEN '" + DTOS(MV_PAR03) + "' AND '" + DTOS(MV_PAR04) + "' "
 	cQuery += "AND E2_BAIXA BETWEEN '" + DTOS(MV_PAR06) + "' AND '" + DTOS(MV_PAR07) + "' "
 	cQuery += "AND EV_NATUREZ BETWEEN '" +  (MV_PAR01) + "' AND '" + (MV_PAR02) + "' "
+	cQuery += "AND E2_FORNECE BETWEEN '" +  (MV_PAR09) + "' AND '" + (MV_PAR10) + "' "
 	cQuery += "AND E2_TIPO NOT IN ('ISS','INS','PA','TX') " // Impostos e pagamentos antecipados
 	cQuery += "AND E2_STATUS NOT IN ('D') "	// Desdobramentos
 	cQuery += "AND E2_FILIAL = '" + (MV_PAR05) + "' AND E2_MULTNAT = '1' "
@@ -302,6 +304,9 @@ Static Function ValidPerg(cPerg)
 	AADD(aRegs,{cPerg,"06","Da Baixa 		","","","mv_ch06","D",08,0,0,"G","","mv_par06","","","","","","","","","","","","","","","","","","","","","","","","",""})
 	AADD(aRegs,{cPerg,"07","Ate a Baixa	 	","","","mv_ch07","D",08,0,0,"G","","mv_par07","","","","","","","","","","","","","","","","","","","","","","","","",""})
 	AADD(aRegs,{cPerg,"08","Ordem			","","","mv_ch08","C",01,0,0,"C","","mv_par08","Dt. Digitação","","","","","Titulo","","","","","Fornecedor","","","","","","","","","","","","","",""})
+	AADD(aRegs,{cPerg,"09","Do Fornecedor	","","","mv_ch09","C",09,0,0,"G","","mv_par09","","","","","","","","","","","","","","","","","","","","","","","","","SA2"})
+	AADD(aRegs,{cPerg,"10","Ate o Fornecedor	","","","mv_ch10","C",09,0,0,"G","","mv_par10","","","","","","","","","","","","","","","","","","","","","","","","","SA2"})
+
 	For i:=1 to Len(aRegs)
 		If !dbSeek(cPerg+aRegs[i,2])
 			RecLock("SX1",.T.)

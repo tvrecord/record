@@ -1,7 +1,7 @@
 #INCLUDE "TOPCONN.CH"
 #INCLUDE "PROTHEUS.CH"
 
-//Rafael França - 28/10/2020 - Relatorio de mapas para liberação
+//Rafael França - 28/10/2020 - Relatorio de mapas para liberação de acordo com modelo estabelecido pelo compras
 //SIGACOM -> Relatorios -> Especificos -> Mapas para Liberação
 
 User Function COMR001()
