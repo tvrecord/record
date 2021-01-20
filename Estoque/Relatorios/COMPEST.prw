@@ -3,16 +3,10 @@
 
 /*/
 ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
-±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
-±±ÉÍÍÍÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍ»±±
 ±±ºPrograma  ³COMPEST º Autor ³ Bruno Alves       º Data ³    09/04/2013  º±±
 ±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
 ±±ºDescricao ³ Planilha para informar quais produtos deverão ser comprados ±
 ±±          ±± periodicamente											  º±±
-±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
-±±ºUso       ³ AP6 IDEs                                                   º±±
-±±ÈÍÍÍÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¼±±
-±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
 /*/
 
@@ -148,16 +142,16 @@ DBGotop()
 procregua(nRec1)
 
 While !EOF()
-	
+
 	IncProc("Gerando 1º Entrada:")
-	
+
 	aAdd(aEnt1,{	TMP->D1_COD,;     //01.Codigo do Produto
 	TMP->D1_DESCRI,;    	//02.Descrição do Produto
 	TMP->QUANTIDADE,;  	//03.Quantidade comprada
 	TMP->B1_LOCPAD})		//04.Mes da compra
-	
+
 	DBSkip()
-	
+
 EndDo
 
 DBSelectARea("TMP")
@@ -198,16 +192,16 @@ DBGotop()
 procregua(nRec2)
 
 While !EOF()
-	
+
 	IncProc("Gerando 2º Entrada:")
-	
+
 	aAdd(aEnt2,{	TMP->D1_COD,;     //01.Codigo do Produto
 	TMP->D1_DESCRI,;    	//02.Descrição do Produto
 	TMP->QUANTIDADE,;  	//03.Quantidade comprada
 	TMP->B1_LOCPAD})		//04.Mes da compra
-	
+
 	DBSkip()
-	
+
 EndDo
 
 DBSelectARea("TMP")
@@ -248,16 +242,16 @@ DBGotop()
 procregua(nRec3)
 
 While !EOF()
-	
+
 	IncProc("Gerando 3º Entrada:")
-	
+
 	aAdd(aEnt3,{	TMP->D1_COD,;     //01.Codigo do Produto
 	TMP->D1_DESCRI,;    	//02.Descrição do Produto
 	TMP->QUANTIDADE,;  	//03.Quantidade comprada
 	TMP->B1_LOCPAD})		//04.Mes da compra
-	
+
 	DBSkip()
-	
+
 EndDo
 
 DBSelectARea("TMP")
@@ -296,16 +290,16 @@ DBGotop()
 procregua(nRec7)
 
 While !EOF()
-	
+
 	IncProc("Gerando 4º Entrada:")
-	
+
 	aAdd(aEnt4,{	TMP->D1_COD,;     //01.Codigo do Produto
 	TMP->D1_DESCRI,;    	//02.Descrição do Produto
 	TMP->QUANTIDADE,;  	//03.Quantidade comprada
 	TMP->B1_LOCPAD})		//04.Mes da compra
-	
+
 	DBSkip()
-	
+
 EndDo
 
 DBSelectARea("TMP")
@@ -354,18 +348,18 @@ DBGotop()
 procregua(nRec4)
 
 While !EOF()
-	
+
 	IncProc("Gerando 1º Consumação:")
-	
+
 	aAdd(aCons1,{	TMP->D3_COD,;     //01.Codigo do Produto
 	TMP->B1_DESC,;    	//02.Descrição do Produto
 	TMP->QUANTIDADE,;  	//03.Quantidade comprada
 	TMP->BM_GRUPO,;      //04
 	TMP->BM_DESC,;        //05
 	TMP->B1_LOCPAD})		//06
-	
+
 	DBSkip()
-	
+
 EndDo
 
 DBSelectARea("TMP")
@@ -409,18 +403,18 @@ DBGotop()
 procregua(nRec5)
 
 While !EOF()
-	
+
 	IncProc("Gerando 2º Consumação:")
-	
+
 	aAdd(aCons2,{	TMP->D3_COD,;     //01.Codigo do Produto
 	TMP->B1_DESC,;    	//02.Descrição do Produto
 	TMP->QUANTIDADE,;  	//03.Quantidade comprada
 	TMP->BM_GRUPO,;
 	TMP->BM_DESC,;
 	TMP->B1_LOCPAD})
-	
+
 	DBSkip()
-	
+
 EndDo
 
 DBSelectARea("TMP")
@@ -464,18 +458,18 @@ DBGotop()
 procregua(nRec6)
 
 While !EOF()
-	
+
 	IncProc("Gerando 3º Consumação:")
-	
+
 	aAdd(aCons3,{	TMP->D3_COD,;     //01.Codigo do Produto
 	TMP->B1_DESC,;    	//02.Descrição do Produto
 	TMP->QUANTIDADE,;  	//03.Quantidade comprada
 	TMP->BM_GRUPO,;   // 04 Grupo
 	TMP->BM_DESC,;
 	TMP->B1_LOCPAD})		//05.Descrição Grupo
-	
+
 	DBSkip()
-	
+
 EndDo
 
 DBSelectARea("TMP")
@@ -518,18 +512,18 @@ DBGotop()
 procregua(nRec8)
 
 While !EOF()
-	
+
 	IncProc("Gerando 4º Consumação:")
-	
+
 	aAdd(aCons4,{	TMP->D3_COD,;     //01.Codigo do Produto
 	TMP->B1_DESC,;    	//02.Descrição do Produto
 	TMP->QUANTIDADE,;  	//03.Quantidade comprada
 	TMP->BM_GRUPO,;      //04
 	TMP->BM_DESC,;        //05
 	TMP->B1_LOCPAD})		//06
-	
+
 	DBSkip()
-	
+
 EndDo
 
 DBSelectARea("TMP")
@@ -620,47 +614,47 @@ _aItem[20]		:= "CONSUMO + MARGEM(" + cValtoChar(MV_PAR12) + "%) - ESTOQUE"
 	_aItem := {}
 
 If MV_PAR11 == 1
-	
+
 	For I := 1 to Len(aCons1)
-		
+
 		N4 := aScan(aCons4, { |x| x[01] == aCons1[I][1] } )
 		N3 := aScan(aCons3, { |x| x[01] == aCons1[I][1] } )// Localiza o mesmo produto em outra consumação para impressao
 		N2 := aScan(aCons2, { |x| x[01] == aCons1[I][1] } )// Localiza o mesmo produto em outra consumação para impressao
-		
-		
+
+
 		If N2 != 0 .AND. N3 != 0 // Será impresso caso o produto já esteja consumido os tres periodos informados nos parametros, caso contrario precisará realizar controle manual até ser consumido os periodos informados
-			
+
 			IF (aCons1[I][4] != cGrupo)
-				
+
 				// Pular Linha
 					_aItem := ARRAY(LEN(_aCExcel) + 1)
 					AADD(_aIExcel,_aItem)
 	_aItem := {}
-				
+
 					_aItem := ARRAY(LEN(_aCExcel) + 1)
 				_aItem[02] 		:= aCons1[I][4]
 				_aItem[03] 		:= aCons1[I][5]
 					AADD(_aIExcel,_aItem)
 	_aItem := {}
-				
+
 				//Pular Linha
 					_aItem := ARRAY(LEN(_aCExcel) + 1)
 					AADD(_aIExcel,_aItem)
 	_aItem := {}
-				
+
 			Endif
-			
+
 			C1 := aScan(aEnt1, { |x| x[01] == aCons1[I][1] } )// Localiza o mesmo produto em outra consumação para impressao
 			C2 := aScan(aEnt2, { |x| x[01] == aCons1[I][1] } )// Localiza o mesmo produto em outra consumação para impressao
 			C3 := aScan(aEnt3, { |x| x[01] == aCons1[I][1] } )// Localiza o mesmo produto em outra consumação para impressao
 			C4 := aScan(aEnt4, { |x| x[01] == aCons1[I][1] } )// Localiza o mesmo produto em outra consumação para impressao
-			
+
 			aSaldos:={CalcEst(PADL(aCons1[I][1],15),aCons1[I][6],MV_PAR01),;
 			CalcEst(PADL(aCons1[I][1],15),aCons1[I][6],MV_PAR02 + 1),;
 			CalcEst(PADL(aCons1[I][1],15),aCons1[I][6],MV_PAR04 + 1),;
 			CalcEst(PADL(aCons1[I][1],15),aCons1[I][6],MV_PAR06 + 1),;
 			CalcEst(PADL(aCons1[I][1],15),aCons1[I][6],MV_PAR08 + 1)}
-			
+
 				_aItem := ARRAY(LEN(_aCExcel) + 1)
 			_aItem[01]		:= aCons1[I][6]
 			_aItem[02]		:= aCons1[I][1]
@@ -702,60 +696,60 @@ If MV_PAR11 == 1
 			ELSEIF AT(".",_aItem[20]) > 0
 				_aItem[02]		:= cValToChar(VAL(SUBSTR(_aItem[20],1,(AT(".",_aItem[20]) - 1))) + 1)
 			Endif
-			
+
 				AADD(_aIExcel,_aItem)
 	_aItem := {}
-			
-			
+
+
 		EndIf
-		
+
 		cGrupo := aCons1[I][4]
-		
-		
+
+
 	Next
-	
+
 ELSE
-	
+
 	For I := 1 to Len(aCons1)
-		
+
 		N4 := aScan(aCons4, { |x| x[01] == aCons1[I][1] } )// Localiza o mesmo produto em outra consumação para impressao
 		N3 := aScan(aCons3, { |x| x[01] == aCons1[I][1] } )// Localiza o mesmo produto em outra consumação para impressao
 		N2 := aScan(aCons2, { |x| x[01] == aCons1[I][1] } )// Localiza o mesmo produto em outra consumação para impressao
-		
-		
+
+
 		If N2 != 0 .OR. N3 != 0 // Será impresso caso o produto já esteja consumido os tres periodos informados nos parametros, caso contrario precisará realizar controle manual até ser consumido os periodos informados
-			
+
 			IF (aCons1[I][4] != cGrupo)
-				
+
 				// Pular Linha
 					_aItem := ARRAY(LEN(_aCExcel) + 1)
 					AADD(_aIExcel,_aItem)
 	_aItem := {}
-				
+
 					_aItem := ARRAY(LEN(_aCExcel) + 1)
 				_aItem[02] 	:= aCons1[I][4]
 				_aItem[03]	:= aCons1[I][5]
 					AADD(_aIExcel,_aItem)
 	_aItem := {}
-				
+
 				//Pular Linha
 					_aItem := ARRAY(LEN(_aCExcel) + 1)
 					AADD(_aIExcel,_aItem)
 	_aItem := {}
-				
+
 			Endif
-			
+
 			C1 := aScan(aEnt1, { |x| x[01] == aCons1[I][1] } )// Localiza o mesmo produto em outra consumação para impressao
 			C2 := aScan(aEnt2, { |x| x[01] == aCons1[I][1] } )// Localiza o mesmo produto em outra consumação para impressao
 			C3 := aScan(aEnt3, { |x| x[01] == aCons1[I][1] } )// Localiza o mesmo produto em outra consumação para impressao
 			C4 := aScan(aEnt4, { |x| x[01] == aCons1[I][1] } )// Localiza o mesmo produto em outra consumação para impressao
-			
+
 			aSaldos:={CalcEst(PADL(aCons1[I][1],15),aCons1[I][6],MV_PAR01),;
 			CalcEst(PADL(aCons1[I][1],15),aCons1[I][6],MV_PAR02 + 1),;
 			CalcEst(PADL(aCons1[I][1],15),aCons1[I][6],MV_PAR04 + 1),;
 			CalcEst(PADL(aCons1[I][1],15),aCons1[I][6],MV_PAR06 + 1),;
 			CalcEst(PADL(aCons1[I][1],15),aCons1[I][6],MV_PAR08 + 1)}
-			
+
 				_aItem := ARRAY(LEN(_aCExcel) + 1)
 			_aItem[01]		:= aCons1[I][6]
 			_aItem[02]		:= aCons1[I][1]
@@ -798,7 +792,7 @@ ELSE
 				_aItem[18]	:= cValtoChar(ROUND((iiF(N3==0,((aCons2[N2][3] + aCons1[I][3])/2),(aCons3[N3][3] + aCons2[N2][3] + aCons1[I][3]) / 3)),0))
 				_aItem[19]	:= cValtoChar(ROUND((ROUND((iiF(N3==0,((aCons2[N2][3] + aCons1[I][3])/2),(aCons3[N3][3] + aCons2[N2][3] + aCons1[I][3]) / 3)),0)) * (MV_PAR12/100),0))
 			EndIf
-			
+
 			If N3 == 0
 				_aItem[20]		:= cValToChar(IIF(N3==0,((aCons1[I][3] + aCons2[N2][3]) / 2) + (((aCons1[I][3] + aCons2[N2][3]) / 2) * (MV_PAR12/100)) - (aSaldos[5][1]),((aCons3[N3][3] + aCons2[N2][3] + aCons1[I][3])/3) + (((aCons3[N3][3] + aCons2[N2][3] + aCons1[I][3]) / 3) * (MV_PAR12/100)) - (aSaldos[5][1])))
 			ELSEIF N2 == 0
@@ -806,26 +800,26 @@ ELSE
 			ELSEIF N2 != 0 .AND. N3 != 0
 				_aItem[20]		:= cValToChar(IIF(N2==0,((aCons1[I][3] + aCons3[N3][3]) / 2) + (((aCons1[I][3] + aCons3[N3][3]) / 2) * (MV_PAR12/100)) - (aSaldos[5][1]),((aCons3[N3][3] + aCons2[N2][3] + aCons1[I][3])/3) + (((aCons3[N3][3] + aCons2[N2][3] + aCons1[I][3]) / 3) * (MV_PAR12/100)) - (aSaldos[5][1])))
 			EndIf
-			
+
 			IF VAL(_aItem[20]) < 0
 				_aItem[20]		:= "0"
 			ELSEIF AT(".",_aItem[20]) > 0
 				_aItem[20]		:= cValToChar(VAL(SUBSTR(_aItem[20],1,(AT(".",_aItem[20]) - 1))) + 1)
 			Endif
 				AADD(_aIExcel,_aItem)
-	_aItem := {}			
+	_aItem := {}
 		EndIf
-		
+
 		cGrupo := aCons1[I][4]
-	
+
 	Next
-	
+
 EndIf
 
 If !ApOleClient("MsExcel")
 	MsgStop("Microsoft Excel nao instalado.")  //"Microsoft Excel nao instalado."
 	Return
-EndIf    
+EndIf
 
 IF (LEN(_aIExcel) > 0)
 	MSGRUN("Favor Aguardar...", "Exportando os Registros para o Excel",;
