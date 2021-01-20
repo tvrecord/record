@@ -1,19 +1,7 @@
 #INCLUDE "rwmake.ch"
 
-/*/
-ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
-±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
-±±ÉÍÍÍÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍ»±±
-±±ºPrograma  ³NOVO9     º Autor ³ AP6 IDE            º Data ³  27/02/14   º±±
-±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
-±±ºDescricao ³ Codigo gerado pelo AP6 IDE.                                º±±
-±±º          ³                                                            º±±
-±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
-±±ºUso       ³ AP6 IDE                                                    º±±
-±±ÈÍÍÍÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¼±±
-±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
-ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
-/*/
+// Rafael França - 27/02/2014 - Cadastro de contas SIG com orçamento
+// Compras -> Atualizações -> Especificos -> Contas SIG
 
 User Function AXSZY
 
@@ -21,19 +9,21 @@ User Function AXSZY
 //³ Declaracao de Variaveis                                             ³
 //ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 
-Local cVldAlt := ".T." // Validacao para permitir a alteracao. Pode-se utilizar ExecBlock.
-Local cVldExc := ".T." // Validacao para permitir a exclusao. Pode-se utilizar ExecBlock.
+//Local cVldAlt := ".T." // Validacao para permitir a alteracao. Pode-se utilizar ExecBlock.
+//Local cVldExc := ".T." // Validacao para permitir a exclusao. Pode-se utilizar ExecBlock.
+
 Private cCadastro 	:= "Cadastro de Orçamento SIG"
 Private aRotina   	:= {	{"Pesquisar" ,"AxPesqui",0,1}  	,;
 						 	{"Visualizar","AxVisual",0,2} 	,;
 							{"Incluir"	 ,"AxInclui",0,3}   ,;
-							{"Alterar"	 ,"AxAltera",0,4}   ,; 
+							{"Alterar"	 ,"AxAltera",0,4}   ,;
 							{"Excluir"	 ,"AxDeleta",0,5}	,;
-							{"Importar"	 ,"U_IMPORTSIG",0,2}}    //(" + (cPedido) + ")
-Private cDelFunc  	:= ".T." // Validacao para a exclusao. Pode-se utilizar ExecBlock   
-Private cString   	:= "SZY"  
+							{"Importar CSV"	 ,"U_IMPORTSIG",0,2}}
+
+Private cDelFunc  	:= ".T." // Validacao para a exclusao. Pode-se utilizar ExecBlock
+Private cString   	:= "SZY"
 
 dbSelectArea(cString)
-dbSetOrder(1)                                                  
+dbSetOrder(1)
 mBrowse( 6,1,22,75,cString,,,,,,)
 Return
