@@ -1,31 +1,17 @@
 #include "totvs.ch"
 #include "protheus.ch"
 #Include "rwmake.ch"
-#Include "topconn.ch"
-#Include "tbiconn.ch"
 
 User Function IMPORTSIG()
 
-	/*
-ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
-±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
-±±ÉÍÍÍÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍ»±±
-±±ºPrograma  ³IncTecnicoºAutor  ³Rafael França       º Data ³  13/01/15   º±±
-±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
-±±ºDesc.     ³Incluir dados de um txt no sistema para orçamento SIG.      º±±
-±±º          ³                                                            º±±
-±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
-±±ºUso       ³ AP                                                         º±±
-±±ÈÍÍÍÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¼±±
-±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
-ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
-	*/
+// Rafael França - 13/01/15 - Incluir dados de um arquivo csv separado por ; no sistema para orçamento SIG.
+// Compras -> Atualizações -> Especificos -> Contas SIG (Outras Ações)
 
 	Local cArq    := ""
 	Local cLinha  := ""
 	Local nNum	  := 0
-	Local lPrim   := .T.
-	Local aCampos := {}
+//	Local lPrim   := .T. // Separa primeira linha
+//	Local aCampos := {}  // Nome dos campos primeira linha
 	Local aDados  := {}
 
 	Private aErro := {}
@@ -36,12 +22,12 @@ User Function IMPORTSIG()
 
 	cArq := MV_PAR01
 
-	If !MsgYesNo("02/01/20 - Processa arquivo: " + alltrim(cArq) + " e substitui dados anteriores?")
+	If !MsgYesNo("Processa arquivo: " + alltrim(cArq) + " e substitui dados anteriores?")
 		Return()
 	EndIf
 
 	If !File(cArq)
-		MsgStop("O arquivo " + alltrim(cArq) + " não foi encontrado. A importação será abortada!","ATENCAO")
+		MsgStop("O arquivo " + alltrim(cArq) + " não foi encontrado. A importação será abortada!","ATENÇÃO")
 		Return
 	EndIf
 
@@ -54,6 +40,7 @@ User Function IMPORTSIG()
 
 		cLinha := FT_FREADLN()
 
+		// Separo a primeira linha se for necessario
 		//If lPrim
 		//	aCampos := Separa(cLinha,";",.T.)
 		//	lPrim := .F.
@@ -62,6 +49,7 @@ User Function IMPORTSIG()
 		//EndIf
 
 		FT_FSKIP()
+
 	EndDo
 
 	Begin Transaction
@@ -73,43 +61,43 @@ User Function IMPORTSIG()
 			dbSelectArea("SZY")
 			dbSetOrder(1)
 
-			IF dbSeek(xFilial("SZY") + aDados[i,1] + " 2020")
+			IF dbSeek(xFilial("SZY") + aDados[i,1] + " " + MV_PAR02)
 				Reclock("SZY",.F.)
-				//ZY_CODIGO	:= UPPER(aDados[i,1])
-				//ZY_DESCRI	:= UPPER(aDados[i,2])
-				//ZY_MES01	:= VAL(StrTran(aDados[i,3],",",".",1,))
-				//ZY_MES02	:= VAL(StrTran(aDados[i,4],",",".",1,))
-				//ZY_MES03	:= VAL(StrTran(aDados[i,5],",",".",1,))
-				//ZY_MES04	:= VAL(StrTran(aDados[i,6],",",".",1,))
-				//ZY_MES05	:= VAL(StrTran(aDados[i,7],",",".",1,))
-				//ZY_MES06	:= VAL(StrTran(aDados[i,8],",",".",1,))
-				//ZY_MES07	:= VAL(StrTran(aDados[i,9],",",".",1,))
-				//ZY_MES08	:= VAL(StrTran(aDados[i,10],",",".",1,))
+				ZY_CODIGO	:= UPPER(aDados[i,1])
+				ZY_DESCRI	:= UPPER(aDados[i,2])
+				ZY_MES01	:= VAL(StrTran(aDados[i,3],",",".",1,))
+				ZY_MES02	:= VAL(StrTran(aDados[i,4],",",".",1,))
+				ZY_MES03	:= VAL(StrTran(aDados[i,5],",",".",1,))
+				ZY_MES04	:= VAL(StrTran(aDados[i,6],",",".",1,))
+				ZY_MES05	:= VAL(StrTran(aDados[i,7],",",".",1,))
+				ZY_MES06	:= VAL(StrTran(aDados[i,8],",",".",1,))
+				ZY_MES07	:= VAL(StrTran(aDados[i,9],",",".",1,))
+				ZY_MES08	:= VAL(StrTran(aDados[i,10],",",".",1,))
 				ZY_MES09	:= VAL(StrTran(aDados[i,11],",",".",1,))
 				ZY_MES10	:= VAL(StrTran(aDados[i,12],",",".",1,))
 				ZY_MES11	:= VAL(StrTran(aDados[i,13],",",".",1,))
 				ZY_MES12	:= VAL(StrTran(aDados[i,14],",",".",1,))
 				ZY_MES12	:= VAL(StrTran(aDados[i,14],",",".",1,))
-				ZY_ANO 		:= "2020"
+				ZY_ANO 		:= MV_PAR02
 				SZY->(MsUnlock())
 				nNum++
 			ELSE
 				Reclock("SZY",.T.)
 				ZY_CODIGO	:= UPPER(aDados[i,1])
 				ZY_DESCRI	:= UPPER(aDados[i,2])
-				//ZY_MES01	:= VAL(StrTran(aDados[i,3],",",".",1,))
-				//ZY_MES02	:= VAL(StrTran(aDados[i,4],",",".",1,))
-				//ZY_MES03	:= VAL(StrTran(aDados[i,5],",",".",1,))
-				//ZY_MES04	:= VAL(StrTran(aDados[i,6],",",".",1,))
-				//ZY_MES05	:= VAL(StrTran(aDados[i,7],",",".",1,))
-				//ZY_MES06	:= VAL(StrTran(aDados[i,8],",",".",1,))
-				//ZY_MES07	:= VAL(StrTran(aDados[i,9],",",".",1,))
-				//ZY_MES08	:= VAL(StrTran(aDados[i,10],",",".",1,))
+				ZY_MES01	:= VAL(StrTran(aDados[i,3],",",".",1,))
+				ZY_MES02	:= VAL(StrTran(aDados[i,4],",",".",1,))
+				ZY_MES03	:= VAL(StrTran(aDados[i,5],",",".",1,))
+				ZY_MES04	:= VAL(StrTran(aDados[i,6],",",".",1,))
+				ZY_MES05	:= VAL(StrTran(aDados[i,7],",",".",1,))
+				ZY_MES06	:= VAL(StrTran(aDados[i,8],",",".",1,))
+				ZY_MES07	:= VAL(StrTran(aDados[i,9],",",".",1,))
+				ZY_MES08	:= VAL(StrTran(aDados[i,10],",",".",1,))
 				ZY_MES09	:= VAL(StrTran(aDados[i,11],",",".",1,))
 				ZY_MES10	:= VAL(StrTran(aDados[i,12],",",".",1,))
 				ZY_MES11	:= VAL(StrTran(aDados[i,13],",",".",1,))
 				ZY_MES12	:= VAL(StrTran(aDados[i,14],",",".",1,))
-				ZY_ANO 		:= "2020"
+				ZY_ANO 		:= MV_PAR02
 				SZY->(MsUnlock())
 
 			ENDIF
@@ -133,6 +121,7 @@ User Function IMPORTSIG()
 Return
 
 Static Function ValidPerg()
+
 	Local _sAlias := Alias()
 	Local aRegs := {}
 	Local i,j
@@ -141,7 +130,8 @@ Static Function ValidPerg()
 	dbSetOrder(1)
 	cPerg := PADR(cPerg,10)
 
-	aAdd(aRegs,{cPerg,"01","Arquivo:        ","","","mv_ch1","C",30,00,0,"G","","mv_par01","","","","","","","","","","","","","","","","","","","","","","","","","",""})
+	aAdd(aRegs,{cPerg,"01","Arquivo:        ","","","mv_ch01","C",30,00,0,"G","","mv_par01","","","","","","","","","","","","","","","","","","","","","","","","","",""})
+	aAdd(aRegs,{cPerg,"02","Ano:        	","","","mv_ch02","C",04,00,0,"G","","mv_par02","","","","","","","","","","","","","","","","","","","","","","","","","",""})
 
 	For i:=1 to Len(aRegs)
 		If !dbSeek(cPerg+aRegs[i,2])
@@ -154,6 +144,7 @@ Static Function ValidPerg()
 			MsUnlock()
 		Endif
 	Next
+
 	dbSelectArea(_sAlias)
 
 Return
