@@ -50,17 +50,40 @@ User Function CCI31U()
 	Private cMotivo3   := ""
 	Private nAss	   := 0
 	Private nValor	   := 0
+	Private cCotaDe		:= ""
+	Private cCotaAte	:= ""
+	Private nAtuEst		:= ""
+	Private nImobi		:= ""
+
+
+
 
 	//dbSelectArea("SC8") Bruno - Ajustar uso
 	//dbSetOrder(1)
 
+	//Relatorio sendo chamado pela rotina de aprovação liberar documento
+	IF Alltrim(FUNNAME()) == "MATA094"
 
-	ValidPerg(cPerg)
+		cCotaDe		:= POSICIONE("SC8",11,xFilial("SC8")+Alltrim(SCR->CR_NUM) + "0001","C8_NUM")
+		cCotaAte	:= POSICIONE("SC8",11,xFilial("SC8")+Alltrim(SCR->CR_NUM) + "0001","C8_NUM")
+		nAtuEst		:= 1
+		nImobi		:= 1
 
-	If !Pergunte(cPerg,.T.)
-		alert("OPERAÇÃO CANCELADA")
-		return
-	ENDIF
+	Else
+
+		ValidPerg(cPerg)
+
+		If !Pergunte(cPerg,.T.)
+			alert("OPERAÇÃO CANCELADA")
+			return
+		ENDIF
+
+		cCotaDe		:= MV_PAR01
+		cCotaAte	:= MV_PAR02
+		nAtuEst		:= MV_PAR03
+		nImobi		:= MV_PAR04
+
+	EndIf
 
 
 	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
@@ -115,9 +138,9 @@ Static Function RunReport(Cabec1,Cabec2,Titulo)
 	Private dLib01    := "//"
 	Private dLib02		:= "//"
 	Private dLib03		:= "//"
-	Private lAssElen := .F.
-	Private lAssDir  := .F.
-	Private lAssDir1  := .F.
+	Private lAprov01 := .F.
+	Private lAprov02  := .F.
+	Private lAprov03  := .F.
 	Private lAssAus  := .F.
 	Private lFer  := .F.
 	Private cAprov01 := ""
@@ -199,23 +222,24 @@ Static Function RunReport(Cabec1,Cabec2,Titulo)
 
 	SetRegua(RecCount())
 	pOrcado := 0
-
+	/*Retirado por conta da implementação da rotina de aprovação - Bruno Alves 21-01-2021
 	If AllTrim(Substring(cUsuario,7,15)) $ "Luciano Ribeiro%Eleni Caldeira (Elenn)%Claudinei Girotti%Josiel Ferreira%Wagner Lima"
 		MV_PAR01 := POSICIONE("SC8",11,xFilial("SC8")+Alltrim(SCR->CR_NUM) + "0001","C8_NUM")
 		MV_PAR02 := POSICIONE("SC8",11,xFilial("SC8")+Alltrim(SCR->CR_NUM) + "0001","C8_NUM")
 	Endif
+	*/
 
 
 
 
 	dbSelectArea("SC8")
 	dbSetOrder(1)
-	SC8->(DBSEEK(xFilial("SC8")+MV_PAR01,.T. ) )
+	SC8->(DBSEEK(xFilial("SC8")+cCotaDe,.T. ) )
 
 
 	// Alterado para imprimir intervalo de mapas 17/10/2014
 	//While !SC8->(EOF()).AND.SC8->C8_NUM <= MV_PAR01
-	While !SC8->(EOF()) .AND. SC8->C8_NUM >= MV_PAR01 .AND. SC8->C8_NUM <= MV_PAR02
+	While !SC8->(EOF()) .AND. SC8->C8_NUM >= cCotaDe .AND. SC8->C8_NUM <= cCotaAte
 
 		pCotacao	  := SC8->C8_NUM
 		pData      := SC8->C8_EMISSAO
@@ -535,7 +559,7 @@ STATIC FUNCTION ImprCabec()
 	oPrn:Say( 0200, 0020,"CNPJ: "+TRANSFORM(RTRIM(SM0->M0_CGC),"@R 99.999.999/9999-99"),oFont3,100 )
 	oPrn:Say( 0260, 0020,"INSCRIÇÃO ESTADUAL: "+TRANSFORM(SM0->M0_INSC,"@R 99.999.999/999/99"),oFont3,100 )
 	oPrn:Say( 0330, 0020,"CONTROLE DE ESTOQUE ",oFont5,100 )
-	oPrn:Say( 0330, 0450,"SIM  |"+IF(MV_PAR03==1,"X","")+"     |        NÃO   |"+IF(MV_PAR03==2,"X","")+"     | ",oFont5,100 )
+	oPrn:Say( 0330, 0450,"SIM  |"+IF(nAtuEst==1,"X","")+"     |        NÃO   |"+IF(nAtuEst==2,"X","")+"     | ",oFont5,100 )
 	oPrn:Say( 0090, 0920,"PEDIDO ORÇADO: ",oFont5,100 )
 	oPrn:Say( 0090, 1170,"SIM  |"+IF(SZL->ZL_PEDORC == "1","X","")+"  |   NÃO   |"+IF(SZL->ZL_PEDORC=="2","X","")+" | ",oFont5,100 )
 	IF SZL->ZL_TPPAG == "1"
@@ -565,7 +589,7 @@ STATIC FUNCTION ImprCabec()
 	oPrn:Say( 0420, 2120,"Cod. Fornecedor:",oFont5,100 )
 	oPrn:Say( 0420, 2760,"Cod. Fornecedor:",oFont5,100 )
 	oPrn:Say( 0420, 0020,"IMOBILIZADO ",oFont5,100 )
-	oPrn:Say( 0420, 0450,"SIM  |"+IF(MV_PAR04==1,"X","")+"     |        NÃO   |"+IF(MV_PAR04==2,"X","")+"     | ",oFont5,100 )
+	oPrn:Say( 0420, 0450,"SIM  |"+IF(nImobi==1,"X","")+"     |        NÃO   |"+IF(nImobi==2,"X","")+"     | ",oFont5,100 )
 	oPrn:Say( 0510, 0020," ITEM",oFont5,100 )
 	oPrn:Say( 0510, 0200,"QTDE",oFont5,100 )
 	oPrn:Say( 0510, 0320,"UNID",oFont5,100 )
@@ -844,86 +868,83 @@ STATIC FUNCTION ImprRodape()
 		While !EOF()
 
 
-			If TMP->CR_USER == "000002"          // Elenn Caldeira
-				IF TMP->CR_LIBAPROV <> TMP->CR_APROV //.AND. !EMPTY(TMP->CR_LIBAPRO)
+			If TMP->CR_NIVEL == "01"
+
+				IF TMP->CR_LIBAPROV <> TMP->CR_APROV
 					cLib01 := ALLTRIM(TMP->CR_LIBAPRO)
 				ELSE
 					cLib01 := ALLTRIM(TMP->CR_APROV)
 				ENDIF
-				//cAprov01 := Posicione("SAK",1,xFilial("SAK")+TMP->CR_USER,"AK_NOME")
-				cAprov01 := "Eleni Caldeira (Elenn)"
-				cFuncao01 := "Gerente Administrativo / Financeiro"
-				cCodUser1 := TMP->CR_APROV
-				lass01 := .T.
+
+				If PswSeek( TMP->CR_USER, .T. )
+				aUsuario := PswRet() // Retorna vetor com informações do usuário
+				cAprov01 	:= Alltrim(aUsuario[1][4])
+				cFuncao01 	:= Alltrim(aUsuario[1][13])
+				cCodUser1 	:= TMP->CR_APROV
+				lass01 		:= .T.
+				EndIf
+
 			EndIF
 
-			If TMP->CR_USER == "000166" .OR. TMP->CR_USER == "000180" .OR. TMP->CR_USER == "000190" .OR. TMP->CR_USER == "000219" //Claudinei Girotti ou Josiel Ferreira
-				IF TMP->CR_LIBAPROV <> TMP->CR_APROV //.AND. !EMPTY(TMP->CR_LIBAPRO)
+			IF TMP->CR_NIVEL == "02"
+				IF TMP->CR_LIBAPROV <> TMP->CR_APROV
 					cLib02 := ALLTRIM(TMP->CR_LIBAPRO)
 				ELSE
 					cLib02 := ALLTRIM(TMP->CR_APROV)
 				ENDIF
-				IF TMP->CR_USER == "000166"
-					cAprov02 := "Claudinei Girotti"
-				ELSEIF TMP->CR_USER == "000180"
-					cAprov02 := "Josiel Ferreira"
-				ELSEIF TMP->CR_USER == "000190"
-					cAprov02 := "Wagner Lima"
-				ELSEIF TMP->CR_USER == "000219"
-					cAprov02 := "Artur Fernandes"
-				ENDIF
-				cFuncao02 := "     Gerente Executivo"
+
+				If PswSeek( TMP->CR_USER, .T. )
+				aUsuario := PswRet()
+				cAprov02 := Alltrim(aUsuario[1][4])
+				cFuncao02 := Alltrim(aUsuario[1][13])
 				cCodUser2 := TMP->CR_APROV
 				lass02 := .T.
+				EndIf
+
 			EndIF
 
-			If (TMP->CR_USER == "000192" .OR. TMP->CR_USER == "000157")// Carlos Alves  //Ferias Luciano Ribeiro 02-14/01/2018
-				IF TMP->CR_LIBAPROV <> TMP->CR_APROV //.AND. !EMPTY(TMP->CR_LIBAPRO)
+			If TMP->CR_NIVEL == "03"
+
+				IF TMP->CR_LIBAPROV <> TMP->CR_APROV
 					cLib03 := ALLTRIM(TMP->CR_LIBAPRO)
 				ELSE
 					cLib03 := ALLTRIM(TMP->CR_APROV)
 				ENDIF
-				cAprov03 := Posicione("SAK",1,xFilial("SAK")+TMP->CR_APROV,"AK_NOME")
-				cFuncao03 := "Diretor Geral"
+
+				If PswSeek( TMP->CR_USER, .T. )
+				aUsuario := PswRet()
+				cAprov03 := Alltrim(aUsuario[1][4])
+				cFuncao03 := Alltrim(aUsuario[1][13])
 				cCodUser3 := TMP->CR_APROV
 				lass03 := .T.
+				EndIf
+
 			EndIF
 
-			If  TMP->CR_USER == "000002" .AND. !EMPTY(TMP->CR_DATALIB) .AND. !EMPTY(TMP->CR_USERLIB) // Elenn
-				lAssElen := .T.
+			If  TMP->CR_NIVEL == "01"  .AND. !EMPTY(TMP->CR_DATALIB) .AND. !EMPTY(TMP->CR_USERLIB)
+				lAprov01 := .T.
 				dLib01   := DTOC(STOD(TMP->CR_DATALIB))
-				//		cAprov01 := Posicione("SAK",1,xFilial("SAK")+TMP->CR_APROV,"AK_NOME")
-			ElseIf (TMP->CR_USER == "000166" .OR. TMP->CR_USER == "000180" .OR. TMP->CR_USER == "000190" .OR. TMP->CR_USER == "000219") .AND.  !EMPTY(TMP->CR_DATALIB) .AND. !EMPTY(TMP->CR_USERLIB) // Claudinei Girotti OU Josiel Ferreira
-				lAssDir := .T.
+
+			ElseIf TMP->CR_NIVEL == "02"  .AND. !EMPTY(TMP->CR_DATALIB) .AND. !EMPTY(TMP->CR_USERLIB)
+				lAprov02 := .T.
 				dLib02   := DTOC(STOD(TMP->CR_DATALIB))
-				//		cAprov02 := Posicione("SAK",1,xFilial("SAK")+TMP->CR_APROV,"AK_NOME")
-			ElseIf ((TMP->CR_USER == "000192" .OR. TMP->CR_USER == "000157")  .AND. EMPTY(TMP->CR_APRORI) .AND. !EMPTY(TMP->CR_DATALIB) .AND. !EMPTY(TMP->CR_USERLIB)) // Carlos
-				lAssDir1 := .T.
+
+			ElseIf TMP->CR_NIVEL == "03"  .AND. !EMPTY(TMP->CR_DATALIB) .AND. !EMPTY(TMP->CR_USERLIB)
+				lAprov03 := .T.
 				dLib03   := DTOC(STOD(TMP->CR_DATALIB))
-				//		cAprov03 := Posicione("SAK",1,xFilial("SAK")+TMP->CR_APROV,"AK_NOME")
-				/*
-			ElseIf TMP->CR_NIVEL == "02" .AND. !EMPTY(TMP->CR_APRORI)
-			cAprovAus := Posicione("SAK",1,xFilial("SAK")+TMP->CR_APROV,"AK_NOME")
-			lAssAus := .T.
-				*/
 
 			EndIf
 
-			//Provisorio, devido as ferias da dona elenn
-			//ElseIf TMP->CR_NIVEL == "03"
-			//	lFer := .T.
-			//	dLib01   := DTOC(STOD(TMP->CR_DATALIB))
-			//	cAprov01 := Posicione("SAK",1,xFilial("SAK")+TMP->CR_APROV,"AK_NOME")
-
-			nAss += 1  //Rafael França - Conta os aprovadores para verificar a necessidade de impressao
+			nAss += 1
 			nValor := TMP->CR_TOTAL
 
 			DbSkip()
 
 		Enddo
 
-		IF dDatabase >= CTOD("02/01/2018") .AND. dDatabase <= CTOD("14/01/2018") .AND. nValor >= 1000 .AND. .F. .AND. !(lAssDir1)
-			lAssDir1 := .T.
+/*
+		IF dDatabase >= CTOD("02/01/2018") .AND. dDatabase <= CTOD("14/01/2018") .AND. nValor >= 1000 .AND. .F. .AND. !(lAprov03)
+			lAprov03 := .T.
 			dLib03   := dDatabase
 			cAprov03 := "Luciano Ribeiro"
 			cFuncao03 := "Diretor Geral"
@@ -932,8 +953,8 @@ STATIC FUNCTION ImprRodape()
 			nAss += 1
 		ENDIF
 
-		IF dDatabase >= CTOD("15/01/2018") .AND. dDatabase <= CTOD("19/01/2018") .AND. .F. .AND. !(lAssDir)
-			lAssDir := .T.
+		IF dDatabase >= CTOD("15/01/2018") .AND. dDatabase <= CTOD("19/01/2018") .AND. .F. .AND. !(lAprov02)
+			lAprov02 := .T.
 			dLib02   := dDatabase
 			cAprov02 := "Artur Fernandes"
 			cFuncao02 := "     Gerente Executivo"
@@ -943,8 +964,8 @@ STATIC FUNCTION ImprRodape()
 
 		ENDIF
 
-		If dDatabase >= CTOD("22/01/2018") .AND. dDatabase <= CTOD("10/02/2018") .AND. .T. .AND. !(lAssElen)       // Elenn Caldeira
-			lAssElen := .T.
+		If dDatabase >= CTOD("22/01/2018") .AND. dDatabase <= CTOD("10/02/2018") .AND. .T. .AND. !(lAprov01)       // Elenn Caldeira
+			lAprov01 := .T.
 			dLib01   := dDatabase
 			cAprov01 := "Eleni Caldeira (Elenn)"
 			cFuncao01 := "Gerente Administrativo / Financeiro"
@@ -952,6 +973,8 @@ STATIC FUNCTION ImprRodape()
 			lass01 := .T.
 			nAss += 1
 		EndIF
+
+		*/
 
 		//Bruno - Ajuste utilizacao
 		DbSelectArea("TMP")
@@ -962,48 +985,48 @@ STATIC FUNCTION ImprRodape()
 
 	IF  nAss == 3 //Rafael França - 10/07/14 Conta as assinaturas para vericar a necessidade de impressao
 
-		oPrn:Say( 2150, 1490,REPLICATE("_",26),oFont3,100 )
+		oPrn:Say( 2150, 1490,REPLICATE("_",32),oFont3,100 )
 		oPrn:Say( 2200, 1610,UPPER(cAprov01),oFont5,100 )
 		oPrn:Say( 2240, 1560,cFuncao01,oFont5,100 )
 
-		oPrn:Say( 2150, 2100,REPLICATE("_",28),oFont3,100 )
+		oPrn:Say( 2150, 2100,REPLICATE("_",32),oFont3,100 )
 		oPrn:Say( 2200, 2170,UPPER(cAprov02),oFont5,100 )
 		oPrn:Say( 2240, 2135,cFuncao02,oFont5,100 )
 
-		oPrn:Say( 2150, 2700,REPLICATE("_",28),oFont3,100 )
+		oPrn:Say( 2150, 2700,REPLICATE("_",32),oFont3,100 )
 		oPrn:Say( 2200, 2870,UPPER(cAprov03),oFont5,100 )
 		oPrn:Say( 2240, 2885,cFuncao03,oFont5,100 )
 
 		//Rafael Franca - Assinatura digital
 
-		IF lAssElen == .T. .OR. dDatabase >= CTOD("22/01/2018") .AND. dDatabase <= CTOD("10/02/2018")
+		IF lAprov01 == .T. .OR. dDatabase >= CTOD("22/01/2018") .AND. dDatabase <= CTOD("10/02/2018")
 			if dDatabase >= CTOD("22/01/2018") .AND. dDatabase <= CTOD("10/02/2018")
-				oPrn:Say( 2070, 1445,PadC("Liberação Automática - Férias",62),oFont5,100 )
+				oPrn:Say( 2070, 1445,PadC("Liberação Automática - Férias",60),oFont5,100 )
 				oPrn:Say( 2120, 1445,PadC("22/01/2018 - 10/02/2018",60),oFont5,100 )
 			else
-				oPrn:Say( 2070, 1445,PadC("Liberação Eletrônica",62),oFont5,100 )
+				oPrn:Say( 2070, 1445,PadC("Liberação Eletrônica",60),oFont5,100 )
 				oPrn:Say( 2120, 1445,PadC(Alltrim(cAprov01) + " - Data: " + (dLib01) + "",60),oFont5,100 )
 			endif
 		EndIf
 
 
-		IF lAssDir == .T. .OR. (dDatabase >= CTOD("15/01/2018") .AND. dDatabase <= CTOD("19/01/2018"))
+		IF lAprov02 == .T. .OR. (dDatabase >= CTOD("15/01/2018") .AND. dDatabase <= CTOD("19/01/2018"))
 			if  dDatabase >= CTOD("15/01/2018") .AND. dDatabase <= CTOD("19/01/2018")
-				oPrn:Say( 2070, 2080,PadC("Liberação Automática - Recesso",62),oFont5,100 )
-				oPrn:Say( 2120, 2050,PadC("15/01/2018 - 19/01/2018",62),oFont5,100 )
+				oPrn:Say( 2070, 2080,PadC("Liberação Automática - Recesso",60),oFont5,100 )
+				oPrn:Say( 2120, 2050,PadC("15/01/2018 - 19/01/2018",60),oFont5,100 )
 			ELSE
-				oPrn:Say( 2070, 2080,PadC("Liberação Eletrônica",62),oFont5,100 )
-				oPrn:Say( 2120, 2050,PadC(Alltrim(cAprov02) + " - Data: " + (dLib02) + "",62),oFont5,100 )
+				oPrn:Say( 2070, 2080,PadC("Liberação Eletrônica",60),oFont5,100 )
+				oPrn:Say( 2120, 2050,PadC(Alltrim(cAprov02) + " - Data: " + (dLib02) + "",60),oFont5,100 )
 			ENDIF
 		ENDIF
 
 
-		IF lAssDir1 == .T. .OR. (dDatabase >= CTOD("02/01/2018") .AND. dDatabase <= CTOD("14/01/2018") .AND. nValor >= 1000)
+		IF lAprov03 == .T. .OR. (dDatabase >= CTOD("02/01/2018") .AND. dDatabase <= CTOD("14/01/2018") .AND. nValor >= 1000)
 			IF dDatabase >= CTOD("02/01/2018") .AND. dDatabase <= CTOD("14/01/2018")
-				oPrn:Say( 2070, 2690,PadC("Liberação Automática - Férias",62),oFont5,100 )
-				oPrn:Say( 2120, 2690,PadC("02/01/2018 - 14/01/2018",62),oFont5,100 )
+				oPrn:Say( 2070, 2690,PadC("Liberação Automática - Férias",60),oFont5,100 )
+				oPrn:Say( 2120, 2690,PadC("02/01/2018 - 14/01/2018",60),oFont5,100 )
 			ELSE
-				oPrn:Say( 2070, 2690,PadC("Liberação Eletrônica",62),oFont5,100 )
+				oPrn:Say( 2070, 2690,PadC("Liberação Eletrônica",60),oFont5,100 )
 				oPrn:Say( 2120, 2690,PadC(Alltrim(cAprov03) + " - Data: " + (dLib03) + "",60),oFont5,100 )
 			ENDIF
 		EndIf
@@ -1014,75 +1037,75 @@ STATIC FUNCTION ImprRodape()
 		//Rafael Franca - Assinatura digital
 
 		IF lass01 == .T.
-			oPrn:Say( 2150, 1760,REPLICATE("_",28),oFont3,100 )
-			oPrn:Say( 2200, 1880,UPPER(cAprov01),oFont5,100 )
-			oPrn:Say( 2240, 1830,cFuncao01,oFont5,100 )
+			oPrn:Say( 2150, 1760,REPLICATE("_",32),oFont3,100 )
+			oPrn:Say( 2200, 1760,PADC(UPPER(Alltrim(cAprov01)),60),oFont5,100 )
+			oPrn:Say( 2240, 1770,PADC(Alltrim(cFuncao01),60),oFont5,100 )
 		ENDIF
 
 		IF lass02 == .T.
 			IF lass01 == .T.
-				oPrn:Say( 2150, 2440,REPLICATE("_",28),oFont3,100 )
+				oPrn:Say( 2150, 2440,REPLICATE("_",32),oFont3,100 )
 				oPrn:Say( 2200, 2520,UPPER(cAprov02),oFont5,100 )
 				oPrn:Say( 2240, 2475,cFuncao02,oFont5,100 )
 			ELSE
-				oPrn:Say( 2150, 1760,REPLICATE("_",28),oFont3,100 )
+				oPrn:Say( 2150, 1760,REPLICATE("_",32),oFont3,100 )
 				oPrn:Say( 2200, 1880,UPPER(cAprov02),oFont5,100 )
 				oPrn:Say( 2240, 1830,cFuncao02,oFont5,100 )
 			ENDIF
 		ENDIF
 
 		IF lass03 == .T.
-			oPrn:Say( 2150, 2440,REPLICATE("_",28),oFont3,100 )
-			oPrn:Say( 2200, 2575,UPPER(cAprov03),oFont5,100 )
-			oPrn:Say( 2240, 2600,cFuncao03,oFont5,100 )
+			oPrn:Say( 2150, 2440,REPLICATE("_",32),oFont3,100 )
+			oPrn:Say( 2200, 2440,PADC(UPPER(Alltrim(cAprov03)),60),oFont5,100 )
+			oPrn:Say( 2240, 2450,PADC(Alltrim(cFuncao03),60),oFont5,100 )
 		ENDIF
 
-		IF lAssElen == .T. .OR. dDatabase >= CTOD("22/01/2018") .AND. dDatabase <= CTOD("10/02/2018")
+		IF lAprov01 == .T. .OR. dDatabase >= CTOD("22/01/2018") .AND. dDatabase <= CTOD("10/02/2018")
 
 			if dDatabase >= CTOD("22/01/2018") .AND. dDatabase <= CTOD("10/02/2018")
-				oPrn:Say( 2070, 1715,PadC("Liberação Automática - Férias",62),oFont5,100 )
+				oPrn:Say( 2070, 1715,PadC("Liberação Automática - Férias",60),oFont5,100 )
 				oPrn:Say( 2120, 1715,PadC("22/01/2018 - 10/02/2018",60),oFont5,100 )
 			else
-				oPrn:Say( 2070, 1715,PadC("Liberação Eletrônica",62),oFont5,100 )
+				oPrn:Say( 2070, 1715,PadC("Liberação Eletrônica",60),oFont5,100 )
 				oPrn:Say( 2120, 1715,PadC(Alltrim(cAprov01) + " - Data: " + (dLib01) + "",60),oFont5,100 )
 			EndIf
 		EndIf
 
-		IF lAssDir == .T.
-			IF lAssElen == .T. .AND. lass01 == .T.
+		IF lAprov02 == .T.
+			IF lAprov01 == .T. .AND. lass01 == .T.
 
 				IF dDatabase >= CTOD("15/01/2018") .AND. dDatabase <= CTOD("19/01/2018")
-					oPrn:Say( 2070, 2410,PadC("Liberação Automática - Recesso",62),oFont5,100 )
-					oPrn:Say( 2120, 2420,PadC("15/01/2018 - 19/01/2018",62),oFont5,100 )
+					oPrn:Say( 2070, 2410,PadC("Liberação Automática - Recesso",60),oFont5,100 )
+					oPrn:Say( 2120, 2420,PadC("15/01/2018 - 19/01/2018",60),oFont5,100 )
 				ELSE
-					oPrn:Say( 2070, 2410,PadC("Liberação Eletrônica",62),oFont5,100 )
-					oPrn:Say( 2120, 2380,PadC(Alltrim(cAprov02) + " - Data: " + (dLib02) + "",62),oFont5,100 )
+					oPrn:Say( 2070, 2410,PadC("Liberação Eletrônica",60),oFont5,100 )
+					oPrn:Say( 2120, 2380,PadC(Alltrim(cAprov02) + " - Data: " + (dLib02) + "",60),oFont5,100 )
 				ENDIF
 
-			ELSEIF lAssElen == .T. .AND. lass01 == .F.
+			ELSEIF lAprov01 == .T. .AND. lass01 == .F.
 
 				if dDatabase >= CTOD("15/01/2018") .AND. dDatabase <= CTOD("19/01/2018")
-					oPrn:Say( 2070, 1715,PadC("Liberação Automática - Recesso",62),oFont5,100 )
+					oPrn:Say( 2070, 1715,PadC("Liberação Automática - Recesso",60),oFont5,100 )
 					oPrn:Say( 2120, 1715,PadC("15/01/2018 - 19/01/2018",60),oFont5,100 )
 				else
-					oPrn:Say( 2070, 1715,PadC("Liberação Eletrônica",62),oFont5,100 )
+					oPrn:Say( 2070, 1715,PadC("Liberação Eletrônica",60),oFont5,100 )
 					oPrn:Say( 2120, 1715,PadC(Alltrim(cAprov02) + " - Data: " + (dLib02) + "",60),oFont5,100 )
 				EndIf
 
-			ELSEIF lAssElen == .F. .AND. lass01 == .F.
-				oPrn:Say( 2070, 1715,PadC("Liberação Eletrônica",62),oFont5,100 )
+			ELSEIF lAprov01 == .F. .AND. lass01 == .F.
+				oPrn:Say( 2070, 1715,PadC("Liberação Eletrônica",60),oFont5,100 )
 				oPrn:Say( 2120, 1715,PadC(Alltrim(cAprov02) + " - Data: " + (dLib02) + "",60),oFont5,100 )
 			ENDIF
 		ENDIF
 
-		IF lAssDir1 == .T.
+		IF lAprov03 == .T.
 
 			IF  (dDatabase >= CTOD("02/01/2018") .AND. dDatabase <= CTOD("14/01/2018") .AND. nValor >= 1000)
-				oPrn:Say( 2070, 2410,PadC("Liberação Automática - Férias",62),oFont5,100 )
-				oPrn:Say( 2120, 2380,PadC("02/01/2018 - 14/01/2018",62),oFont5,100 )
+				oPrn:Say( 2070, 2410,PadC("Liberação Automática - Férias",60),oFont5,100 )
+				oPrn:Say( 2120, 2380,PadC("02/01/2018 - 14/01/2018",60),oFont5,100 )
 			ELSE
-				oPrn:Say( 2070, 2410,PadC("Liberação Eletrônica",62),oFont5,100 )
-				oPrn:Say( 2120, 2380,PadC(Alltrim(cAprov03) + " - Data: " + (dLib03) + "",62),oFont5,100 )
+				oPrn:Say( 2070, 2410,PadC("Liberação Eletrônica",60),oFont5,100 )
+				oPrn:Say( 2120, 2380,PadC(Alltrim(cAprov03) + " - Data: " + (dLib03) + "",60),oFont5,100 )
 			ENDIF
 		ENDIF
 
@@ -1091,75 +1114,75 @@ STATIC FUNCTION ImprRodape()
 		//Rafael Franca - Assinatura digital
 
 		IF lass01 == .T.
-			oPrn:Say( 2150, 2100,REPLICATE("_",28),oFont3,100 )
-			oPrn:Say( 2200, 2170,UPPER(cAprov01),oFont5,100 )
-			oPrn:Say( 2240, 2135,cFuncao01,oFont5,100 )
+			oPrn:Say( 2150, 2100,REPLICATE("_",32),oFont3,100 )
+			oPrn:Say( 2200, 2100,PADC(UPPER(Alltrim(cAprov01)),60),oFont5,100 )
+			oPrn:Say( 2240, 2110,PADC(Alltrim(cFuncao01),60),oFont5,100 )
 		ENDIF
 
 		IF lass02 == .T.
 			IF lass01 == .T.
-				oPrn:Say( 2150, 2100,REPLICATE("_",28),oFont3,100 )
+				oPrn:Say( 2150, 2100,REPLICATE("_",32),oFont3,100 )
 				oPrn:Say( 2200, 2170,UPPER(cAprov02),oFont5,100 )
 				oPrn:Say( 2240, 2135,cFuncao02,oFont5,100 )
 			ELSE
-				oPrn:Say( 2150, 2100,REPLICATE("_",28),oFont3,100 )
+				oPrn:Say( 2150, 2100,REPLICATE("_",32),oFont3,100 )
 				oPrn:Say( 2200, 2170,UPPER(cAprov02),oFont5,100 )
 				oPrn:Say( 2240, 2135,cFuncao02,oFont5,100 )
 			ENDIF
 		ENDIF
 
 		IF lass03 == .T.
-			oPrn:Say( 2150, 2100,REPLICATE("_",28),oFont3,100 )
+			oPrn:Say( 2150, 2100,REPLICATE("_",32),oFont3,100 )
 			oPrn:Say( 2200, 2170,UPPER(cAprov03),oFont5,100 )
 			oPrn:Say( 2240, 2135,cFuncao03,oFont5,100 )
 		ENDIF
 
-		IF lAssElen == .T. .OR. dDatabase >= CTOD("22/01/2018") .AND. dDatabase <= CTOD("10/02/2018")
+		IF lAprov01 == .T. .OR. dDatabase >= CTOD("22/01/2018") .AND. dDatabase <= CTOD("10/02/2018")
 
 			if dDatabase >= CTOD("22/01/2018") .AND. dDatabase <= CTOD("10/02/2018")
-				oPrn:Say( 2070, 2080,PadC("Liberação Automática - Férias",62),oFont5,100 )
+				oPrn:Say( 2070, 2080,PadC("Liberação Automática - Férias",60),oFont5,100 )
 				oPrn:Say( 2120, 2050,PadC("22/01/2018 - 10/02/2018",60),oFont5,100 )
 			else
-				oPrn:Say( 2070, 2080,PadC("Liberação Eletrônica",62),oFont5,100 )
+				oPrn:Say( 2070, 2080,PadC("Liberação Eletrônica",60),oFont5,100 )
 				oPrn:Say( 2120, 2050,PadC(Alltrim(cAprov01) + " - Data: " + (dLib01) + "",60),oFont5,100 )
 			EndIf
 		EndIf
 
-		IF lAssDir == .T.
-			IF lAssElen == .T. .AND. lass01 == .T.
+		IF lAprov02 == .T.
+			IF lAprov01 == .T. .AND. lass01 == .T.
 
 				IF dDatabase >= CTOD("15/01/2018") .AND. dDatabase <= CTOD("19/01/2018")
-					oPrn:Say( 2070, 2080,PadC("Liberação Automática - Recesso",62),oFont5,100 )
-					oPrn:Say( 2120, 2050,PadC("15/01/2018 - 19/01/2018",62),oFont5,100 )
+					oPrn:Say( 2070, 2080,PadC("Liberação Automática - Recesso",60),oFont5,100 )
+					oPrn:Say( 2120, 2050,PadC("15/01/2018 - 19/01/2018",60),oFont5,100 )
 				ELSE
-					oPrn:Say( 2070, 2080,PadC("Liberação Eletrônica",62),oFont5,100 )
-					oPrn:Say( 2120, 2050,PadC(Alltrim(cAprov02) + " - Data: " + (dLib02) + "",62),oFont5,100 )
+					oPrn:Say( 2070, 2080,PadC("Liberação Eletrônica",60),oFont5,100 )
+					oPrn:Say( 2120, 2050,PadC(Alltrim(cAprov02) + " - Data: " + (dLib02) + "",60),oFont5,100 )
 				ENDIF
 
-			ELSEIF lAssElen == .T. .AND. lass01 == .F.
+			ELSEIF lAprov01 == .T. .AND. lass01 == .F.
 
 				if dDatabase >= CTOD("15/01/2018") .AND. dDatabase <= CTOD("19/01/2018")
-					oPrn:Say( 2070, 2080,PadC("Liberação Automática - Recesso",62),oFont5,100 )
+					oPrn:Say( 2070, 2080,PadC("Liberação Automática - Recesso",60),oFont5,100 )
 					oPrn:Say( 2120, 2050,PadC("15/01/2018 - 19/01/2018",60),oFont5,100 )
 				else
-					oPrn:Say( 2070, 2080,PadC("Liberação Eletrônica",62),oFont5,100 )
+					oPrn:Say( 2070, 2080,PadC("Liberação Eletrônica",60),oFont5,100 )
 					oPrn:Say( 2120, 2050,PadC(Alltrim(cAprov02) + " - Data: " + (dLib02) + "",60),oFont5,100 )
 				EndIf
 
-			ELSEIF lAssElen == .F. .AND. lass01 == .F.
-				oPrn:Say( 2070, 2080,PadC("Liberação Eletrônica",62),oFont5,100 )
+			ELSEIF lAprov01 == .F. .AND. lass01 == .F.
+				oPrn:Say( 2070, 2080,PadC("Liberação Eletrônica",60),oFont5,100 )
 				oPrn:Say( 2120, 2050,PadC(Alltrim(cAprov02) + " - Data: " + (dLib02) + "",60),oFont5,100 )
 			ENDIF
 		ENDIF
 
-		IF lAssDir1 == .T.
+		IF lAprov03 == .T.
 
 			IF  (dDatabase >= CTOD("02/01/2018") .AND. dDatabase <= CTOD("14/01/2018") .AND. nValor >= 1000)
-				oPrn:Say( 2070, 2080,PadC("Liberação Automática - Férias",62),oFont5,100 )
-				oPrn:Say( 2120, 2050,PadC("02/01/2018 - 14/01/2018",62),oFont5,100 )
+				oPrn:Say( 2070, 2080,PadC("Liberação Automática - Férias",60),oFont5,100 )
+				oPrn:Say( 2120, 2050,PadC("02/01/2018 - 14/01/2018",60),oFont5,100 )
 			ELSE
-				oPrn:Say( 2070, 2080,PadC("Liberação Eletrônica",62),oFont5,100 )
-				oPrn:Say( 2120, 2050,PadC(Alltrim(cAprov03) + " - Data: " + (dLib03) + "",62),oFont5,100 )
+				oPrn:Say( 2070, 2080,PadC("Liberação Eletrônica",60),oFont5,100 )
+				oPrn:Say( 2120, 2050,PadC(Alltrim(cAprov03) + " - Data: " + (dLib03) + "",60),oFont5,100 )
 			ENDIF
 		ENDIF
 
@@ -1167,7 +1190,7 @@ STATIC FUNCTION ImprRodape()
 
 
 	oPrn:Say( 0030, 0920,"COMPRADOR(A): " + UPPER(cNomeComp) + "",oFont3,100 )
-	//oPrn:Say( 2150, 2720,REPLICATE("_",28),oFont3,100 )
+	//oPrn:Say( 2150, 2720,REPLICATE("_",32),oFont3,100 )
 	//Zera os valores para o proximo mapa
 
 	nTotFre  := 0
