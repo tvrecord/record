@@ -22,7 +22,8 @@ User Function MATA094()
 		nOpc := oObj:GetOperation() // PEGA A OPERAÇÃO
 
 		If (cIdPonto =="BUTTONBAR")
-			xRet := {{"Consulta", "Consulta", {|| ConsultPed()}}}
+			xRet := {{"Consulta", "Consulta", {|| ConsultPed()}},;
+				{"Mapa Cotação", "Mapa Cotação", {|| u_CCI31U()}}}
 		EndIf
 	EndIf
 
@@ -32,7 +33,7 @@ Return (xRet)
 
 Static Function ConsultPed()
 
-	u_RELCOM01(2) // 1 = Relatorio / 2 = Consulta	
+	u_RELCOM01(2) // 1 = Relatorio / 2 = Consulta
 
 Return
 
