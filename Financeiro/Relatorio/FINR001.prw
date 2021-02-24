@@ -426,7 +426,7 @@ Static Function GetData(cPPeriodo,cPPracaDe,cPPracaAte,cPRpDe,cPRpAte)
 		ZAF.D_E_L_E_T_ = '' AND
 		ZAG.D_E_L_E_T_ = '' AND
 		ZAH.D_E_L_E_T_ = ''
-		ORDER BY 1,2
+		ORDER BY 1,4,2
 
 	EndSql
 
@@ -667,6 +667,7 @@ Static Function PerNeg(cPraca,cMesAno)
 			ZAH_PERIOD = %Exp:cMesAno% AND
 			D_E_L_E_T_ = ''
 
+
 		EndSql
 
 
@@ -674,7 +675,7 @@ Static Function PerNeg(cPraca,cMesAno)
 
 			aAdd(aPerNeg,{(cTmp)->ZAH_CODIGO,; //01 Codigo
 				(cTmp)->ZAH_PRACA,;			   //02 Praça
-				(cTmp)->ZAH_PERIOD,;		   //03 Periodo
+				Substring((cTmp)->ZAH_PERIOD,3,4) + Substring((cTmp)->ZAH_PERIOD,1,2),;		   //03 Periodo
 				(cTmp)->ZAH_DTACUM })		   //04 Periodo Negativo
 
 			cPraca 	 	:= (cTmp)->ZAH_PRACA
@@ -693,8 +694,16 @@ Static Function PerNeg(cPraca,cMesAno)
 
 	//Se tiver alguma compensação, será necessário a ordenação
 	If Len(aPerNeg) > 0
-		aPerNeg := aSort(aPerNeg,,, { |x, y| x[4] < y[4] })
+		aPerNeg := aSort(aPerNeg,,, { |x, y| x[3] < y[3] })
 	EndIf
+
+	//Refaço o preenchimento das datas, pois mesano não estava ordenando da forma correta.
+
+	For i:=1 to Len(aPerNeg)
+
+		aPerNeg[i][3] := Substring(aPerNeg[i][3],5,2) + Substring(aPerNeg[i][3],1,4)
+
+	Next
 
 
 
