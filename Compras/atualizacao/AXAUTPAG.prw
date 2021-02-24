@@ -362,7 +362,7 @@ ELSEIF (SUBSTR(EMBARALHA(SZS->ZS_USERLGI,1),3,6) == __cUserID) .AND. SZS->ZS_LIB
 			ElseIf PEND->ZS_LIBERAD == "L"
 				cSitAprov := "Aprovação Eletrônica - " + DTOC(STOD(PEND->ZS_DTLIB))
 			Else
-				cSitAprov := "Aguardando Aprovação"
+				cSitAprov := ""//"Aguardando Aprovação" 24/02/2020 - Rafael França - Removida a mensagem de aguardando aprovação
 			EndIf
 
 			//Devido o legado da aprovação eletronica no controle de alçada na tabela SCR foi necessário fazer essa tratativa
