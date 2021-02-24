@@ -122,7 +122,7 @@ User Function WordAut()
 		ElseIf SCR->CR_STATUS $ '04/06'
 			&("cAssina" + Alltrim(STR(nAprov)) ) 	    := "Rejeição Eletrônica - " + DTOC(SCR->CR_DATALIB)
 		Else
-			&("cAssina" + Alltrim(STR(nAprov)) ) 	    := "Aguardando Aprovação"
+			&("cAssina" + Alltrim(STR(nAprov)) ) 	    := ""//"Aguardando Aprovação" 24/02/2020 - Rafael França - Removida a mensagem de aguardando aprovação
 		EndIf
 		&("cNome"   + Alltrim(STR(nAprov)) )   	:= Alltrim(Posicione("SAK",1,xFilial("SAK")+SCR->CR_APROV,"AK_NOME"))
 
