@@ -598,7 +598,7 @@ Static Function RunReport(Cabec1,Cabec2,Titulo,nLin)
 					@nLin,034 PSAY aPedidos[_I,6]  				//LOJA
 					@nLin,038 PSAY SUBSTR(aPedidos[_I,7],1,34)  //NOME
 					IF aPedidos[_I,3] == "PC"
-						IF Posicione("SZL",3,xFilial("SZL") + aPedidos[_I,2],"ZL_PEDORC") == "1"
+						IF Posicione("SZL",2,xFilial("SZL") + aPedidos[_I,2],"ZL_PEDORC") == "1"
 							@nLin,178 PSAY "ORÇADO"
 						ELSE
 							@nLin,178 PSAY "NÃO ORÇADO"

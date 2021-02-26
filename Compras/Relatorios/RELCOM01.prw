@@ -45,7 +45,7 @@ User Function RELCOM01(nOpc) //nOpcao 1 = Relatorio; 2 = Consulta na rotina libe
 	Private m_pag      	:= 01
 	Private wnrel      	:= "RELNATSIG"
 	Private cString 	:= "SC7"
-	Private nOpcao		:= nOpc //Transformando a variavel em private 
+	Private nOpcao		:= nOpc //Transformando a variavel em private
 	Private cContaSig	:= ""
 	Private cNatureza	:= ""
 
@@ -61,12 +61,12 @@ User Function RELCOM01(nOpc) //nOpcao 1 = Relatorio; 2 = Consulta na rotina libe
 	Else
 
 		cNatureza := Alltrim(Posicione("SC1",6,xFilial("SCR") + ALLTRIM(SCR->CR_NUM),"C1_NATUREZ"))
-		
+
 		DbSelectArea("SED");DbSetOrder(1)
 		DbSeek(xFilial("SED")+cNatureza)
-		
+
 		cContaSig := SED->ED_CONTSIG
-		MsgInfo("Natureza: " + cNatureza + ": " + SED->ED_DESCRIC + Chr(13) + Chr(10) +"Conta SIG: "  + cContaSig + "","Parametros de Pesquisa") 
+		MsgInfo("Natureza: " + cNatureza + ": " + SED->ED_DESCRIC + Chr(13) + Chr(10) +"Conta SIG: "  + cContaSig + "","Parametros de Pesquisa")
 
 	Endif
 
@@ -198,7 +198,7 @@ Static Function RunReport(Cabec1,Cabec2,Titulo,nLin)
 	cQuery += " WHERE SC7010.D_E_L_E_T_ = '' AND C7_TIPO = 1 "
 	cQuery += " AND C7_EMISSAO >= '20130726' " // COMEÇARAM AS LIBERAÇÃO PELO SR CARLOS ALVES
 	cQuery += " AND SUBSTRING(C7_EMISSAO,1,6) <= '" + IIF(nOpcao == 1,MV_PAR04,SUBSTR(DTOS(dDatabase),1,4) ) + IIF(nOpcao == 1,MV_PAR03,SUBSTR(DTOS(dDatabase),5,2) ) + "' "
-	If nOpcao == 1	
+	If nOpcao == 1
 		cQuery += " AND ED_CONTSIG BETWEEN '" + MV_PAR05 + "' AND '" + MV_PAR06 + "' "
 	Else
 		cQuery += " AND ED_CONTSIG = '" + cContaSig + "' "
@@ -223,7 +223,7 @@ Static Function RunReport(Cabec1,Cabec2,Titulo,nLin)
 	cQuery += " WHERE SC7010.D_E_L_E_T_ = '' AND SED010.D_E_L_E_T_ = '' AND C7_TIPO = 2 "
 	cQuery += " AND C7_EMISSAO >= '20130726' " // COMEÇARAM AS LIBERAÇÃO PELO SR CARLOS ALVES
 	cQuery += " AND SUBSTRING(C7_EMISSAO,1,6) <= '" + IIF(nOpcao == 1,MV_PAR04,SUBSTR(DTOS(dDatabase),1,4) ) + IIF(nOpcao == 1,MV_PAR03,SUBSTR(DTOS(dDatabase),5,2) ) + "' "
-	If nOpcao == 1	
+	If nOpcao == 1
 		cQuery += " AND ED_CONTSIG BETWEEN '" + MV_PAR05 + "' AND '" + MV_PAR06 + "' "
 	Else
 		cQuery += " AND ED_CONTSIG = '" + cContaSig + "' "
@@ -246,7 +246,7 @@ Static Function RunReport(Cabec1,Cabec2,Titulo,nLin)
 	cQuery += " AND ZS_LIBERAD <> 'B' "
 	cQuery += " AND ZS_CONTRAT <> '1' "
 	cQuery += " AND ZS_ATUEST <> '1' "
-	If nOpcao == 1	
+	If nOpcao == 1
 		cQuery += " AND ED_CONTSIG BETWEEN '" + MV_PAR05 + "' AND '" + MV_PAR06 + "' "
 	Else
 		cQuery += " AND ED_CONTSIG = '" + cContaSig + "' "
@@ -306,7 +306,7 @@ Static Function RunReport(Cabec1,Cabec2,Titulo,nLin)
 	cQuery += " F4_CTBDESP = '2' AND "
 	cQuery += " D1_FILIAL = '01' AND "
 	cQuery += " D1_DOC <> '" + IIF(nOpcao == 1,MV_PAR13,"") + "' AND " //Remove exceções, colocado a pedido da Sra. Simone dia 04/05/17 - Rafael
-	If nOpcao == 1	
+	If nOpcao == 1
 		cQuery += " CT1_SIG BETWEEN '" + MV_PAR05 + "' AND '" + MV_PAR06 + "' AND "
 	Else
 		cQuery += " CT1_SIG = '" + cContaSig + "' AND "
@@ -330,7 +330,7 @@ Static Function RunReport(Cabec1,Cabec2,Titulo,nLin)
 	cQuery += " F4_CTBDESP = '1' AND "
 	cQuery += " D1_FILIAL = '01' AND "
 	cQuery += " D1_DOC <> '" + IIF(nOpcao == 1,MV_PAR13,"") + "' AND " //Remove exceções, colocado a pedido da Sra. Simone dia 04/05/17 - Rafael
-	If nOpcao == 1	
+	If nOpcao == 1
 		cQuery += "  CT1_SIG BETWEEN '" + MV_PAR05 + "' AND '" + MV_PAR06 + "' AND "
 	Else
 		cQuery += "  CT1_SIG = '" + cContaSig + "' AND "
@@ -461,7 +461,7 @@ Static Function RunReport(Cabec1,Cabec2,Titulo,nLin)
 					@nLin,034 PSAY aPedidos[_I,6]  				//LOJA
 					@nLin,038 PSAY SUBSTR(aPedidos[_I,7],1,34)  //NOME
 					IF aPedidos[_I,3] == "PC"
-						IF Posicione("SZL",3,xFilial("SZL") + aPedidos[_I,2],"ZL_PEDORC") == "1"
+						IF Posicione("SZL",2,xFilial("SZL") + aPedidos[_I,2],"ZL_PEDORC") == "1"
 							@nLin,178 PSAY "ORÇADO"
 						ELSE
 							@nLin,178 PSAY "NÃO ORÇADO"
@@ -640,7 +640,7 @@ Static Function RunReport(Cabec1,Cabec2,Titulo,nLin)
 			cQuery += " AND C7_EMISSAO >= '20130726' " // COMEÇARAM AS LIBERAÇÃO PELO SR CARLOS ALVES
 			cQuery += " AND SUBSTRING(C7_EMISSAO,1,6) <= '" + IIF(nOpcao == 1,MV_PAR04,SUBSTR(DTOS(dDatabase),1,4) ) + IIF(nOpcao == 1,MV_PAR03,SUBSTR(DTOS(dDatabase),5,2) ) + "' "
 
-			If nOpcao == 1	
+			If nOpcao == 1
 				cQuery += " AND ED_CONTSIG BETWEEN '" + MV_PAR05 + "' AND '" + MV_PAR06 + "' "
 			Else
 				cQuery += " AND ED_CONTSIG = '" + cContaSig + "' "
@@ -668,7 +668,7 @@ Static Function RunReport(Cabec1,Cabec2,Titulo,nLin)
 			cQuery += " AND C7_EMISSAO >= '20130726' " // COMEÇARAM AS LIBERAÇÃO PELO SR CARLOS ALVES
 			cQuery += " AND SUBSTRING(C7_EMISSAO,1,6) <= '" + IIF(nOpcao == 1,MV_PAR04,SUBSTR(DTOS(dDatabase),1,4) ) + IIF(nOpcao == 1,MV_PAR03,SUBSTR(DTOS(dDatabase),5,2) ) + "' "
 
-			If nOpcao == 1	
+			If nOpcao == 1
 				cQuery += " AND ED_CONTSIG BETWEEN '" + MV_PAR05 + "' AND '" + MV_PAR06 + "' "
 			Else
 				cQuery += " AND ED_CONTSIG = '" + cContaSig + "' "
@@ -693,7 +693,7 @@ Static Function RunReport(Cabec1,Cabec2,Titulo,nLin)
 			cQuery += " AND ZS_LIBERAD <> 'B' "
 			cQuery += " AND ZS_CONTRAT <> '1' "
 
-			If nOpcao == 1	
+			If nOpcao == 1
 				cQuery += " AND ED_CONTSIG BETWEEN '" + MV_PAR05 + "' AND '" + MV_PAR06 + "' "
 			Else
 				cQuery += " AND ED_CONTSIG = '" + cContaSig + "' "
@@ -756,7 +756,7 @@ Static Function RunReport(Cabec1,Cabec2,Titulo,nLin)
 			cQuery += " D1_FILIAL = '01' AND "
 			cQuery += " D1_DOC <> '" + MV_PAR13 + "' AND " //Remove exceções, colocado a pedido da Sra. Simone dia 04/05/17 - Rafael
 
-			If nOpcao == 1	
+			If nOpcao == 1
 				cQuery += " CT1_SIG BETWEEN '" + MV_PAR05 + "' AND '" + MV_PAR06 + "' AND "
 			Else
 				cQuery += " CT1_SIG = '" + cContaSig + "' AND "
@@ -781,7 +781,7 @@ Static Function RunReport(Cabec1,Cabec2,Titulo,nLin)
 			cQuery += " (F4_CTBDESP = '1' AND F4_CCONTA <> '116010001') AND "
 			cQuery += " D1_FILIAL = '01' AND "
 			cQuery += " D1_DOC <> '" + MV_PAR13 + "' AND " //Remove exceções, colocado a pedido da Sra. Simone dia 04/05/17 - Rafael
-			If nOpcao == 1	
+			If nOpcao == 1
 				cQuery += " CT1_SIG BETWEEN '" + MV_PAR05 + "' AND '" + MV_PAR06 + "' AND "
 			Else
 				cQuery += " CT1_SIG = '" + cContaSig + "' AND "
@@ -1069,4 +1069,4 @@ Static Function ValidPerg()
 
 	dbSelectArea(_sAlias)
 
-Return              
+Return
