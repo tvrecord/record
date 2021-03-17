@@ -39,12 +39,12 @@ User Function GQREENTR()
 	RestArea(aAreaSE2)
 	RestArea(aArea)
 
-	@ 200,1 TO 600,600 DIALOG oGrav TITLE OemToAnsi("Gravacao do Histórico")
-	@ 05,05 TO 595,595
-	@ 10,018 Say "Digite o histórico a ser registrado no contas a pagar: "
-	@ 20,018 Get cHist  Valid !Empty(cHist)  Picture "@!"  SIZE 200,75
-	@ 200,208 BMPBUTTON TYPE 01 ACTION OkGrav()
-	@ 200,238 BMPBUTTON TYPE 02 ACTION Close(oGrav)
+	@ 000,000 TO 200,600 DIALOG oGrav TITLE OemToAnsi("Gravacao do Histórico")
+	//@ 05,05 TO 595,595
+	@ 010,018 Say "Digite o histórico a ser registrado no contas a pagar: "
+	@ 020,018 Get cHist  Valid !Empty(cHist)  Picture "@!"  SIZE 200,75
+	@ 070,158 BMPBUTTON TYPE 01 ACTION OkGrav()
+	@ 070,188 BMPBUTTON TYPE 02 ACTION Close(oGrav)
 
 	Activate Dialog oGrav Centered
 
