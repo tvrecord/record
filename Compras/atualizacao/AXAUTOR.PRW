@@ -97,6 +97,7 @@ User Function WordAut()
 	wcValor			:= Alltrim(Str(SZM->ZM_VALOR)) + " (" + Alltrim(Extenso(SZM->ZM_VALOR))  +  ")"
 	wcAprova		:= SZM->ZM_NMAPROV
 	wcCompra		:= SZM->ZM_NMCOMPR
+	wcLibComp		:= "Liberação Eletrônica - "+DTOC(SZM->ZM_EMISSAO)
 	wcPedido		:= SZM->ZM_PEDIDO
 	wcAno			:= Alltrim(Str(Ano(SZM->ZM_EMISSAO)))
 	wcTelefone		:= Alltrim(cValToChar(Posicione("SA2",1,xFilial("SA2")+ SZM->ZM_FORNECE + SZM->ZM_LOJA,"A2_TEL")))
@@ -149,6 +150,7 @@ User Function WordAut()
 	OLE_SetDocumentVar(hWord, 'Valor'     ,wcValor)
 	OLE_SetDocumentVar(hWord, 'Aprova'    ,wcAprova)
 	OLE_SetDocumentVar(hWord, 'Compra'    ,wcCompra)
+	OLE_SetDocumentVar(hWord, 'LibComp'   ,wcLibComp)
 	OLE_SetDocumentVar(hWord, 'Pedido'    ,wcPedido)
 	OLE_SetDocumentVar(hWord, 'Ano'       ,wcAno)
 	OLE_SetDocumentVar(hWord, 'cAssina1'  ,cAssina1)
