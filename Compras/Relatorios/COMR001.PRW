@@ -60,7 +60,7 @@ ENDIF
 //TRATO AS PERGUNTAS PARA USO NOS FILTROS
 IF MV_PAR02 == 1
 cNomeTabela		:= "MAPAS PARA LIBERAÇÃO NO MICROSIGA - " + DTOC(STOD(cPDiaSem)) + " - " + DTOC(STOD(cUDiaSem))
-cFiltro			:= "%AND C7_EMISSAO BETWEEN '"+cPDiaSem+"' AND '"+cUDiaSem+"' AND C7_TIPO = '1' AND CR_APROV = '000032' AND CR_TOTAL BETWEEN 1000 AND 10000 %" //Aprovados pela Sra. Elenn durante a semana --ALTERADO O CR_APROV PARA O 000032 DA LUCILENE e diminuido o valor para 4 mil
+cFiltro			:= "%AND C7_EMISSAO BETWEEN '"+cPDiaSem+"' AND '"+cUDiaSem+"' AND C7_TIPO = '1' AND CR_APROV = '000001' AND CR_TOTAL BETWEEN 1000 AND 10000 %" //Aprovados pela Sra. Elenn durante a semana --ALTERADO O CR_APROV PARA O 000032 DA LUCILENE e diminuido o valor para 4 mil
 ELSEIF MV_PAR02 == 2
 cNomeTabela		:= "MAPAS PARA LIBERAÇÃO NO MICROSIGA - " + DTOC(MV_PAR01)
 cFiltro			:= "%AND C7_EMISSAO BETWEEN '"+cPDiaSem+"' AND '"+cUDiaSem+"' AND CR_APROV = '000028' AND CR_DATALIB = '' %" //Apenas pedidos enviados para aprovação do diretor
