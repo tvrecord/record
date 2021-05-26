@@ -267,7 +267,7 @@ Static Function fProcPdf()
 
 			nLin += REL_VERT_STD
 
-			If PswSeek( cUsuario, .T. )
+			If PswSeek(cUsuario,.T.)
 
 				aUsuario := PswRet() // Retorna vetor com informações do usuário
 
@@ -418,8 +418,7 @@ Static Function GetData(cPPeriodo,cPPracaDe,cPPracaAte,cPRpDe,cPRpAte)
 		E1_TIPO = 'NF' AND
 		E1_CLIENTE = F2_CLIENTE AND
 		E1_LOJA = F2_LOJA AND
-		//E1_VENCREA BETWEEN  SUBSTRING(F2_EMISSAO,1,6) + '01' AND CONVERT(VARCHAR,DATEADD(DAY,55,CONVERT(DATE, F2_EMISSAO, 103)),112) AND
-		E1_PARCELA IN ('','001') AND
+		E1_VENCREA BETWEEN  SUBSTRING(F2_EMISSAO,1,6) + '01' AND CONVERT(VARCHAR,DATEADD(DAY,55,CONVERT(DATE, F2_EMISSAO, 103)),112) AND
 		SE1.D_E_L_E_T_ = ''
 		WHERE
 		ZAG_FILIAL = '01' AND
