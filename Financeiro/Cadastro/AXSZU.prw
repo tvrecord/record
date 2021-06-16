@@ -624,18 +624,18 @@ Static Function RunReport(Cabec1,Cabec2,Titulo,nLin)
 			@nLin,067 PSAY STOD(TMP->E1_EMISSAO)
 			@nLin,078 PSAY STOD(TMP->E1_VENCTO)
 			@nLin,090 PSAY STOD(TMP->E1_BAIXA)
-			@nLin,102 PSAY TMP->E1_VALOR PICTURE "@E 999,999.99"
-			@nLin,126 PSAY TMP->E1_COMIS1 PICTURE "@E 99.99%"
+			@nLin,101 PSAY TMP->E1_VALOR PICTURE "@E 999,999,999.99" //Linha alterada para que aparecesse 1 milhão no relatorio - wesley da silva 14/06
+			@nLin,130 PSAY TMP->E1_COMIS1 PICTURE "@E 99.99%" //valor original 126 - Alterado para ajuste das colunas - Wesley da silva 14/06
 			//IF MV_PAR23 = 1	.AND. TMP->VALORLIQUIDO == 0
-			@nLin,114 PSAY TMP->VALORLIQUIDO PICTURE "@E 999,999.99"
-			@nLin,133 PSAY TMP->LIQUIDO PICTURE "@E 999,999.99"
+			@nLin,117 PSAY TMP->VALORLIQUIDO PICTURE "@E 999,999,999.99" //valor original 114 - Alterado para ajuste das colunas - Wesley da silva 14/06
+			@nLin,136 PSAY TMP->LIQUIDO PICTURE "@E 999,999,999.99" //valor original 133 - Alterado para ajuste das colunas - Wesley da silva 14/06
 			//ELSE
 			//@nLin,114 PSAY TMP->E1_VALOR PICTURE "@E 999,999.99"
 			//@nLin,133 PSAY TMP->LIQUIDO2 PICTURE "@E 999,999.99"
 			//ENDIF
-			@nLin,148 PSAY IIF(lPagar == .T. .OR. MV_PAR23 = 1, "SIM","NÃO")
+			@nLin,155 PSAY IIF(lPagar == .T. .OR. MV_PAR23 = 1, "SIM","NÃO")
 			IF MV_PAR21 == 1
-				@nLin,155 PSAY IIF(TMP->ED_TIPNAT == "1" .OR. TMP->ED_TIPNAT == "3", "LOCAL","SPOT")
+				@nLin,160 PSAY IIF(TMP->ED_TIPNAT == "1" .OR. TMP->ED_TIPNAT == "3", "LOCAL","SPOT")
 				@nLin,162 PSAY TMP->ED_DESCRIC
 			ENDIF
 
@@ -667,14 +667,14 @@ Static Function RunReport(Cabec1,Cabec2,Titulo,nLin)
 
 				nLin++
 				@nLin,102 PSAY nTotVal PICTURE "@E 9,999,999.99"
-				@nLin,133 PSAY nTotBV PICTURE "@E 9,999,999.99"
-				@nLin,148 PSAY "SIM"
+				@nLin,137 PSAY nTotBV PICTURE "@E 9,999,999.99"
+				@nLin,154 PSAY "SIM"
 				nLin++
-				@nLin,133 PSAY nTotNoBV PICTURE "@E 9,999,999.99"
-				@nLin,148 PSAY "NAO"
+				@nLin,137 PSAY nTotNoBV PICTURE "@E 9,999,999.99"
+				@nLin,154 PSAY "NAO"
 				nLin++
-				@nLin,133 PSAY (nTotBV + nTotNoBv) PICTURE "@E 9,999,999.99"
-				@nLin,148 PSAY "TOTAL"
+				@nLin,137 PSAY (nTotBV + nTotNoBv) PICTURE "@E 9,999,999.99"
+				@nLin,154 PSAY "TOTAL"
 
 				nTotVend := (nTotBV + nTotNoBv)
 
