@@ -74,8 +74,8 @@ wnrel := SetPrint("",NomeProg,cPerg,@titulo,cDesc1,cDesc2,cDesc3,.T.,,.T.,Tamanh
 //Imprimir relatorio com dados Financeiros ou de Clientes
 
 If MV_PAR10 == 1
-	
-	cQuery := "SELECT PH_FILIAL AS FILIAL,PH_MAT AS MAT,RA_NOME AS NOME,RA_SITFOLH AS SITFOLH,RA_DEMISSA AS DEMISSA,PH_DATA AS DATA,PH_ABONO AS ABONO,P6_DESC AS DESC,PH_QTABONO AS QTABONO,PH_CC AS CC,CTT_DESC01 AS DESC01 FROM SPH010 "
+
+	cQuery := "SELECT PH_FILIAL AS FILIAL,PH_MAT AS MAT,RA_NOME AS NOME,RA_SITFOLH AS SITFOLH,RA_DEMISSA AS DEMISSA,PH_DATA AS DATA,PH_ABONO AS ABONO,P6_DESC AS DESCRICAO,PH_QTABONO AS QTABONO,PH_CC AS CC,CTT_DESC01 AS DESC01 FROM SPH010 "
 	cQuery += "INNER JOIN SRA010 ON "
 	cQuery += "SPH010.PH_FILIAL = SRA010.RA_FILIAL AND "
 	cQuery += "SPH010.PH_MAT = SRA010.RA_MAT "
@@ -106,10 +106,10 @@ If MV_PAR10 == 1
 	EndIf
 	cQuery += "SPH010.PH_CC BETWEEN '" + (MV_PAR08) + "' AND '" + (MV_PAR09) + "' "
 	cQuery += "ORDER BY SPH010.PH_CC,SPH010.PH_MAT,SPH010.PH_DATA "
-	
+
 ELSE
-	
-	cQuery := "SELECT PC_FILIAL AS FILIAL,PC_MAT AS MAT,RA_NOME AS NOME,RA_SITFOLH AS SITFOLH,RA_DEMISSA AS DEMISSA,PC_DATA AS DATA,PC_ABONO AS ABONO,P6_DESC AS DESC,PC_QTABONO AS QTABONO,PC_CC AS CC,CTT_DESC01 AS DESC01 FROM SPC010 "
+
+	cQuery := "SELECT PC_FILIAL AS FILIAL,PC_MAT AS MAT,RA_NOME AS NOME,RA_SITFOLH AS SITFOLH,RA_DEMISSA AS DEMISSA,PC_DATA AS DATA,PC_ABONO AS ABONO,P6_DESC AS DESCRICAO,PC_QTABONO AS QTABONO,PC_CC AS CC,CTT_DESC01 AS DESC01 FROM SPC010 "
 	cQuery += "INNER JOIN SRA010 ON "
 	cQuery += "SPC010.PC_FILIAL = SRA010.RA_FILIAL AND "
 	cQuery += "SPC010.PC_MAT = SRA010.RA_MAT "
@@ -140,7 +140,7 @@ ELSE
 	EndIf
 	cQuery += "SPC010.PC_CC BETWEEN '" + (MV_PAR08) + "' AND '" + (MV_PAR09) + "' "
 	cQuery += "ORDER BY SPC010.PC_CC,SPC010.PC_MAT,SPC010.PC_DATA "
-	
+
 EndIf
 
 tcQuery cQuery New Alias "TMP"
@@ -214,36 +214,36 @@ DBGotop()
 //DEFINE FONT oFont NAME "Courier New" SIZE 0,-11 BOLD
 
 If MV_PAR12 == 1
-	
+
 	While !EOF()
-		
+
 		SetRegua(RecCount())
-		
-		
-		
+
+
+
 		//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 		//³ Verifica o cancelamento pelo usuario...                             ³
 		//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-		
+
 		If lAbortPrint
 			@nLin,00 PSAY "*** CANCELADO PELO OPERADOR ***"
 			Exit
 		Endif
-		
-		
-		
+
+
+
 		If nLin > 70 // Salto de Página. Neste caso o formulario tem 55 linhas...
 			Cabec(Titulo,Cabec1,Cabec2,NomeProg,Tamanho,nTipo)
 			nLin := 8
 		Endif
-		
-		
-		
+
+
+
 		cNome := TMP->NOME
 		nHoras := TMP->QTABONO
 		cCodMat := TMP->MAT
-		
-		
+
+
 		IF (TMP->CC != cCodCusto)
 			@nLin, 000 PSAY "------------------------------------------------------------------------------------------------------------------------------------"
 			nLin := nLin + 1 // Avanca a linha de impressao
@@ -253,27 +253,27 @@ If MV_PAR12 == 1
 			@nLin, 000 PSAY "------------------------------------------------------------------------------------------------------------------------------------"
 			nLin := nLin + 1 // Avanca a linha de impressao
 		Endif
-		
-		
+
+
 		@nLin, 000 PSAY TMP->MAT
 		@nLin, 008 PSAY cNome
 		@nLin, 050 PSAY STOD(TMP->DATA)
 		@nLin, 062 PSAY DiaExtenso(STOD(TMP->DATA))
 		@nLin, 074 PSAY nHoras
-		@nLin, 084 PSAY TMP->DESC
-		
+		@nLin, 084 PSAY TMP->DESCRICAO
+
 		nTotHoras := SomaHoras(nTotHoras,nHoras)
 		nHorasFunc := SomaHoras(nHorasFunc,nHoras)
 		nHorasCC := SomaHoras(nHorasCC,nHoras)
-		
-		
-		
+
+
+
 		cCodCusto := TMP->CC
-		
+
 		dbskip()
-		
-		
-		
+
+
+
 		IF (TMP->MAT != cCodMat)
 			nLin += 1
 			@nLin, 000 PSAY "Total de Horas do Funcionario "
@@ -282,7 +282,7 @@ If MV_PAR12 == 1
 			nHorasFunc := 0
 			nLin += 1
 		ENDIF
-		
+
 		IF (TMP->CC != cCodCusto)
 			nLin += 1
 			@nLin, 000 PSAY "Total de Horas do Centro de Custo "
@@ -292,104 +292,104 @@ If MV_PAR12 == 1
 			nLin += 1
 			@nLin, 000 PSAY "------------------------------------------------------------------------------------------------------------------------------------"
 		ENDIF
-		
+
 		nLin := nLin + 1 // Avanca a linha de impressao
-		
-		
-		
+
+
+
 	ENDDO
-	
-	
+
+
 	nLin += 1
 	@nLin, 00 PSAY "Total de Horas: "
 	@nLin, 23 PSAY nTotHoras
-	
+
 	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 	//³ Finaliza a execucao do relatorio...                                 ³
 	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-	
+
 	SET DEVICE TO SCREEN
-	
+
 	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 	//³ Se impressao em disco, chama o gerenciador de impressao...          ³
 	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-	
+
 	If aReturn[5]==1
 		dbCommitAll()
 		SET PRINTER TO
 		OurSpool(wnrel)
 	Endif
-	
+
 	MS_FLUSH()
-	
+
 ELSE
-	
-	
-	
+
+
+
 	// **************************** Cria Arquivo Temporario
-	_aCExcel:={}//SPCSQL->(DbStruct()) 
+	_aCExcel:={}//SPCSQL->(DbStruct())
 	aadd( _aCExcel , {"MATRICULA"    	, "C" , 10 , 00 } ) //01
 	aadd( _aCExcel , {"NOME"			, "C" , 50 , 00 } ) //02
 	aadd( _aCExcel , {"DATADIA"  		, "C" , 10 , 00 } ) //03
 	aadd( _aCExcel , {"EXTENSO"	   		, "C" , 30 , 00 } ) //04
 	aadd( _aCExcel , {"HORAS"     		, "C" , 04,  00 } ) //05
 	aadd( _aCExcel , {"EVENTO"		  	, "C" , 20 , 00 } ) //06
-	
-	
+
+
    	//_cTemp := CriaTrab(_aCExcel, .T.)
 	//DbUseArea(.T.,"DBFCDX",_cTemp,"TMP1",.F.,.F.)
-	
+
 	DbSelectArea("TMP")
 	Do While TMP->(!Eof())
-		
-		
+
+
 		cNome := TMP->NOME
 		nHoras := TMP->QTABONO
 		cCodMat := TMP->MAT
-		
+
 		IF (TMP->CC != cCodCusto)
-		
+
 		// Pular Linha
 	_aItem := ARRAY(LEN(_aCExcel) + 1)
 		AADD(_aIExcel,_aItem)
 	_aItem := {}
-	
+
 			_aItem := ARRAY(LEN(_aCExcel) + 1)
 			_aItem[1] 		:= TMP->CC
 			_aItem[2] 		    := TMP->DESC01
    			AADD(_aIExcel,_aItem)
    			_aItem := {}
-			
-		//Pular Linha					
+
+		//Pular Linha
 	_aItem := ARRAY(LEN(_aCExcel) + 1)
 		AADD(_aIExcel,_aItem)
-	_aItem := {}			
-		
+	_aItem := {}
+
 		Endif
-		
-		
+
+
 		_aItem := ARRAY(LEN(_aCExcel) + 1)
 		_aItem[1]  		:= TMP->MAT
 		_aItem[2]		:= cNome
 		_aItem[3]		:= DTOC(STOD(TMP->DATA))
 		_aItem[4] 	   	:= DiaExtenso(STOD(TMP->DATA))
 		_aItem[5] 	 	:= cValToChar(nHoras)
-		_aItem[6]     	:= TMP->DESC
+		_aItem[6]     	:= TMP->DESCRICAO
 	AADD(_aIExcel,_aItem)
 	_aItem := {}
-		
+
 		nTotHoras := SomaHoras(nTotHoras,nHoras)
 		nHorasFunc := SomaHoras(nHorasFunc,nHoras)
 		nHorasCC := SomaHoras(nHorasCC,nHoras)
-		
-		
-		
+
+
+
 		cCodCusto := TMP->CC
-		
+
 		TMP->(DbSkip())
-		
-		
-		
+
+
+
 		IF (TMP->MAT != cCodMat)
 	_aItem := ARRAY(LEN(_aCExcel) + 1)
 			_aItem[4] 	:= "TOTAL FUNCIONARIO"
@@ -398,7 +398,7 @@ ELSE
 	_aItem := {}
 			nHorasFunc := 0
 		ENDIF
-		
+
 		IF (TMP->CC != cCodCusto)
 	_aItem := ARRAY(LEN(_aCExcel) + 1)
 			_aItem[4] 	:= "TOTAL CENTRO DE CUSTO"
@@ -407,40 +407,40 @@ ELSE
 	_aItem := {}
 			nHorasCC := 0
 		ENDIF
-		
+
 		nLin := nLin + 1 // Avanca a linha de impressao
-		
-		
+
+
 	Enddo
 			//Pula Linha
 	_aItem := ARRAY(LEN(_aCExcel) + 1)
 	AADD(_aIExcel,_aItem)
-	_aItem := {} 
-			
+	_aItem := {}
+
 	_aItem := ARRAY(LEN(_aCExcel) + 1)
 			_aItem[4] 	:= "TOTAL DE HORAS"
 			_aItem[5]	    := cValToChar(nTotHoras)
 	AADD(_aIExcel,_aItem)
 	_aItem := {}
 
-	
+
 	If !ApOleClient("MsExcel")
 		MsgStop("Microsoft Excel nao instalado.")  //"Microsoft Excel nao instalado."
 		Return
 	EndIf
-	
+
 	//cArq     := _cTemp+".DBF"
-	
+
 	//DBSelectArea("TMP1")
 	//DBCloseARea("TMP1")
-	
-	
+
+
 	//__CopyFIle(cArq , AllTrim(GetTempPath())+_ctemp+".XLS")
-	
+
 	//oExcelApp:= MsExcel():New()
 	//oExcelApp:WorkBooks:Open(AllTrim(GetTempPath())+_ctemp+".XLS")
-	//oExcelApp:SetVisible(.T.) 
-	
+	//oExcelApp:SetVisible(.T.)
+
 	IF (LEN(_aIExcel) > 0)
 	MSGRUN("Favor Aguardar...", "Exportando os Registros para o Excel",;
 	{ ||CURSORWAIT(), DLGTOEXCEL( {{"GETDADOS", "Relacao de abono - Record DF", _aCExcel, _aIExcel}} ), CURSORARROW() } )
@@ -448,7 +448,7 @@ ELSE
 	MSGALERT("Nenhum Registro foi encontrado.","MOTAPON")
 	_lRet := .F.
 ENDIF
-	
+
 EndIf
 
 Return
