@@ -43,6 +43,7 @@ If !ApOleClient("MsExcel")
 	Return
 EndIf
 
+/*
 IF MV_PAR02 == 1
 //VERIFICO O PRIMEIRO E O ULTIMO DIA DA SEMANA PARA USAR NO FILTRO
 For n := 0 To 7
@@ -56,14 +57,22 @@ ELSEIF MV_PAR02 == 2
      cPDiaSem := DTOS(MV_PAR01 - 60)
      cUDiaSem := DTOS(MV_PAR01 + 5)
 ENDIF
+*/
+//Rafael França - 30/03/21 - Alterado a disposição dos parametros, agora será controle lado por periodo defindo por usuario.
+     cPDiaSem := DTOS(MV_PAR01)
+     cUDiaSem := DTOS(MV_PAR02)
+
 
 //TRATO AS PERGUNTAS PARA USO NOS FILTROS
-IF MV_PAR02 == 1
+IF MV_PAR03 == 1
 cNomeTabela		:= "MAPAS PARA LIBERAÇÃO NO MICROSIGA - " + DTOC(STOD(cPDiaSem)) + " - " + DTOC(STOD(cUDiaSem))
 cFiltro			:= "%AND C7_EMISSAO BETWEEN '"+cPDiaSem+"' AND '"+cUDiaSem+"' AND C7_TIPO = '1' AND CR_APROV = '000001' AND CR_TOTAL BETWEEN 1000 AND 10000 %" //Aprovados pela Sra. Elenn durante a semana --ALTERADO O CR_APROV PARA O 000032 DA LUCILENE e diminuido o valor para 4 mil
-ELSEIF MV_PAR02 == 2
+ELSEIF MV_PAR03 == 2
 cNomeTabela		:= "MAPAS PARA LIBERAÇÃO NO MICROSIGA - " + DTOC(MV_PAR01)
 cFiltro			:= "%AND C7_EMISSAO BETWEEN '"+cPDiaSem+"' AND '"+cUDiaSem+"' AND CR_APROV = '000028' AND CR_DATALIB = '' %" //Apenas pedidos enviados para aprovação do diretor
+ELSEIF MV_PAR03 == 3
+cNomeTabela		:= "MAPAS PARA LIBERAÇÃO NO MICROSIGA - " + DTOC(STOD(cPDiaSem)) + " - " + DTOC(STOD(cUDiaSem))
+cFiltro			:= "%AND C7_EMISSAO BETWEEN '"+cPDiaSem+"' AND '"+cUDiaSem+"' AND C7_TIPO = '1' AND CR_APROV = '000001' %"
 ENDIF
 
 cCampo1			:= "ZY_MES" + SUBSTR(DTOS(MV_PAR01),5,2)
@@ -90,7 +99,7 @@ ORDER BY PEDIDO
 
 EndSql //FINALIZO A MINHA QUERY
 
-IF MV_PAR03 == 1
+IF MV_PAR04 == 1
 
     //Criando o objeto que irá gerar o conteúdo do Excel
     oFWMsExcel := FWMSExcel():New()
@@ -203,9 +212,7 @@ Enddo
 
 	RestArea(aArea)
 
-	ELSEIF MV_PAR03 == 2
-
-
+	ELSEIF MV_PAR04 == 2
 
 	ENDIF
 
@@ -220,9 +227,10 @@ Static Function ValidPerg(cPerg)
 	dbSetOrder(1)
 	aRegs:={}
 
-	AADD(aRegs,{cPerg,"01","Data Referência:  	","","","mv_ch01","D",08,0,0,"G","","mv_par01","","","","","","","","","","","","","","","","","","","","","","","","",""})
-	AADD(aRegs,{cPerg,"02","Tipo:            	","","","mv_ch02","N",01,0,1,"C","","mv_par02","Lib. Gerência","","","","","Pend. Diretor","","","","","","","","","","","","","","","","","","","" })
-	AADD(aRegs,{cPerg,"03","Formato:           	","","","mv_ch03","N",01,0,1,"C","","mv_par03","Planilha","","","","","PDF","","","","","","","","","","","","","","","","","","","" })
+	AADD(aRegs,{cPerg,"01","Data Inicial:  		","","","mv_ch01","D",08,0,0,"G","","mv_par01","","","","","","","","","","","","","","","","","","","","","","","","",""})
+	AADD(aRegs,{cPerg,"02","Data Final: 	 	","","","mv_ch02","D",08,0,0,"G","","mv_par02","","","","","","","","","","","","","","","","","","","","","","","","",""})
+	AADD(aRegs,{cPerg,"03","Tipo:            	","","","mv_ch03","N",01,0,1,"C","","mv_par03","Lib. Gerência","","","","","Pend. Diretor","","","","","Todos","","","","","","","","","","","","","","" })
+	AADD(aRegs,{cPerg,"04","Formato:           	","","","mv_ch04","N",01,0,1,"C","","mv_par04","Planilha","","","","","PDF","","","","","","","","","","","","","","","","","","","" })
 
 	For i:=1 to Len(aRegs)
 		If !dbSeek(cPerg+aRegs[i,2])
