@@ -66,6 +66,7 @@ Static Function PrintExcel()
 	Local cTitle := "Repasse Rateio - " + cPeriodo
 	Private cTitWorkSheet := cTitle
 	Private cTitTable := cTitle
+	Private nNum := 0
 
 	(TMP)->(DbGoTop())
 
@@ -73,22 +74,33 @@ Static Function PrintExcel()
 	oExcel:AddworkSheet(cTitWorkSheet)
 	oExcel:AddTable (cTitWorkSheet,cTitTable)
 
-	oExcel:AddColumn(cTitWorkSheet,cTitTable,"Praça",1,1)
-	oExcel:AddColumn(cTitWorkSheet,cTitTable,"Num Repasse",1,1)
-	oExcel:AddColumn(cTitWorkSheet,cTitTable,"NF",1,1)
+	oExcel:AddColumn(cTitWorkSheet,cTitTable,"Sequencia",1,1)
+	oExcel:AddColumn(cTitWorkSheet,cTitTable,"Praca",1,1)
+	oExcel:AddColumn(cTitWorkSheet,cTitTable,"Nome Praca",1,1)
+	oExcel:AddColumn(cTitWorkSheet,cTitTable,"NF Fornecedor",1,1)
+	oExcel:AddColumn(cTitWorkSheet,cTitTable,"Emissao",1,1)
+	oExcel:AddColumn(cTitWorkSheet,cTitTable,"Valor NF",1,2)
+	oExcel:AddColumn(cTitWorkSheet,cTitTable,"Vencimento NF",1,2)
 	oExcel:AddColumn(cTitWorkSheet,cTitTable,"Cliente",1,1)
-	oExcel:AddColumn(cTitWorkSheet,cTitTable,"Valor Rateio",1,2)
-
+	oExcel:AddColumn(cTitWorkSheet,cTitTable,"Natureza",1,1)
+	oExcel:AddColumn(cTitWorkSheet,cTitTable,"NF RP",1,1)
+	oExcel:AddColumn(cTitWorkSheet,cTitTable,"RP",1,1)
 
 
 	While( (TMP)->(!Eof()) )
-
+		nNUm += 1
 		aDetRel := {}
+		AADD(aDetRel, cValToChar(nNum))
 		AADD(aDetRel, Alltrim((TMP)->ZAH_PRACA))
+		AADD(aDetRel, Alltrim((TMP)->ZAF_DESCRI))
 		AADD(aDetRel, SPACE(9))
-		AADD(aDetRel, Alltrim((TMP)->ZAH_NUMRP))
-		AADD(aDetRel, Alltrim((TMP)->ZAH_CLIENT))
+		AADD(aDetRel, SPACE(9))
 		AADD(aDetRel, (TMP)->ZAH_VLRAT)
+		AADD(aDetRel, SPACE(9))
+		AADD(aDetRel, Alltrim((TMP)->ZAH_CLIENT))
+		AADD(aDetRel, "REPASSE SPOT")
+		AADD(aDetRel, Posicione("SC5",10,xFilial("SC5") + Alltrim((TMP)->ZAH_NUMRP)), "C5_NUM")
+		AADD(aDetRel, Alltrim((TMP)->ZAH_NUMRP))
 
 
 		nTotal += (TMP)->ZAH_VLRAT
@@ -118,13 +130,12 @@ Static Function BusDados()
 
 	BeginSql Alias TMP
 
-		SELECT ZAH_PERIOD,ZAH_PRACA,ZAH_NUMRP,ZAH_CLIENT,ZAH_VLRAT FROM %table:ZAH% WHERE
-		ZAH_PERIOD = %exp:cPeriodo% AND
+		SELECT ZAH_PERIOD,ZAH_PRACA,ZAH_NUMRP,ZAH_CLIENT,ZAH_VLRAT, ZAF_DESCRI FROM %table:ZAH%
+		INNER JOIN %table:ZAF% ON ZAH_PRACA = ZAF_CODIGO AND %table:ZAF%.D_E_L_E_T_ = '' AND ZAH_FILIAL = ZAF_FILIAL
+		WHERE ZAH_PERIOD = %exp:cPeriodo% AND
 		ZAH_PRACA BETWEEN %exp:MV_PAR02% AND %exp:MV_PAR03% AND
 		ZAH_NUMRP BETWEEN  %exp:MV_PAR04% AND %exp:MV_PAR05% AND
-		ZAH_VLRAT > 0 AND
-		D_E_L_E_T_ = ''
-
+		ZAH_VLRAT > 0 AND %table:ZAH%.D_E_L_E_T_ = ''
 
 	EndSql
 
