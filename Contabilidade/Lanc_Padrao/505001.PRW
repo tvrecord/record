@@ -25,35 +25,35 @@ GRUPO:
 User Function 505001()
 
 
-Private cConta := ""
-Private cGrupo := ""
+	Private cConta := ""
+	Private cGrupo := ""
 
-_aArea := GetArea()
+	_aArea := GetArea()
 
-If SED->ED_CONTA >= '41' .AND. SED->ED_CONTA <= '439999999'
-	
-	cGrupo := Posicione("CTT",1,xFilial("CTT") + M->E1_CCD, "CTT_GRUPO")// Busca o grupo do plano de contas no cadastro do centro de custo
-	
-	If SUBSTR(SED->ED_CONTA,2,1) == cGrupo // Verifica se a conta contabil do cadastro está OK
+	If SED->ED_CONTA >= '41' .AND. SED->ED_CONTA <= '439999999'
+
+		cGrupo := Posicione("CTT",1,xFilial("CTT") + M->E1_CCD, "CTT_GRUPO")// Busca o grupo do plano de contas no cadastro do centro de custo
+
+		If SUBSTR(SED->ED_CONTA,2,1) == cGrupo // Verifica se a conta contabil do cadastro está OK
+			cConta := SED->ED_CONTA
+
+			//Se a Conta contabil não for o mesmo grupo do centro de custo, o programa pesquisa
+			//uma conta compativel no cadastro da relação da conta contabil
+		elseIf SUBSTR(Posicione("SZI",1,xFilial("SZI") + SED->ED_CONTA, "ZI_CC2"),2,1) == cGrupo
+			cConta := Posicione("SZI",1,xFilial("SZI") + SED->ED_CONTA, "ZI_CC2")
+		elseIf SUBSTR(Posicione("SZI",1,xFilial("SZI") + SED->ED_CONTA, "ZI_CC3"),2,1) == cGrupo
+			cConta := Posicione("SZI",1,xFilial("SZI") + SED->ED_CONTA, "ZI_CC3")
+		EndIf
+
+
+
+	ELSE
+
 		cConta := SED->ED_CONTA
-		
-		//Se a Conta contabil não for o mesmo grupo do centro de custo, o programa pesquisa
-		//uma conta compativel no cadastro da relação da conta contabil
-	elseIf SUBSTR(Posicione("SZI",1,xFilial("SZI") + SED->ED_CONTA, "ZI_CC2"),2,1) == cGrupo
-		cConta := Posicione("SZI",1,xFilial("SZI") + SED->ED_CONTA, "ZI_CC2")
-	elseIf SUBSTR(Posicione("SZI",1,xFilial("SZI") + SED->ED_CONTA, "ZI_CC3"),2,1) == cGrupo
-		cConta := Posicione("SZI",1,xFilial("SZI") + SED->ED_CONTA, "ZI_CC3")
-	EndIf
-	
-	
-	
-ELSE
-	
-	cConta := SED->ED_CONTA
-	
-EndIf
 
-_aArea	:= RestArea(_aArea)
+	EndIf
+
+	_aArea	:= RestArea(_aArea)
 
 
 Return(cConta)
