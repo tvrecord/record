@@ -12,12 +12,12 @@ Local nTotemp := 0
 Local cQuery  := ""
 
 
-cQuery:= "SELECT C7_FILIAL,C7_TOTAL,C7_VLDESC,C7_VALFRE FROM " + RetSqlName("SC7") + " WHERE C7_FILIAL = '" + xFilial("SC7") + "' AND C7_NUM = '" + (M->ZM_PEDIDO) + "' AND D_E_L_E_T_ <> '*'"
+cQuery:= "SELECT C7_FILIAL,C7_TOTAL,C7_VLDESC,C7_VALFRE,C7_DESPESA FROM " + RetSqlName("SC7") + " WHERE C7_FILIAL = '" + xFilial("SC7") + "' AND C7_NUM = '" + (M->ZM_PEDIDO) + "' AND D_E_L_E_T_ <> '*'"
 
 TcQuery cQuery New Alias "TMP"
 
 DBSelectArea("TMP")
-DBGotop()          	
+DBGotop()
 
 SZM->(dbSetOrder(4))
 iF SZM->(dbSeek(TMP->C7_FILIAL + M->ZM_PEDIDO))
@@ -32,14 +32,14 @@ EndIf
 
 
 While !EOF()
-	
-	
-	nTotemp := (TMP->C7_TOTAL) - (TMP->C7_VLDESC) + (TMP->C7_VALFRE)
+
+
+	nTotemp := (TMP->C7_TOTAL) - (TMP->C7_VLDESC) + (TMP->C7_VALFRE) + C7_DESPESA
 	nTotal += nTotemp
-	
-	
+
+
 	dbSkip()
-	
+
 Enddo
 
 DBSelectArea("TMP")
