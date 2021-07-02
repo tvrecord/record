@@ -167,7 +167,7 @@ Static Function RunReport(Cabec1,Cabec2,Titulo)
 	Private nValDesp := 0
 	Private cFornece := ""
 	Private cTemp    := ""
-	PRIVATE aProdutos,aComplemen,aFornCab,aFornece,aPrecos,aSubTotal,aFrete,aDesconto,aIPI,aOrcado,aDesc
+	PRIVATE aProdutos,aComplemen,aFornCab,aFornece,aPrecos,aSubTotal,aFrete,aDesconto,aIPI,aOrcado,aDesc,aDespesa
 	PRIVATE aPrazo,aCondPgto,i,J,cDescri,aMinimos,ij,pMinimo,porcado
 	private pCotacao,pData
 	Private oFont, cCode, oPrn
@@ -261,6 +261,7 @@ Static Function RunReport(Cabec1,Cabec2,Titulo)
 		aSubTotal  := {0,0,0,0,0}
 		aFrete     := {0,0,0,0,0}
 		aDesconto  := {0,0,0,0,0}
+		aDespesa   := {0,0,0,0,0}
 		aDesc      := {0,0,0,0,0}
 		aFornCab  := {}
 
@@ -326,6 +327,7 @@ Static Function RunReport(Cabec1,Cabec2,Titulo)
 					aIPI[LEN(aFornCab)]       := SC8->C8_VALIPI
 					aDesconto[LEN(aFornCab)]  := SC8->C8_VLDESC
 					aPrazo[LEN(aFornCab)]     := SC8->C8_PRAZO
+					aDespesa[LEN(aFornCab)]   := SC8->C8_DESPESA
 					dbSelectArea("SE4")
 					dbSetOrder(1)
 					dbSeek(xFilial()+SC8->C8_COND)
@@ -339,6 +341,8 @@ Static Function RunReport(Cabec1,Cabec2,Titulo)
 					aPrazo[i]        := SC8->C8_PRAZO
 					aIPI[I]          += SC8->C8_VALIPI
 					aDesconto[I]     += SC8->C8_VLDESC
+					aDespesa[I]      += SC8->C8_DESPESA
+
 
 					dbSelectArea("SE4")
 					dbSetOrder(1)
@@ -693,21 +697,21 @@ STATIC FUNCTION ImprRodape()
 	oPrn:Say( 1905, 1800,"Desconto: " + TRANSFORM(aDesconto[1],"@E 999,999.99"),oFont5,100 )
 
 	oPrn:Say( 1955, 1460,"IPI: " + TRANSFORM(aIPI[1],"@E 999,999.99"),oFont5,100 )
-	oPrn:Say( 1955, 1800,"Total: "    + TRANSFORM(aSubtotal[1] + aIPI[1] + aFrete[1] - aDesconto[1],"@E 999,999.99"),oFont5,100 )
+	oPrn:Say( 1955, 1800,"Total: "    + TRANSFORM(aSubtotal[1] + aIPI[1] + aFrete[1] - aDesconto[1] + aDespesa[1],"@E 999,999.99"),oFont5,100 )
 
 	//2 Fornecedor
 	oPrn:Say( 1905, 2115,"Frete: "    + TRANSFORM(aFrete[2],"@E 999,999.99"),oFont5,100 )
 	oPrn:Say( 1905, 2450,"Desconto: " + TRANSFORM(aDesconto[2],"@E 999,999.99"),oFont5,100 )
 
 	oPrn:Say( 1955, 2115,"IPI: " + TRANSFORM(aIPI[2],"@E 999,999.99"),oFont5,100 )
-	oPrn:Say( 1955, 2450,"Total: "    + TRANSFORM(aSubtotal[2] + aIPI[2] + aFrete[2] - aDesconto[2],"@E 999,999.99"),oFont5,100 )
+	oPrn:Say( 1955, 2450,"Total: "    + TRANSFORM(aSubtotal[2] + aIPI[2] + aFrete[2] - aDesconto[2] + aDespesa[2],"@E 999,999.99"),oFont5,100 )
 
 	//3 Fornecedor
 	oPrn:Say( 1905, 2750,"Frete: "    + TRANSFORM(aFrete[3],"@E 999,999.99"),oFont5,100 )
 	oPrn:Say( 1905, 2980,"Desconto: " + TRANSFORM(aDesconto[3],"@E 999,999.99"),oFont5,100 )
 
 	oPrn:Say( 1955, 2750,"IPI: " + TRANSFORM(aIPI[3],"@E 999,999.99"),oFont5,100 )
-	oPrn:Say( 1955, 2980,"Total: "    + TRANSFORM(aSubtotal[3] + aIPI[3] + aFrete[3] - aDesconto[3],"@E 999,999.99"),oFont5,100 )
+	oPrn:Say( 1955, 2980,"Total: "    + TRANSFORM(aSubtotal[3] + aIPI[3] + aFrete[3] - aDesconto[3] + aDespesa[3],"@E 999,999.99"),oFont5,100 )
 
 
 	oPrn:Say( 1840, 1490,"S U B T O T A L",oFont5,100 )
