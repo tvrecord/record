@@ -98,7 +98,7 @@ IF 	   MV_PAR01 == 1  //Sintetico
 	ENDIF
 	cQuery += "GROUP BY ZR_TIPO,ZR_CTASIG "
 	cQuery += "ORDER BY ZR_TIPO,ZR_CTASIG "
-	
+
 ELSEIF MV_PAR01 == 2  //Centro de custo - Sintetico
 	cQuery := "SELECT CTT_CCSIG,ZR_TIPO,ZR_CTASIG,SUM(ZR_VALOR) AS VALOR FROM SZR010 INNER JOIN CTT010 ON ZR_CC = CTT_CUSTO  "
 	cQuery += "WHERE SZR010.D_E_L_E_T_ = '' AND CTT010.D_E_L_E_T_ = '' AND CTT010.CTT_CCSIG <> '' "
@@ -118,7 +118,7 @@ ELSEIF MV_PAR01 == 2  //Centro de custo - Sintetico
 	ENDIF
 	cQuery += "GROUP BY CTT_CCSIG,ZR_TIPO,ZR_CTASIG "
 	cQuery += "ORDER BY CTT_CCSIG,ZR_TIPO,ZR_CTASIG "
-	
+
 ELSEIF MV_PAR01 == 3 //Analitico por centro de custo
 	cQuery	:= "SELECT ZR_DOC,ZR_PREFIXO,ZR_CODEMP,ZR_TIPO,ZR_CLIENTE,ZR_FORNECE,ZR_LOJA,ZR_UNDNEG,CTT_CCSIG,ZR_CTASIG,SUM(ZR_VALOR) AS VALOR, ZR_EMISSAO,ZR_HIST FROM SZR010 "
 	cQuery	+= "INNER JOIN CTT010 ON CTT_CUSTO = ZR_CC "
@@ -131,7 +131,7 @@ ELSEIF MV_PAR01 == 3 //Analitico por centro de custo
 	IF !EMPTY(MV_PAR12)
 		cQuery += "AND ZR_CC IN " + FormatIn(MV_PAR12,";") + " "
 	ENDIF
-	
+
 	IF 	   MV_PAR02 == 1
 		cQuery += "AND ZR_TIPO = 'D' "
 	ELSEIF MV_PAR02 == 2
@@ -139,7 +139,7 @@ ELSEIF MV_PAR01 == 3 //Analitico por centro de custo
 	ENDIF
 	cQuery	+= "GROUP BY ZR_DOC,ZR_PREFIXO,ZR_CODEMP,ZR_TIPO,ZR_CLIENTE,ZR_FORNECE,ZR_LOJA,ZR_UNDNEG,CTT_CCSIG,ZR_CTASIG,ZR_EMISSAO,ZR_HIST "
 	cQuery += "ORDER BY CTT_CCSIG,ZR_TIPO,ZR_CTASIG "
-	
+
 ELSEIF MV_PAR01 == 4 //Verificar os erros Log
 	cQuery	:="SELECT * FROM SZR010 WHERE "
 	cQuery += "ZR_EMISSAO BETWEEN '"+DTOS(MV_PAR03)+"' AND '"+DTOS(MV_PAR04)+"' AND "
@@ -217,29 +217,29 @@ DBGotop()
 //DEFINE FONT oFont NAME "Courier New" SIZE 0,-11 BOLD
 
 While !EOF()
-	
+
 	SetRegua(RecCount())
-	
+
 	//зддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
 	//Ё Verifica o cancelamento pelo usuario...                             Ё
 	//юддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
-	
+
 	IF lAbortPrint
 		@nLin,00 PSAY "*** CANCELADO PELO OPERADOR ***"
 		Exit
 	Endif
-	
-	
-	
-	
+
+
+
+
 	IF MV_PAR01 < 3 ////Rafael FranГa -> Executado quando o relatorio e "Sintetico,C. Custo e Conta SIG"
-		
+
 		IF nLin > 52 // Salto de PАgina. Neste caso o formulario tem 55 linhas...
 			Cabec(Titulo,Cabec1,Cabec2,NomeProg,Tamanho,nTipo)
 			nLin := 8
 		Endif
-		
-		
+
+
 		IF MV_PAR01 == 2
 			IF (cCustoSIG != TMP->CTT_CCSIG)
 				@nLin, 000 PSAY REPLICATE("-",LIMITE)
@@ -251,10 +251,10 @@ While !EOF()
 				nLin     := nLin + 1 // Avanca a linha de impressao
 			ENDIF
 		ENDIF
-		
-		
+
+
 		IF MV_PAR01 == 1
-			
+
 			IF (cTipo != TMP->ZR_TIPO) .AND. MV_PAR11 == 1
 				nLin     := nLin + 1 // Avanca a linha de impressao
 				IF TMP->ZR_TIPO == "D"
@@ -266,9 +266,9 @@ While !EOF()
 				@nLin, 000 PSAY REPLICATE("-",LIMITE)
 				nLin     := nLin + 1 // Avanca a linha de impressao
 			ENDIF
-			
+
 		ELSEIF MV_PAR01 == 2
-			
+
 			IF MV_PAR11 == 1 .AND. (cCustoSIG != TMP->CTT_CCSIG)
 				nLin     := nLin + 1 // Avanca a linha de impressao
 				IF TMP->ZR_TIPO == "D"
@@ -280,9 +280,9 @@ While !EOF()
 				@nLin, 000 PSAY REPLICATE("-",LIMITE)
 				nLin     := nLin + 1 // Avanca a linha de impressao
 			ENDIF
-			
+
 		ENDIF
-		
+
 		IF (cSubTot <> SUBSTR(TMP->ZR_CTASIG,1,2))
 			nLin 	:= nLin + 1
 			@nLin, 001 PSAY SUBSTR(TMP->ZR_CTASIG,1,2)
@@ -292,11 +292,11 @@ While !EOF()
 			nLin 	:= nLin + 1 // Avanca a linha de impressao
 			nSubTot	:= 0
 		ENDIF
-		
+
 		@nLin, 001 PSAY ALLTRIM(TMP->ZR_CTASIG)
 		@nLin, 014 PSAY ALLTRIM(Posicione("SZY",1,xFilial("SZY")+SUBSTRING(TMP->ZR_CTASIG,1,6) + Alltrim(STR(Year(MV_PAR03))),"ZY_DESCRI"))
 		@nLin, 065 PSAY TMP->VALOR PICTURE "@E 999,999,999.99"
-		
+
 		IF TMP->ZR_TIPO == "D" //Separa os valores por credito e debito
 			IF Posicione("SZY",1,xFilial("SZY")+SUBSTRING(TMP->ZR_CTASIG,1,6) + Alltrim(STR(Year(MV_PAR03))),"ZY_RESULT") == "1" //CONTA DE SOMA
 				nVlTotalD	 += TMP->VALOR
@@ -319,18 +319,18 @@ While !EOF()
 			ENDIF
 		ENDIF
 		//nSubTot	+= TMP->VALOR
-		 
+
 		nSubTot	    += TMP->VALOR
 		cSubTot 	:= SUBSTR(TMP->ZR_CTASIG,1,2)
 		cTipo  		:= TMP->ZR_TIPO
-		
+
 		IF MV_PAR01 == 2
 			cCustoSIG := TMP->CTT_CCSIG
 		ENDIF
-		
+
 		dbSelectArea ("TMP")
 		dbskip()
-		
+
 		IF (cSubTot <> SUBSTR(TMP->ZR_CTASIG,1,2))  //SubTotais das contas SIG - Tabela SX5 "ZA"
 			nLin     := nLin + 1 // Avanca a linha de impressao
 			@nLin, 000 PSAY REPLICATE("-",LIMITE)
@@ -342,7 +342,7 @@ While !EOF()
 			@nLin, 065 PSAY nSubTot PICTURE "@E 999,999,999.99"
 			nSubTot	 	:= 0
 		ENDIF
-		
+
 		IF (cTipo != TMP->ZR_TIPO) .AND. MV_PAR01 <> 2 .AND. MV_PAR11 == 1
 			nLin += 2
 			IF cTipo == "D"
@@ -353,12 +353,12 @@ While !EOF()
 				@nLin, 065 PSAY nVlTotalC PICTURE "@E 999,999,999.99"
 				nLin += 2
 				@nLin, 001 PSAY UPPER("Faturamento sem a receita de aplicaГЦo:")
-				@nLin, 065 PSAY nVlTotalC1 PICTURE "@E 999,999,999.99"				
+				@nLin, 065 PSAY nVlTotalC1 PICTURE "@E 999,999,999.99"
 			ENDIF
 			nLin += 1
 			@nLin, 000 PSAY REPLICATE("-",LIMITE)
 		ENDIF
-		
+
 		IF MV_PAR01 == 2  // Por Centro de Custos
 			IF ((cTipo != TMP->ZR_TIPO)) .OR. (cCustoSIG != TMP->CTT_CCSIG) .AND. MV_PAR11 == 1
 				nLin += 2
@@ -375,16 +375,16 @@ While !EOF()
 				@nLin, 000 PSAY REPLICATE("-",LIMITE)
 			ENDIF
 		ENDIF
-		
+
 		nLin 		+= 1 // Avanca a linha de impressao
-		
+
 	ELSEIF MV_PAR01 == 3 //Rafael FranГa -> Executado quando o relatorio e por "LanГamentos"
-		
+
 		IF nLin > 65 // Salto de PАgina. Neste caso o formulario tem 55 linhas...
 			Cabec(Titulo,Cabec1,Cabec2,NomeProg,Tamanho,nTipo)
 			nLin := 8
 		Endif
-		
+
 		IF (cCustoSIG != TMP->CTT_CCSIG)
 			@nLin, 000 PSAY REPLICATE("-",LIMITE)
 			nLin     := nLin + 1 // Avanca a linha de impressao
@@ -394,7 +394,7 @@ While !EOF()
 			@nLin, 000 PSAY REPLICATE("-",LIMITE)
 			nLin     := nLin + 1 // Avanca a linha de impressao
 		ENDIF
-		
+
 		IF MV_PAR11 == 1 .AND. (cCustoSIG != TMP->CTT_CCSIG)
 			nLin     := nLin + 1 // Avanca a linha de impressao
 			IF TMP->ZR_TIPO == "D"
@@ -406,7 +406,7 @@ While !EOF()
 			@nLin, 000 PSAY REPLICATE("-",LIMITE)
 			nLin     := nLin + 1 // Avanca a linha de impressao
 		ENDIF
-		
+
 		IF (cSubTot <> TMP->ZR_CTASIG)
 			nLin 	:= nLin + 1
 			@nLin, 001 PSAY TMP->ZR_CTASIG
@@ -417,7 +417,7 @@ While !EOF()
 			nLin 	:= nLin + 1 // Avanca a linha de impressao
 			nSubTot	:= 0
 		ENDIF
-		
+
 		@nLin, 001 PSAY ALLTRIM(SUBSTR(TMP->ZR_DOC,1,10)) + "\" + TMP->ZR_PREFIXO
 		IF !EMPTY(TMP->ZR_CLIENTE)
 			@nLin, 014 PSAY ALLTRIM(TMP->ZR_CLIENTE) + " " + TMP->ZR_LOJA
@@ -437,7 +437,7 @@ While !EOF()
 		@nLin, 060 PSAY STOD(TMP->ZR_EMISSAO)
 		@nLin, 072 PSAY	TMP->VALOR PICTURE "@E 999,999,999.99"
 		@nLin, 089 PSAY	ALLTRIM(SUBSTR(TMP->ZR_HIST,1,40))
-		
+
 		IF TMP->ZR_TIPO == "D" //Separa os valores por credito e debito
 			IF Posicione("SZY",1,xFilial("SZY")+SUBSTRING(TMP->ZR_CTASIG,1,6)+ Alltrim(STR(Year(MV_PAR03))),"ZY_RESULT") == "1" //CONTA DE SOMA
 				nVlTotalD	 += TMP->VALOR
@@ -455,15 +455,15 @@ While !EOF()
 				nVlTotalC	 -= TMP->VALOR
 			ENDIF
 		ENDIF
-		
+
 		nSubTot	     += TMP->VALOR
 		cSubTot 	:= TMP->ZR_CTASIG
 		cTipo 		:= TMP->ZR_TIPO
 		cCustoSIG 	:= TMP->CTT_CCSIG
-		
+
 		dbSelectArea ("TMP")
 		dbskip()
-		
+
 		IF (cSubTot <> TMP->ZR_CTASIG) .OR. (cTipo != TMP->ZR_TIPO) .OR. (cCustoSIG != TMP->CTT_CCSIG) //SubTotais das contas SIG - Tabela SX5 "ZA"
 			nLin     := nLin + 1 // Avanca a linha de impressao
 			@nLin, 000 PSAY REPLICATE("-",LIMITE)
@@ -473,8 +473,8 @@ While !EOF()
 			@nLin, 072 PSAY nSubTot PICTURE "@E 999,999,999.99"
 			nSubTot	 	:= 0
 		ENDIF
-		
-		
+
+
 		IF (cTipo != TMP->ZR_TIPO) .OR. (cCustoSIG != TMP->CTT_CCSIG) .AND. MV_PAR11 == 1
 			nLin += 2
 			IF cTipo == "D"
@@ -489,18 +489,18 @@ While !EOF()
 			nLin += 1
 			@nLin, 000 PSAY REPLICATE("-",LIMITE)
 		ENDIF
-		
+
 		nLin 		+= 1 // Avanca a linha de impressao
-		
+
 	ENDIF
-	
+
 	IF MV_PAR01 == 4
-		
+
 		IF nLin > 52 // Salto de PАgina. Neste caso o formulario tem 55 linhas...
 			Cabec(Titulo,Cabec1,Cabec2,NomeProg,Tamanho,nTipo)
 			nLin := 8
 		Endif
-		
+
 		@nLin, 000 PSAY TMP->ZR_CODIGO
 		@nLin, 008 PSAY TMP->ZR_DOC
 		@nLin, 023 PSAY TMP->ZR_CLIENTE
@@ -511,14 +511,14 @@ While !EOF()
 		@nLin, 079 PSAY TMP->ZR_MODULO
 		@nLin, 089 PSAY TMP->ZR_CONTA
 		@nLin, 102 PSAY TMP->ZR_CTADESC
-		
+
 		nLin++
-		
-		
+
+
 		dbskip()
-		
+
 	EndIf
-	
+
 ENDDO
 
 dbSelectArea("TMP")
