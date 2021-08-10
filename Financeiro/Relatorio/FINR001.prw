@@ -31,8 +31,6 @@ User Function FINR001()
 	//Private lLogin    := Type("cEmpAnt") != "U"
 	Private cTmp1     := GetNextAlias()
 	Private cPeriodo,cPeriodoAnt
-
-
 	Private oPrint
 	Private cSubTitle	:= ""
 	Private nPag 		:= 0
@@ -42,12 +40,9 @@ User Function FINR001()
 
 	Private aImpNeg := {}
 
-
-
 	//If !lLogin
 	//PREPARE ENVIRONMENT EMPRESA "01" FILIAL "01" MODULO "FIN"
 	//EndIf
-
 
 	// Cria e abre a tela de pergunta
 	ValidPerg( _cPerg )
@@ -61,18 +56,12 @@ User Function FINR001()
 		Return
 	EndIf
 
-
 	cPeriodo 	:= SUBSTRING(DTOS(MV_PAR01),5,2) + SUBSTRING(DTOS(MV_PAR01),1,4)
 	cPeriodoAnt := SUBSTRING(DTOS(MonthSub(MV_PAR01,1)),5,2) + SUBSTRING(DTOS(MonthSub(MV_PAR01,1)),1,4)
 
-
-
 	FwMsgRun(Nil, { || fProcPDF() }, "Processando", "Emitindo relatorio em PDF..." )
 
-
-
 Return
-
 
 /*/{Protheus.doc} fProcPdf
 imprimir relatorio em pdf
@@ -82,8 +71,8 @@ imprimir relatorio em pdf
 @since 24/08/2020
 @return return_type, return_description
 /*/
-Static Function fProcPdf()
 
+Static Function fProcPdf()
 
 	Local i
 	Local cPraca 	:= ""
@@ -156,7 +145,6 @@ Static Function fProcPdf()
 
 			EndIf
 
-
 		EndIf
 
 		nQtd++
@@ -184,9 +172,7 @@ Static Function fProcPdf()
 
 		ImpDetalhe()
 
-
 		(cTmp1)->(DbSkip())
-
 
 		If cPraca != Alltrim((cTmp1)->ZAG_PRACA)
 
@@ -196,7 +182,6 @@ Static Function fProcPdf()
 			nTotCalc  := 0
 			nTotRepas := 0
 			nTotRat	  := 0
-
 
 			//Verifico se imprime apenas o total ou não
 			If cImpTot == "N"
@@ -238,7 +223,6 @@ Static Function fProcPdf()
 
 					EndIf
 
-
 				Next
 
 				oPrint:Say( nLin,335, Transform( nTotRat, "@E 999,999,999.99") ,oFonteN)
@@ -259,7 +243,11 @@ Static Function fProcPdf()
 
 			EndIf
 
-			nLin := 500
+			If nLin >= REL_END - 50
+				nLin := 540
+			Else
+				nLin := 500
+			EndIf
 
 			//Imprime as Assinaturas
 			oPrint:Say( nLin,458, "_______________________________" ,oFonteN)
@@ -271,10 +259,8 @@ Static Function fProcPdf()
 
 				aUsuario := PswRet() // Retorna vetor com informações do usuário
 
-
 				oPrint:Say( nLin,458, PADC("Eleni Caldeira (Elenn)",50) ,oFonte)
 				oPrint:Say( nLin,620, PADC(Alltrim(aUsuario[1][4]),50) ,oFonte)
-
 
 				nLin += REL_VERT_STD
 
@@ -304,16 +290,12 @@ Static Function fProcPdf()
 Return
 
 /*/{Protheus.doc} ImpProxPag
-
     Imprime cabeçlho da proxima pagina
-
     @author  Bruno Alves de Oliveira
     @since   28-08-2020
 /*/
 
-
 Static Function ImpProxPag()
-
 
 	nPag++
 	oPrint:StartPage()
@@ -356,80 +338,132 @@ Static Function GetData(cPPeriodo,cPPracaDe,cPPracaAte,cPRpDe,cPRpAte)
 
 	// Busca os registros a serem impressos no relatório
 	BeginSql Alias cTmp1
-
 		SELECT
-		ZAG_PRACA,ZAG_NUMRP,ZAG_EMISSA,ZAG_PERIOD,ZAG_USERGI,
-		ZAF_CODIGO,ZAF_DESCRI,ZAF_CGC,ZAF_IMPTOT,
-		ZAH_REPTOT,ZAH_DESCFI,ZAH_INADIM,ZAH_DEDUCO,ZAH_COMREP,ZAH_BV,ZAH_VLCALC,ZAH_REPASS,ZAH_REPCOM,ZAH_AGENCI,ZAH_VALLIQ,ZAH_CLIENT,ZAH_RATEIO,ZAH_VLRAT,ZAH_UTILIZ,
-		QTD,
-		VALTOT,
-		C5_XTPFAT,C5_COMIS1,
-		F2_SERIE,F2_DOC,F2_EMISSAO,F2_VALBRUT,F2_CLIENTE,F2_LOJA,
-		A1_NOME,
-		E1_VENCREA
-		FROM %table:ZAG% AS ZAG
-		INNER JOIN %table:ZAH% AS ZAH ON
-		ZAH_FILIAL = ZAG_FILIAL AND
-		ZAH_CODIGO = ZAG_CODIGO AND
-		ZAH_PRACA = ZAG_PRACA AND
-		ZAH_NUMRP = ZAG_NUMRP AND
-		ZAH_PERIOD = ZAG_PERIOD
+			ZAG_PRACA,
+			ZAG_NUMRP,
+			ZAG_EMISSA,
+			ZAG_PERIOD,
+			ZAG_USERGI,
+			ZAF_CODIGO,
+			ZAF_DESCRI,
+			ZAF_CGC,
+			ZAF_IMPTOT,
+			ZAH_REPTOT,
+			ZAH_DESCFI,
+			ZAH_INADIM,
+			ZAH_DEDUCO,
+			ZAH_COMREP,
+			ZAH_BV,
+			ZAH_VLCALC,
+			ZAH_REPASS,
+			ZAH_REPCOM,
+			ZAH_AGENCI,
+			ZAH_VALLIQ,
+			ZAH_CLIENT,
+			ZAH_RATEIO,
+			ZAH_VLRAT,
+			ZAH_UTILIZ,
+			QTD,
+			VALTOT,
+			C5_XTPFAT,
+			C5_COMIS1,
+			F2_SERIE,
+			F2_DOC,
+			F2_EMISSAO,
+			F2_VALBRUT,
+			F2_CLIENTE,
+			F2_LOJA,
+			A1_NOME,
+			E1_VENCREA
+		FROM
+			%table:ZAG% AS ZAG
+		INNER JOIN %table:ZAH% AS ZAH
+		ON ZAH_FILIAL = ZAG_FILIAL
+			AND ZAH_CODIGO = ZAG_CODIGO
+			AND ZAH_PRACA = ZAG_PRACA
+			AND ZAH_NUMRP = ZAG_NUMRP
+			AND ZAH_PERIOD = ZAG_PERIOD
 		LEFT JOIN (
-		SELECT  ZAH_FILIAL,ZAH_PRACA,ZAH_PERIOD, COUNT(*) AS QTD FROM %table:ZAH% ZAH01
-		WHERE
-		ZAH01.D_E_L_E_T_ = ''
-		GROUP BY ZAH_FILIAL,ZAH_PRACA,ZAH_PERIOD
-		)  ZA  ON
-		ZA.ZAH_FILIAL   = ZAG_FILIAL AND
-		ZA.ZAH_PRACA	= ZAG_PRACA AND
-		ZA.ZAH_PERIOD	= %Exp:cPeriodoAnt%
+				SELECT
+					ZAH_FILIAL,
+					ZAH_PRACA,
+					ZAH_PERIOD,
+					COUNT(*) AS QTD
+				FROM
+					%table:ZAH% ZAH01
+				WHERE
+					ZAH01.D_E_L_E_T_ = ''
+				GROUP BY
+					ZAH_FILIAL,
+					ZAH_PRACA,
+					ZAH_PERIOD
+			) ZA
+		ON ZA.ZAH_FILIAL = ZAG_FILIAL
+			AND ZA.ZAH_PRACA = ZAG_PRACA
+			AND ZA.ZAH_PERIOD = %Exp:cPeriodoAnt%
 		LEFT JOIN (
-		SELECT  ZAH_FILIAL,ZAH_PRACA,ZAH_PERIOD,SUM(ZAH_REPCOM) AS VALTOT FROM %table:ZAH% ZAH02
+				SELECT
+					ZAH_FILIAL,
+					ZAH_PRACA,
+					ZAH_PERIOD,
+					SUM(ZAH_REPCOM) AS VALTOT
+				FROM
+					%table:ZAH% ZAH02
+				WHERE
+					ZAH02.D_E_L_E_T_ = ''
+				GROUP BY
+					ZAH_FILIAL,
+					ZAH_PRACA,
+					ZAH_PERIOD
+			) ZAA1
+		ON ZAA1.ZAH_FILIAL = ZAG_FILIAL
+			AND ZAA1.ZAH_PRACA = ZAG_PRACA
+			AND ZAA1.ZAH_PERIOD = %Exp:cPeriodo%
+		INNER JOIN %table:ZAF% AS ZAF
+		ON ZAF_FILIAL = ZAG_FILIAL
+			AND ZAF_CODIGO = ZAG_PRACA
+		LEFT JOIN %table:SC5% AS SC5
+		ON C5_FILIAL = ZAG_FILIAL
+			AND C5_NUMRP = ZAG_NUMRP
+			AND C5_NOTA <> ''
+			AND SC5.D_E_L_E_T_ = ''
+		LEFT JOIN %table:SA1% AS SA1
+		ON A1_COD = C5_CLIENTE
+			AND A1_LOJA = C5_LOJACLI
+			AND SA1.D_E_L_E_T_ = ''
+		LEFT JOIN %table:SF2% AS SF2
+		ON F2_FILIAL = C5_FILIAL
+			AND F2_SERIE = C5_SERIE
+			AND F2_DOC = C5_NOTA
+			AND F2_CLIENTE = C5_CLIENTE
+			AND F2_LOJA = C5_LOJACLI
+			AND SF2.D_E_L_E_T_ = ''
+		LEFT JOIN %table:SE1% AS SE1
+		ON E1_FILIAL = F2_FILIAL
+			AND E1_PREFIXO = F2_SERIE
+			AND E1_NUM = F2_DOC
+			AND E1_TIPO = 'NF'
+			AND E1_CLIENTE = F2_CLIENTE
+			AND E1_LOJA = F2_LOJA
+			AND E1_PARCELA IN ('', '001')
+			AND E1_VENCREA BETWEEN SUBSTRING(F2_EMISSAO, 1, 6) + '01' AND CONVERT(
+				VARCHAR,
+				DATEADD(DAY, 55, CONVERT(DATE, F2_EMISSAO, 103)),
+				112
+			)
+			AND SE1.D_E_L_E_T_ = ''
 		WHERE
-		ZAH02.D_E_L_E_T_ = ''
-		GROUP BY ZAH_FILIAL,ZAH_PRACA,ZAH_PERIOD
-		)  ZAA1  ON
-		ZAA1.ZAH_FILIAL   = ZAG_FILIAL AND
-		ZAA1.ZAH_PRACA	= ZAG_PRACA AND
-		ZAA1.ZAH_PERIOD	= %Exp:cPeriodo%
-		INNER JOIN %table:ZAF% AS ZAF ON
-		ZAF_FILIAL = ZAG_FILIAL AND
-		ZAF_CODIGO = ZAG_PRACA
-		LEFT JOIN %table:SC5%  AS SC5 ON
-		C5_FILIAL = ZAG_FILIAL AND
-		C5_NUMRP = ZAG_NUMRP AND
-		C5_NOTA <> '' AND
-		SC5.D_E_L_E_T_ = ''
-		LEFT JOIN %table:SA1% AS SA1 ON
-		A1_COD = C5_CLIENTE AND
-		A1_LOJA = C5_LOJACLI AND
-		SA1.D_E_L_E_T_ = ''
-		LEFT JOIN %table:SF2% AS SF2 ON
-		F2_FILIAL = C5_FILIAL AND
-		F2_SERIE = C5_SERIE AND
-		F2_DOC = C5_NOTA AND
-		F2_CLIENTE = C5_CLIENTE AND
-		F2_LOJA = C5_LOJACLI AND
-		SF2.D_E_L_E_T_ = ''
-		LEFT JOIN %table:SE1% AS SE1 ON
-		E1_FILIAL = F2_FILIAL  AND
-		E1_PREFIXO = F2_SERIE AND
-		E1_NUM = F2_DOC AND
-		E1_TIPO = 'NF' AND
-		E1_CLIENTE = F2_CLIENTE AND
-		E1_LOJA = F2_LOJA AND
-		E1_VENCREA BETWEEN  SUBSTRING(F2_EMISSAO,1,6) + '01' AND CONVERT(VARCHAR,DATEADD(DAY,55,CONVERT(DATE, F2_EMISSAO, 103)),112) AND
-		SE1.D_E_L_E_T_ = ''
-		WHERE
-		ZAG_FILIAL = '01' AND
-		ZAG_PERIOD = %Exp:cPPeriodo% AND
-		ZAG_PRACA BETWEEN %Exp:cPPracaDe% AND %Exp:cPPracaAte% AND
-		ZAG_NUMRP BETWEEN %Exp:cPRpDe% AND %Exp:cPRpAte% AND
-		ZAF.D_E_L_E_T_ = '' AND
-		ZAG.D_E_L_E_T_ = '' AND
-		ZAH.D_E_L_E_T_ = ''
-		ORDER BY 1,4,2
-
+			ZAG_FILIAL = '01'
+			AND ZAG_PERIOD = %Exp:cPPeriodo%
+			AND ZAG_PRACA BETWEEN %Exp:cPPracaDe% AND %Exp:cPPracaAte%
+			AND ZAG_NUMRP BETWEEN %Exp:cPRpDe% AND %Exp:cPRpAte%
+			AND ZAF.D_E_L_E_T_ = ''
+			AND ZAG.D_E_L_E_T_ = ''
+			AND ZAH.D_E_L_E_T_ = ''
+		ORDER BY
+			1,
+			4,
+			2
 	EndSql
 
 
@@ -660,16 +694,19 @@ Static Function PerNeg(cPraca,cMesAno)
 
 		// Busca os registros a serem impressos no relatório
 		BeginSql Alias cTmp
-
-			SELECT ZAH_CODIGO,ZAH_DTACUM,ZAH_PRACA,ZAH_PERIOD FROM %table:ZAH% AS ZAH
+			SELECT
+				ZAH_CODIGO,
+				ZAH_DTACUM,
+				ZAH_PRACA,
+				ZAH_PERIOD
+			FROM
+				%table:ZAH% AS ZAH
 			WHERE
-			ZAH_PRACA = %Exp:cPraca% AND
-			ZAH_DTACUM <> '' AND
-			ZAH_ACUCAL < 0 AND
-			ZAH_PERIOD = %Exp:cMesAno% AND
-			D_E_L_E_T_ = ''
-
-
+				ZAH_PRACA = %Exp:cPraca%
+				AND ZAH_DTACUM <> ''
+				AND ZAH_ACUCAL < 0
+				AND ZAH_PERIOD = %Exp:cMesAno%
+				AND D_E_L_E_T_ = ''
 		EndSql
 
 
