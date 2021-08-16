@@ -204,7 +204,7 @@ Static Function TelaDes()
 
 		If EMPTY(cItem)//Verifica se a configuração do contrato foi realizada com sucesso
 			Close(oDlg)
-			MsgInfo("É necessário configurar o contrato:  (" + cContrato + ") corretamente!!","Atenção")
+			MsgInfo("É necessário configurar o contrato: (" + cContrato + ") corretamente!","Atenção")
 			lValido := .F.
 			Return // Se não utilizar o Return, o ponto de entrada se perde
 		Endif
