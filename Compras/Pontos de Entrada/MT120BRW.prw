@@ -25,11 +25,12 @@ User Function TelaOBS()
 Local cPedido 	:= Space(6)
 Local cCotacao	:= Space(6)
 Local cSolicit	:= Space(6)
-Local cOBS 		:= Space(40) 
+Local cCtaSig	:= Space(6)
+Local cOBS 		:= Space(40)
 Local cOBS1		:= Space(40)
-Local aItens	:= {'Boleto','Transferencia'} 
+Local aItens	:= {'Boleto','Transferencia'}
 Local aItens1	:= {'Sim','Não'}
-Private oArquivo 
+Private oArquivo
 Private oArquivo1
 Private cBanco 		:= space(3)
 Private cAgencia 	:= space(6)
@@ -37,11 +38,12 @@ Private cDgAgencia	:= space(1)
 Private cConta 		:= space(9)
 Private cDgConta 	:= space(1)
 Private cNome	 	:= space(60)
-                                  
+
 //cCotacao := ALLTRIM(POSICIONE("SC8",11,xFilial("SC8")+Alltrim(SCR->CR_NUM) + "0001","C8_NUM"))
 cCotacao := SC7->C7_NUMCOT
 cSolicit := SC7->C7_NUMSC
 cPedido  := SC7->C7_NUM
+cCtaSig	 := Posicione("SED",1,xFilial("SED") + Posicione("SC1",6,xFilial("SCR") + ALLTRIM(SC7->C7_NUM),"C1_NATUREZ"),"ED_CONTSIG")
 
 dbSelectArea("SZL")
 dbSetOrder(2)
@@ -63,15 +65,17 @@ DEFINE FONT oFont NAME "Courier New" SIZE 0,-11 BOLD
 @ 010,130 Say "Tp. Pagamento:"
 @ 010,170 COMBOBOX oArquivo ITEMS aItens SIZE 70,020 OF oDlg PIXEL FONT oFont  VALID !EMPTY(oArquivo)
 @ 030,015 Say "Cotação:"
-@ 030,050 Get cCotacao  when .F. F3 "SC8" //IIF(Empty(cCotacao),.F.,.T. )                               
+@ 030,050 Get cCotacao  when .F. F3 "SC8" //IIF(Empty(cCotacao),.F.,.T. )
 @ 030,130 Say "Orçado:"
 @ 030,170 COMBOBOX oArquivo1 ITEMS aItens1 SIZE 70,020 OF oDlg PIXEL FONT oFont  VALID !EMPTY(oArquivo1)
-@ 050,015 Say "Observação:"
-@ 050,050 Get cOBS MEMO SIZE 200,040 VALID !EMPTY(cOBS)
-@ 100,015 Say "Exclusivo:"
-@ 100,050 Get cOBS1 MEMO SIZE 200,040 VALID !EMPTY(cOBS1)
-@ 150,165 BMPBUTTON TYPE 01 ACTION AlteraOBS(cPedido,cCotacao,cOBS,cOBS1)
-@ 150,200 BMPBUTTON TYPE 02 ACTION Close(oDlg)
+@ 050,015 Say "Cta. SIG:"
+@ 050,050 Get cCtaSig //IIF(Empty(cPedido),.F.,.T. )
+@ 070,015 Say "Observação:"
+@ 070,050 Get cOBS MEMO SIZE 200,040 VALID !EMPTY(cOBS)
+@ 120,015 Say "Exclusivo:"
+@ 120,050 Get cOBS1 MEMO SIZE 200,040 VALID !EMPTY(cOBS1)
+@ 170,190 BMPBUTTON TYPE 01 ACTION AlteraOBS(cPedido,cCotacao,cOBS,cOBS1)
+@ 170,220 BMPBUTTON TYPE 02 ACTION Close(oDlg)
 ACTIVATE DIALOG oDlg CENTERED
 
 Return
@@ -105,8 +109,8 @@ DBSETORDER(1)
 If DBSEEK(xFilial("SZL")+cCotacao)
 	RecLock("SZL",.F.)
 	SZL->ZL_OBS1		:= cObs
-	SZL->ZL_TPPAG		:= IIF(oArquivo == "Boleto","1","2")  
-	SZL->ZL_PEDORC 		:= IIF(oArquivo1 == "Sim","1","2") 
+	SZL->ZL_TPPAG		:= IIF(oArquivo == "Boleto","1","2")
+	SZL->ZL_PEDORC 		:= IIF(oArquivo1 == "Sim","1","2")
 	SZL->ZL_EXCLUSI 	:= cObs1
 	MsUnlock("SZL")
 	//MsgInfo("Alteração realizada com sucesso","Fim")
@@ -116,12 +120,12 @@ Close(oDlg)
 
 
 iF SZL->ZL_TPPAG == "2" // Verifica se o tipo de pagamento é como transferencia
-	
+
 	DBSelectArea("SA2")
 	DBSetorder(1)
 	DBSeek(xFilial("SA2") + POSICIONE("SC7",1,xFilial("SC7")+SZL->ZL_PEDIDO,"C7_FORNECE") + POSICIONE("SC7",1,xFilial("SC7")+SZL->ZL_PEDIDO,"C7_LOJA"))
-	
-	
+
+
 	iF !EMPTY(ALLTRIM(SA2->A2_BANCO))
 		cBanco 		:= ALLTRIM(SA2->A2_BANCO)
 	EndIf
@@ -140,9 +144,9 @@ iF SZL->ZL_TPPAG == "2" // Verifica se o tipo de pagamento é como transferencia
 	iF !EMPTY(SA2->A2_NOME)
 		cNome	 	:= SA2->A2_NOME
 	EndIf
-	
+
 	DEFINE FONT oFont NAME "Courier New" SIZE 0,-11 BOLD
-	
+
 	@ 000,000 TO 230,350 DIALOG oDlg TITLE "Consulta/Altera Dados Bancarios do Fornecedor"
 	@ 010,015 Say "Banco:"
 	@ 010,050 Get cBanco  Valid  !EMPTY(ALLTRIM(cBanco))
@@ -159,17 +163,17 @@ iF SZL->ZL_TPPAG == "2" // Verifica se o tipo de pagamento é como transferencia
 	@ 090,090 BMPBUTTON TYPE 01 ACTION AlteraSA2()
 	@ 090,120 BMPBUTTON TYPE 02 ACTION Close(oDlg)
 	ACTIVATE DIALOG oDlg CENTERED
-	
+
 	DBSelectArea("SA2")
 	DBSetorder(1)
 	DBSeek(xFilial("SA2") + POSICIONE("SC7",1,xFilial("SC7")+SZL->ZL_PEDIDO,"C7_FORNECE") + POSICIONE("SC7",1,xFilial("SC7")+SZL->ZL_PEDIDO,"C7_LOJA"))
-	
+
 	If MsgYesNo("Deseja enviar e-mail com os dos dados bancarios do fornecedor " + SA2->A2_NOME + " com Banco: " + ALLTRIM(SA2->A2_BANCO) + "-" + "Ag: " + ALLTRIM(SA2->A2_AGENCIA) + "-" + (SA2->A2_DGAGEN) + " Conta: " + ALLTRIM(SA2->A2_NUMCON) + "-" + SA2->A2_DGCONTA + " ?" )
-		
+
 		U_AVISOCOMP() // Envia e-mail para os departamentos envolvidos cadastrarem a agencia e a conta no Bradesco para realizar o pagamento
-		
+
 	EndIf
-	
+
 EndIf
 
 Return
@@ -187,7 +191,7 @@ Close(oDlg)
 DBSelectArea("SA2")
 DBSetorder(1)
 IF(DBSeek(xFilial("SA2") + POSICIONE("SC7",1,xFilial("SC7")+SZL->ZL_PEDIDO,"C7_FORNECE") + POSICIONE("SC7",1,xFilial("SC7")+SZL->ZL_PEDIDO,"C7_LOJA"))	)
-	
+
 	RecLock("SA2",.F.)
 	SA2->A2_BANCO := cBanco
 	SA2->A2_AGENCIA := cAgencia
@@ -195,9 +199,9 @@ IF(DBSeek(xFilial("SA2") + POSICIONE("SC7",1,xFilial("SC7")+SZL->ZL_PEDIDO,"C7_F
 	SA2->A2_NUMCON := cConta
 	SA2->A2_DGCONTA := cDgConta
 	SA2->(MsUnlock())
-	
+
 	MsgInfo("Cadastro Bancario do fornecedor alterado com sucesso!!")
-	
+
 EndIf
 
 Return
