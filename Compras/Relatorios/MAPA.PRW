@@ -78,8 +78,10 @@ User Function CCI31U()
 			return
 		ENDIF
 
-		cCotaDe		:= MV_PAR01
-		cCotaAte	:= MV_PAR02
+		//cCotaDe		:= MV_PAR01
+		//cCotaAte		:= MV_PAR02
+		cCotaDe		:= POSICIONE("SC8",11,xFilial("SC8") + MV_PAR01 + "0001","C8_NUM")
+		cCotaAte	:= POSICIONE("SC8",11,xFilial("SC8") + MV_PAR02 + "0001","C8_NUM")
 		nAtuEst		:= MV_PAR03
 		nImobi		:= MV_PAR04
 
@@ -109,7 +111,6 @@ User Function CCI31U()
 	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 
 	RptStatus({|| RunReport(Cabec1,Cabec2,Titulo) },Titulo)
-
 
 Return
 
@@ -986,7 +987,6 @@ STATIC FUNCTION ImprRodape()
 
 	Endif
 
-
 	IF  nAss == 3 //Rafael França - 10/07/14 Conta as assinaturas para vericar a necessidade de impressao
 
 		oPrn:Say( 2150, 1490,REPLICATE("_",32),oFont3,100 )
@@ -1192,7 +1192,6 @@ STATIC FUNCTION ImprRodape()
 
 	ENDIF
 
-
 	oPrn:Say( 0030, 0920,"COMPRADOR(A): " + UPPER(cNomeComp) + "",oFont3,100 )
 	//oPrn:Say( 2150, 2720,REPLICATE("_",32),oFont3,100 )
 	//Zera os valores para o proximo mapa
@@ -1212,10 +1211,7 @@ oPrn:SayBitmap( 2025, 2775, cBMP001, 0350, 0150 )
 
 RETURN NIL
 
-
 Static Function ValidPerg(cPerg)
-
-
 
 	_sAlias := Alias()
 	cPerg := PADR(cPerg,10)
@@ -1223,13 +1219,10 @@ Static Function ValidPerg(cPerg)
 	dbSetOrder(1)
 	aRegs:={}
 
-	AADD(aRegs,{cPerg,"01","Da Cotacao  ?","","","mv_ch1","C",06,0,0,"G","","mv_par01","","","","","","","","","","","","","","","","","","","","","","","","","SC8"})
-	AADD(aRegs,{cPerg,"02","Ate Cotacao  ?","","","mv_ch2","C",06,0,0,"G","","mv_par02","","","","","","","","","","","","","","","","","","","","","","","","","SC8"})
-	AADD(aRegs,{cPerg,"03","Atual. Estoque?","","","mv_ch3","N",01,0,2,"C","","mv_par03","Sim","","","","","Nao","","","","","","","","","","","","","","","","","","","","","","",""})
-	AADD(aRegs,{cPerg,"04","Imobilizado   ?","","","mv_ch4","N",01,0,2,"C","","mv_par04","Sim","","","","","Nao","","","","","","","","","","","","","","","","","","","","","","",""})
-
-
-
+	AADD(aRegs,{cPerg,"01","Do Pedido:		","","","mv_ch1","C",06,0,0,"G","","mv_par01","","","","","","","","","","","","","","","","","","","","","","","","","SC7"})
+	AADD(aRegs,{cPerg,"02","Até o Pedido:	","","","mv_ch2","C",06,0,0,"G","","mv_par02","","","","","","","","","","","","","","","","","","","","","","","","","SC7"})
+	AADD(aRegs,{cPerg,"03","Atual. Estoque:	","","","mv_ch3","N",01,0,2,"C","","mv_par03","Sim","","","","","Nao","","","","","","","","","","","","","","","","","","","","","","",""})
+	AADD(aRegs,{cPerg,"04","Imobilizado:	","","","mv_ch4","N",01,0,2,"C","","mv_par04","Sim","","","","","Nao","","","","","","","","","","","","","","","","","","","","","","",""})
 
 	For i:=1 to Len(aRegs)
 		If !dbSeek(cPerg+aRegs[i,2])
