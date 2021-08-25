@@ -26,6 +26,7 @@ Local cPedido 	:= Space(6)
 Local cCotacao	:= Space(6)
 Local cSolicit	:= Space(6)
 Local cCtaSig	:= Space(6)
+Local cSigDesc	:= Space(60)
 Local cOBS 		:= Space(40)
 Local cOBS1		:= Space(40)
 Local aItens	:= {'Boleto','Transferencia'}
@@ -44,6 +45,7 @@ cCotacao := SC7->C7_NUMCOT
 cSolicit := SC7->C7_NUMSC
 cPedido  := SC7->C7_NUM
 cCtaSig	 := Posicione("SED",1,xFilial("SED") + Posicione("SC1",6,xFilial("SCR") + ALLTRIM(SC7->C7_NUM),"C1_NATUREZ"),"ED_CONTSIG")
+cSigDesc := PadL(Alltrim(cCtaSig) + " - " + Posicione("SZY",1,xFilial("SZY")+PADR(Alltrim(cCtaSig),6)+cValToChar(Year(SC7->C7_EMISSAO)),"ZY_DESCRI"),60)
 
 dbSelectArea("SZL")
 dbSetOrder(2)
@@ -69,7 +71,7 @@ DEFINE FONT oFont NAME "Courier New" SIZE 0,-11 BOLD
 @ 030,130 Say "Orçado:"
 @ 030,170 COMBOBOX oArquivo1 ITEMS aItens1 SIZE 70,020 OF oDlg PIXEL FONT oFont  VALID !EMPTY(oArquivo1)
 @ 050,015 Say "Cta. SIG:"
-@ 050,050 Get cCtaSig //IIF(Empty(cPedido),.F.,.T. )
+@ 050,050 Get cSigDesc //IIF(Empty(cPedido),.F.,.T. )
 @ 070,015 Say "Observação:"
 @ 070,050 Get cOBS MEMO SIZE 200,040 VALID !EMPTY(cOBS)
 @ 120,015 Say "Exclusivo:"
