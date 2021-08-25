@@ -15,6 +15,8 @@
 ±±ÈÍÍÍÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¼±±
 ±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+
+SIGACOM -> Relatorios -> Especificos -> Custo Sig Estoque
 /*/
 
 User Function CustoReq
@@ -170,40 +172,40 @@ DBSelectArea("TMP")
 DBGotop()
 
 While !EOF()
-	
+
 	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 	//³ Verifica o cancelamento pelo usuario...                             ³
 	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-	
+
 	If lAbortPrint
 		@nLin,00 PSAY "*** CANCELADO PELO OPERADOR ***"
 		Exit
 	Endif
-	
+
 	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 	//³ Impressao do cabecalho do relatorio. . .                            ³
 	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-	
+
 	If nLin > 70 // Salto de Página. Neste caso o formulario tem 55 linhas...
 		Cabec(Titulo,Cabec1,Cabec2,NomeProg,Tamanho,nTipo)
 		nLin := 8
 	Endif
-	
+
 	If lOk == .T.
-		
+
 		@nLin,001 PSAY TMP->CT1_SIG
 		@nLin,010 PSAY TMP->ZY_DESCRI
 		@nLin,000 PSAY Replicate("_",132)
-		
+
 		nLin += 2
-		
+
 		lOk := .F.
-		
+
 	EndIf
-	
+
 	// Coloque aqui a logica da impressao do seu programa...
 	// Utilize PSAY para saida na impressora. Por exemplo:
-	
+
 	@nLin,001 PSAY  TMP->D3_COD
 	@nLin,012 PSAY  TMP->D3_QUANT
 	@nLin,017 PSAY 	TMP->B1_DESC
@@ -213,31 +215,31 @@ While !EOF()
 	If MV_PAR07 == 2
 	@nLin,122 PSAY 	TMP->D3_DOC
 	Endif
-	
+
 	//	aAdd(aPedidos,{TMP->CT1_SIG,TMP->D3_COD,"AM",,,,TMP->B1_DESC,TMP->B1_CONTA,TMP->CT1_DESC01,TMP->D3_QUANT,,,TMP->CUSTO,})
-	
+
 	nTotal  += TMP->CUSTO
 	nTotSig += TMP->CUSTO
-	
-	
+
+
 	nLin++
-	
+
 	cSig := TMP->CT1_SIG
-	
+
 	DBSkip()
-	
+
 	If cSig != TMP->CT1_SIG
-		
+
 		@nLin,099 PSAY 	nTotSig PICTURE "@E 9,999,999.99"
-		
+
 		lOk := .T.
 		nTotSig := 0
-		
+
 		nLin+=2
-		
+
 	Endif
-	
-	
+
+
 EndDo
 
 @nLin,100 PSAY 	nTotal PICTURE "@E 999,999,999.99"
@@ -290,7 +292,7 @@ aRegs:={}
 AADD(aRegs,{cPerg,"01","Do 	Codigo?	","","","mv_ch01","C",09,0,0,"G","","mv_par01","","","","","","","","","","","","","","","","","","","","","","","","","SB1"})
 AADD(aRegs,{cPerg,"02","Ate Codigo?	","","","mv_ch02","C",09,0,0,"G","","mv_par02","","","","","","","","","","","","","","","","","","","","","","","","","SB1"})
 AADD(aRegs,{cPerg,"03","Da  Emissão ?","","","mv_ch03","D",08,0,0,"G","","mv_par03","","","","","","","","","","","","","","","","","","","","","","","","",""})
-AADD(aRegs,{cPerg,"04","Ate Emissão ?","","","mv_ch04","D",08,0,0,"G","","mv_par04","","","","","","","","","","","","","","","","","","","","","","","","",""}) 
+AADD(aRegs,{cPerg,"04","Ate Emissão ?","","","mv_ch04","D",08,0,0,"G","","mv_par04","","","","","","","","","","","","","","","","","","","","","","","","",""})
 AADD(aRegs,{cPerg,"05","Da Conta SIG?	","","","mv_ch05","C",09,0,0,"G","","mv_par05","","","","","","","","","","","","","","","","","","","","","","","","","SZY"})
 AADD(aRegs,{cPerg,"06","Ate Conta SIG?	","","","mv_ch06","C",09,0,0,"G","","mv_par06","","","","","","","","","","","","","","","","","","","","","","","","","SZY"})
 aAdd(aRegs,{cPerg,"07","Tipo? 	","","","mv_ch7","N",01,00,1,"C","","mv_par07","Sintetico","","","","","Analitico","","","","","","","","","","","","","","","","","","","" })
