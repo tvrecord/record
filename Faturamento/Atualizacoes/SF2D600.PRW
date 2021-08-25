@@ -10,7 +10,7 @@
 ฑฑฬออออออออออุออออออออออสอออออออฯออออออออออออออออออออสออออออฯอออออออออออออนฑฑ
 ฑฑบDesc.     ณInseri linha no complemento da nota fiscal de saida.        บฑฑ
 ฑฑบ          ณ para gerar o arquivo d600 e d605 no arquvi sped pis/cofins บฑฑ
-บฑฑ             (Comunica็ใo e Telecomunica็ใo)                           บฑฑ   
+บฑฑ             (Comunica็ใo e Telecomunica็ใo)                           บฑฑ
 ฑฑฬออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
 ฑฑบUso       ณ AP                                                         บฑฑ
 ฑฑศออออออออออฯออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออผฑฑ
@@ -31,12 +31,12 @@ User Function SF2D600
 		alert("OPERAวรO CANCELADA")
 	return
 	ENDIF
-	
+
 	Processa({|| Ajustar()},"Ajustando linha d600 e d605....")
-	
+
 Return
-	
-Static Function Ajustar()             
+
+Static Function Ajustar()
 
 
 	cQuery	:= "SELECT F2_FILIAL,F2_SERIE,F2_DOC,(SELECT FX_DOC FROM SFX010 WHERE FX_DOC = F2_DOC AND FX_CLIFOR = F2_CLIENTE AND D_E_L_E_T_ <> '*') AS FXDOC, "
@@ -72,9 +72,9 @@ Static Function Ajustar()
 	While !TMP->(Eof())
 
 		IncProc("Ajustando linha d600 e d605....")
-	
+
 		If EMPTY(TMP->FXDOC)
-		
+
 			RecLock("SFX",.T.)
 			SFX->FX_FILIAL 		:= TMP->F2_FILIAL
 			SFX->FX_TIPOMOV    	:= "S"
@@ -96,12 +96,13 @@ Static Function Ajustar()
 			SFX->FX_PERFIS    	:= SUBSTR(TMP->F2_EMISSAO,5,2) + SUBSTR(TMP->F2_EMISSAO,1,4)
 			SFX->FX_AREATER    	:= "21"
 			SFX->FX_TERMINA    	:= "0000000000"
+			//SFX->FX_TPASSIN    	:= "1"
 			SFX->(MSUNLOCK())
-	
+
 		EndIf
 
 		TMP->(dbSkip())
-	
+
 	EndDo
 
 

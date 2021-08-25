@@ -11,7 +11,7 @@
 ±±º          ³ do SE1 gerados, facilitando a geracao do CNAB.             º±±
 ±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
 ±±ºUso       ³ Rede Record-DF - modulo Financeiro                         º±±
-±±ÈÍÍÍÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¼±±  
+±±ÈÍÍÍÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¼±±
 ±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
 /*/
@@ -34,17 +34,17 @@ SE1->(DBSEEK(xFilial("SE1")+SF2->F2_CLIENTE+SF2->F2_LOJA+SF2->F2_SERIE+SF2->F2_D
 
 WHILE !EOF().AND.SE1->E1_FILIAL+SE1->E1_CLIENTE+SE1->E1_LOJA+SE1->E1_SERIE+SE1->E1_NUM ==;
 	SF2->F2_FILIAL+SF2->F2_CLIENTE+SF2->F2_LOJA+SF2->F2_SERIE+SF2->F2_DOC
-	
+
 	IF cBanco  == "237"
 		cAgencia := "34169"
 		//cConta   := SC5->C5_CONTA
 		cNosso   := SPACE(15)
-		
+
 		dbSelectArea("SA6")
 		dbsetOrder(1)
 		SA6->(DBSEEK(xFilial()+cBanco+cAgencia))
 		w_num	 := ALLTRIM(SA6->A6_NOSNUM)
-		
+
 		cTam=LEN(cNosso)
 		cTitulo:= ALLTRIM(STR(VAL(SUBSTR(w_num,1,cTam-2))+1))
 		cTam	 := Len(cTitulo)
@@ -62,10 +62,10 @@ WHILE !EOF().AND.SE1->E1_FILIAL+SE1->E1_CLIENTE+SE1->E1_LOJA+SE1->E1_SERIE+SE1->
 			ENDIF
 			X=X-1
 		ENDDO
-		
+
 		cRest	 := MOD( cAcm,11 )
 		cDig	 := 11 - crest
-		
+
 		IF cBanco = "237"
 			npict = "@R 99/99/999999999-X"
 			npict2= "@R 99/99/999999999-X"
@@ -78,15 +78,15 @@ WHILE !EOF().AND.SE1->E1_FILIAL+SE1->E1_CLIENTE+SE1->E1_LOJA+SE1->E1_SERIE+SE1->
 			Else
 				cNosso  := cTitulo+strzero(cDig,1)
 			Endif
-			
+
 		Endif
-		
+
 		dbSelectArea("SA6")
 		dbsetOrder(1)
 		RecLock("SA6",.F.)
 		REPLACE SA6->A6_NOSNUM WITH cNosso  //No cadastro de Banco é necessário o cógido da
 		SA6->(MsUnLock())                   //Carteira para a composição do calculo do digito.
-		
+
 		RecLock("SE1",.F.)
 		REPLACE SE1->E1_NUMBCO WITH SUBSTR(cNosso,3,12) //No Cadastro de Titulos a Receber é gravado
 		SE1->(MSUNLOCK())                               //apenas o código do nosso numero sem o código
@@ -99,16 +99,16 @@ WHILE !EOF().AND.SE1->E1_FILIAL+SE1->E1_CLIENTE+SE1->E1_LOJA+SE1->E1_SERIE+SE1->
 		@ 30,018 Say " A ser cobrado pelo banco: "+SA6->A6_COD+' Agencia: '+SA6->A6_AGENCIA+' '+SA6->A6_NREDUZ
 		@ 53,018 SAY "No.Anterior ?"
 		@ 53,058 SAY W_NUM PICTURE npict SIZE 70,20
-		
+
 		@ 70,018 SAY "Numero Atual?"
 		@ 70,058 GET cNosso PICTURE npict2 SIZE 70,20
-		
+
 		@ 90,158 BMPBUTTON TYPE 01 ACTION OkGera()
 		Activate Dialog oGera Centered*/
 	Endif
-	
+
 	SE1->(DBSKIP())
-	
+
 ENDDO
 
 
@@ -122,7 +122,7 @@ BEGINDOC
 ENDDOC*/
 
 If SF2->F2_ESPECIE == "NFSC" .OR. SF2->F2_ESPECIE == "SPED" .OR. SF2->F2_ESPECIE == "NTSC"
-	
+
 	DBSelectArea("SFX")
 	DBSetOrder(1)
 	DBSeek(xFilial("SF2") + "S" + SF2->F2_SERIE + SF2->F2_DOC + SF2->F2_CLIENTE + SF2->F2_LOJA + "01")
@@ -131,7 +131,7 @@ If SF2->F2_ESPECIE == "NFSC" .OR. SF2->F2_ESPECIE == "SPED" .OR. SF2->F2_ESPECIE
 	Else
 		lOk := .T.
 	EndIf
-	
+
 	RecLock("SFX",lOk)
 	SFX->FX_FILIAL 		:= xFilial("SF2")
 	SFX->FX_TIPOMOV    	:= "S"
@@ -153,10 +153,11 @@ If SF2->F2_ESPECIE == "NFSC" .OR. SF2->F2_ESPECIE == "SPED" .OR. SF2->F2_ESPECIE
 	SFX->FX_PERFIS    	:= SUBSTR(DTOS(SF2->F2_EMISSAO),5,2) + SUBSTR(DTOS(SF2->F2_EMISSAO),1,4)
 	SFX->FX_AREATER    	:= "21"
 	SFX->FX_TERMINA    	:= "0000000000"
+	//SFX->FX_TPASSIN    	:= "1"
 	SFX->(MSUNLOCK())
-	
-	
-	
+
+
+
 EndIf
 
 
