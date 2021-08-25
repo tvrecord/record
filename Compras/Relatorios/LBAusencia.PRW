@@ -1,7 +1,7 @@
 #INCLUDE "rwmake.ch"
 #INCLUDE "TopConn.ch"
 
- 
+
 /*/
 ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
 ±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
@@ -15,6 +15,7 @@
 ±±ÈÍÍÍÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¼±±
 ±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+
 /*/
 
 User Function LBAusencia
@@ -53,7 +54,7 @@ Private wnrel        := "NOME" // Coloque aqui o nome do arquivo usado para impr
 Private cPerg	      := "LBAusen"
 Private cString      := "SCR"
 Private cQuery       := ""
-Private nTotPedido   := 0 
+Private nTotPedido   := 0
 Private nTotValor    := 0
 
 
@@ -90,11 +91,11 @@ cQuery += "INNER JOIN SAK010 ON "
 cQuery += "" + RetSqlName("SCR") + ".CR_FILIAL = " + RetSqlName("SAK") + ".AK_FILIAL AND "
 cQuery += "" + RetSqlName("SCR") + ".CR_APRORI = " + RetSqlName("SAK") + ".AK_COD "
 cQuery += "WHERE "
-cQuery += "" + RetSqlName("SCR") + ".CR_NUM BETWEEN '" + (MV_PAR01) + "' AND '" + (MV_PAR02) + "' AND " 
+cQuery += "" + RetSqlName("SCR") + ".CR_NUM BETWEEN '" + (MV_PAR01) + "' AND '" + (MV_PAR02) + "' AND "
 IF !EMPTY(MV_PAR05)
-cQuery += "" + RetSqlName("SCR") + ".CR_APRORI = '" + (MV_PAR05) + "' AND " 
+cQuery += "" + RetSqlName("SCR") + ".CR_APRORI = '" + (MV_PAR05) + "' AND "
 ELSE
-cQuery += "" + RetSqlName("SCR") + ".CR_APRORI <> '' AND " 
+cQuery += "" + RetSqlName("SCR") + ".CR_APRORI <> '' AND "
 ENDIF
 cQuery += "" + RetSqlName("SC7") + ".C7_FORNECE BETWEEN '" + (MV_PAR06) + "' AND '" + (MV_PAR07) + "' AND "
 cQuery += "" + RetSqlName("SCR") + ".CR_DATALIB BETWEEN '" + DTOS(MV_PAR03) + "' AND '" + DTOS(MV_PAR04) + "' AND "
@@ -114,7 +115,7 @@ If Eof()
 	dbSelectArea("TMP")
 	dbCloseArea("TMP")
 	Return
-Endif                                      
+Endif
 
 If nLastKey == 27
 	dbSelectArea("TMP")
@@ -164,18 +165,18 @@ DBGotop()
 //DEFINE FONT oFont NAME "Courier New" SIZE 0,-11 BOLD
 
 While !EOF()
-	
+
 	SetRegua(RecCount())
-	
+
 	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 	//³ Verifica o cancelamento pelo usuario...                             ³
 	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-	
+
 	If lAbortPrint
 		@nLin,00 PSAY "*** CANCELADO PELO OPERADOR ***"
 		Exit
 	Endif
-	
+
 
 	If nLin > 70 // Salto de Página. Neste caso o formulario tem 55 linhas...
 		Cabec(Titulo,Cabec1,Cabec2,NomeProg,Tamanho,nTipo)
@@ -191,13 +192,13 @@ While !EOF()
 	@nLin, 072 PSAY SUBSTR(TMP->A2_NOME,1,25)
 	@nLin, 102 PSAY SUBSTR(TMP->E4_DESCRI,1,15)
 	@nLin, 117 PSAY TMP->C7_NUMCOT
-   
+
 	nTotValor   += TMP->CR_TOTAL
-  	nTotPedidos += 1 
+  	nTotPedidos += 1
 
 	dbskip()
-	
-	nLin 			+= 1 // Avanca a linha de impressao 
+
+	nLin 			+= 1 // Avanca a linha de impressao
 
 
 ENDDO

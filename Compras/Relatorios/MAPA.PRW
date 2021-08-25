@@ -10,6 +10,9 @@
 ±±ºPrograma  ³CCI301    º Autor ³ Edmilson Dias Santos  º Data ³  12/07/01º±±
 ±±ºDescricao ³ Relatorio de Analise de Cotacao - TOMADA DE PRECOS         º±±
 ±±ºUso       ³ Clientes Microsiga                                         º±±
+
+SIGACOM-> Relatorios -> Especificos -> Mapa grafico
+
 /*/
 
 User Function CCI31U()

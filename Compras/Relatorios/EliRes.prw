@@ -15,6 +15,9 @@
 ±±ÈÍÍÍÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¼±±
 ±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+
+SIGACOM -> Relatorios -> Especificos -> Elimina residuos
+
 /*/
 
 User Function EliRes
@@ -161,54 +164,54 @@ dbGoTop()
 DbSelectArea("TMP")
 
 While !EOF()
-	
+
 	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 	//³ Verifica o cancelamento pelo usuario...                             ³
 	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-	
+
 	If lAbortPrint
 		@nLin,00 PSAY "*** CANCELADO PELO OPERADOR ***"
 		Exit
 	Endif
-	
+
 	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 	//³ Impressao do cabecalho do relatorio. . .                            ³
 	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-	
+
 	If nLin > 65 // Salto de Página. Neste caso o formulario tem 55 linhas...
 		Cabec(Titulo,Cabec1,Cabec2,NomeProg,Tamanho,nTipo)
 		nLin := 8
 	Endif
-	
+
 	// Coloque aqui a logica da impressao do seu programa...
 	// Utilize PSAY para saida na impressora. Por exemplo:
-	
+
 	If cPedido != TMP->C7_NUM
-		
+
 		If lOk == .T.
-			@nLin,73 PSAY nVal PICTURE "@E 999,999,999.99"		
+			@nLin,73 PSAY nVal PICTURE "@E 999,999,999.99"
 			nVal := 0
 			nLin := nLin + 2 // Avanca a linha de impressao
 		EndIf
 
 
-		
+
 		@nLin,00 PSAY ALLTRIM(TMP->C7_NUM)
 		@nLin,08 PSAY STOD(TMP->C7_EMISSAO)
 		@nLin,20 PSAY ALLTRIM(TMP->C7_FORNECE)
 		@nLin,30 PSAY ALLTRIM(TMP->A2_NREDUZ)
 		@nLin,62 PSAY ALLTRIM(TMP->C7_MOTIVO)
 		@nLin,00 PSAY "__________________________________________________________________________________________________________________________________________"
-		
+
 		nLin := nLin + 1 // Avanca a linha de impressao
-		
-		
+
+
 	EndIf
 
 // Busca o nome de quem eliminou o Residuo
- 
- nPos := aScan(aUser, { |x| x[1,1]  ==  SUBSTR(EMBARALHA(TMP->C7_USERLGA,1),3,6) } )		
-	
+
+ nPos := aScan(aUser, { |x| x[1,1]  ==  SUBSTR(EMBARALHA(TMP->C7_USERLGA,1),3,6) } )
+
 	@nLin,00 PSAY TMP->C7_PRODUTO
 	@nLin,11 PSAY TMP->B1_DESC
 	@nLin,50 PSAY TMP->QUANTIDADE
@@ -218,21 +221,21 @@ While !EOF()
 	If !empty(nPos)
 	@nLin,100 PSAY aUser[nPos][1][2]  // Nome da pessoa que executou a rotina Eliminar Residuo
 	EndIf
-	
+
 	nLin := nLin + 1 // Avanca a linha de impressao
-	
+
 	cPedido := TMP->C7_NUM
-	lOk := .T.  
-	
+	lOk := .T.
+
 	nVal += TMP->TOTAL
 	nTot += TMP->TOTAL
-	
-	
+
+
 	dbSkip() // Avanca o ponteiro do registro no arquivo
 EndDo
-     
+
    	@nLin,73 PSAY nVal PICTURE "@E 999,999,999.99"
-    nLin := nLin + 2 
+    nLin := nLin + 2
 	@nLin,00 PSAY "__________________________________________________________________________________________________________________________________________"
 	nLin := nLin + 1 // Avanca a linha de impressao
 	@nLin,00 PSAY "Total Geral:"
