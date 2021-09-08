@@ -577,8 +577,6 @@ Static Function RunReport(Cabec1,Cabec2,Titulo,nLin)
 
 	nOrcSig := Posicione("SZY",1,xFilial("SZY")+PADR(Alltrim(cSIG),6)+IIF(nOpcao == 1,MV_PAR04,SUBSTR(DTOS(dDatabase),1,4) ),@cCampo)
 
-
-
 	@nLin,001 PSAY REPLICATE("-",LIMITE)
 	nLin 	+= 1
 	@nLin,001 PSAY "BLOQUEADO --->"
@@ -594,7 +592,6 @@ Static Function RunReport(Cabec1,Cabec2,Titulo,nLin)
 
 	@nLin,001 PSAY Posicione("SZY",1,xFilial("SZY")+PADR(Alltrim(cSIG),6)+IIF(nOpcao == 1,MV_PAR04,SUBSTR(DTOS(dDatabase),1,4) ),"ZY_DESCRI")
 
-
 	@nLin,050 PSAY "VL. ORÇADO:"
 	@nLin,065 PSAY nOrcSig PICTURE "@E 999,999,999.99"
 	@nLin,095 PSAY "SALDO APÓS APROVAÇÃO:"
@@ -608,7 +605,6 @@ Static Function RunReport(Cabec1,Cabec2,Titulo,nLin)
 	nLin 	+= 2
 	@nLin,001 PSAY "Legenda: AM = Almoxarifado (Saidas Estoque)   |   NF = Nota Fiscal   |   PC = Pedido de Compras   |   AE = Autorização de Entrega   |   AP = Autorização de pagamento"
 	//@nLin,206 PSAY nTotal PICTURE "@E 999,999,999.99"
-
 
 	If nOpcao == 1 //Inicio nOpcao
 
@@ -634,7 +630,6 @@ Static Function RunReport(Cabec1,Cabec2,Titulo,nLin)
 			cQuery += " FROM SC7010 "
 			cQuery += " INNER JOIN SA2010 ON C7_FORNECE = A2_COD AND C7_LOJA = A2_LOJA "
 			cQuery += " INNER JOIN SC1010 ON C7_NUMSC = C1_NUM AND C7_ITEMSC = C1_ITEM AND C7_FILIAL = C1_FILIAL "
-
 			cQuery += " INNER JOIN SED010 ON C1_NATUREZ = ED_CODIGO "
 			cQuery += " WHERE SC7010.D_E_L_E_T_ = '' AND C7_TIPO = 1 "
 			cQuery += " AND C7_EMISSAO >= '20130726' " // COMEÇARAM AS LIBERAÇÃO PELO SR CARLOS ALVES
@@ -645,6 +640,7 @@ Static Function RunReport(Cabec1,Cabec2,Titulo,nLin)
 			Else
 				cQuery += " AND ED_CONTSIG = '" + cContaSig + "' "
 			EndIf
+
 			//cQuery += " AND C7_NUM BETWEEN '" + MV_PAR01 + "' AND '" + MV_PAR02 + "' "
 			//cQuery += " AND C7_FORNECE BETWEEN '" + MV_PAR07 + "' AND '" + MV_PAR08 + "' "
 			cQuery += " AND C7_RESIDUO <> 'S' "
