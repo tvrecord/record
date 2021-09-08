@@ -99,9 +99,8 @@ Static Function PrintExcel()
 		AADD(aDetRel, SPACE(9))
 		AADD(aDetRel, Alltrim((TMP)->ZAH_CLIENT))
 		AADD(aDetRel, "REPASSE SPOT")
-		AADD(aDetRel, Posicione("SC5",10,xFilial("SC5") + Alltrim((TMP)->ZAH_NUMRP)), "C5_NUM")
+		AADD(aDetRel, Posicione("SC5",10,xFilial("SC5") + Alltrim((TMP)->ZAH_NUMRP), "C5_NUM"))
 		AADD(aDetRel, Alltrim((TMP)->ZAH_NUMRP))
-
 
 		nTotal += (TMP)->ZAH_VLRAT
 		oExcel:AddRow(cTitWorkSheet,cTitTable,aDetRel)
