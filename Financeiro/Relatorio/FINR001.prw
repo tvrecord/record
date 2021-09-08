@@ -466,8 +466,6 @@ Static Function GetData(cPPeriodo,cPPracaDe,cPPracaAte,cPRpDe,cPRpAte)
 			2
 	EndSql
 
-
-
 Return
 
 /*/{Protheus.doc} xFonte
@@ -514,12 +512,17 @@ User Function PXCABECA(oPrint,cTitle,cSubTitle,nPage, lBlackWhite)
 	If oPrint:GetOrientation() == 1
 
 		oPrint:SayBitmap(30,15,"\system\LOGO01.png",80,40)
-		oPrint:SayAlign(35,155,Capital(AllTrim(Posicione("SM0", 1, cEmpAnt+cFilAnt , "M0_NOMECOM"))),oFont14, 580, 20, , 0, 2)
-		oPrint:SayAlign(51,155, "ERP | " + oApp:cModDesc ,oFont14,580,20,,0,2)
 
+		If (cEmpAnt+cFilAnt) == "0105" //Rafael - Regra para colocar o acento
+		oPrint:SayAlign(35,155,Capital(AllTrim(Posicione("SM0", 1, cEmpAnt+cFilAnt , "M0_NOMECOM"))),oFont14, 580, 20, , 0, 2)
+		Else
+		oPrint:SayAlign(35,155,"Rádio e Televisão Capital Ltda.",oFont14, 580, 20, , 0, 2)
+		EndIf
+
+		oPrint:SayAlign(51,155, "ERP | " + oApp:cModDesc ,oFont14,580,20,,0,2)
 		oPrint:SayAlign(20,20,"Emitido em: " + cData,oFont14, 535, 20, , 1, 1)
 		oPrint:SayAlign(40,20,"Hora: " + Time(),oFont14, 535, 20, , 1, 1)
-		oPrint:SayAlign(60,20,"Pagina: " + cValtoChar(nPage),oFont14, 535, 20, , 1, 1)
+		oPrint:SayAlign(60,20,"Página: " + cValtoChar(nPage),oFont14, 535, 20, , 1, 1)
 
 		oPrint:Line(80,10,80,580,CLR_HGRAY,"-9")
 
@@ -533,12 +536,18 @@ User Function PXCABECA(oPrint,cTitle,cSubTitle,nPage, lBlackWhite)
 		oPrint:Line(20,10,20,820,CLR_HGRAY,"-9")
 		oPrint:SayBitmap(30,15,"\system\LOGO01.PNG",80,40)
 
-		oPrint:SayAlign(70,18,Capital(AllTrim(Posicione("SM0", 1, cEmpAnt+cFilAnt , "M0_NOMECOM"))),oFont14, 820, 20, /*[ nClrText]*/, 0, 1)
+		If (cEmpAnt+cFilAnt) == "0105" //Rafael - Regra para colocar o acento
+		oPrint:SayAlign(70,18,Capital(AllTrim(Posicione("SM0", 1, cEmpAnt+cFilAnt , "M0_NOMECOM"))),oFont14, 820, 20, , 0, 1)
+		Else
+		oPrint:SayAlign(70,18,"Rádio e Televisão Capital Ltda.",oFont14, 820, 20, , 0, 1)
+		EndIf
+
+		///oPrint:SayAlign(70,18,Capital(AllTrim(Posicione("SM0", 1, cEmpAnt+cFilAnt , "M0_NOMECOM"))),oFont14, 820, 20, /*[ nClrText]*/, 0, 1)
 		oPrint:SayAlign(85,18, "ERP | " + oApp:cModDesc ,oFont14,580,20,,0,2)
 
 		oPrint:SayAlign(30,20,"Emitido em: " + cData,oFont14, 800, 20, /*[ nClrText]*/, 1, 1)
 		oPrint:SayAlign(50,20,"Hora: " + Time(),oFont14, 800, 20, /*[ nClrText]*/, 1, 1)
-		oPrint:SayAlign(70,20,"Pagina: " + cValtoChar(nPage),oFont14, 800, 20, /*[ nClrText]*/, 1, 1)
+		oPrint:SayAlign(70,20,"Página: " + cValtoChar(nPage),oFont14, 800, 20, /*[ nClrText]*/, 1, 1)
 
 		oPrint:SayAlign(40,10,cTitle,oFont24, 830, 20, /*[ nClrText]*/, 2, 1)
 		oPrint:SayAlign(65,10,cSubTitle,oFont14, 830, 20, /*[ nClrText]*/, 2, 1)
