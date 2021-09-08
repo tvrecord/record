@@ -308,10 +308,16 @@ Static Function ValidRep(nOpc)
 
 		(cTmp)->(DbGoTop())
 		//Se encontrou algum repasse cadastrado retorna .F., pois só deve ter um repasse cadastrado por nota fiscal
-		If (cTmp)->QTD > 0
-			MsgAlert("Não é possivel incluir o número repasse em mais de uma nota fiscal, favor verificar, pois foi cadastrado na NF: " + Alltrim((cTmp)->F1_DOC) + " - Fornecedor: " + Alltrim((cTmp)->F1_FORNECE),"NatRep")
+		If (cTmp)->QTD > 1
+			MsgAlert("Não é possivel incluir o número repasse em mais de duas notas fiscais, favor verificar, pois foi cadastrado na NF: " + Alltrim((cTmp)->F1_DOC) + " - Fornecedor: " + Alltrim((cTmp)->F1_FORNECE),"NatRep")
 			lValido := .F.
 			Return
+		ElseIf (cTmp)->QTD == 1
+			IF MsgYesNo("Número da RP já cadastrado na NF: " + Alltrim((cTmp)->F1_DOC) + " - Fornecedor: " + Alltrim((cTmp)->F1_FORNECE) + ". Deseja continuar?","NatRep")
+			lValido := .T.
+			Else
+			lValido := .F.
+			EndIf
 		Else
 			lValido := .T.
 		EndIf
