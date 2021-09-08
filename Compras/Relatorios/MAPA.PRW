@@ -274,7 +274,7 @@ Static Function RunReport(Cabec1,Cabec2,Titulo)
 			If SC8->C8_NUMPED != "XXXXXX"
 				cPedidoC := SC8->C8_NUMPED
 				cMotivo  := SC8->C8_MOTIVO
-				nTotFre  := SC8->C8_TOTFRE
+				nTotFre  := nTotFre + SC8->C8_TOTFRE
 				nTotIPI  := nTotIPI + SC8->C8_VALIPI
 				nVlDesc  := nVlDesc + SC8->C8_VLDESC
 				cFornece := SC8->C8_FORNECE
@@ -326,7 +326,7 @@ Static Function RunReport(Cabec1,Cabec2,Titulo)
 			IF i == 0
 				AADD(aFornCab ,SC8->C8_FORNECE+SC8->C8_LOJA)
 				IF LEN(aFornCab) <= 5
-					aPrecos[J][LEN(aFornCab)] := IIF(SC8->C8_QTSEGUM > 0,SC8->C8_PRECO,SC8->C8_PRECO)
+					aPrecos[J][LEN(aFornCab)] := SC8->C8_PRECO
 					aFrete[LEN(aFornCab)]     := SC8->C8_TOTFRE
 					aIPI[LEN(aFornCab)]       := SC8->C8_VALIPI
 					aDesconto[LEN(aFornCab)]  := SC8->C8_VLDESC
@@ -340,8 +340,8 @@ Static Function RunReport(Cabec1,Cabec2,Titulo)
 				ENDIF
 			ELSE
 				IF I <= 5
-					aPrecos[J][I]    := IIF(SC8->C8_QTSEGUM > 0,SC8->C8_PRECO,SC8->C8_PRECO)
-					aFrete[i]        := SC8->C8_TOTFRE
+					aPrecos[J][I]    := SC8->C8_PRECO
+					aFrete[i]        += SC8->C8_TOTFRE
 					aPrazo[i]        := SC8->C8_PRAZO
 					aIPI[I]          += SC8->C8_VALIPI
 					aDesconto[I]     += SC8->C8_VLDESC
