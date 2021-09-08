@@ -316,6 +316,7 @@ Static Function fProcPdf()
 		oPrint:Say(nLin,050, SUBSTR((cAlias1)->NATUREZA,1,24) + "."				  			,oFonte)
 		EndIf
 
+		//Função para quebrar linha sem cortar a palavra.
 		For i := 1 To MLCount(ALLTRIM((cAlias1)->FORNECEDOR),35)
      		If !Empty(MLCount(ALLTRIM((cAlias1)->FORNECEDOR),35))
           		If !Empty(MemoLine(ALLTRIM((cAlias1)->FORNECEDOR),35,i))
@@ -335,9 +336,9 @@ Static Function fProcPdf()
 		Next i
 		//oPrint:Say( nLin,285, ALLTRIM(cDescricao)					  			  			,oFonte)
 		oPrint:Say(nLin,530, cOrcado								  			  			,oFonte)
-		oPrint:Say(nLin,560, PADR(Transform((cAlias1)->VLAPROV, "@E 999,999.99"),10) 		,oFonte)
-		oPrint:Say(nLin,615, PADR(Transform(nPrevisão, "@E 999,999.99"),10) 				,oFonte)
-		oPrint:Say(nLin,670, PADR(Transform(nSaldo, "@E 999,999.99"),10) 					,oFonte)
+		oPrint:Say(nLin,560, PADR(Transform((cAlias1)->VLAPROV, "@E 9,999,999.99"),12) 		,oFonte)
+		oPrint:Say(nLin,615, PADR(Transform(nPrevisão, "@E 9,999,999.99"),12) 				,oFonte)
+		oPrint:Say(nLin,670, PADR(Transform(nSaldo, "@E 9,999,999.99"),12) 					,oFonte)
 		oPrint:Say(nLin,710, (cAlias1)->CONDPAG					  			  				,oFonte)
 		If Empty(SUBSTR((cAlias1)->UNIREQ,20,1))
 		oPrint:Say(nLin,750, SUBSTR((cAlias1)->UNIREQ,1,20)			  			  			,oFonte)
@@ -374,45 +375,34 @@ Static Function fProcPdf()
 	(cAlias1)->(dbClosearea())
 
 	//Impressão do total de todas as praças
-	oPrint:Say( nLin,560, PADR(Transform( nTotal, "@E 999,999.99"),10),oFonteN)
+	oPrint:Say( nLin,560, PADR(Transform( nTotal, "@E 9,999,999.99"),12),oFonteN)
 	nLin += (REL_VERT_STD * 4)
 
-	//Imprime linha das assinaturas
-	If !Empty(MV_PAR05) .and. PswSeek( 	MV_PAR05, .T. )
-		oPrint:Say( nLin,024, "_________________________" ,oFonte10N)
-		aUsuario := PswRet() // Retorna vetor com informações do usuário
+		//Imprime linha das assinaturas
+	If !Empty(MV_PAR05) //.and. FWSFALLUSERS(MV_PAR05,.T.)
+		oPrint:Say(nLin,024, "_________________________" ,oFonte10N)
+		aUsuario := FWSFALLUSERS({MV_PAR05}) // Retorna vetor com informações do usuário
 		cAssin1 := Alltrim(aUsuario[1][4])
-		cCargo1 := Alltrim(aUsuario[1][13])
-	EndIf
-
-	If !Empty(MV_PAR06) .and. PswSeek( 	MV_PAR06, .T. )
-		oPrint:Say( nLin,175, "_________________________" ,oFonte10N)
-		aUsuario := PswRet() // Retorna vetor com informações do usuário
-		cAssin2 := Alltrim(aUsuario[1][4])
-		cCargo2 := Alltrim(aUsuario[1][13])
-	EndIf
-
-	nLin += REL_VERT_STD
-
-	//Imprime o nome das assinaturas
-
-	If !Empty(cAssin1)
+		cCargo1 := Alltrim(aUsuario[1][7])
+		nLin += REL_VERT_STD
 		oPrint:Say(nLin,024, PADC(cAssin1,40) ,oFonte10)
-	EndIf
-
-	If !Empty(cAssin2)
-		oPrint:Say(nLin,175, PADC(cAssin2,40) ,oFonte10)
-	EndIf
-
-	nLin += REL_VERT_STD
-
-	If !Empty(cCargo1)
+		nLin += REL_VERT_STD
 		oPrint:Say(nLin,024, PADC(cCargo1,33) ,oFonte10N)
 	EndIf
 
-	If !Empty(cCargo2)
+	If !Empty(MV_PAR06) .and. !Empty(MV_PAR05) //.and. FWSFALLUSERS(MV_PAR06,.T.)
+		nLin -= (REL_VERT_STD*2)
+		oPrint:Say(nLin,175, "_________________________" ,oFonte10N)
+		aUsuario := FWSFALLUSERS({MV_PAR06})// Retorna vetor com informações do usuário
+		cAssin2 := Alltrim(aUsuario[1][4])
+		cCargo2 := Alltrim(aUsuario[1][7])
+		nLin += REL_VERT_STD
+		oPrint:Say(nLin,175, PADC(cAssin2,40) ,oFonte10)
+		nLin += REL_VERT_STD
 		oPrint:Say(nLin,175, PADC(cCargo2,33) ,oFonte10N)
 	EndIf
+
+	nLin += REL_VERT_STD
 
 //Imprime os totais do relatorio
 	DBSelectArea(cAlias2)
@@ -438,7 +428,7 @@ Static Function fProcPdf()
 	While !(cAlias2)->(Eof())
 
 	oPrint:Say(nLin,610,(cAlias2)->UNIREQ		  								,oFonte)
-	oPrint:Say(nLin,790,PADR(Transform((cAlias2)->VALOR, "@E 999,999.99"),10)	,oFonte)
+	oPrint:Say(nLin,790,PADR(Transform((cAlias2)->VALOR, "@E 9,999,999.99"),12)	,oFonte)
 
 	nLin += REL_VERT_STD
 
@@ -447,7 +437,7 @@ Static Function fProcPdf()
 	Enddo
 
 	oPrint:Say(nLin,610,"TOTAL"	  									,oFonteN)
-	oPrint:Say(nLin,790,PADR(Transform(nTotal, "@E 999,999.99"),10)	,oFonteN)
+	oPrint:Say(nLin,790,PADR(Transform(nTotal, "@E 9,999,999.99"),12)	,oFonteN)
 
 	(cAlias2)->(dbClosearea())
 
@@ -469,9 +459,9 @@ Static Function ImpProxPag()
 	oPrint:Say( nLin,145, "FORNECEDOR"			,oFonteN)
 	oPrint:Say( nLin,270, "DESCRIÇÃO"			,oFonteN)
 	oPrint:Say( nLin,515, "ORÇADO"				,oFonteN)
-	oPrint:Say( nLin,560, PADR("VL PEDIDO",10)	,oFonteN)
-	oPrint:Say( nLin,615, PADR("PREV ORC.",10)	,oFonteN)
-	oPrint:Say( nLin,670, PADR("SALDO",10)		,oFonteN)
+	oPrint:Say( nLin,560, PADR("VL PEDIDO",12)	,oFonteN)
+	oPrint:Say( nLin,615, PADR("PREV ORC.",12)	,oFonteN)
+	oPrint:Say( nLin,670, PADR("SALDO",12)		,oFonteN)
 	oPrint:Say( nLin,710, "COND PAG."			,oFonteN)
 	oPrint:Say( nLin,750, "SOLICITANTE"			,oFonteN)
 
