@@ -1,5 +1,5 @@
 #Include "rwmake.ch"
-#Include "protheus.ch"     
+#Include "protheus.ch"
 #DEFINE ENTER CHR(13)+CHR(10)
 
 /*ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
@@ -47,10 +47,10 @@ User Function IMPRP01NEW()
 	Private _oDlg				// Dialog Principal
 
 	// Variaveis que definem a Acao do Formulario
-	Private VISUAL 		:= .F.                        
-	Private INCLUI 		:= .F.                        
-	Private ALTERA 		:= .F.                        
-	Private DELETA 		:= .F.        
+	Private VISUAL 		:= .F.
+	Private INCLUI 		:= .F.
+	Private ALTERA 		:= .F.
+	Private DELETA 		:= .F.
 	Private lCliente		:= .F.
 	Private lPedido		:= .T.
 	Private lVendedor		:= .F.
@@ -59,7 +59,7 @@ User Function IMPRP01NEW()
 	ValidPerg()
 	Pergunte(cPerg,.T.)
 
-	//Motivo da Gravação os parametros nas variaveis: Após execução do execauto os parametros são alterados para rotina do execauto            
+	//Motivo da Gravação os parametros nas variaveis: Após execução do execauto os parametros são alterados para rotina do execauto
 
 	_dDtIni		:= MV_PAR01 //Data inicial
 	_dDtFim		:= MV_PAR02 //Data final
@@ -86,9 +86,9 @@ User Function IMPRP01NEW()
 	@ C(110),C(150) BMPBUTTON TYPE 05 ACTION Pergunte(cPerg,.T.)   //ValidPerg()
 	@ C(110),C(195) BMPBUTTON TYPE 02 ACTION Close(_oDlg)
 
-	ACTIVATE MSDIALOG _oDlg CENTERED 
+	ACTIVATE MSDIALOG _oDlg CENTERED
 
-Return(.T.)   
+Return(.T.)
 
 /*ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
 ±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
@@ -105,18 +105,18 @@ Static Function OkImpDBF()
 	//³ Inicializa a regua de processamento                                 ³
 	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 	//Valida o preenchimento dos parametros - Bruno Alves - 24/05/2020
-	If Empty(_dDtIni) .OR. Empty(_dDtFim) .OR.	Empty(_cCond) .OR. Empty(_cCondFix) .OR. Empty(_cNat) .OR.  Empty(_cProd) .OR. Empty(MV_PAR09) 
-		MsgAlert("Favor preencher todos os parametros para continuar com a importação e geração dos pedidos de venda","OkImpDBF")		
+	If Empty(_dDtIni) .OR. Empty(_dDtFim) .OR.	Empty(_cCond) .OR. Empty(_cCondFix) .OR. Empty(_cNat) .OR.  Empty(_cProd) .OR. Empty(MV_PAR09)
+		MsgAlert("Favor preencher todos os parametros para continuar com a importação e geração dos pedidos de venda","OkImpDBF")
 		Return
 	EndIf
 
-	If lPedido                                          
-		Processa({|| GRVPED() },"Importando Pedidos...")        
-	EndIf     
+	If lPedido
+		Processa({|| GRVPED() },"Importando Pedidos...")
+	EndIf
 
 	Close(_oDlg)
 
-Return   
+Return
 
 
 /*ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
@@ -131,14 +131,15 @@ Return
 ±±ÈÍÍÍÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¼±±
 ±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß*/
+
 Static Function GRVPED()
-	Local _cArqPed		:= Alltrim(MV_PAR06)+"VENDA.TXT"                              
+	Local _cArqPed		:= Alltrim(MV_PAR06)+"VENDA.TXT"
 	//Local _lGrava		:= .F.
 	Local _cComp		:= StrTran(DToC(dDataBase),"/")
 	Local _aCab			:= {}
 	Local  nPos			:= 0
 	Local _aItens		:= {}
-	Local _cVend		:= "" 
+	Local _cVend		:= ""
 	Local _lNovo		:= .F.
 	Local nTotal		:= 0
 	Local nDif			:= 0
@@ -151,9 +152,9 @@ Static Function GRVPED()
 
 	Local nPercAg		:= 0
 
-	//Private _cArqTxt 	:= "Y:\_TV40\LOGS\Pedidos.log" //Arquivo onde serão gravadas as ocorrências...	
+	//Private _cArqTxt 	:= "Y:\_TV40\LOGS\Pedidos.log" //Arquivo onde serão gravadas as ocorrências...
 	Private _cArqTxt 	:= Alltrim(MV_PAR06)+"logErro.log" //Arquivo onde serão gravadas as ocorrências...
-	Private _cMsg 		:= ""  
+	Private _cMsg 		:= ""
 	Private _nCont		:= 0
 	Private _dINI		:= CTOD("\\")
 	Private _dFIM		:= CTOD("\\")
@@ -171,7 +172,7 @@ Static Function GRVPED()
 	dbSetOrder(1)
 
 	dbSelectArea("SE4")
-	dbSetOrder(1)   
+	dbSetOrder(1)
 
 	dbSelectArea("SC5")
 	dbSetOrder(5)
@@ -181,8 +182,8 @@ Static Function GRVPED()
 
 	//Verifico se existe o arquivo no caminho informado
 	If File(@_cArqPed)
-		//Efetua a cópia da máquina local para o servidor. Servirá para processamento do temporario e tambem como backup		
-		__CopyFile(@_cArqPed,"\system\tvm\tv+\VENDA"+_cComp+".TXT")		
+		//Efetua a cópia da máquina local para o servidor. Servirá para processamento do temporario e tambem como backup
+		__CopyFile(@_cArqPed,"\system\tvm\tv+\VENDA"+_cComp+".TXT")
 	Else
 		MsgStop("Não existe o arquivo " + _cArqPed + ". Verifique!","FRVPED")
 		Return
@@ -190,11 +191,11 @@ Static Function GRVPED()
 
 	aHeader := LeituraArq(_cArqPed,.T.)
 
-	nFILIAL   := aScan(aHeader[1], { |x| x == "Z1_FILIAL"})	
+	nFILIAL   := aScan(aHeader[1], { |x| x == "Z1_FILIAL"})
 	nCPFCGC	  := aScan(aHeader[1], { |x| x == "Z1_CPFCGC"})
 	nIDCLI	  := aScan(aHeader[1], { |x| x == "Z1_IDCLI"})
-	nCONDPAG  := aScan(aHeader[1], { |x| x == "Z1_CONDPAG"})	
-	nCNPJAGE  := aScan(aHeader[1], { |x| x == "Z1_CNPJAGE"})	 
+	nCONDPAG  := aScan(aHeader[1], { |x| x == "Z1_CONDPAG"})
+	nCNPJAGE  := aScan(aHeader[1], { |x| x == "Z1_CNPJAGE"})
 	nPARC1	  := aScan(aHeader[1], { |x| x == "Z1_PARC1"})
 	nDATA1	  := aScan(aHeader[1], { |x| x == "Z1_DATA1"})
 	nPARC2	  := aScan(aHeader[1], { |x| x == "Z1_PARC2"})
@@ -207,15 +208,15 @@ Static Function GRVPED()
 	nDESCRI	  := aScan(aHeader[1], { |x| x == "Z1_DESCRI"})
 	nPRCVEN	  := aScan(aHeader[1], { |x| x == "Z1_PRCVEN"})
 	nNUMRP	  := aScan(aHeader[1], { |x| x == "Z1_NUMRP"})
-	nPREFINI  := aScan(aHeader[1], { |x| x == "Z1_PREFINI"})	
-	nPREFFIM  := aScan(aHeader[1], { |x| x == "Z1_PREFFIM"})	
-	nDESCONT  := aScan(aHeader[1], { |x| x == "Z1_DESCONT"})	
-	nCANCELA  := aScan(aHeader[1], { |x| x == "Z1_CANCELA"})	
+	nPREFINI  := aScan(aHeader[1], { |x| x == "Z1_PREFINI"})
+	nPREFFIM  := aScan(aHeader[1], { |x| x == "Z1_PREFFIM"})
+	nDESCONT  := aScan(aHeader[1], { |x| x == "Z1_DESCONT"})
+	nCANCELA  := aScan(aHeader[1], { |x| x == "Z1_CANCELA"})
 	nNUMPED	  := aScan(aHeader[1], { |x| x == "Z1_NUMPED"})
-	nNATUREZA := aScan(aHeader[1], { |x| x == "Z1_NATUREZA"})	
+	nNATUREZA := aScan(aHeader[1], { |x| x == "Z1_NATUREZA"})
 	nPRACA	  := aScan(aHeader[1], { |x| x == "Z1_PRACA"})
-	nTIPOFAT  := aScan(aHeader[1], { |x| x == "Z1_TIPOFAT"})	
-	nTIPOVEIC := aScan(aHeader[1], { |x| x == "Z1_TIPOVEIC"})	
+	nTIPOFAT  := aScan(aHeader[1], { |x| x == "Z1_TIPOFAT"})
+	nTIPOVEIC := aScan(aHeader[1], { |x| x == "Z1_TIPOVEIC"})
 	nCFOP	  := aScan(aHeader[1], { |x| x == "Z1_CFOP"})
 
 	nValParc := 0
@@ -237,21 +238,21 @@ Static Function GRVPED()
 		aPed[i][nPARC1]		:= Val(StrTran(aPed[i][nPARC1],",", "."))
 		aPed[i][nPARC2]		:= Val(StrTran(aPed[i][nPARC2],",", "."))
 		aPed[i][nPARC3]		:= Val(StrTran(aPed[i][nPARC3],",", "."))
-		aPed[i][nPARC4]		:= Val(StrTran(aPed[i][nPARC4],",", ".")) 
+		aPed[i][nPARC4]		:= Val(StrTran(aPed[i][nPARC4],",", "."))
 		aPed[i][nPRCVEN]	:= Val(StrTran(aPed[i][nPRCVEN],",", "."))
 		aPed[i][nDESCONT]	:= Val(StrTran(aPed[i][nDESCONT],",", "."))
 
-		aPed[i][nNUMPED]	:= STRZERO(Val(aPed[i][nNUMPED]),6)		
+		aPed[i][nNUMPED]	:= STRZERO(Val(aPed[i][nNUMPED]),6)
 
 
 		//Transforma datas que estão em formato caracter em formato data
 
 		aPed[i][nDATA1]		:= CTOD(aPed[i][nDATA1])
-		aPed[i][nDATA2]		:= CTOD(aPed[i][nDATA2])		
+		aPed[i][nDATA2]		:= CTOD(aPed[i][nDATA2])
 		aPed[i][nDATA3]		:= CTOD(aPed[i][nDATA3])
 		aPed[i][nDATA4]		:= CTOD(aPed[i][nDATA4])
 		aPed[i][nPREFINI]	:= CTOD(aPed[i][nPREFINI])
-		aPed[i][nPREFFIM]	:= CTOD(aPed[i][nPREFFIM])	
+		aPed[i][nPREFFIM]	:= CTOD(aPed[i][nPREFFIM])
 
 
 		// Zero a porcentagem para o proximo pedido
@@ -273,11 +274,11 @@ Static Function GRVPED()
 		SC5->(dbSetOrder(1))
 		If SC5->(dbSeek(xFilial("SC5")+aPed[i][nNUMPED]))
 			Loop
-		Endif    
+		Endif
 
 		//Filtro apenas o intervalo do pedido de venda - Bruno Alves de Oliveira
 		If !(aPed[i][nNUMPED] >= STRZERO(Val(MV_PAR07),6) .AND. aPed[i][nNUMPED] <= STRZERO(Val(MV_PAR08),6))
-			Loop		
+			Loop
 		EndIf
 
 
@@ -289,14 +290,14 @@ Static Function GRVPED()
 			Loop
 		EndIf
 
-		//Verifica se existe o cliente cadastrado 
+		//Verifica se existe o cliente cadastrado
 		SA1->(dbSetOrder(3))
 		If !SA1->(DbSeek(xFilial("SA1")+aPed[i][nCPFCGC],.F.))
 			_cMsg := "O pedido de venda para o CGC/CNPJ: "+aPed[i][nCPFCGC]+" RP: "+aPed[i][nNUMRP]+". Sem cadastro de cliente."
 			GeraLog(_cMsg) //Grava no arquivo de log
 			_nCont ++
 			Loop
-		Endif     
+		Endif
 
 		//Nao importa pedido cancelado
 		If aPed[i][nCANCELA] == "S"
@@ -312,25 +313,25 @@ Static Function GRVPED()
 			_cVend 	:= SA3->A3_COD
 		Else
 			_cVend	:= ""
-		EndIf 
+		EndIf
 
 		//Rafael - Coloca data de inicio e fim de veiculação nas Ordens de Faturamento
-		IF EMPTY(aPed[i][nPREFINI])  
+		IF EMPTY(aPed[i][nPREFINI])
 			_dINI := dDataBase
 		ELSE
 			_dINI := aPed[i][nPREFINI]
 		ENDIF
 
-		IF EMPTY(aPed[i][nPREFFIM])  
+		IF EMPTY(aPed[i][nPREFFIM])
 			_dFIM := dDataBase
 		ELSE
 			_dFIM := aPed[i][nPREFFIM]
 		ENDIF
 
 		//Tratativa dos valores para geração do pedido de venda conforme o preenchimento do tipo de faturamento - Bruno Alves - 24/05/2020
-		If (aPed[i][nTIPOFAT] == "2" .OR. aPed[i][nTIPOFAT] == "5") .AND. aPed[i][nDESCONT] > 0 
+		If (aPed[i][nTIPOFAT] == "2" .OR. aPed[i][nTIPOFAT] == "5") .AND. aPed[i][nDESCONT] > 0
 			nValParc := Round(aPed[i][nPARC1],2) - (Round(aPed[i][nPARC1],2) * (aPed[i][nDESCONT]/100))
-			nValVend := aPed[i][nPRCVEN] - (Round(aPed[i][nPRCVEN],2) * (aPed[i][nDESCONT]/100))		
+			nValVend := aPed[i][nPRCVEN] - (Round(aPed[i][nPRCVEN],2) * (aPed[i][nDESCONT]/100))
 		Else
 			nValParc := Round(aPed[i][nPARC1],2)
 			nValVend := aPed[i][nPRCVEN]
@@ -348,7 +349,7 @@ Static Function GRVPED()
 			//Se localizou insiro a da data e o valor parcela
 			If nPos > 0
 
-				//Verifico se é duplicidade ou não		
+				//Verifico se é duplicidade ou não
 
 				//Verifico aonde posso inserir a data e o valor da parcela.
 				//Caso a data seja igual é necessário somar o valor da mensalidade
@@ -367,8 +368,8 @@ Static Function GRVPED()
 				EndIf
 
 
-				//Passo o registro para não incluir um novo cabeçalho com a mesma informação	
-				Loop          
+				//Passo o registro para não incluir um novo cabeçalho com a mesma informação
+				Loop
 
 			EndIf
 
@@ -378,7 +379,7 @@ Static Function GRVPED()
 		//Inserir apenas um item e um cabeçalho em cada pedido de venda
 		If nPos == 0
 
-			//Array com o cabeçalho do pedido 
+			//Array com o cabeçalho do pedido
 			//Acrescentado informação no array posição 09 ao 15 - Bruno Alves de OLiveira 22/09/2019
 			aAdd(_aCab,{SA1->A1_COD,;	//01.Codigo do cliente
 			SA1->A1_LOJA,;			 	//02.Loja do cliente
@@ -386,7 +387,7 @@ Static Function GRVPED()
 			aPed[i][nNUMRP],;   		//04.RP TV+
 			_dINI,;					 	//05.Periodo de veiculação De
 			_dFIM,;         		 	//06.Periodo de veiculação ate
-			aPed[i][nMENNOTA],;			//07.Mensagem para nota fiscal 
+			aPed[i][nMENNOTA],;			//07.Mensagem para nota fiscal
 			aPed[i][nNUMPED],;		 	//08.Número da NF do TV+ que será o num do ped. no Protheus
 			IIF(aPed[i][nNATUREZA] == "1" .or. Empty(aPed[i][nNATUREZA]),aPed[i][nDATA1],CTOD("//")),;			//09 Data da 1º Parcela
 			IIF(aPed[i][nNATUREZA] == "1" .or. Empty(aPed[i][nNATUREZA]),nValParc,0),;			//10 Valor da 1º Parcela
@@ -396,10 +397,10 @@ Static Function GRVPED()
 			0,;						 	//14 Valor da 3º Parcela
 			CTOD("//"),;			 	  //15 Data da 4º Parcela
 			0,;						 	  //16 Valor da 4º Parcela
-			Alltrim(aPed[i][nDESCRI]),;	  //17 Descrição da importação aonde buscamos dicas do preenchimento da natureza 
+			Alltrim(aPed[i][nDESCRI]),;	  //17 Descrição da importação aonde buscamos dicas do preenchimento da natureza
 			Alltrim(aPed[i][nNATUREZA]),; //18 Regra da Natureza
-			Alltrim(aPed[i][nPRACA]),;	  //19 Praca  
-			Alltrim(aPed[i][nTIPOFAT]),;  //20 Tipo de Faturamento	
+			Alltrim(aPed[i][nPRACA]),;	  //19 Praca
+			Alltrim(aPed[i][nTIPOFAT]),;  //20 Tipo de Faturamento
 			Alltrim(aPed[i][nTIPOVEIC]),; //21 Tipo de Veiculacao
 			Alltrim(aPed[i][nCFOP]),;	  //22 CFOP
 			nPercAg }) 					  //23 Porcentagem Vendedor (Agencia)
@@ -409,17 +410,17 @@ Static Function GRVPED()
 
 			//Verifico se a TES é valida, caso não seja preencho como em branco para fazer a trativa na inclusão do pedido de venda
 			DbSelectArea("SF4");DbSetOrder(1)
-			If !DbSeek(xFilial("SF4") + cTes)			
+			If !DbSeek(xFilial("SF4") + cTes)
 				cTes := ""
-			EndIf	
+			EndIf
 
 
-			//Array com os itens do pedido				
+			//Array com os itens do pedido
 			aAdd(_aItens,{	SA1->A1_COD,;   //01.Codigo do Cliente
 			SA1->A1_LOJA,;    				//02.Loja do cliente
 			nValVend,;  			//03.Preco unitario
 			aPed[i][nNUMRP],;				//04.RP TV+
-			cTes }) 						// 05 TES		
+			cTes }) 						// 05 TES
 
 		Endif
 
@@ -427,7 +428,7 @@ Static Function GRVPED()
 	Next
 
 	//Se não tiver erro log, recria para atualizar o arquivo
-	If Empty(_cMsg) 
+	If Empty(_cMsg)
 		GeraLog("OK")
 	EndIf
 
@@ -435,11 +436,11 @@ Static Function GRVPED()
 	If LEN(_aCab) == 0
 		MsgAlert("Não existem informações para serem importadas","GRVPED")
 		Return
-	EndIf                   
+	EndIf
 
 	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 	//³Grava Pedido de Venda³
-	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ 
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 	_aCab 	:= aSort(_aCab,,,     { |x,y| x[1]+x[2]+x[4] > y[1]+y[2]+y[4] })
 	_aItens := aSort(_aItens,,,   { |x,y| x[1]+x[2]+x[4] > y[1]+y[2]+y[4] })
 
@@ -455,11 +456,11 @@ Static Function GRVPED()
 			Endif
 		Next _J
 
-		If Len(_aAuxItem) > 0   
+		If Len(_aAuxItem) > 0
 			// Carrega o array _aLinha com os itens do pedido
 			_aItensC5 := {}
-			_cItem := "00"  
-			_lNovo := .F.              
+			_cItem := "00"
+			_lNovo := .F.
 			//_cNumPed := StrZero(Val(_aCab[_I,8]),6)
 			_cNumPed := _aCab[_I,8]//Temporario
 			nTotal := 0
@@ -491,11 +492,11 @@ Static Function GRVPED()
 			//Natureza Spot cadastrado no cadastro do cliente
 			If "PI" $ Substr(_aCab[_I][17],1,3) .AND. !("BRASILIA" $ _aCab[_I][17] ) .AND. !Empty(Posicione("SA1",1,xFilial("SA1")+_aCab[_I][1]+_aCab[_I][2],"A1_XNATSPO"))
 			cNatureza := Posicione("SA1",1,xFilial("SA1")+_aCab[_I][1]+_aCab[_I][2],"A1_XNATSPO")
-			//Natureza Informada nos parametros			
+			//Natureza Informada nos parametros
 			ElseIf Empty(Posicione("SA1",1,xFilial("SA1")+_aCab[_I][1]+_aCab[_I][2],"A1_NATUREZ"))
 			cNatureza := _cNat
 			//Natureza Normal cadastro no cadastro do cliente
-			Else		
+			Else
 			cNatureza := Posicione("SA1",1,xFilial("SA1")+_aCab[_I][1]+_aCab[_I][2],"A1_NATUREZ")
 			EndIf
 			*/
@@ -509,7 +510,7 @@ Static Function GRVPED()
 				cNatureza := Posicione("SA1",1,xFilial("SA1")+_aCab[_I][1]+_aCab[_I][2],"A1_NATUREZ")
 			EndIf
 
-			//Caso o campo natureza não esteja preenchido, irá buscar a natureza informado no parametro 
+			//Caso o campo natureza não esteja preenchido, irá buscar a natureza informado no parametro
 			If Empty(cNatureza)
 				cNatureza := _cNat
 				MsgAlert("Favor preencher o cadastro de natureza do Cliente: " + Alltrim(_aCab[_I][1]) + " Loja: "  + Alltrim(_aCab[_I][2]) + " - Nome: " + Posicione("SA1",1,xFilial("SA1")+_aCab[_I][1]+_aCab[_I][2],"A1_NOME") + ".")
@@ -523,9 +524,9 @@ Static Function GRVPED()
 				If _aCab[_I,10] > 0 // Verifico se a condição de pagamento foi parcela fixa ou condição de pagamento normal conforme regra do campo Z1_NATUREZA - Bruno Alves - 24/05/2020
 					nDif := nTotal - (_aCab[_I,10] + _aCab[_I,12] + _aCab[_I,14] + _aCab[_I,16])
 					If nDif > 0
-						_aCab[_I,10] := _aCab[_I,10] + nDif			
+						_aCab[_I,10] := _aCab[_I,10] + nDif
 					ElseIf nDif < 0
-						_aCab[_I,10] := _aCab[_I,10] + nDif			
+						_aCab[_I,10] := _aCab[_I,10] + nDif
 					EndIf
 				EndIf
 			EndIf
@@ -542,11 +543,11 @@ Static Function GRVPED()
 			aAdd(_aCabC5,{"C5_CONDPAG",	IIF(_aCab[_I,18] == "1",_cCondFix,_cCond)	,Nil})
 			aAdd(_aCabC5,{"C5_TIPLIB",	"1",Nil})
 			aAdd(_aCabC5,{"C5_NATUREZ",	cNatureza,Nil})
-			aAdd(_aCabC5,{"C5_REPASSE",	"N",Nil})			
+			aAdd(_aCabC5,{"C5_REPASSE",	"N",Nil})
 			aAdd(_aCabC5,{"C5_NUMRP",	_aCab[_I,04],Nil})
 			aAdd(_aCabC5,{"C5_PREFINI",	_aCab[_I,05],Nil})
 			aAdd(_aCabC5,{"C5_PREFFIM",	_aCab[_I,06],Nil})
-			aAdd(_aCabC5,{"C5_CALCCOM",	"S",Nil}) 
+			aAdd(_aCabC5,{"C5_CALCCOM",	"S",Nil})
 			//Adicionado a regra da parcela pelo Bruno Alves - 22/09/2019
 			aAdd(_aCabC5,{"C5_DATA1",	_aCab[_I,09],Nil})
 			aAdd(_aCabC5,{"C5_PARC1",	_aCab[_I,10],Nil})
@@ -569,7 +570,7 @@ Static Function GRVPED()
 				// Integra com o Pedido de Venda
 				Begin Transaction
 					lMsErroAuto := .F.
-					MSExecAuto({|x,y,z|Mata410(x,y,z)},_aCabC5,_aItensC5,3)   
+					MSExecAuto({|x,y,z|Mata410(x,y,z)},_aCabC5,_aItensC5,3)
 					If lMsErroAuto
 						_cMsg := "O pedido de venda " + Alltrim(_cNumPed) +" para o CGC/CNPJ: "+_aCab[_I,01]+" RP: "+_aCab[_I,04]+" apresentou problemas no momento da inclusão do pedido de venda pela rotina do execauto."
 						GeraLog(_cMsg) //Grava no arquivo de log
@@ -663,27 +664,27 @@ Return
 ±±ÀÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
 ±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß*/
-Static Function C(nTam)                                                         
-	Local nHRes	:=	oMainWnd:nClientWidth	// Resolucao horizontal do monitor     
+Static Function C(nTam)
+	Local nHRes	:=	oMainWnd:nClientWidth	// Resolucao horizontal do monitor
 
-	If nHRes == 640	// Resolucao 640x480 (soh o Ocean e o Classic aceitam 640)  
-		nTam *= 0.8                                                                
-	ElseIf (nHRes == 798).Or.(nHRes == 800)	// Resolucao 800x600                
-		nTam *= 1                                                                  
-	Else	// Resolucao 1024x768 e acima                                           
-		nTam *= 1.28                                                               
-	EndIf                                                                         
+	If nHRes == 640	// Resolucao 640x480 (soh o Ocean e o Classic aceitam 640)
+		nTam *= 0.8
+	ElseIf (nHRes == 798).Or.(nHRes == 800)	// Resolucao 800x600
+		nTam *= 1
+	Else	// Resolucao 1024x768 e acima
+		nTam *= 1.28
+	EndIf
 
-	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿                                               
-	//³Tratamento para tema "Flat"³                                               
-	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ                                               
-	If "MP8" $ oApp:cVersion                                                      
-		If (Alltrim(GetTheme()) == "FLAT") .Or. SetMdiChild()                      
-			nTam *= 0.90                                                            
-		EndIf                                                                      
-	EndIf                                                                         
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³Tratamento para tema "Flat"³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	If "MP8" $ oApp:cVersion
+		If (Alltrim(GetTheme()) == "FLAT") .Or. SetMdiChild()
+			nTam *= 0.90
+		EndIf
+	EndIf
 
-Return Int(nTam)                                    
+Return Int(nTam)
 
 /*ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
 ±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
@@ -732,7 +733,7 @@ Static Function GeraLog(_cMsg)
 
 	fClose(_nHdl)
 
-Return                            
+Return
 
 
 /*ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
@@ -767,7 +768,7 @@ Static Function LeituraArq(_cArqPed,lHeader)
 			Exit
 		ElseIf lPrim
 			aCampos := Separa(cLinha,";",.T.)
-			lPrim := .F.			
+			lPrim := .F.
 		Else
 			AADD(aDados,Separa(cLinha,";",.T.))
 		EndIf
