@@ -45,7 +45,7 @@ cCotacao := SC7->C7_NUMCOT
 cSolicit := SC7->C7_NUMSC
 cPedido  := SC7->C7_NUM
 cCtaSig	 := Posicione("SED",1,xFilial("SED") + Posicione("SC1",6,xFilial("SCR") + ALLTRIM(SC7->C7_NUM),"C1_NATUREZ"),"ED_CONTSIG")
-cSigDesc := PadL(Alltrim(cCtaSig) + " - " + Posicione("SZY",1,xFilial("SZY")+PADR(Alltrim(cCtaSig),6)+cValToChar(Year(SC7->C7_EMISSAO)),"ZY_DESCRI"),60)
+cSigDesc := Alltrim(cCtaSig) + " - " + Posicione("SZY",1,xFilial("SZY")+PADR(Alltrim(cCtaSig),6)+cValToChar(Year(SC7->C7_EMISSAO)),"ZY_DESCRI")
 
 dbSelectArea("SZL")
 dbSetOrder(2)
