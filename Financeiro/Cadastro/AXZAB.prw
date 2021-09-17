@@ -465,8 +465,8 @@ User Function RGOVVAR
 		alert("Operação cancelada pelo usuário")
 		return
 	ENDIF
-
-	titulo := "Relatorio Período " + DTOC(MV_PAR01) + " - " + DTOC(MV_PAR02)
+    // Pedro Leonardo - 17/09/21 - Solicitação Elenn para alterar o titulo do relatorio
+	titulo := UPPER( "BV descontado equipe de vendas - Período " + DTOC(MV_PAR01) + " - " + DTOC(MV_PAR02) + )
 
 	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 	//³ Monta a interface padrao com o usuario...                           ³
