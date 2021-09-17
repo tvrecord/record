@@ -15,6 +15,7 @@ SIGACOM-> Relatorios -> Especificos -> Mapa grafico
 
 /*/
 
+
 User Function CCI31U()
 
 	//旼컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴�
@@ -271,7 +272,7 @@ Static Function RunReport(Cabec1,Cabec2,Titulo)
 			If SC8->C8_NUMPED != "XXXXXX"
 				cPedidoC := SC8->C8_NUMPED
 				cMotivo  := SC8->C8_MOTIVO
-				nTotFre  := nTotFre + SC8->C8_TOTFRE
+				nTotFre  := nTotFre + SC8->C8_VALFRE
 				nTotIPI  := nTotIPI + SC8->C8_VALIPI
 				nVlDesc  := nVlDesc + SC8->C8_VLDESC
 				cFornece := SC8->C8_FORNECE
