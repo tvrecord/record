@@ -58,9 +58,6 @@ User Function CCI31U()
 	Private nAtuEst		:= ""
 	Private nImobi		:= ""
 
-
-
-
 	//dbSelectArea("SC8") Bruno - Ajustar uso
 	//dbSetOrder(1)
 
@@ -245,8 +242,8 @@ Static Function RunReport(Cabec1,Cabec2,Titulo)
 	//While !SC8->(EOF()).AND.SC8->C8_NUM <= MV_PAR01
 	While !SC8->(EOF()) .AND. SC8->C8_NUM >= cCotaDe .AND. SC8->C8_NUM <= cCotaAte
 
-		pCotacao	  := SC8->C8_NUM
-		pData      := SC8->C8_EMISSAO
+		pCotacao	:= SC8->C8_NUM
+		pData      	:= SC8->C8_EMISSAO
 
 
 
@@ -304,7 +301,7 @@ Static Function RunReport(Cabec1,Cabec2,Titulo)
 			//	cDescri := Alltrim(SB5->B5_CEME)
 			//Else
 			//cDescri := Alltrim(SC1->C1_DESCRI) + IIF(!EMPTY(SC1->C1_OBS)," Obs.: "+SC1->C1_OBS,SPACE(1))
-			cDescri := ALLTRIM(SB1->B1_DESC)
+			cDescri := ALLTRIM(SC1->C1_DESCRI)
 			//Endif
 			//IF LEFT(SB1->B1_DESC,AT(SPACE(1),SB1->B1_DESC)) <> LEFT(cDescri,AT(SPACE(1),cDescri))
 			//  cDescri := LEFT(ALLTRIM(SB1->B1_DESC),AT(SPACE(1),ALLTRIM(SB1->B1_DESC)))+ " " + cDescri
