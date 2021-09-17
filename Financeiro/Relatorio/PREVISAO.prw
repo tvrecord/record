@@ -205,6 +205,7 @@ Static Function Relatorio()
 	cQuery += "WHERE "
 	cQuery += "ED_NATGER BETWEEN '" + (MV_PAR24) + "' AND '" + (MV_PAR25) + "' AND "
 	cQuery += "C7_RESIDUO <> 'S' AND "
+	cQUery += "C7_FLUXO <> 'N' AND " //Pedro Leonardo 17/09/21 - Regra de remoção de pedido do fluxo de caixa a pagar
 	cQuery += "C7_ENCER = '' AND "
 	cQuery += "C7_COND <> '006' AND "
 	cQuery += "C7_FILIAL = '" + xFilial("SC7") + "' AND "
@@ -376,6 +377,7 @@ Static Function Relatorio()
 	cQuery += "C3_NATUREZ = ED_CODIGO "
 	cQuery += "WHERE "
 	cQuery += "C7_RESIDUO <> 'S' AND "
+	cQUery += "C7_FLUXO <> 'N' AND " //Pedro Leonardo 17/09/21 - Regra de remoção de pedido do fluxo de caixa a pagar
 	cQuery += "C7_ENCER = '' AND "
 	cQuery += "C7_FILIAL = '" + xFilial("SC7") + "' AND "
 	cQuery += "ED_CODIGO BETWEEN '" + (MV_PAR05) + "' AND '" + (MV_PAR06) + "' AND "
@@ -420,6 +422,7 @@ Static Function Relatorio()
 	cQuery += "C3_NATUREZ = ED_CODIGO "
 	cQuery += "WHERE "
 	cQuery += "C7_RESIDUO <> 'S' AND "
+	cQUery += "C7_FLUXO <> 'N' AND " //Pedro Leonardo 17/09/21 - Regra de remoção de pedido do fluxo de caixa a pagar
 	cQuery += "C7_ENCER = '' AND "
 	cQuery += "C7_FILIAL = '" + xFilial("SC7") + "' AND "
 	cQuery += "ED_CODIGO BETWEEN '" + (MV_PAR05) + "' AND '" + (MV_PAR06) + "' AND "

@@ -245,6 +245,7 @@ cQuery += "C1_NATUREZ = ED_CODIGO "
 cQuery += "WHERE "
 cQuery += "ED_NATGER BETWEEN '" + (MV_PAR24) + "' AND '" + (MV_PAR25) + "' AND "
 cQuery += "C7_RESIDUO <> 'S' AND "
+cQUery += "C7_FLUXO <> 'N' AND " //Pedro Leonardo 17/09/21 - Regra de remoção de pedido do fluxo de caixa a pagar
 cQuery += "C7_ENCER = '' AND "
 cQuery += "C7_COND <> '006' AND "
 cQuery += "C7_FILIAL = '" + xFilial("SC7") + "' AND "
@@ -409,6 +410,7 @@ cQuery += "INNER JOIN SED010 ON "
 cQuery += "C3_NATUREZ = ED_CODIGO "
 cQuery += "WHERE "
 cQuery += "C7_RESIDUO <> 'S' AND "
+cQUery += "C7_FLUXO <> 'N' AND " //Pedro Leonardo 17/09/21 - Regra de remoção de pedido do fluxo de caixa a pagar
 cQuery += "C7_ENCER = '' AND "
 cQuery += "C7_FILIAL = '" + xFilial("SC7") + "' AND "
 cQuery += "ED_CODIGO BETWEEN '" + (MV_PAR05) + "' AND '" + (MV_PAR06) + "' AND "
@@ -453,6 +455,7 @@ cQuery += "INNER JOIN SED010 ON "
 cQuery += "C3_NATUREZ = ED_CODIGO "
 cQuery += "WHERE "
 cQuery += "C7_RESIDUO <> 'S' AND "
+cQUery += "C7_FLUXO <> 'N' AND " //Pedro Leonardo 17/09/21 - Regra de remoção de pedido do fluxo de caixa a pagar
 cQuery += "C7_ENCER = '' AND "
 cQuery += "C7_FILIAL = '" + xFilial("SC7") + "' AND "
 cQuery += "ED_CODIGO BETWEEN '" + (MV_PAR05) + "' AND '" + (MV_PAR06) + "' AND "
@@ -519,12 +522,12 @@ DBSelectArea("REALIZ")
 DBGotop()
 
 While !EOF() .AND. DATAVALIDA(STOD(REALIZ->E5_DATA)) < MV_PAR27
-	
+
 	If TemBxCanc(REALIZ->(E5_PREFIXO+E5_NUMERO+E5_PARCELA+E5_TIPO+E5_CLIFOR+E5_LOJA+E5_SEQ)) .AND. REALIZ->E5_NATUREZ <> "1205005"
 		REALIZ->(dbSkip())
 		Loop
 	EndIf
-	
+
 	aAdd(aPedidos,{,;  //01 Emissao
 	,; //02 Numero
 	DATAVALIDA(STOD(REALIZ->E5_DATA)),;//Data do Vencimento  03
@@ -537,10 +540,10 @@ While !EOF() .AND. DATAVALIDA(STOD(REALIZ->E5_DATA)) < MV_PAR27
 	REALIZ->ED_DESCRIC,;// Descrição Natureza 10
 	"REALIZADO",; // Tipo 11
 	}) // Numero 12
-	
+
 	DBSelectArea("REALIZ")
 	DBSkip()
-	
+
 ENDDO
 
 //Adiciona CHEQUES Realizado
@@ -549,7 +552,7 @@ DBSelectArea("CHEQUE")
 DBGotop()
 
 While !EOF() .AND. DATAVALIDA(STOD(CHEQUE->E5_DATA)) < MV_PAR27
-	
+
 	aAdd(aPedidos,{,;  //01 Emissao
 	,; //02 Numero
 	DATAVALIDA(STOD(CHEQUE->E5_DATA)),;//Data do Vencimento  03
@@ -562,10 +565,10 @@ While !EOF() .AND. DATAVALIDA(STOD(CHEQUE->E5_DATA)) < MV_PAR27
 	CHEQUE->ED_DESCRIC,;// Descrição Natureza 10
 	"CHEQUE",; // Tipo 11
 	}) // Numero 12
-	
+
 	DBSelectArea("CHEQUE")
 	DBSkip()
-	
+
 ENDDO
 
 //³Adiciona no Vetor a AUTORIZAÇAO DE ENTREGA que ainda não LANÇADA UMA NOTA NO MES DA FLUXODIA³
@@ -574,13 +577,13 @@ DBSelectArea("AENT")
 DBGotop()
 
 While !EOF()
-	
+
 	aRet := Condicao(AENT->TOTAL,AENT->C7_COND,,STOD(AENT->C7_EMISSAO),)
-	
+
 	For i := 1 to Len(aRet)
-		
+
 		If DATAVALIDA(aRet[i][1]) >= MV_PAR07 .AND. DATAVALIDA(aRet[i][1]) <= MV_PAR08 .AND. DATAVALIDA(aRet[i][1]) >= MV_PAR27
-			
+
 			aAdd(aPedidos,{STOD(AENT->C7_EMISSAO),;  //01 Emissao
 			"FLUXODIA",; //02 Numero
 			DATAVALIDA(aRet[i][1]),;//Data do Vencimento  03
@@ -593,14 +596,14 @@ While !EOF()
 			AENT->ED_DESCRIC,;// Descrição Natureza 10
 			"AENTREGASEG",; // Tipo 11
 			AENT->C7_NUM}) // Numero 12
-			
+
 		EndIf
-		
+
 	Next
-	
+
 	DBSelectArea("AENT")
 	DBSkip()
-	
+
 eNDDO
 
 //³Adiciona no Vetor a AUTORIZAÇAO DE ENTREGA que ainda não LANÇADA UMA NOTA NO MES ANTERIOR³
@@ -610,13 +613,13 @@ DBSelectArea("ANTAENT")
 DBGotop()
 
 While !EOF()
-	
+
 	aRet := Condicao(ANTAENT->TOTAL,ANTAENT->C7_COND,,STOD(ANTAENT->C7_EMISSAO),)
-	
+
 	For i := 1 to Len(aRet)
-		
+
 		If DATAVALIDA(aRet[i][1]) >= MV_PAR07 .AND. DATAVALIDA(aRet[i][1]) <= MV_PAR08 .AND. DATAVALIDA(aRet[i][1]) >= MV_PAR27
-			
+
 			aAdd(aPedidos,{STOD(ANTAENT->C7_EMISSAO),;  //01 Emissao
 			"FLUXODIA",; //02 Numero
 			DATAVALIDA(aRet[i][1]),;//Data do Vencimento  03
@@ -629,14 +632,14 @@ While !EOF()
 			ANTAENT->ED_DESCRIC,;// Descrição Natureza 10
 			"AENTREGA",; // Tipo 11
 			ANTAENT->C7_NUM}) // Numero 12
-			
+
 		EndIf
-		
+
 	Next
-	
+
 	DBSelectArea("ANTAENT")
 	DBSkip()
-	
+
 eNDDO
 
 //³Adiciona no Vetor a Previsão dos Contratos do pagamento mes seguinte (periodo anterior) que ainda não foram lançados na autorização de entrega dos mes seguinte³
@@ -645,13 +648,13 @@ DBSelectArea("ANTCONTR")
 DBGotop()
 
 While !EOF()
-	
+
 	If STOD(ANTCONTR->C3_DATPRI) <= LastDate(STOD(MV_PAR20 + MV_PAR19 + "01"))//Não pode imprimir o relatório que ainda não se iniciou
-		
+
 		IF DATAVALIDA(STOD(MV_PAR20 + MV_PAR19 + ANTCONTR->C3_VENC)) >= MV_PAR27
-			
+
 			If (SUBSTR(ANTCONTR->C3_DATPRI,1,6) != (MV_PAR20 + MV_PAR19))//Todo contrato que se inicia no mes da previsão e está configurado para o mes seguinte não pode aparecer no relatório.
-				
+
 				aAdd(aPedidos,{MONTHSUB(STOD(MV_PAR20 + MV_PAR19 + "01") ,1),;  //01 Emissao
 				"FLUXODIA",; //02 Numero
 				DATAVALIDA(STOD(MV_PAR20 + MV_PAR19 + ANTCONTR->C3_VENC)),;//Data do Vencimento  03
@@ -664,16 +667,16 @@ While !EOF()
 				ANTCONTR->ED_DESCRIC,; // Descrição Natureza 10
 				"ANTCONTRATO",;  // Tipo 11
 				ANTCONTR->C3_NUM + ANTCONTR->C3_ITEM }) // Numero 12
-				
+
 			ENDIF
-			
+
 		ENDIF
-		
+
 	ENDIF
-	
+
 	DBSelectArea("ANTCONTR")
 	DBSkip()
-	
+
 eNDDO
 
 //³Adiciona no Vetor a Previsão dos Contratos que ainda não foram lançados na autorização de entrega dos mes seguinte³
@@ -682,11 +685,11 @@ DBSelectArea("CONTR")
 DBGotop()
 
 While !EOF()
-	
+
 	If STOD(CONTR->C3_DATPRI) <= LastDate(STOD(MV_PAR20 + MV_PAR19 + "01"))//Não pode imprimir o relatório que ainda não se iniciou
-		
+
 		IF DATAVALIDA(STOD(MV_PAR20 + MV_PAR19 + CONTR->C3_VENC)) >= MV_PAR27
-			
+
 			aAdd(aPedidos,{STOD(MV_PAR20 + MV_PAR19 + "01"),;  //01 Emissao
 			"FLUXODIA",; //02 Numero
 			DATAVALIDA(STOD(MV_PAR20 + MV_PAR19 + CONTR->C3_VENC)),;//Data do Vencimento  03
@@ -699,14 +702,14 @@ While !EOF()
 			CONTR->ED_DESCRIC,; // Descrição Natureza 10
 			"CONTRATO",;  // Tipo 11
 			CONTR->C3_NUM + CONTR->C3_ITEM }) // Numero 12
-			
+
 		ENDIF
-		
+
 	ENDIF
-	
+
 	DBSelectArea("CONTR")
 	DBSkip()
-	
+
 eNDDO
 
 //³Adiciona no Vetor as previsões do cadastro das provisões já com os descontos abatidos
@@ -716,18 +719,18 @@ DBSelectArea("PREV")
 DBGotop()
 
 While !EOF()
-	
+
 	nValPrev := PREV->ZA6_VALOR
-	
+
 	IF ALLTRIM(PREV->ZA6_NATURE) == "1205004" .OR. ALLTRIM(PREV->ZA6_NATURE) == "1205005"
 		nValPrev := PREV->ZA6_VALOR - AbatSE5()
 	ENDIF
-	
+
 	nValPrev := nValPrev - AbaFin()
 	nValPrev := nValPrev - AbaCom()
-	
+
 	If nValPrev > 0
-		
+
 		//Quando for previsão do RH não é para abater e sim substituir
 		If PREV->ED_PREVISA == "2"
 			IF PREV->ZA6_NATGER = '0001'
@@ -738,15 +741,15 @@ While !EOF()
 				EndIf
 			EndIf
 		EndIf
-		
+
 		If EMPTY(PREV->ZA6_NMFOR)
 			cForPrev := PREV->ZA6_NMNAT
 		ELSE
 			cForPrev := PREV->ZA6_NMFOR
 		EndIf
-		
+
 		IF 	DATAVALIDA(STOD(PREV->ZA6_VENCRE)) >= MV_PAR27
-			
+
 			aAdd(aPedidos,{STOD(MV_PAR20 + MV_PAR19 + "01"),;  //01 Emissao
 			"FLUXODIA",; //02 Numero
 			DATAVALIDA(STOD(PREV->ZA6_VENCRE)),;//Data do Vencimento  03
@@ -759,14 +762,14 @@ While !EOF()
 			PREV->ZA6_NMNAT,; // Descrição Natureza 10
 			"FLUXODIA",;  // Tipo 11
 			PREV->ZA6_CODIGO}) // Numero 12
-			
+
 		ENDIF
-		
+
 	EndIf
-	
+
 	DBSelectArea("PREV")
 	DBSkip()
-	
+
 ENDDO
 
 //³Adiciona no vetor as previsões dos pedidos de compras³
@@ -775,26 +778,26 @@ DBSelectArea("TMP")
 DBGotop()
 
 While !TMP->(EOF())
-	
+
 	aRet := Condicao(TMP->TOTAL,TMP->C7_COND,,STOD(TMP->C7_EMISSAO) + Posicione("SC8",11,TMP->C7_FILIAL + TMP->C7_NUM,"C8_PRAZO"),)
 	cNumPed := alltrim(TMP->C7_NUM)
 	nVlComp := AbaAdiant()
-	
+
 	For i := 1 to Len(aRet)
-		
+
 		If DATAVALIDA(aRet[i][1]) >= MV_PAR07 .AND. DATAVALIDA(aRet[i][1]) <= MV_PAR08 .AND. DATAVALIDA(aRet[i][1]) >= MV_PAR27
-			
+
 			nVlComp := aREt[i][2] - nVlComp
-			
+
 			If nVlComp <= 0
 				nVlComp * (-1)
-				
+
 			else
-				
+
 				dbSelectArea("SZL")
 				dbSetOrder(2)
 				DbSeek(xFilial("SZL") + TMP->C7_NUM)   //Consulta detalhe do pedido para buscar o historico
-				
+
 				aAdd(aPedidos,{STOD(TMP->C7_EMISSAO),;  //01 Emissao
 				"FLUXODIA",; //02 Numero
 				DATAVALIDA(aRet[i][1]),;//Data do Vencimento  03
@@ -807,16 +810,16 @@ While !TMP->(EOF())
 				POSICIONE("SED",1,xFilial("SED")+TMP->C1_NATUREZ,"ED_DESCRIC"),;// Descrição Natureza 10
 				"PEDIDO",; // Tipo 11
 				TMP->C7_NUM}) // Numero 12
-				
+
 			EndIf
-			
+
 		EndIf
-		
+
 	Next
-	
+
 	DBSelectArea("TMP")
 	DBSkip()
-	
+
 Enddo
 
 //³Adiciona no Vetor os titulos a pagar que precisam ser pagos³
@@ -826,15 +829,15 @@ DBGotop()
 
 
 While !EOF()
-	
+
 	IF DATAVALIDA(STOD(FIN->E2_VENCREA)) >= MV_PAR27
-		
+
 		IF !(ALLTRIM(FIN->E2_NATUREZ) == "1206004" .AND. ALLTRIM(FIN->E2_FORNECE) == "000073")// Solicitado pela Pamela no dia 07/11/2014 pela Pamela
-			
+
 			IF (Posicione("SF1",1,FIN->E2_FILIAL + FIN->E2_NUM + FIN->E2_PREFIXO + FIN->E2_FORNECE + FIN->E2_LOJA ,"F1_COND") != "006") // Se for permuta não adiciona no vetor
-				
+
 				If !(FIN->E2_DESDOBR == "S" .AND. EMPTY(FIN->E2_PARCELA))//Não adiciona titulo que foi desdobrado para não gerar duplicidade
-					
+
 					aAdd(aPedidos,{STOD(FIN->E2_EMISSAO),;  //01 Emissao
 					FIN->E2_NUM,; //02 Numero
 					DATAVALIDA(STOD(FIN->E2_VENCREA)),;//Data do Vencimento  03
@@ -847,128 +850,128 @@ While !EOF()
 					FIN->ED_DESCRIC,; // Descrição Natureza 10
 					"NOTA",;  // Tipo 11
 					FIN->E2_NUM}) // Numero 12
-					
+
 				ENDIF
-				
+
 			ENDIF
-			
+
 		ENDIF
-		
+
 	ENDIF
-	
+
 	DBSelectArea("FIN")
 	DBSkip()
-	
+
 eNDDO
 
 IF MV_PAR23 == 2  //³Ordenar o relatório por ordem Napoli ou Natureza³
-	
+
 	ASORT(aPedidos,,,{|x,y|x[9]+DTOS(x[3]) < y[9]+DTOS(y[3])})
-	
+
 	nNum := 1
 	nNum1 := 1
 	nNum2 := 1
-	
+
 	For i:=1 to Len(aPedidos)
-		
-		
+
+
 		IF ALLTRIM(aPedidos[i][9]) <> cNatureza .AND. ALLTRIM(aPedidos[i][9]) <> "1205017" .AND. ALLTRIM(aPedidos[i][7]) <> "0007"  //SEPARA AS TRANSFERENCIAS E INVESTIMENTOS
-			
+
 			aAdd(aRegistro,{ALLTRIM(aPedidos[i][9]),aPedidos[i][10],;
 			0,0,0,0,0,0,0,0,0,0,;
 			0,0,0,0,0,0,0,0,0,0,;
 			0,0,0,0,0,0,0,0,0,0,0,0})
-			
+
 			nNum += 1
 			nNum1 += 1
 			nNum2 += 1
-			
+
 		ENDIF
-		
+
 		cNatureza  := ALLTRIM(aPedidos[i][9])
-		
+
 	Next
 	aAdd(aRegistro,{"SUBTOTAL","PAGAMENTOS DO DIA --->",;
 	0,0,0,0,0,0,0,0,0,0,;
 	0,0,0,0,0,0,0,0,0,0,;
 	0,0,0,0,0,0,0,0,0,0,0,0})
-	
+
 	nNum += 1
 	nNum2 += 1
-	
+
 	aAdd(aRegistro,{"","",;
 	0,0,0,0,0,0,0,0,0,0,;
 	0,0,0,0,0,0,0,0,0,0,;
 	0,0,0,0,0,0,0,0,0,0,0,0})
-	
+
 	nNum += 1
 	nNum2 += 1
-	
+
 	//INVESTIMENTOS
-	
+
 	For i:=1 to Len(aPedidos)
-		
+
 		IF ALLTRIM(aPedidos[i][9]) <> cNatureza .AND. ALLTRIM(aPedidos[i][9]) <> "1205017" .AND. ALLTRIM(aPedidos[i][7]) == "0007"  //SEPARA AS TRANSFERENCIAS E INVESTIMENTOS
-			
+
 			aAdd(aRegistro,{ALLTRIM(aPedidos[i][9]),aPedidos[i][10],;
 			0,0,0,0,0,0,0,0,0,0,;
 			0,0,0,0,0,0,0,0,0,0,;
 			0,0,0,0,0,0,0,0,0,0,0,0})
-			
+
 			nNum += 1
 			nNum2 += 1
-			
+
 		ENDIF
-		
+
 		cNatureza  := ALLTRIM(aPedidos[i][9])
-		
+
 	Next
-	
+
 	aAdd(aRegistro,{"SUBTOTAL","INVESTIMENTOS     --->",;
 	0,0,0,0,0,0,0,0,0,0,;
 	0,0,0,0,0,0,0,0,0,0,;
 	0,0,0,0,0,0,0,0,0,0,0,»0})
-	
+
 	nNum += 1
-	
+
 	aAdd(aRegistro,{"","",;
 	0,0,0,0,0,0,0,0,0,0,;
 	0,0,0,0,0,0,0,0,0,0,;
 	0,0,0,0,0,0,0,0,0,0,0,0})
-	
+
 	nNum += 1
-	
+
 	aAdd(aRegistro,{"TOTAL   ","--------->",;
 	0,0,0,0,0,0,0,0,0,0,;
 	0,0,0,0,0,0,0,0,0,0,;
 	0,0,0,0,0,0,0,0,0,0,0,0})
-	
+
 	For i:=1 to Len(aPedidos)
-		
-		
+
+
 		IF ALLTRIM(aPedidos[i][9]) == "1205017" .AND. lOk //SEPARA AS TRANSFERENCIAS
-			
+
 			aAdd(aRegistro,{ALLTRIM(aPedidos[i][9]),aPedidos[i][10],;
 			0,0,0,0,0,0,0,0,0,0,;
 			0,0,0,0,0,0,0,0,0,0,;
 			0,0,0,0,0,0,0,0,0,0,0,0})
-			
+
 			lOk := .F.
-			
+
 		ENDIF
-		
+
 	Next
-	
-	
+
+
 	For i:=1 to Len(aPedidos)
-		
+
 		nPos := aScan(aRegistro, { |x| x[1] == ALLTRIM(aPedidos[i][9])})
 		nCol := (day(DATAVALIDA(aPedidos[i][3])) + 2)
-		
+
 		IF month(DATAVALIDA(aPedidos[i][3])) == val(mv_par19)
-			
+
 			IF ALLTRIM(aPedidos[i][9]) <> "1205017"  .AND. ALLTRIM(aPedidos[i][7]) <> "0007"   //SEPARA AS TRANSFERENCIAS
-				
+
 				aRegistro[nPos][nCol] += aPedidos[i][6]
 				aRegistro[nNum][nCol] += aPedidos[i][6]
 				aRegistro[nNum1][nCol] += aPedidos[i][6]
@@ -986,34 +989,34 @@ IF MV_PAR23 == 2  //³Ordenar o relatório por ordem Napoli ou Natureza³
 				aRegistro[nPos][nCol] += aPedidos[i][6]
 				aRegistro[nPos][34]   += aPedidos[i][6]
 			ENDIF
-			
+
 		ENDIF
-		
+
 	Next
-	
+
 	//Monta Estrutura da planilha
-	
+
 	nUlDia := Day(LastDay(STOD(MV_PAR20 + MV_PAR19 + "01"),0)) //Verifica o ultimo dia
-	
+
 	_aCExcel:={}//SPCSQL->(DbStruct())
 	aadd( _aCExcel , {"CODNAT"       	, "C" , 010 , 00 } )
 	aadd( _aCExcel , {"DESCRICAO"		, "C" , 030 , 00 } )
-	
+
 	For i := 1  to nUlDia
 		nDias += 1
 		aadd( _aCExcel ,{"DIA_" + STRZERO(nDias,2)	, "N" , 010 , 02 } )
 	Next
-	
+
 	aadd( _aCExcel ,{"TOTAL"	, "N" , 012 , 02 } )
-	
+
 	//	_cTemp := CriaTrab(_aCExcel,.T.)
 	//	DbUseArea(.T.,"DBFCDX",_cTemp,"TMP1",.F.,.F.)
-	
+
 	nDias 	:= 0
 	nCol 	:= 2
-	
+
 	For i:=1 to Len(aRegistro)
-		
+
 		_aItem := ARRAY(LEN(_aCExcel) + 1)
 		_aItem[01] 		:= aRegistro[i][1]
 		_aItem[02] 		:= aRegistro[i][2]
@@ -1045,110 +1048,110 @@ IF MV_PAR23 == 2  //³Ordenar o relatório por ordem Napoli ou Natureza³
 		_aItem[28]        := aRegistro[i][28]
 		_aItem[29]        := aRegistro[i][29]
 		_aItem[30]        := aRegistro[i][30]
-		
+
 		IF nUlDia == 28
 			_aItem[31]       := aRegistro[i][34]
 		END
-		
+
 		IF nUlDia == 29
 			_aItem[31]        := aRegistro[i][31]
 			_aItem[32]       := aRegistro[i][34]
-		END  
-		
-		IF nUlDia == 30 
-			_aItem[31]        := aRegistro[i][31]		
+		END
+
+		IF nUlDia == 30
+			_aItem[31]        := aRegistro[i][31]
 			_aItem[32]        := aRegistro[i][32]
 			_aItem[33]       := aRegistro[i][34]
-		END  
-		
-		IF nUlDia == 31 
-			_aItem[31]        := aRegistro[i][31]		
-			_aItem[32]        := aRegistro[i][32]		
+		END
+
+		IF nUlDia == 31
+			_aItem[31]        := aRegistro[i][31]
+			_aItem[32]        := aRegistro[i][32]
 			_aItem[33]        := aRegistro[i][33]
 			_aItem[34]       := aRegistro[i][34]
 		END
-		
+
 		AADD(_aIExcel,_aItem)
 		_aItem := {}
-		
+
 	Next
-	
+
 ELSEIF MV_PAR23 == 1
-	
+
 	ASORT(aPedidos,,,{|x,y|x[7]+DTOS(x[3]) < y[7]+DTOS(y[3])})
-	
+
 	nNum := 1
 	nNum1 := 1
 	nNum2 := 1
-	
+
 	For i:=1 to Len(aPedidos)
-		
-		
+
+
 		IF ALLTRIM(aPedidos[i][7]) <> cNatureza .AND. ALLTRIM(aPedidos[i][9]) <> "1205017" .AND. ALLTRIM(aPedidos[i][7]) <> "0007"  //SEPARA AS TRANSFERENCIAS E INVESTIMENTOS
-			
+
 			aAdd(aRegistro,{ALLTRIM(aPedidos[i][7]),Posicione("SX5",1,xFilial("SX5") + "ZV" + alltrim(aPedidos[i][7]),"X5_DESCRI"),0,0,0})
-			
+
 			nNum += 1
 			nNum1 += 1
 			nNum2 += 1
-			
+
 		ENDIF
-		
+
 		cNatureza  := ALLTRIM(aPedidos[i][7])
-		
+
 	Next
 	aAdd(aRegistro,{"SUBTOTAL","------->",0,0,0})
-	
+
 	nNum += 1
-	
+
 	//INVESTIMENTOS
-	
+
 	For i:=1 to Len(aPedidos)
-		
+
 		IF ALLTRIM(aPedidos[i][7]) <> cNatureza .AND. ALLTRIM(aPedidos[i][9]) <> "1205017" .AND. ALLTRIM(aPedidos[i][7]) == "0007"  //SEPARA AS TRANSFERENCIAS E INVESTIMENTOS
-			
+
 			aAdd(aRegistro,{ALLTRIM(aPedidos[i][7]),Posicione("SX5",1,xFilial("SX5") + "ZV" + alltrim(aPedidos[i][7]),"X5_DESCRI"),0,0,0})
-			
+
 			nNum += 1
 			nNum2 += 1
-			
+
 		ENDIF
-		
+
 		cNatureza  := ALLTRIM(aPedidos[i][7])
-		
+
 	Next
-	
+
 	aAdd(aRegistro,{"TOTAL   ","--------->",0,0,0})
-	
+
 	For i:=1 to Len(aPedidos)
-		
-		
+
+
 		IF ALLTRIM(aPedidos[i][9]) == "1205017" .AND. lOk //SEPARA AS TRANSFERENCIAS
-			
+
 			aAdd(aRegistro,{ALLTRIM(aPedidos[i][7]),Posicione("SX5",1,xFilial("SX5") + "ZV" + alltrim(aPedidos[i][7]),"X5_DESCRI"),0,0,0})
-			
+
 			lOk := .F.
-			
+
 		ENDIF
-		
+
 	Next
-	
-	
+
+
 	For i:=1 to Len(aPedidos)
-		
+
 		nPos := aScan(aRegistro, { |x| x[1] == ALLTRIM(aPedidos[i][7])})
 		IF DATAVALIDA(aPedidos[i][3]) < MV_PAR27
 			nCol := 3
 		ELSE
 			nCol := 4
 		ENDIF
-		
+
 		If nPos > 0
-		
+
 		IF month(DATAVALIDA(aPedidos[i][3])) == val(mv_par19)
-			
+
 			IF ALLTRIM(aPedidos[i][9]) <> "1205017"  .AND. ALLTRIM(aPedidos[i][7]) <> "0007"   //SEPARA AS TRANSFERENCIAS
-				
+
 				aRegistro[nPos][nCol] += aPedidos[i][6]
 				aRegistro[nNum][nCol] += aPedidos[i][6]
 				aRegistro[nNum1][nCol] += aPedidos[i][6]
@@ -1164,32 +1167,32 @@ ELSEIF MV_PAR23 == 1
 				aRegistro[nPos][nCol] += aPedidos[i][6]
 				aRegistro[nPos][5]   += aPedidos[i][6]
 			ENDIF
-			
+
 		ENDIF
-		
+
 		EndIf
-		
+
 	Next
-	
+
 	//Monta Estrutura da planilha
-	
+
 	nUlDia := Day(LastDay(STOD(MV_PAR20 + MV_PAR19 + "01"),0)) //Verifica o ultimo dia
-	
+
 	_aCExcel:={}//SPCSQL->(DbStruct())
 	aadd( _aCExcel , {"CODNAT"       	, "C" , 010 , 00 } )
 	aadd( _aCExcel , {"DESCRICAO"		, "C" , 030 , 00 } )
 	aadd( _aCExcel ,{"REALIZADO"	, "N" , 012 , 02 } )
 	aadd( _aCExcel ,{"PREVISAO"	, "N" , 012 , 02 } )
 	aadd( _aCExcel ,{"TOTAL"	, "N" , 012 , 02 } )
-	
+
 	//_cTemp := CriaTrab(_aIExcel,.T.)
 	//DbUseArea(.T.,"DBFCDX",_cTemp,"TMP1",.F.,.F.)
-	
+
 	nDias 	:= 0
 	nCol 	:= 2
-	
+
 	For i:=1 to Len(aRegistro)
-		
+
 		_aItem := ARRAY(LEN(_aCExcel) + 1)
 		_aItem[01]		:= aRegistro[i][1]
 		_aItem[02]		:= aRegistro[i][2]
@@ -1198,10 +1201,10 @@ ELSEIF MV_PAR23 == 1
 		_aItem[05]       := aRegistro[i][5]
 		AADD(_aIExcel,_aItem)
 		_aItem := {}
-		
+
 	Next
-	
-	
+
+
 ENDIF
 
 
@@ -1261,7 +1264,7 @@ Local nValAbat := 0
 
 
 If POSICIONE("SED",1,xFilial("SED") + PREV->ZA6_NATURE,"ED_PREVISA") == "2" // Filtra pelo Vencimento
-	
+
 	cQuery := "SELECT "
 	cQuery += "E2_VALOR,E2_PARCELA,E2_DESDOBR,E2_NUM,E2_PREFIXO,E2_FORNECE "
 	cQuery += "FROM SE2010 "
@@ -1313,15 +1316,15 @@ If POSICIONE("SED",1,xFilial("SED") + PREV->ZA6_NATURE,"ED_PREVISA") == "2" // F
 	cQuery += "SE2010.D_E_L_E_T_ <> '*' AND "
 	cQuery += "SA2010.D_E_L_E_T_ <> '*'  AND "
 	cQuery += "SED010.D_E_L_E_T_ <> '*' "
-	
+
 	tcQuery cQuery New Alias "ABAT"
-	
+
 	DBSelectArea("ABAT")
 	DBGotop()
-	
-	
+
+
 	While !EOF()//Não soma o titulo principal do desdobramento
-		
+
 		cQuery := "SELECT C7_NUMSC,C7_ITEM FROM SD1010 "
 		cQuery += "INNER JOIN SC7010 ON "
 		cQuery += "C7_NUM = D1_PEDIDO "
@@ -1343,45 +1346,45 @@ If POSICIONE("SED",1,xFilial("SED") + PREV->ZA6_NATURE,"ED_PREVISA") == "2" // F
 		cQuery += "SC7010.D_E_L_E_T_ <> '*' AND "
 		cQuery += "SC3010.D_E_L_E_T_ <> '*' "
 		cQuery += "GROUP BY C7_NUMSC,C7_ITEM "
-		
+
 		tcQuery cQuery New Alias "OKCON"
-		
+
 		DBSelectArea("OKCON")
-		
+
 		lOkCon := .T.
-		
+
 		If !OKCON->(EOF())
 			lOkCon := .F.
 		EndIf
-		
+
 		DBSelectArea("OKCON")
 		DBCLOSEAREA("OKCON")
-		
+
 		DBSelectArea("ABAT")
-		
+
 		If lOkCon
-			
+
 			If ABAT->E2_DESDOBR == "S"
-				
+
 				If !EMPTY(ABAT->E2_PARCELA)
 					nValAbat += ABAT->E2_VALOR
 				EndIF
-				
+
 			else
-				
+
 				nValAbat += ABAT->E2_VALOR
-				
+
 			EndIf
-			
+
 		EndIf
-		
+
 		DBSelectArea("ABAT")
 		DBSkip()
-		
+
 	EndDo
-	
+
 ELSEIF POSICIONE("SED",1,xFilial("SED") + PREV->ZA6_NATURE,"ED_PREVISA") == "1"    // Filtra pelo valor e vencimento fechado conforme inserido no parametro
-	
+
 	cQuery := "SELECT "
 	cQuery += "E2_VALOR,E2_PARCELA,E2_DESDOBR,E2_NUM,E2_PREFIXO,E2_FORNECE "
 	cQuery += "FROM SE2010 "
@@ -1435,16 +1438,16 @@ ELSEIF POSICIONE("SED",1,xFilial("SED") + PREV->ZA6_NATURE,"ED_PREVISA") == "1" 
 	cQuery += "SE2010.D_E_L_E_T_ <> '*' AND "
 	cQuery += "SA2010.D_E_L_E_T_ <> '*'  AND "
 	cQuery += "SED010.D_E_L_E_T_ <> '*' "
-	
+
 	tcQuery cQuery New Alias "ABAT"
-	
-	
+
+
 	DBSelectArea("ABAT")
 	DBGotop()
-	
-	
+
+
 	While !EOF()//Não soma o titulo principal do desdobramento e notas vinculadas aos contratos
-		
+
 		cQuery := "SELECT C7_NUMSC,C7_ITEM FROM SD1010 "
 		cQuery += "INNER JOIN SC7010 ON "
 		cQuery += "C7_NUM = D1_PEDIDO "
@@ -1466,57 +1469,57 @@ ELSEIF POSICIONE("SED",1,xFilial("SED") + PREV->ZA6_NATURE,"ED_PREVISA") == "1" 
 		cQuery += "SC7010.D_E_L_E_T_ <> '*' AND "
 		cQuery += "SC3010.D_E_L_E_T_ <> '*' "
 		cQuery += "GROUP BY C7_NUMSC,C7_ITEM "
-		
+
 		tcQuery cQuery New Alias "OKCON"
-		
+
 		DBSelectArea("OKCON")
-		
+
 		lOkCon := .T.
-		
+
 		If !OKCON->(EOF())
 			lOkCon := .F.
 		EndIf
-		
+
 		DBSelectArea("OKCON")
 		DBCLOSEAREA("OKCON")
-		
+
 		DBSelectArea("ABAT")
-		
+
 		if lOkCon
-			
+
 			If EMPTY(PREV->ZA6_FORNEC) // Não permite abater o valor de uma previsão inserida em uma natureza e fornecedor ja existente quando preencher o fornecedor em branco, evitando a duplicidade de infor,ações
-				
+
 				DBSelectArea("ZA6")
 				DBSetOrder(2)
 				IF(DBSeek(PREV->ZA6_FILIAL + PREV->ZA6_MES + PREV->ZA6_ANO + PREV->ZA6_NATURE + ABAT->E2_FORNECE))
-					
+
 					DBSelectArea("ABAT")
 					DBskip()
 					loop
-					
+
 				EndIf
 			EndIf
-			
-			
-			
+
+
+
 			If ABAT->E2_DESDOBR == "S"
-				
+
 				If !EMPTY(ABAT->E2_PARCELA)
 					nValAbat += ABAT->E2_VALOR
 				EndIF
-				
+
 			else
 				nValAbat += ABAT->E2_VALOR
-				
+
 			EndIf
-			
+
 		EndIf
-		
+
 		DBSelectArea("ABAT")
 		DBSkip()
-		
+
 	EndDo
-	
+
 Endif
 
 DBSElectArea("ABAT")
@@ -1534,7 +1537,7 @@ Local nValAbat := 0
 
 
 If POSICIONE("SED",1,xFilial("SED") + PREV->ZA6_NATURE,"ED_PREVISA") == "2" // Filtra pelo Vencimento
-	
+
 	cQuery := "SELECT "
 	cQuery += "C7_FILIAL,C7_EMISSAO,C7_NUM,C7_NUMSC,A2_NOME,C7_COND,((SUM(C7_TOTAL) + SUM(C7_DESPESA) + SUM(C7_VALFRE)) - SUM(C7_VLDESC)) AS TOTAL,C1_NATUREZ FROM SC7010 "
 	cQuery += "INNER JOIN SA2010 ON "
@@ -1565,20 +1568,20 @@ If POSICIONE("SED",1,xFilial("SED") + PREV->ZA6_NATURE,"ED_PREVISA") == "2" // F
 	cQuery += "SA2010.D_E_L_E_T_ <> '*' "
 	cQuery += "GROUP BY C7_FILIAL,C7_EMISSAO,C7_NUMSC,C7_NUM,A2_NOME,C7_COND,C1_NATUREZ "
 	cQuery += "ORDER BY C7_EMISSAO "
-	
+
 	tcQuery cQuery New Alias "ABAT"
-	
+
 	DBSelectArea("ABAT")
 	DBGOTOP()
-	
+
 	While !EOF()
-		
+
 		aRet := Condicao(ABAT->TOTAL,ABAT->C7_COND,,STOD(ABAT->C7_EMISSAO) + Posicione("SC8",11,ABAT->C7_FILIAL + ABAT->C7_NUM,"C8_PRAZO"),)
 		cNumPed := alltrim(ABAT->C7_NUM)
 		nVlComp := AbaAdiant()
-		
+
 		For i := 1 to Len(aRet)
-			
+
 			If DATAVALIDA(aRet[i][1]) == STOD(PREV->ZA6_VENCREA)
 				IF (aREt[i][2] - nVlComp) <= 0
 					nValAbat += 0
@@ -1586,17 +1589,17 @@ If POSICIONE("SED",1,xFilial("SED") + PREV->ZA6_NATURE,"ED_PREVISA") == "2" // F
 					nValAbat += aREt[i][2] - nVlComp
 				ENDIF
 			EndIf
-			
+
 		Next
-		
+
 		DBSelectArea("ABAT")
 		DBskip()
-		
+
 	EndDo
-	
-	
+
+
 ELSEIF POSICIONE("SED",1,xFilial("SED") + PREV->ZA6_NATURE,"ED_PREVISA") == "1"    // Filtra pelo valor e vencimento fechado conforme inserido no parametro
-	
+
 	cQuery := "SELECT "
 	cQuery += "C7_FILIAL,C7_EMISSAO,C7_NUM,C7_NUMSC,A2_NOME,C7_COND,((SUM(C7_TOTAL) + SUM(C7_DESPESA) + SUM(C7_VALFRE)) - SUM(C7_VLDESC)) AS TOTAL,C1_NATUREZ,C7_FORNECE FROM SC7010 "
 	cQuery += "INNER JOIN SA2010 ON "
@@ -1628,23 +1631,23 @@ ELSEIF POSICIONE("SED",1,xFilial("SED") + PREV->ZA6_NATURE,"ED_PREVISA") == "1" 
 	cQuery += "SA2010.D_E_L_E_T_ <> '*' "
 	cQuery += "GROUP BY C7_FILIAL,C7_EMISSAO,C7_NUMSC,C7_NUM,A2_NOME,C7_COND,C1_NATUREZ,C7_FORNECE "
 	cQuery += "ORDER BY C7_EMISSAO "
-	
+
 	tcQuery cQuery New Alias "ABAT"
-	
+
 	DBSelectArea("ABAT")
 	DBGOTOP()
-	
+
 	While !EOF()
-		
+
 		aRet := Condicao(ABAT->TOTAL,ABAT->C7_COND,,STOD(ABAT->C7_EMISSAO) + Posicione("SC8",11,ABAT->C7_FILIAL + ABAT->C7_NUM,"C8_PRAZO"),)
 		cNumPed := alltrim(ABAT->C7_NUM)
 		nVlComp := AbaAdiant()
-		
+
 		For i := 1 to Len(aRet)
 			If DATAVALIDA(aRet[i][1]) >= STOD( MV_PAR20 + MV_PAR19 + "01" ) .AND. DATAVALIDA(aRet[i][1]) <= stod(MV_PAR20 + MV_PAR19 + cvaltochar((Last_Day( STOD( MV_PAR20 + MV_PAR19 + "01" ) ))) )
-				
+
 				If EMPTY(PREV->ZA6_FORNEC) // Não permite abater o valor de uma previsão inserida em uma natureza e fornecedor ja existente quando preencher o fornecedor em branco, evitando a duplicidade de infor,ações
-					
+
 					DBSelectArea("ZA6")
 					DBSetOrder(2)
 					IF(DBSeek(PREV->ZA6_FILIAL + PREV->ZA6_MES + PREV->ZA6_ANO + PREV->ZA6_NATURE + ABAT->C7_FORNECE))
@@ -1652,23 +1655,23 @@ ELSEIF POSICIONE("SED",1,xFilial("SED") + PREV->ZA6_NATURE,"ED_PREVISA") == "1" 
 						loop
 					EndIf
 				EndIf
-				
-				
+
+
 				IF (aREt[i][2] - nVlComp) <= 0
 					nValAbat += 0
 				ELSE
 					nValAbat += aREt[i][2] - nVlComp
 				ENDIF
-				
+
 			EndIf
-			
+
 		Next
-		
+
 		DBSelectArea("ABAT")
 		DBskip()
-		
+
 	EndDo
-	
+
 EndIf
 
 DBSElectArea("ABAT")
