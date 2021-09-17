@@ -210,7 +210,6 @@ Local cCustoSIG	 := "  "
 Local cSubTot	 := "  "
 Local nSubTot	 := 0
 
-
 DBSelectArea("TMP")
 DBGotop()
 
@@ -229,16 +228,12 @@ While !EOF()
 		Exit
 	Endif
 
-
-
-
 	IF MV_PAR01 < 3 ////Rafael França -> Executado quando o relatorio e "Sintetico,C. Custo e Conta SIG"
 
 		IF nLin > 52 // Salto de Página. Neste caso o formulario tem 55 linhas...
 			Cabec(Titulo,Cabec1,Cabec2,NomeProg,Tamanho,nTipo)
 			nLin := 8
 		Endif
-
 
 		IF MV_PAR01 == 2
 			IF (cCustoSIG != TMP->CTT_CCSIG)
@@ -251,7 +246,6 @@ While !EOF()
 				nLin     := nLin + 1 // Avanca a linha de impressao
 			ENDIF
 		ENDIF
-
 
 		IF MV_PAR01 == 1
 
@@ -309,9 +303,9 @@ While !EOF()
 			IF Posicione("SZY",1,xFilial("SZY")+SUBSTRING(TMP->ZR_CTASIG,1,6) + Alltrim(STR(Year(MV_PAR03))),"ZY_RESULT") == "1"
 				nValorCCC	 += TMP->VALOR
 				nVlTotalC	 += TMP->VALOR
-				IF TMP->ZR_CTASIG <> "01013"
-				nVlTotalC1	 += TMP->VALOR
-				ENDIF
+				//IF TMP->ZR_CTASIG <> "01013" // Rafael/Lucilene - 09/09/21 - Permuta de ativos vai ser considerada no valor total
+				//nVlTotalC1	 += TMP->VALOR
+				//ENDIF
 			ELSEIF Posicione("SZY",1,xFilial("SZY")+SUBSTRING(TMP->ZR_CTASIG,1,6) + Alltrim(STR(Year(MV_PAR03))),"ZY_RESULT") == "2"
 				nValorCCC	 -= TMP->VALOR
 				nVlTotalC	 -= TMP->VALOR
