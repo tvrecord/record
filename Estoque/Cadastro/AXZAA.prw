@@ -46,6 +46,7 @@ User Function AXZAA
 		{"Alterar","AxAltera",0,4},;
 		{"Excluir","AxDeleta",0,5},;
 		{"Devolução","U_TelaZAA",0,4},;
+		{"Termo de Responsabilidade","U_MDTR805X ",0,4},;
 		{"Legenda","U_LegZAA",0,6}}
 
 	Private cString := "ZAA"
