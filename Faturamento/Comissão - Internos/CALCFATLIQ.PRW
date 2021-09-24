@@ -34,7 +34,7 @@ Local	_nTotal		:= 0
 //Local	nTotBruto		:= 0
 Local	_nFatLiq		:= 0
 Local aMeses		:=	{	{"01","Jan"},{"02","Fev"},{"03","Mar"},{"04","Abr"},{"05","Mai"},{"06","Jun"},;
-								{"07","Jul"},{"08","Ago"},{"09","Set"},{"10","Out"},{"11","Nov"},{"12","Dez"} }  
+								{"07","Jul"},{"08","Ago"},{"09","Set"},{"10","Out"},{"11","Nov"},{"12","Dez"} }
 
 Private	cPerg		:= "CALFLR3" // Calculo Faturamento Liquido Record
 Private cTipo       := ""
@@ -64,14 +64,14 @@ if	mv_par02 == "2007" .and. mv_par01 $ "03/04"
 		cTxt	+=	"O mês de Março de 2007 foi a Data de Corte da Bonificação para o início das atividades de comissão pelo Sistema..."
 	endif
 
-	Aviso( "A T E N Ç Ã O ! ! !" , cTxt , { "Ok" } ) 
+	Aviso( "A T E N Ç Ã O ! ! !" , cTxt , { "Ok" } )
 
 	Return
 endif
 
 nPos := aScan( aMeses , { |x| x[1] == mv_par01 } )
 
-cTxt := "De Acordo com os parâmetros informados, será gerado o Faturamento Líquido do período de " 
+cTxt := "De Acordo com os parâmetros informados, será gerado o Faturamento Líquido do período de "
 cTxt += aMeses[nPos,2] + "/" + mv_par02 + ". Confirma a Geração ?"
 
 if Aviso( "A T E N Ç Ã O ! ! !" , cTxt , { "Sim" , "Não" } ) == 2
@@ -81,7 +81,7 @@ endif
 dDataIni		:=	StoD(mv_par02 + mv_par01 + "01")
 dDataFimA	:=	( dDataIni - 1 )
 dDataIniA	:=	StoD( Substr( DtoS(dDataFimA) , 01 , 06 ) + "01" )
-dDataFim		:=	mv_par02 + mv_par01 
+dDataFim		:=	mv_par02 + mv_par01
 
 if	mv_par01 == "02"
 	dDataFim += iif( ( Val(mv_par02) / 4 ) == Int( Val(mv_par02) / 4 ) , "29" , "28" )
@@ -90,12 +90,12 @@ else
 endif
 
 if mv_par05 == 2
-cTipo	:= "CV"
+cTipo	:= "CV" //Comissão Varejo
 elseif mv_par05 == 1
-cTipo	:= "CI"
+cTipo	:= "CI" //Comissão Geral
 elseif mv_par05 == 3
-cTipo	:= "CD"
-endif	
+cTipo	:= "CD" //Comissão Por Data
+endif
 
 dDataFim		:= StoD(dDataFim)
 
@@ -105,11 +105,11 @@ _Qry += " where sd2.d2_emissao between '" + DtoS(dDataIni) + "' and '" + DtoS(dD
 _Qry += "   and sd2.d2_filial   = sc5.c5_filial "
 _Qry += "   and sd2.d2_pedido   = sc5.c5_num    "
 _Qry += "   and sed.ed_codigo   = sc5.c5_naturez   "
-_Qry += "   and sed.d_e_l_e_t_  = ' ' " 
+_Qry += "   and sed.d_e_l_e_t_  = ' ' "
 _Qry += "   and sc5.c5_calccom  = 'S' "
 _Qry += "   and sc5.c5_repasse <> 'S' "
 _Qry += "   and sd2.d_e_l_e_t_  = ' ' "
-_Qry += "   and sc5.d_e_l_e_t_  = ' ' "         
+_Qry += "   and sc5.d_e_l_e_t_  = ' ' "
 _Qry += "   and sc5.c5_filial   = '" + xFilial("SC5") + "' "
 _Qry += "   and sd2.d2_filial   = '" + xFilial("SD2") + "' "
 if mv_par05 == 2
@@ -129,17 +129,17 @@ Do While !TSUM->(Eof())
 	If TSUM->C5_COMIS1 > 0 .AND. TSUM->C5_COMIS1 < 99.99
 		//Neste momento abato as comissões dos vendedores externos
 		//_nCom		:= Round(((TSUM->TOTAL * TSUM->C5_COMIS1)/100),2)	//Comissão Agencia (Externos)
-		//_nBsCom	:= Round((TSUM->TOTAL - _nCom),2)						//Base comissão Internos  
+		//_nBsCom	:= Round((TSUM->TOTAL - _nCom),2)						//Base comissão Internos
 		_nBsCom 	:= TSUM->TOTAL
 	ElseIf TSUM->C5_COMIS1 == 99.99
-		_nBsCom 	:= 0	
+		_nBsCom 	:= 0
 	Else //Caso não tenha comissão, entra para o Faturamento líquido.
 		_nBsCom 	:= TSUM->TOTAL
 	EndIf
 
 	_nTotal += _nBsCom  // Recebe os valores para Faturamento total
 //	nTotBruto += TSUM->TOTAL
-	
+
 	TSUM->(dbSkip())
 	Loop
 EndDo
@@ -179,21 +179,21 @@ EndIf
 
 if _cStatus == "R"
 
-	cTmp	:=	"Cálculo Existente Para o Período " 
+	cTmp	:=	"Cálculo Existente Para o Período "
 
 	cTxt	:=	Chr(10) + Chr(13)
 	cTxt	+=	"O Faturamento Líquido Gravado é de : R$ " + Transform( SZ8->Z8_VALOR  , "@E 999,999,999.99" ) 	+ Chr(10) + Chr(13)
-	cTxt	+=	"A Bonificação Gravada é de : R$ " + Transform( SZ8->Z8_BONIVOL , "@E 999,999,999.99" ) 			+ Chr(10) + Chr(13)	
+	cTxt	+=	"A Bonificação Gravada é de : R$ " + Transform( SZ8->Z8_BONIVOL , "@E 999,999,999.99" ) 			+ Chr(10) + Chr(13)
 	cTxt	+=	"O Repasse Gravado é de : R$ " + Transform( SZ8->Z8_REPASSE , "@E 999,999,999.99" ) 				+ Chr(10) + Chr(13)	+ Chr(10) + Chr(13)
 	cTxt	+=	"O Valor do Cálculo Atual foi de : R$ " + Transform( _nTotal , "@E 999,999,999.99" ) 				+ Chr(10) + Chr(13)
-	cTxt	+=	"A Bonificação foi de : R$ " + Transform( mv_par03 , "@E 999,999,999.99" ) 							+ Chr(10) + Chr(13)	
-	cTxt	+=	"O Imposto PIS e COFINS foi de : R$ " + Transform( mv_par04 , "@E 99.99" ) 				+ Chr(10) + Chr(13)	
+	cTxt	+=	"A Bonificação foi de : R$ " + Transform( mv_par03 , "@E 999,999,999.99" ) 							+ Chr(10) + Chr(13)
+	cTxt	+=	"O Imposto PIS e COFINS foi de : R$ " + Transform( mv_par04 , "@E 99.99" ) 				+ Chr(10) + Chr(13)
 //	cTxt	+=	"O Repasse Net foi de : R$ " + Transform( mv_par05 , "@E 999,999,999.99" ) 				+ Chr(10) + Chr(13)
-	cTxt	+=	"O Repasse Calculado foi de : R$ " + Transform( _nRep , "@E 999,999,999.99" ) 						
+	cTxt	+=	"O Repasse Calculado foi de : R$ " + Transform( _nRep , "@E 999,999,999.99" )
 
 	if Aviso( "A T E N Ç Ã O ! ! !" , cTxt , { "Gravar" , "Sair" } , 3 , cTmp ) == 2
 		Return
-	endif	
+	endif
 endif
 
 //Grava o Faturamento mensal
@@ -205,10 +205,10 @@ RecLock("SZ8",_lRet)
 	SZ8->Z8_BONIVOL	:= mv_par03
 	SZ8->Z8_IMPOSTO	:= mv_par04
 //	SZ8->Z8_DESCNET	:= mv_par04
-//	SZ8->Z8_REPNET	:= mv_par05		
+//	SZ8->Z8_REPNET	:= mv_par05
 	SZ8->Z8_STATUS	:= _cStatus
 //	SZ8->Z8_DESCOM	:= nTotBruto - _nTotal
-	SZ8->Z8_TIPO	:= cTipo			
+	SZ8->Z8_TIPO	:= cTipo
 MsUnlock()
 
 Return
