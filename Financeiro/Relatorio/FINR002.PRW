@@ -287,6 +287,7 @@ Static Function GetData(cPeriodo,cPracaDe,cPracaAte)
 
 	// Busca os registros a serem impressos no relatório
 	BeginSql Alias cTmp1
+
 	SELECT ZAF_CODIGO,ZAF_CITY,
 	CASE
 	WHEN ZAF_TIPO = '1'  THEN 'Filiada'
