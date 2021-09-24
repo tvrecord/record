@@ -3,7 +3,7 @@
 #INCLUDE 'RPTDEF.CH'
 
 #DEFINE REL_VERT_STD 16
-#DEFINE REL_START  65
+#DEFINE REL_START 65
 #DEFINE REL_END 560
 #DEFINE REL_RIGHT 820
 #DEFINE REL_LEFT 10
@@ -73,7 +73,6 @@ imprimir relatorio em pdf
 
 Static Function fProcPdf()
 
-//	Local i
 	Local cPraca 	:= ""
 	Local aInfo		:= {}
 	Local aUsuario	:= {}
@@ -103,7 +102,9 @@ Static Function fProcPdf()
 
 			cFileName 	:= "PRACA_"+Alltrim((cTmp1)->ZAG_PRACA)+"_PERIODO_"+cPeriodo+"_FINR004" + "_" +DTOS(Date())+ "_" + StrTran(Time(),":","_")
 			oPrint := FWMSPrinter():New(cFileName, IMP_PDF, .F., cDir, .T.)
-			oPrint:SetLandScape()
+
+			//oPrint:SetPortrait()//Retrato
+			oPrint:SetLandScape()//Paisagem
 			oPrint:SetPaperSize(DMPAPER_A4)
 			oPrint:cPathPDF := cDir
 
