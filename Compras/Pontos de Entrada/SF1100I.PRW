@@ -1,5 +1,5 @@
 /*//#########################################################################################
-Projeto : POUPEX
+Projeto : RECORD
 Modulo  : SIGACOM
 Fonte   : SF1100I
 Objetivo: Chamar funções para complementar contas a pagar e gravar dados adicionais na SF1
@@ -7,22 +7,19 @@ Objetivo: Chamar funções para complementar contas a pagar e gravar dados adicion
 
 #INCLUDE 'TOTVS.CH'
 #INCLUDE "TopConn.ch"
-
-//----------------------------------------------------------
 /*/{Protheus.doc} SF1100I
 Ponto de entrada para no final da nota fiscal de entrada
 @author Bruno Alves
 @version PROTHEUS 12
 @since 02/10/2020
-
 @obs 02/10/2020 - Construcao Inicial
 /*/
-//----------------------------------------------------------
+
 User Function SF1100I()
 
+	Local aArea := GetArea()
 	Local _cUpd  := ""
 	Local nPosRP := Ascan(aXNumRep,{|x| Alltrim(x[1]) == Alltrim(SF1->F1_DOC) + Alltrim(SF1->F1_FORNECE)})
-
 
 	//Se tiver numero do RP para ser preenchido, Gravo na SF1 e SE2
 	If nPosRP > 0
@@ -44,12 +41,22 @@ User Function SF1100I()
 		_cUpd += " AND E2_FORNECE = '"+ SF1->F1_FORNECE +"'"
 		_cUpd += " AND E2_LOJA    = '"+ SF1->F1_LOJA +"'"
 
-
 		If TcSqlExec(_cUpd) < 0
-			MsgStop("Ocorreu um erro na atualização na tabela do contas a pagar!!!")
-			Final()
+			MsgAlert("Ocorreu um erro na atualização na tabela do contas a pagar. Verifique!")
 		EndIf
 
 	EndIF
+
+	//Rafael França - 26/10/21 - Gravação dos campos customizados na tabela SF1. Aba Customizados Record.
+
+	If Type("__cCamNovo01") != "U"
+
+        //Grava o conteúdo na SF1
+        RecLock("SF1", .F.)
+            SF1->F1_SALAS := __cCamNovo01
+        SF1->(MsUnlock())
+    EndIf
+
+    RestArea(aArea)
 
 Return()
