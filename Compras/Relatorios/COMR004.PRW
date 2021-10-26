@@ -48,10 +48,10 @@ BeginSql Alias cAlias
 //QUERY
 SELECT B2_COD AS CODIGO, D1_DESCRI AS DESC_PROD, B2_LOCAL AS LOCAL
 , D1_DOC AS NOTA_FISCAL, D1_SERIE AS SERIE, D1_DTDIGIT AS DT_ENTRADA, D1_FORNECE AS FORNECEDOR, D1_QUANT AS QTD_NF
-, B2_QATU AS ESTOQUE, B2_VATU1 AS VL_ESTOQUE, D1_CC AS CCUSTO, CTT_DESC01 AS DESC_CCUSTO, D1_PEDIDO AS PEDIDO
+, B2_QATU AS ESTOQUE, B2_VATU1 AS VL_ESTOQUE, C1_UNIDREQ AS DESC_REQ, D1_PEDIDO AS PEDIDO
 FROM %table:SB2%
 INNER JOIN %table:SD1% ON B2_COD = D1_COD AND %table:SD1%.D_E_L_E_T_ = '' AND B2_LOCAL = D1_LOCAL
-LEFT JOIN %table:CTT%  ON D1_CC = CTT_CUSTO AND %table:CTT%.D_E_L_E_T_ = ''
+LEFT JOIN %table:SC1%  ON D1_PEDIDO = C1_PEDIDO AND %table:CTT%.D_E_L_E_T_ = ''
 WHERE %table:SB2%.D_E_L_E_T_ = '' AND B2_QATU > 0
 %exp:cFiltro%
 ORDER BY B2_COD, B2_LOCAL, D1_DTDIGIT DESC
@@ -165,10 +165,12 @@ Static Function ValidPerg(cPerg)
 	dbSetOrder(1)
 	aRegs:={}
 
-	AADD(aRegs,{cPerg,"01","Do Produto:		","","","mv_ch01","C",09,0,0,"G","","mv_par01","","","","","","","","","","","","","","","","","","","","","","","","","SB1"})
-	AADD(aRegs,{cPerg,"02","Até o Produto:	","","","mv_ch02","C",09,0,0,"G","","mv_par02","","","","","","","","","","","","","","","","","","","","","","","","","SB1"})
-	AADD(aRegs,{cPerg,"03","Da Data:		","","","mv_ch03","D",08,0,0,"G","","mv_par03","","","","","","","","","","","","","","","","","","","","","","","","",""})
-	AADD(aRegs,{cPerg,"04","Até a Data:		","","","mv_ch04","D",08,0,0,"G","","mv_par04","","","","","","","","","","","","","","","","","","","","","","","","",""})
+	AADD(aRegs,{cPerg,"01","Do Produto:			","","","mv_ch01","C",09,0,0,"G","","mv_par01","","","","","","","","","","","","","","","","","","","","","","","","","SB1"})
+	AADD(aRegs,{cPerg,"02","Até o Produto:		","","","mv_ch02","C",09,0,0,"G","","mv_par02","","","","","","","","","","","","","","","","","","","","","","","","","SB1"})
+	AADD(aRegs,{cPerg,"03","Da Data:			","","","mv_ch03","D",08,0,0,"G","","mv_par03","","","","","","","","","","","","","","","","","","","","","","","","",""})
+	AADD(aRegs,{cPerg,"04","Até a Data:			","","","mv_ch04","D",08,0,0,"G","","mv_par04","","","","","","","","","","","","","","","","","","","","","","","","",""})
+	AADD(aRegs,{cPerg,"05","Do Departamento:	","","","mv_ch05","D",05,0,0,"G","","mv_par05","","","","","","","","","","","","","","","","","","","","","","","","","SY3"})
+	AADD(aRegs,{cPerg,"06","Até o Departamento:	","","","mv_ch06","D",05,0,0,"G","","mv_par06","","","","","","","","","","","","","","","","","","","","","","","","","SY3"})
 
 	For i:=1 to Len(aRegs)
 		If !dbSeek(cPerg+aRegs[i,2])
