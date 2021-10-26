@@ -21,15 +21,10 @@ User Function ImpSIG
 Local cDesc1         := "Este programa tem como objetivo imprimir relatorio "
 Local cDesc2         := "de acordo com os parametros informados pelo usuario."
 Local cDesc3         := ""
-Local cPict          := ""
 Local titulo       	 := "SIG "
 Local nLin           := 100
-
 Local Cabec1         := UPPER(" Cod. SIG     Descricao                                                    Valor")
 Local Cabec2         := ""
-Local Cabec3         := ""
-Local imprime        := .T.
-Local aOrd := {}
 
 Private lEnd         := .F.
 Private lAbortPrint  := .F.
@@ -40,7 +35,6 @@ Private nomeprog     := "IMPSIG" //Coloque aqui o nome do programa para impressa
 Private nTipo        := 15
 Private aReturn      := {"Zebrado", 1, "Administracao", 1, 2, 1, "", 1}
 Private nLastKey     := 0
-Private cbtxt        := Space(10)
 Private cbcont       := 00
 Private CONTFL       := 01
 Private m_pag        := 01
@@ -159,7 +153,7 @@ tcQuery cQuery New Alias "TMP"
 If Eof()
 	MsgInfo("Nao existem dados a serem impressos!","Verifique")
 	dbSelectArea("TMP")
-	dbCloseArea("TMP")
+	dbCloseArea()
 	Return
 Endif
 
@@ -303,9 +297,9 @@ While !EOF()
 			IF Posicione("SZY",1,xFilial("SZY")+SUBSTRING(TMP->ZR_CTASIG,1,6) + Alltrim(STR(Year(MV_PAR03))),"ZY_RESULT") == "1"
 				nValorCCC	 += TMP->VALOR
 				nVlTotalC	 += TMP->VALOR
-				//IF TMP->ZR_CTASIG <> "01013" // Rafael/Lucilene - 09/09/21 - Permuta de ativos vai ser considerada no valor total
-				//nVlTotalC1	 += TMP->VALOR
-				//ENDIF
+				IF TMP->ZR_CTASIG <> "01012" // Rafael- 06/10/21 - Colocar conta de receita de aplicação financeira
+				nVlTotalC1	 += TMP->VALOR
+				ENDIF
 			ELSEIF Posicione("SZY",1,xFilial("SZY")+SUBSTRING(TMP->ZR_CTASIG,1,6) + Alltrim(STR(Year(MV_PAR03))),"ZY_RESULT") == "2"
 				nValorCCC	 -= TMP->VALOR
 				nVlTotalC	 -= TMP->VALOR
@@ -516,7 +510,7 @@ While !EOF()
 ENDDO
 
 dbSelectArea("TMP")
-dbCloseArea("TMP")
+dbCloseArea()
 
 //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 //³ Finaliza a execucao do relatorio...                                 ³
