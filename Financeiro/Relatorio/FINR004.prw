@@ -197,19 +197,19 @@ Static Function ImpProxPag()
 
 	nPag++
 	oPrint:StartPage()
-	cSubTitle := "PAGAMENTO REPASSE: " + Alltrim(MesExtenso(Val(Substring(cPeriodo,1,2)))) + "/" + Substring(cPeriodo,3,4)  + " - CNPJ: " + Transform(Alltrim(ZAF->ZAF_CGC),"@R 99.999.999/9999-99")
-	nLin := u_PXCABECA(@oPrint, "REPASSE A PAGAR (" + Alltrim(ZAF->ZAF_CODIGO) + " - " + Alltrim(ZAF->ZAF_DESCRI) + ")" , cSubTitle  , nPag)
+	cSubTitle := UPPER(Alltrim(ZAF->ZAF_CODIGO) + " - " + Alltrim(ZAF->ZAF_DESCRI) + " - CNPJ: " + Transform(Alltrim(ZAF->ZAF_CGC),"@R 99.999.999/9999-99"))
+	nLin := u_PXCABECA(@oPrint, UPPER("REPASSE A PAGAR - FATURAMENTO SPOT (VENCIMENTO: " + DTOC(MV_PAR10) + ")") , cSubTitle  , nPag)
 
-	oPrint:Say( nLin,020, "RP"	   ,oFonteN)
-	oPrint:Say( nLin,052, "NF Rec.",oFonteN)
-	oPrint:Say( nLin,084, "Emissao",oFonteN)
-	oPrint:Say( nLin,128, "Baixa"  ,oFonteN)
-	oPrint:Say( nLin,170, "Cliente",oFonteN)
-	oPrint:Say( nLin,340, "Agencia",oFonteN)
-	oPrint:Say( nLin,492, "NF Pag.",oFonteN)
-	oPrint:Say( nLin,524, "Emissão",oFonteN)
-	oPrint:Say( nLin,568, "Vencto" ,oFonteN)
-	oPrint:Say( nLin,795, "Valor"  ,oFonteN)
+	oPrint:Say( nLin,020, "RP"	   			 ,oFonteN)
+	oPrint:Say( nLin,052, "NF Rec."			 ,oFonteN)
+	oPrint:Say( nLin,084, "Emissao"			 ,oFonteN)
+	oPrint:Say( nLin,128, "Receb."  		 ,oFonteN)
+	oPrint:Say( nLin,170, "Cliente"			 ,oFonteN)
+	oPrint:Say( nLin,340, "Agencia"			 ,oFonteN)
+	oPrint:Say( nLin,492, "NF Pag."			 ,oFonteN)
+	oPrint:Say( nLin,524, "Emissão"			 ,oFonteN)
+	oPrint:Say( nLin,568, "Vencto" 			 ,oFonteN)
+	oPrint:Say( nLin,795, "Valor"  			 ,oFonteN)
 
 	oPrint:line(nLin+5,REL_LEFT,nLin+5,REL_RIGHT )
 
@@ -289,13 +289,14 @@ Static Function GetData(cPPeriodo,cPPracaDe,cPPracaAte,cPRpDe,cPRpAte)
 			AND E2_XNUMRP = ZAG_NUMRP
 			AND E2_EMISSAO BETWEEN '' AND %Exp:cDataFin%
 			AND E2_BAIXA = ''
-			AND E2_VALOR = ZAH_VLRAT
+			AND (E2_VALOR = ZAH_VLRAT OR E2_XNUMRP IN ('234777'))
 			AND SE2.D_E_L_E_T_ = ''
 		WHERE
 			ZAG_FILIAL = '01'
 			AND ZAG_EMISSA BETWEEN '' AND %Exp:cDataFin%
 			AND ZAG_PRACA BETWEEN %Exp:cPPracaDe% AND %Exp:cPPracaAte%
 			AND ZAG_NUMRP BETWEEN %Exp:cPRpDe% AND %Exp:cPRpAte%
+			AND (ZAG_PERIOD <> '072021' OR ZAG_NUMRP NOT IN ('234575'))
 			AND ZAH_VLRAT > 0
 			AND ZAF.D_E_L_E_T_ = ''
 			AND ZAG.D_E_L_E_T_ = ''
@@ -336,6 +337,8 @@ Static Function ValidPerg(cPerg)
 	aAdd(aRegs,{cPerg,"07", "Ate a Baixa Rec.:"	 ,"","","mv_ch7","D",08,00,0,"G","","MV_PAR07","","","","","","","","","","","","","","","","","","","","","","","","",""})
 	aAdd(aRegs,{cPerg,"08","Assinatura 1:" 		 ,"","","mv_ch8","C",06,00,0,"G","","mv_par08","","","","","","","","","","","","","","","","","","","","","","","","","USR"})
 	aAdd(aRegs,{cPerg,"09","Assinatura 2:"		 ,"","","mv_ch9","C",06,00,0,"G","","mv_par09","","","","","","","","","","","","","","","","","","","","","","","","","USR"})
+	aAdd(aRegs,{cPerg,"10","Vencimento:"  		 ,"","","mv_ch10","D",08,00,0, "G","","MV_PAR10","","","","","","","","","","","","","","","","","","","","","","","","",""})
+
 
 	For i:=1 to Len(aRegs)
 		If !dbSeek(PADR(cPerg,10)+aRegs[i,2])
