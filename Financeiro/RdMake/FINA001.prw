@@ -3,7 +3,6 @@
 #INCLUDE "TBICONN.CH"
 #include "topconn.ch"
 
-
 /*‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹
 ±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 ±±⁄ƒƒƒƒƒƒƒƒƒƒ¬ƒƒƒƒƒƒƒƒƒƒƒƒƒƒ¬ƒƒƒƒƒƒ¬ƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒ¬ƒƒƒƒ¬ƒƒƒƒƒƒƒƒƒƒø±±
@@ -37,7 +36,6 @@ User Function FINA001()
 	Private cPracaNeg  := ""
 	Private nDifRep    := 0
 
-
 	cTexto := "Rotina ir· fazer o calculo do repasse das praÁas atraves do arquivo de importaÁ„o .CSV. As colunas precisam est· na seguinte ordem:" + Chr(13) + Chr(10)
 	cTexto += "1∫ : RP					" + Chr(13) + Chr(10)
 	cTexto += "2∫ : UT					" + Chr(13) + Chr(10)
@@ -61,8 +59,6 @@ User Function FINA001()
 	cTexto += "20∫: % REPASSE			" + Chr(13) + Chr(10)
 	cTexto += "21∫: REPASSE COMPETENCIA	" + Chr(13) + Chr(10)
 	cTexto += "22∫: REPASSE TOTA		" + Chr(13) + Chr(10)
-
-
 
 	Aviso("Rotina FINA001",cTexto,{"OK"})
 
@@ -131,7 +127,6 @@ User Function FINA001()
 			EndIf
 		EndIf
 
-
 		//Verifico se existe o cadastro da praÁa
 		DbSelectArea("ZAF");DbSetOrder(1)
 		If !DbSeek(xFilial("ZAF") + STRZERO(Val(aDados[i][6]),3))
@@ -176,7 +171,6 @@ User Function FINA001()
 
 	Next i
 
-
 	If Len(aInfo) > 0
 
 		//Ordena todas as informaÁıes Praca e Numero RP
@@ -193,13 +187,9 @@ User Function FINA001()
 
 	EndIf
 
-
-
 	RestArea(_aARea)
 
-
 Return
-
 
 /*‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹
 ±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
@@ -224,7 +214,6 @@ Static Function ExecImport()
 	Local nValRep    := 0
 
 	ProcRegua(Len(aInfo))
-
 
 	For n:=1 to Len(aInfo)
 
@@ -265,7 +254,6 @@ Static Function ExecImport()
 
 		EndIf
 
-
 		RECLOCK("ZAG",.T.)
 
 		//Prepara a mascara para transformar em valor
@@ -282,8 +270,6 @@ Static Function ExecImport()
 		EndIf
 		*/
 
-
-
 		ZAG->ZAG_FILIAL	  	:= xFilial("ZAG")
 		ZAG->ZAG_CODIGO     := cCodSeq
 		ZAG->ZAG_PRACA    	:= aInfo[n][6] //EMP VENDA
@@ -297,7 +283,6 @@ Static Function ExecImport()
 		ZAG->ZAG_SIGEXI		:= aInfo[n][5]
 		ZAG->ZAG_EMPREP		:= aInfo[n][6]
 		ZAG->(MSUNLOCK())
-
 
 		RECLOCK("ZAH",.T.)
 		ZAH->ZAH_FILIAL	  	:= xFilial("ZAH")
@@ -330,19 +315,15 @@ Static Function ExecImport()
 
 		ZAH->(MSUNLOCK())
 
-
-
 		nAcumulado := 0
 		cPraca := aInfo[n][6]
 		cDtAcum := ""
 
 	Next
 
-
 	MsgInfo("ImportaÁ„o realizada com sucesso. " + Alltrim(STR(Len(aInfo))) + " registro(s).","FINA001")
 
 Return
-
 
 /*‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹
 ±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
@@ -353,7 +334,6 @@ Return
 ±±¿ƒƒƒƒƒƒƒƒƒƒ¡ƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒŸ±±
 ±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 ﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂ*/
-
 
 Static Function ExecRateio()
 
@@ -366,8 +346,6 @@ Static Function ExecRateio()
 	Local nQtd	    := 0
 	Local cRatPraca := ""
 	Local nRecno    := 0
-
-
 
 	cQuery += "SELECT * FROM ZAH010 WHERE "
 	cQuery += "ZAH_PERIOD = '" + cPeriodo + "' AND "
@@ -396,7 +374,6 @@ Static Function ExecRateio()
 
 		IncProc("Rateando o valor do Numero RP" + TMP->ZAH_NUMRP)
 
-
 		DbSelectArea("ZAH");DbSetOrder(1)
 		If DbSeek(xFilial("ZAH") + TMP->ZAH_CODIGO + TMP->ZAH_PRACA + TMP->ZAH_NUMRP)
 
@@ -409,7 +386,6 @@ Static Function ExecRateio()
 					nPercRat := (TMP->ZAH_VALOR*100)/SUM->VALPAG // Rafael - 23/10/2020
 					//Quantidade de informaÁıes rateadas
 					nQtd++
-
 
 					RECLOCK("ZAH",.F.)
 					ZAH->ZAH_VLACUM	:= 0
@@ -441,7 +417,6 @@ Static Function ExecRateio()
 
 				EndIf
 
-
 			EndIf
 
 			//Fecho a tabela temporaria para a funÁ„o SumTotZAH receber outra chamada dentro do loop
@@ -455,7 +430,6 @@ Static Function ExecRateio()
 		cRatPraca := TMP->ZAH_PRACA
 
 		DbSkip()
-
 
 		//FaÁo o ajuste do rateio caso seja necess·rio por quest„o de arrendondamento
 		If cRatPraca != TMP->ZAH_PRACA .and. lRat
@@ -475,7 +449,6 @@ Static Function ExecRateio()
 
 		EndIf
 
-
 	EndDo
 
 	MsgInfo("De " + Alltrim(Str(nCont)) + " RP(s) foram rateados " + Alltrim(Str(nQtd)) + " RP(s).")
@@ -483,14 +456,11 @@ Static Function ExecRateio()
 	dbSelectArea("TMP")
 	dbCloseArea("TMP")
 
-
-
 Return
 
 //Descobre o valor total da praÁa no determinado periodo para fazer o rateio
 //nOpcao = 1 Tratativa para o rateio; 2 Tratativa para fazer o calculo do acumulado do mes seguinte; valor total do valor rateio
 Static Function SumTotZAH(nOpcao,cPraRep,cMesAno)
-
 
 	Local cQuery  := ""
 	Local lOk  	  := .T.
@@ -538,11 +508,9 @@ Static Function SumTotZAH(nOpcao,cPraRep,cMesAno)
 			lOk := .F.
 		EndIf
 
-
 	EndIf
 
 Return(lOk)
-
 
 /*‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹
 ±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
@@ -565,8 +533,6 @@ Static Function ValidPerg(cPerg)
 	aAdd(aRegs,{cPerg,"01","Busca Arquivo?","","","mv_ch1","C",60,00,0,"G","","mv_par01","","","","","","","","","","","","","","","","","","","","","","","","","",""})
 	aAdd(aRegs,{cPerg,"02","Periodo?","","","mv_ch2","D",08,00,0,"G","","mv_par02","","","","","","","","","","","","","","","","","","","","","","","","","",""})
 
-
-
 	For i:=1 to Len(aRegs)
 		If !dbSeek(cPerg+aRegs[i,2])
 			RecLock("SX1",.T.)
@@ -585,14 +551,11 @@ Static Function ValidPerg(cPerg)
 			Next
 			MsUnlock()
 
-
 		Endif
 	Next
 	dbSelectArea(_sAlias)
 
 Return
-
-
 
 //FunÁ„o para excluir o periodo do cadastro do repasse das praÁas
 
@@ -601,7 +564,6 @@ Static Function DelPeriodo(cPeriodo,cPerSum)
 
 	Local cQuery := ""
 	Local cDel	 := ""
-
 
 	cQuery := "SELECT COUNT(*) as QTD FROM ZAG010 WHERE "
 	cQuery += "ZAG_PERIOD = " + cPerSum + " AND D_E_L_E_T_ = '' "
@@ -642,16 +604,12 @@ Static Function DelPeriodo(cPeriodo,cPerSum)
 
 Return
 
-
-
-
 //Trata valores da planilha
 
 Static Function TrataVal(cValor)
 
 	Local nValor := 0
 	Local lNeg 	 := .F.
-
 
 	cValor := StrTran(cValor, ".","")
 	cValor := StrTran(cValor,",",".")
@@ -669,6 +627,5 @@ Static Function TrataVal(cValor)
 	If lNeg
 		nValor := nValor * -1
 	EndIf
-
 
 Return(nValor)
