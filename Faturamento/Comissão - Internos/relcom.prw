@@ -57,7 +57,7 @@ User Function RELCOM()
 	Private nSpotLoc 		:= 0
 	Private nTipoC			:= ""
 	Private cDtIniV			:= ""
-	Private _aMeses 		:= {"JANEIRO","FEVEREIRO","MARCO","ABRIL","MAIO","JUNHO","JULHO","AGOSTO","SETEMBRO","OUTUBRO","NOVEMBRO","DEZEMBRO"}	
+	Private _aMeses 		:= {"JANEIRO","FEVEREIRO","MARCO","ABRIL","MAIO","JUNHO","JULHO","AGOSTO","SETEMBRO","OUTUBRO","NOVEMBRO","DEZEMBRO"}
 
 	ValidPerg()
 
@@ -76,9 +76,11 @@ User Function RELCOM()
 		if MV_PAR25 == 2 //Rafael França - Verifica o tipo da comissão
 			nTipoC			:= "CV" //Comissao Varejo
 		elseif MV_PAR25 == 1
-			nTipoC			:= "CI" //Comissao Interna 
+			nTipoC			:= "CI" //Comissao Interna
 		elseif MV_PAR25 == 3
-			nTipoC			:= "CD" //Comissao com data de inicio 			
+			nTipoC			:= "CD" //Comissao com data de inicio
+		elseif MV_PAR25 == 4
+			nTipoC			:= "CT" //Comissao de Teste
 		endif
 
 		if MV_PAR07 == MV_PAR08
@@ -112,7 +114,7 @@ Return
 ±±ÉÍÍÍÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍ»±±
 ±±ºFun‡„o    ³RUNREPORT º Autor ³ AP6 IDE            º Data ³  03/05/07   º±±
 ±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
-±±ºDescri‡„o ³ Funcao auxiliar chamada pela RPTSTATUS. A funcao RPTSTATUS º±±
+±±ºDescri‡„o ³ Função auxiliar chamada pela RPTSTATUS. A Função RPTSTATUS º±±
 ±±º          ³ monta a janela com a regua de processamento.               º±±
 ±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
 ±±ºUso       ³ Programa principal                                         º±±
@@ -198,22 +200,25 @@ Static Function RunReport(Cabec1,Cabec2,Titulo,nLin)
 		_cQuery += "       e1_tipo"
 		_cQuery += " from " + 	RetSqlName("SE1")	+ " se1, "
 		_cQuery +=           	RetSqlName("SC5")	+ " sc5,  "
-		_cQuery += " sed010 sed  "		
+		_cQuery += " sed010 sed  "
 		_cQuery += " where e1_emissao BETWEEN '"	+ DtoS(mv_par01) + "' and '" + DtoS(mv_par02) + "'"
 		_cQuery += "   and e1_vencto  BETWEEN '"	+ DtoS(mv_par03) + "' and '" + DtoS(mv_par04) + "'"
 		//_cQuery += "   and E1_NATUREZ not LIKE '1101017%'"  // Rafael - Retira o faturamento spot para calculo
 		_cQuery += "   and e1_baixa       = ' '"
 		_cQuery += "   and e1_filial      = c5_filial and e1_filial = '01' " // Rafael França - Processa apenas filial 01
-		_cQuery += "   and e1_pedido      = c5_num"	
+		_cQuery += "   and e1_pedido      = c5_num"
 		_cQuery += "   and c5_calccom     = 'S'"
 		_cQuery += "   and c5_repasse    <> 'S'"
-		_cQuery += "   and ed_codigo      = e1_naturez   "			
+		_cQuery += "   and ed_codigo      = e1_naturez   "
+		if mv_par25 == 4
+		_cQuery += " 	and c5_naturez in ('1101007','110101701','110101702','1101046','1101050') "
+		endif
 		if mv_par25 == 2
 			_cQuery += "   and sed.ed_tipnat   in ('3','4') "
-		endif	
+		endif
 		if cDtIniV <> ""
-			_cQuery += " and se1.e1_emissao >= " + cDtIniV + " "	
-		endif	
+			_cQuery += " and se1.e1_emissao >= " + cDtIniV + " "
+		endif
 		_cQuery += "   and sed.d_e_l_e_t_ = ' '"
 		_cQuery += "   and se1.d_e_l_e_t_ = ' '"
 		_cQuery += "   and sc5.d_e_l_e_t_ = ' '"
@@ -259,11 +264,11 @@ Static Function RunReport(Cabec1,Cabec2,Titulo,nLin)
 				QRY1->E1_EMISSAO	,;	// 06
 				QRY1->E1_VENCTO		,;	// 07
 				QRY1->E1_VENCREA	,;	// 08
-				(_nSaldoTit * 0.3 ) 	,;	// 09 
+				(_nSaldoTit * 0.3 ) 	,;	// 09
 				QRY1->E1_VEND1		,;	// 10
 				QRY1->E1_BAIXA		,;	// 11
 				QRY1->E1_COMIS1	,;	// 12
-				(QRY1->E1_VALOR  * 0.3 )	})	// 13 
+				(QRY1->E1_VALOR  * 0.3 )	})	// 13
 
 			ELSE
 
@@ -283,7 +288,7 @@ Static Function RunReport(Cabec1,Cabec2,Titulo,nLin)
 
 			ENDIF
 
-			QRY1->(dbSkip()) 
+			QRY1->(dbSkip())
 
 		EndDo
 
@@ -305,7 +310,7 @@ Static Function RunReport(Cabec1,Cabec2,Titulo,nLin)
 		_cQuery += "        e1_tipo"
 		_cQuery += "  from " + RetSqlName("SE1")	+ " se1,"
 		_cQuery +=             RetSqlName("SC5")	+ " sc5,"
-		_cQuery += " sed010 sed  "		
+		_cQuery += " sed010 sed  "
 		_cQuery += "  where e1_emissao BETWEEN '"	+ DtoS(mv_par01) + "' and '" + DtoS(mv_par02) + "'"
 		_cQuery += "    and e1_vencto BETWEEN '"	+ DtoS(mv_par03) + "' and '" + DtoS(mv_par04) + "'"
 		_cQuery += "    and e1_baixa       > '"		+ DtoS(mv_par06) + "'"
@@ -313,14 +318,17 @@ Static Function RunReport(Cabec1,Cabec2,Titulo,nLin)
 		_cQuery += "    and e1_pedido      = c5_num and e1_filial = '01' " // Rafael França - Processa apenas filial 01
 		_cQuery += "    and c5_calccom     = 'S'"
 		_cQuery += "    and c5_repasse    <> 'S'"
-		_cQuery += "   and ed_codigo      = e1_naturez   "			
+		_cQuery += "   and ed_codigo      = e1_naturez   "
+		if mv_par25 == 4
+		_cQuery += " 	and c5_naturez in ('1101007','110101701','110101702','1101046','1101050') "
+		endif
 		if mv_par25 == 2
 			_cQuery += "   and sed.ed_tipnat   in ('3','4') "
-		endif	
+		endif
 		if cDtIniV <> ""
-			_cQuery += "   and se1.e1_emissao >= " + cDtIniV + " "	
-		endif			
-		_cQuery += "   and sed.d_e_l_e_t_ = ' '"		
+			_cQuery += "   and se1.e1_emissao >= " + cDtIniV + " "
+		endif
+		_cQuery += "   and sed.d_e_l_e_t_ = ' '"
 		_cQuery += "    and se1.d_e_l_e_t_ = ' '"
 		_cQuery += "    and sc5.d_e_l_e_t_ = ' '"
 		_cQuery += "  order by e1_emissao, e1_prefixo, e1_num, e1_parcela"
@@ -345,7 +353,7 @@ Static Function RunReport(Cabec1,Cabec2,Titulo,nLin)
 				_nSaldoTit := SaldoTit(SE1->E1_PREFIXO ,SE1->E1_NUM ,SE1->E1_PARCELA ,SE1->E1_TIPO ,SE1->E1_NATUREZ ,"R",SE1->E1_CLIENTE,1,Min(dDataBase,mv_par06),Min(dDataBase,mv_par06),SE1->E1_LOJA,xFilial("SE1")) - SomaAbat(SE1->E1_PREFIXO, SE1->E1_NUM, SE1->E1_PARCELA,"R",SE1->E1_MOEDA,,SE1->E1_CLIENTE,SE1->E1_LOJA)
 			Endif
 
-			IF ALLTRIM(QRY2->E1_NATUREZ) == '1101008' .OR. ALLTRIM(QRY2->E1_NATUREZ) == '1101050'  // .AND. QRY2->E1_NATUREZ <= '110101799' 
+			IF ALLTRIM(QRY2->E1_NATUREZ) == '1101008' .OR. ALLTRIM(QRY2->E1_NATUREZ) == '1101050'  // .AND. QRY2->E1_NATUREZ <= '110101799'
 
 				IF MV_PAR07 == "000211" .AND. MV_PAR08 == "000211" .OR. MV_PAR07 == "000559" .AND. MV_PAR08 == "000559" // Rafael - 16/05/18 - Receita Spot apenas para o vendedor 000211
 
@@ -431,14 +439,17 @@ Static Function RunReport(Cabec1,Cabec2,Titulo,nLin)
 		_cQuery += "   and e1_pedido      = c5_num"
 		_cQuery += "   and c5_calccom     = 'S'"
 		_cQuery += "   and c5_repasse    <> 'S'"
-		_cQuery += "   and ed_codigo      = e1_naturez   "			
+		_cQuery += "   and ed_codigo      = e1_naturez   "
+		if mv_par25 == 4
+		_cQuery += "   and c5_naturez in ('1101007','110101701','110101702','1101046','1101050') "
+		endif
 		if mv_par25 == 2
 			_cQuery += "   and sed.ed_tipnat   in ('3','4') "
-		endif	
+		endif
 		if cDtIniV <> ""
-			_cQuery += "  and se1.e1_emissao >= " + cDtIniV + " "	
-		endif			
-		_cQuery += "   and sed.d_e_l_e_t_ = ' '"		
+			_cQuery += "  and se1.e1_emissao >= " + cDtIniV + " "
+		endif
+		_cQuery += "   and sed.d_e_l_e_t_ = ' '"
 		_cQuery += "   and se1.d_e_l_e_t_ = ' '"
 		_cQuery += "   and sc5.d_e_l_e_t_ = ' '"
 		_cQuery += "   and exists (select 1"
@@ -471,7 +482,7 @@ Static Function RunReport(Cabec1,Cabec2,Titulo,nLin)
 
 			_E1_VALOR	:=	SE1->E1_VALOR
 
-			IF ALLTRIM(BPARC->E1_NATUREZ) == '1101008' .OR. ALLTRIM(BPARC->E1_NATUREZ) == '1101050' // .AND. BPARC->E1_NATUREZ <= '110101799'       
+			IF ALLTRIM(BPARC->E1_NATUREZ) == '1101008' .OR. ALLTRIM(BPARC->E1_NATUREZ) == '1101050' // .AND. BPARC->E1_NATUREZ <= '110101799'
 
 				IF MV_PAR07 == "000211" .AND. MV_PAR08 == "000211" .OR. MV_PAR07 == "000559" .AND. MV_PAR08 == "000559" // Rafael - 16/05/18 - Receita Spot apenas para o vendedor 000211
 
@@ -571,7 +582,7 @@ Static Function RunReport(Cabec1,Cabec2,Titulo,nLin)
 			_cQuery += "  from " + RetSqlName("SE1")	+ " se1,"
 			_cQuery +=             RetSqlName("SC5")	+ " sc5,"
 			_cQuery +=             RetSqlName("SE5")	+ " se5,"
-			_cQuery += " sed010 sed  "			
+			_cQuery += " sed010 sed  "
 			//	_cQuery += " where se1.e1_emissao BETWEEN '"	+ DtoS(mv_par01) + "' and '" + DtoS(mv_par02 - 30) + "'"
 			_cQuery += " where se1.e1_emissao BETWEEN '"	+ DtoS(mv_par01) + "' and '" + DtoS(mv_par02 - F_ULTDIA(mv_par02)) + "'"
 			_cQuery += "   and se1.e1_vencto  BETWEEN '"	+ DtoS(mv_par03) + "' and '" + DtoS(mv_par04) + "'"
@@ -590,14 +601,17 @@ Static Function RunReport(Cabec1,Cabec2,Titulo,nLin)
 			_cQuery += "   and se5.e5_loja     = se1.e1_loja"
 			_cQuery += "   and se5.e5_tipodoc <> 'MT'"
 			_cQuery += "   and se5.e5_situaca <> 'C'" // Nao considerar movimentos cancelados
-			_cQuery += "   and ed_codigo      = e1_naturez   "			
+			_cQuery += "   and ed_codigo      = e1_naturez   "
+			if mv_par25 == 4
+				_cQuery += " 	and c5_naturez in ('1101007','110101701','110101702','1101046','1101050') "
+			endif
 			if mv_par25 == 2
 				_cQuery += "   and sed.ed_tipnat   in ('3','4') "
-			endif		
+			endif
 			if cDtIniV <> ""
-				_cQuery += "   and se1.e1_emissao >= " + cDtIniV + " "	
-			endif			
-			_cQuery += "   and sed.d_e_l_e_t_ = ' '"			
+				_cQuery += "   and se1.e1_emissao >= " + cDtIniV + " "
+			endif
+			_cQuery += "   and sed.d_e_l_e_t_ = ' '"
 			_cQuery += "   and se5.d_e_l_e_t_  = ' '"
 			_cQuery += "   and se1.d_e_l_e_t_  = ' '"
 			_cQuery += "   and sc5.d_e_l_e_t_  = ' '"
@@ -651,7 +665,7 @@ Static Function RunReport(Cabec1,Cabec2,Titulo,nLin)
 					endif
 				endif
 
-				IF ALLTRIM(QRY3->E1_NATUREZ) == '1101008' .OR. ALLTRIM(QRY3->E1_NATUREZ) == '1101050'  // .AND. QRY3->E1_NATUREZ <= '110101799'   
+				IF ALLTRIM(QRY3->E1_NATUREZ) == '1101008' .OR. ALLTRIM(QRY3->E1_NATUREZ) == '1101050'  // .AND. QRY3->E1_NATUREZ <= '110101799'
 
 					IF MV_PAR07 == "000211" .AND. MV_PAR08 == "000211" .OR. MV_PAR07 == "000559" .AND. MV_PAR08 == "000559" // Rafael - 16/05/18 - Receita Spot apenas para o vendedor 000211
 
@@ -703,7 +717,7 @@ Static Function RunReport(Cabec1,Cabec2,Titulo,nLin)
 					QRY3->E1_COMIS1	,;	// 12
 					QRY3->E1_VALOR		})	// 13
 
-				ENDIF 
+				ENDIF
 
 				QRY3->(dbSkip())
 
@@ -756,14 +770,17 @@ Static Function RunReport(Cabec1,Cabec2,Titulo,nLin)
 			_cQuery += "   and c5_calccom     = 'S' "
 			_cQuery += "   and c5_repasse     = 'N' "
 			_cQuery += "   and e1_pedido     <> ' ' "
-			_cQuery += "   and ed_codigo      = e1_naturez   "			
+			_cQuery += "   and ed_codigo      = e1_naturez   "
+			if mv_par25 == 4
+			_cQuery += " 	and c5_naturez in ('1101007','110101701','110101702','1101046','1101050') "
+			endif
 			if mv_par25 == 2
 				_cQuery += "   and sed.ed_tipnat   in ('3','4') "
-			endif	
+			endif
 			if cDtIniV <> ""
-				_cQuery += "   and se1.e1_emissao >= " + cDtIniV + " "	
-			endif					
-			_cQuery += "   and sed.d_e_l_e_t_ = ' '"			
+				_cQuery += "   and se1.e1_emissao >= " + cDtIniV + " "
+			endif
+			_cQuery += "   and sed.d_e_l_e_t_ = ' '"
 			_cQuery += "   and se1.d_e_l_e_t_ = ' ' "
 			_cQuery += "   and sc5.d_e_l_e_t_ = ' ' "
 			_cQuery += "   and exists (select 1"
@@ -825,9 +842,9 @@ Static Function RunReport(Cabec1,Cabec2,Titulo,nLin)
 					endif
 				endif
 
-				IF ALLTRIM(QRY3->E1_NATUREZ) == '1101008' .OR. ALLTRIM(QRY3->E1_NATUREZ) == '1101050'  // .AND. QRY3->E1_NATUREZ <= '110101799'   
+				IF ALLTRIM(QRY3->E1_NATUREZ) == '1101008' .OR. ALLTRIM(QRY3->E1_NATUREZ) == '1101050'  // .AND. QRY3->E1_NATUREZ <= '110101799'
 
-					IF MV_PAR07 == "000211" .AND. MV_PAR08 == "000211" .OR. MV_PAR07 == "000559" .AND. MV_PAR08 == "000559" // Rafael - 16/05/18 - Receita Spot apenas para o vendedor 000211			
+					IF MV_PAR07 == "000211" .AND. MV_PAR08 == "000211" .OR. MV_PAR07 == "000559" .AND. MV_PAR08 == "000559" // Rafael - 16/05/18 - Receita Spot apenas para o vendedor 000211
 
 						aAdd(_aTitulos,{	QRY3->E1_PREFIXO	,;	// 01
 						QRY3->E1_NUM		,;	// 02
@@ -878,7 +895,7 @@ Static Function RunReport(Cabec1,Cabec2,Titulo,nLin)
 					QRY3->E1_COMIS1	    ,;	// 12
 					QRY3->E1_VALOR		})	// 13
 
-				ENDIF    
+				ENDIF
 
 				QRY3->(dbSkip())
 			EndDo
@@ -909,14 +926,17 @@ Static Function RunReport(Cabec1,Cabec2,Titulo,nLin)
 		_cQuery += "   and c5_calccom     = 'S'"
 		_cQuery += "   and c5_filial      = '01'"  //rafael
 		_cQuery += "   and c5_repasse    <> 'S'"
-		_cQuery += "   and ed_codigo      = c5_naturez   "			
+		_cQuery += "   and ed_codigo      = c5_naturez   "
+		if mv_par25 == 4
+		_cQuery += " 	and c5_naturez in ('1101007','110101701','110101702','1101046','1101050') "
+		endif
 		if mv_par25 == 2
 			_cQuery += "   and sed.ed_tipnat   in ('3','4') "
-		endif		
+		endif
 		if cDtIniV <> ""
-			_cQuery += "   and d2_emissao >= " + cDtIniV + " "	
-		endif			
-		_cQuery += "   and sed.d_e_l_e_t_ = ' '"		
+			_cQuery += "   and d2_emissao >= " + cDtIniV + " "
+		endif
+		_cQuery += "   and sed.d_e_l_e_t_ = ' '"
 		_cQuery += "   and sd2.d_e_l_e_t_ = ' '"
 		_cQuery += "   and sc5.d_e_l_e_t_ = ' '"
 		_cQuery += " group by d2_filial, d2_serie, d2_doc, d2_pedido, c5_comis1, c5_repasse, d2_cliente, d2_loja, d2_emissao"
@@ -1030,12 +1050,15 @@ Static Function RatNat()
 	_cQuery += "C5_CALCCOM   = 'S'   AND "
 	_cQuery += "C5_REPASSE   <> 'S'   AND "
 	_cQuery += "E1_MULTNAT <> '1' AND "
+	if mv_par25 == 4
+		_cQuery += " AND C5_NATUREZ IN ('1101007','110101701','110101702','1101046','1101050') "
+	endif
 	if mv_par25 == 2
 		_cQuery += "ED_TIPNAT IN ('3','4') AND "
 	endif
 	if cDtIniV <> ""
-		_cQuery += "  F2_EMISSAO >= " + cDtIniV + " AND "	
-	endif				
+		_cQuery += "  F2_EMISSAO >= " + cDtIniV + " AND "
+	endif
 	_cQuery += "SC5010.D_E_L_E_T_ <> '*' AND "
 	_cQuery += "SF2010.D_E_L_E_T_ <> '*' AND "
 	_cQuery += "SED010.D_E_L_E_T_ <> '*' AND "
@@ -1065,12 +1088,15 @@ Static Function RatNat()
 	_cQuery += "C5_CALCCOM   = 'S'   AND "
 	_cQuery += "C5_REPASSE   <> 'S'   AND "
 	_cQuery += "EV_RECPAG = 'R' AND "
+	if mv_par25 == 4
+		_cQuery += " AND EV_NATUREZ IN ('1101007','110101701','110101702','1101046','1101050') "
+	endif
 	if mv_par25 == 2
 		_cQuery += "ED_TIPNAT IN ('3','4') AND "
-	endif	
+	endif
 	if cDtIniV <> ""
-		_cQuery += "  F2_EMISSAO >= " + cDtIniV + " AND "	
-	endif	
+		_cQuery += "  F2_EMISSAO >= " + cDtIniV + " AND "
+	endif
 	_cQuery += "SC5010.D_E_L_E_T_ <> '*' AND "
 	_cQuery += "SF2010.D_E_L_E_T_ <> '*' AND "
 	_cQuery += "SED010.D_E_L_E_T_ <> '*' AND "
@@ -1103,10 +1129,10 @@ Static Function RatNat()
 		ELSE
 			nNat  := NAT->TOTAL
 		ENDIF
-		cNat  := NAT->NATUREZ 
+		cNat  := NAT->NATUREZ
 		IF ALLTRIM(NAT->NATUREZ) == "1101008" .OR. ALLTRIM(NAT->NATUREZ) == "1101050"
-			cDesc := ALLTRIM(NAT->DESCRIC) + " 70%"	
-		ELSE	
+			cDesc := ALLTRIM(NAT->DESCRIC) + " 70%"
+		ELSE
 			cDesc := NAT->DESCRIC
 		ENDIF
 
@@ -1125,9 +1151,9 @@ Static Function RatNat()
 			DBSkip()
 		EndIf
 
-		IF nNat <> 0 	   
+		IF nNat <> 0
 			@nLin,000 psay cDesc
-			@nLin,045 psay nNat Picture "@E 999,999,999.99"	+ " (+)"  
+			@nLin,045 psay nNat Picture "@E 999,999,999.99"	+ " (+)"
 		ENDIF
 		nLin++
 
@@ -1205,13 +1231,16 @@ Static Function Resumo()
 			_cQuerySpot += "WHERE "
 			_cQuerySpot += "SUBSTRING(C5_NATUREZ,1,7) IN ('1101017','1101046') AND SUBSTRING(E1_NATUREZ,1,7) IN ('1101017','1101046')  AND "
 			_cQuerySpot += "SUBSTRING(F2_EMISSAO,1,6) = '" + SUBSTR(MV_PAR24,1,4) + SUBSTR(MV_PAR24,6,2) + "' and "
+	if mv_par25 == 4
+		_cQuerySpot += " C5_NATUREZ IN ('1101007','110101701','110101702','1101046','1101050') AND "
+	endif
 			IF cDtIniV <> ""
-				_cQuerySpot += "F2_EMISSAO >= " + cDtIniV + " AND "	
-			ENDIF				
+				_cQuerySpot += "F2_EMISSAO >= " + cDtIniV + " AND "
+			ENDIF
 			_cQuerySpot += "C5_FILIAL    = '01'   AND "
 			_cQuerySpot += "C5_CALCCOM   = 'S'   AND "
 			_cQuerySpot += "C5_REPASSE   <> 'S'   AND "
-			_cQuerySpot += "E1_MULTNAT <> '1' AND "	
+			_cQuerySpot += "E1_MULTNAT <> '1' AND "
 			_cQuerySpot += "SC5010.D_E_L_E_T_ <> '*' AND "
 			_cQuerySpot += "SF2010.D_E_L_E_T_ <> '*' AND "
 			_cQuerySpot += "SED010.D_E_L_E_T_ <> '*' AND "
@@ -1219,7 +1248,7 @@ Static Function Resumo()
 			_cQuerySpot += "GROUP BY C5_FILIAL, SUBSTRING(C5_NATUREZ,1,7), ED_DESCRIC "
 
 			_cQuerySpot += "UNION "
-
+			// Union com dados de titulos com rateio SEV
 			_cQuerySpot += "SELECT C5_FILIAL AS FILIAL, SUBSTRING(EV_NATUREZ,1,7) AS NATUREZ, ED_DESCRIC AS DESCRIC, SUM(EV_VALOR) AS TOTAL FROM SC5010 "
 			_cQuerySpot += "INNER JOIN SF2010 ON "
 			_cQuerySpot += "C5_FILIAL = F2_FILIAL AND "
@@ -1237,10 +1266,13 @@ Static Function Resumo()
 			_cQuerySpot += "SUBSTRING(EV_NATUREZ,1,7) = ED_CODIGO "
 			_cQuerySpot += "WHERE "
 			_cQuerySpot += "SUBSTRING(EV_NATUREZ,1,7) IN ('1101017','1101046') AND "
-			_cQuerySpot += "SUBSTRING(F2_EMISSAO,1,6) = '" + SUBSTR(MV_PAR24,1,4) + SUBSTR(MV_PAR24,6,2) + "' and "
+			_cQuerySpot += "SUBSTRING(F2_EMISSAO,1,6) = '" + SUBSTR(MV_PAR24,1,4) + SUBSTR(MV_PAR24,6,2) + "' AND "
+			if mv_par25 == 4
+				_cQuerySpot += " EV_NATUREZ IN ('1101007','110101701','110101702','1101046','1101050') AND "
+			endif
 			IF cDtIniV <> ""
-				_cQuerySpot += "F2_EMISSAO >= " + cDtIniV + " AND "	
-			ENDIF	
+				_cQuerySpot += "F2_EMISSAO >= " + cDtIniV + " AND "
+			ENDIF
 			//_cQuerySpot += "F2_EMISSAO between '" + DtoS(mv_par01) + "' and '" + DtoS(mv_par02) + "' AND "
 			_cQuerySpot += "C5_FILIAL    = '01'   AND "
 			_cQuerySpot += "C5_CALCCOM   = 'S'   AND "
@@ -1299,12 +1331,15 @@ Static Function Resumo()
 			_cQueryRec += "C5_CALCCOM   = 'S'   AND "
 			_cQueryRec += "C5_REPASSE   <> 'S'   AND "
 			_cQueryRec += "E1_MULTNAT <> '1' AND "
+			if mv_par25 == 4
+				_cQueryRec += " C5_NATUREZ IN ('1101007','110101701','110101702','1101046','1101050') AND "
+			endif
 			if mv_par25 == 2
 				_cQueryRec += "ED_TIPNAT IN ('3','4') AND "
 			endif
 			IF cDtIniV <> ""
-				_cQueryRec += "F2_EMISSAO >= " + cDtIniV + " AND "	
-			ENDIF							
+				_cQueryRec += "F2_EMISSAO >= " + cDtIniV + " AND "
+			ENDIF
 			_cQueryRec += "SC5010.D_E_L_E_T_ <> '*' AND "
 			_cQueryRec += "SF2010.D_E_L_E_T_ <> '*' AND "
 			_cQueryRec += "SED010.D_E_L_E_T_ <> '*' AND "
@@ -1331,9 +1366,12 @@ Static Function Resumo()
 			_cQueryRec += "WHERE "
 			_cQueryRec += "SUBSTRING(EV_NATUREZ,1,7) IN ('1101008','1101050') AND "
 			_cQueryRec += "SUBSTRING(F2_EMISSAO,1,6) = '" + SUBSTR(MV_PAR24,1,4) + SUBSTR(MV_PAR24,6,2) + "' and "
+			if mv_par25 == 4
+				_cQueryRec += " EV_NATUREZ IN ('1101007','110101701','110101702','1101046','1101050') AND "
+			endif
 			IF cDtIniV <> ""
-				_cQueryRec += "F2_EMISSAO >= " + cDtIniV + " AND "	
-			ENDIF	
+				_cQueryRec += "F2_EMISSAO >= " + cDtIniV + " AND "
+			ENDIF
 			//_cQueryRec += "F2_EMISSAO between '" + DtoS(mv_par01) + "' and '" + DtoS(mv_par02) + "' AND "
 			_cQueryRec += "C5_FILIAL    = '01'   AND "
 			_cQueryRec += "C5_CALCCOM   = 'S'   AND "
@@ -1341,7 +1379,7 @@ Static Function Resumo()
 			_cQueryRec += "EV_RECPAG = 'R' AND "
 			if mv_par25 == 2
 				_cQueryRec += "ED_TIPNAT IN ('3','4') AND "
-			endif			
+			endif
 			_cQueryRec += "SC5010.D_E_L_E_T_ <> '*' AND "
 			_cQueryRec += "SF2010.D_E_L_E_T_ <> '*' AND "
 			_cQueryRec += "SED010.D_E_L_E_T_ <> '*' AND "
@@ -1392,11 +1430,14 @@ Static Function Resumo()
 			_cQuerySpot += "SUBSTRING(C5_NATUREZ,1,7) = ED_CODIGO "
 			_cQuerySpot += "WHERE "
 			_cQuerySpot += "C5_NATUREZ IN ('1101017') AND E1_NATUREZ IN ('1101017')  AND "
-			_cQuerySpot += "SUBSTRING(F2_EMISSAO,1,6) = '" + SUBSTR(MV_PAR24,1,4) + SUBSTR(MV_PAR24,6,2) + "' AND "				
+			if mv_par25 == 4
+				_cQuerySpot += " C5_NATUREZ IN ('1101007','110101701','110101702','1101046','1101050') AND "
+			endif
+			_cQuerySpot += "SUBSTRING(F2_EMISSAO,1,6) = '" + SUBSTR(MV_PAR24,1,4) + SUBSTR(MV_PAR24,6,2) + "' AND "
 			_cQuerySpot += "C5_FILIAL    = '01'   AND "
 			_cQuerySpot += "C5_CALCCOM   = 'S'   AND "
 			_cQuerySpot += "C5_REPASSE   <> 'S'   AND "
-			_cQuerySpot += "E1_MULTNAT <> '1' AND "	
+			_cQuerySpot += "E1_MULTNAT <> '1' AND "
 			_cQuerySpot += "SC5010.D_E_L_E_T_ <> '*' AND "
 			_cQuerySpot += "SF2010.D_E_L_E_T_ <> '*' AND "
 			_cQuerySpot += "SED010.D_E_L_E_T_ <> '*' AND "
@@ -1422,6 +1463,9 @@ Static Function Resumo()
 			_cQuerySpot += "SUBSTRING(EV_NATUREZ,1,7) = ED_CODIGO "
 			_cQuerySpot += "WHERE "
 			_cQuerySpot += "EV_NATUREZ IN ('1101017') AND "
+			if mv_par25 == 4
+				_cQuerySpot += " EV_NATUREZ IN ('1101007','110101701','110101702','1101046','1101050') AND "
+			endif
 			_cQuerySpot += "SUBSTRING(F2_EMISSAO,1,6) = '" + SUBSTR(MV_PAR24,1,4) + SUBSTR(MV_PAR24,6,2) + "' AND "
 			_cQuerySpot += "C5_FILIAL    = '01'   AND "
 			_cQuerySpot += "C5_CALCCOM   = 'S'   AND "
@@ -1589,14 +1633,14 @@ Static Function Resumo()
 			ENDIF
 
 			IF MV_PAR25 == 2 .AND. nSpotLoc > 0
-			
+
 				nLin ++
 
 				@nLin,000 psay "FATURAMENTO SPOT LOCAL " + _aMeses[Month(mv_par05)] + "/" + Substr(DtoS(mv_par05),1,4)
 				@nLin,055 psay "-------->"
 				@nLin,065 psay nSpotLoc Picture "@E 999,999,999.99" + " (+)"
 
-			ENDIF			
+			ENDIF
 
 		ENDIF
 
@@ -1615,7 +1659,7 @@ Static Function Resumo()
 			nComiss20 := NAT->COMISSAO
 
 			@nLin,000 psay "COMISSAO DE AGENCIA - 20%"
-			@nLin,055 psay "-------->"	
+			@nLin,055 psay "-------->"
 			@nLin,065 psay nComiss20 Picture "@E 999,999,999.99" + " (-)"
 
 			nLin ++
@@ -2112,13 +2156,13 @@ Static Function ImpParam()
 	@nLin++, 005 psay "09 - Emissão/Baixa        : " + iif(mv_par09==1,"1-Emissao","2-Baixa")
 	@nLin++, 005 psay "10 - Tipo Vendedor        : " + iif(mv_par10==1,"1-Vendedor CLT","2-Vendedor PJ")
 	@nLin++, 005 psay "11 - Assinatura 1         : " + mv_par11
-	@nLin++, 005 psay "12 - Funcao 1             : " + mv_par12
+	@nLin++, 005 psay "12 - Função 1             : " + mv_par12
 	@nLin++, 005 psay "13 - Assinatura 2         : " + mv_par13
-	@nLin++, 005 psay "14 - Funcao 2             : " + mv_par14
+	@nLin++, 005 psay "14 - Função 2             : " + mv_par14
 	@nLin++, 005 psay "15 - Assinatura 3         : " + mv_par15
-	@nLin++, 005 psay "16 - Funcao 3             : " + mv_par16
+	@nLin++, 005 psay "16 - Função 3             : " + mv_par16
 	@nLin++, 005 psay "17 - Assinatura 4         : " + mv_par17
-	@nLin++, 005 psay "18 - Funcao 4             : " + mv_par18
+	@nLin++, 005 psay "18 - Função 4             : " + mv_par18
 	@nLin++, 005 psay "19 - Geracao no Mes       : " + iif(mv_par21==1,"1-Primeira","2-Segunda")
 	@nLin++, 005 psay "20 - Informacao 1         : " + mv_par22
 	@nLin++, 005 psay "21 - Informacao 2         : " + mv_par23
@@ -2524,8 +2568,8 @@ Static Function Vend()
 
 	_nRepass	:= _nRepas
 	//_nFatLiq	:= _nFat + nNatSpot //Alterado conforme Elisangela solicitou Bruno Alves 07/03/2013
-	_nFatLiq	:= _nBase  
-	_nFatLiq	:= _nFat + nNatSpot + nSpotLoc + (nRecSpot * 0.7) // Rafael França - 17/12/18 - Correção da base para calcular o percentual da comissão. 
+	_nFatLiq	:= _nBase
+	_nFatLiq	:= _nFat + nNatSpot + nSpotLoc + (nRecSpot * 0.7) // Rafael França - 17/12/18 - Correção da base para calcular o percentual da comissão.
 
 	While !QRV->(Eof())
 
@@ -2579,31 +2623,31 @@ Static Function ValidPerg()
 	dbSetOrder(1)
 	cPerg := PADR(cPerg,10)
 
-	aAdd(aRegs,{cPerg,"01","Da Emissão Titulos  ?","","","mv_ch1","D",08,00,0,"G","","mv_par01","","","","","","","","","","","","","","","","","","","","","","","","","",""})
-	aAdd(aRegs,{cPerg,"02","Até Emissão Titulos ?","","","mv_ch2","D",08,00,0,"G","","mv_par02","","","","","","","","","","","","","","","","","","","","","","","","","",""})
-	aAdd(aRegs,{cPerg,"03","Do Venc. Titulos    ?","","","mv_ch3","D",08,00,0,"G","","mv_par03","","","","","","","","","","","","","","","","","","","","","","","","","",""})
-	aAdd(aRegs,{cPerg,"04","Até Venc. Titulos   ?","","","mv_ch4","D",08,00,0,"G","","mv_par04","","","","","","","","","","","","","","","","","","","","","","","","","",""})
-	aAdd(aRegs,{cPerg,"05","Dt da Baixa Inicial ?","","","mv_ch5","D",08,00,0,"G","","mv_par05","","","","","","","","","","","","","","","","","","","","","","","","","",""})
-	aAdd(aRegs,{cPerg,"06","Dt da Baixa Final   ?","","","mv_ch6","D",08,00,0,"G","","mv_par06","","","","","","","","","","","","","","","","","","","","","","","","","",""})
-	aAdd(aRegs,{cPerg,"07","Do Vendedor Interno ?","","","mv_ch7","C",06,00,0,"G","","mv_par07","","","","","","","","","","","","","","","","","","","","","","","","","SA3",""})
-	aAdd(aRegs,{cPerg,"08","Ate Vendedor Interno?","","","mv_ch8","C",06,00,0,"G","","mv_par08","","","","","","","","","","","","","","","","","","","","","","","","","SA3",""})
-	aAdd(aRegs,{cPerg,"09","Emissão/Baixa       ?","","","mv_ch9","N",01,00,1,"C","","mv_par09","Emissao","","","","","Baixa","","","","","","","","","","","","","","","","","","","" })
-	aAdd(aRegs,{cPerg,"10","Tipo Vendedor       ?","","","mv_cha","N",01,00,1,"C","","mv_par10","Vendedor CLT","","","","","Vendedor PJ","","","","","","","","","","","","","","","","","","","" })
-	aAdd(aRegs,{cPerg,"11","Assinatura 1        ?","","","mv_chb","C",20,00,0,"G","","mv_par11","","","","","","","","","","","","","","","","","","","","","","","","","",""})
-	aAdd(aRegs,{cPerg,"12","Funcao 1            ?","","","mv_chc","C",20,00,0,"G","","mv_par12","","","","","","","","","","","","","","","","","","","","","","","","","",""})
-	aAdd(aRegs,{cPerg,"13","Assinatura 2        ?","","","mv_chd","C",20,00,0,"G","","mv_par13","","","","","","","","","","","","","","","","","","","","","","","","","",""})
-	aAdd(aRegs,{cPerg,"14","Funcao 2            ?","","","mv_che","C",20,00,0,"G","","mv_par14","","","","","","","","","","","","","","","","","","","","","","","","","",""})
-	aAdd(aRegs,{cPerg,"15","Assinatura 3        ?","","","mv_chf","C",20,00,0,"G","","mv_par15","","","","","","","","","","","","","","","","","","","","","","","","","",""})
-	aAdd(aRegs,{cPerg,"16","Funcao 3            ?","","","mv_chg","C",20,00,0,"G","","mv_par16","","","","","","","","","","","","","","","","","","","","","","","","","",""})
-	aAdd(aRegs,{cPerg,"17","Assinatura 4        ?","","","mv_chh","C",20,00,0,"G","","mv_par17","","","","","","","","","","","","","","","","","","","","","","","","","",""})
-	aAdd(aRegs,{cPerg,"18","Funcao 4            ?","","","mv_chi","C",20,00,0,"G","","mv_par18","","","","","","","","","","","","","","","","","","","","","","","","","",""})
-	aAdd(aRegs,{cPerg,"19","Assinatura 5        ?","","","mv_chj","C",20,00,0,"G","","mv_par19","","","","","","","","","","","","","","","","","","","","","","","","","",""})
-	aAdd(aRegs,{cPerg,"20","Funcao 5            ?","","","mv_chk","C",20,00,0,"G","","mv_par20","","","","","","","","","","","","","","","","","","","","","","","","","",""})
-	aAdd(aRegs,{cPerg,"21","Geracao no Mes      ?","","","mv_chl","N",01,00,1,"C","","mv_par21","Primeira","","","","","Segunda","","","","","","","","","","","","","","","","","","","",""})
-	aAdd(aRegs,{cPerg,"22","Informacao 1        ?","","","mv_chm","C",50,00,0,"G","","mv_par22","","","","","","","","","","","","","","","","","","","","","","","","","",""})
-	aAdd(aRegs,{cPerg,"23","Informacao 2        ?","","","mv_chn","C",50,00,0,"G","","mv_par23","","","","","","","","","","","","","","","","","","","","","","","","","",""})
-	aAdd(aRegs,{cPerg,"24","Ano/Mes Grava Comis.?","","","mv_cho","C",07,00,0,"G","","mv_par24","","","","","","","","","","","","","","","","","","","","","","","","","",""})
-	aAdd(aRegs,{cPerg,"25","Tipo comissão       ?","","","mv_chp","N",01,00,1,"C","","mv_par25","Geral","","","","","Varejo","","","","","Por Data","","","","","","","","","","","","","","",""})
+	aAdd(aRegs,{cPerg,"01","Da Emissão:			","","","mv_ch1","D",08,00,0,"G","","mv_par01","","","","","","","","","","","","","","","","","","","","","","","","","",""})
+	aAdd(aRegs,{cPerg,"02","Até a Emissão:		","","","mv_ch2","D",08,00,0,"G","","mv_par02","","","","","","","","","","","","","","","","","","","","","","","","","",""})
+	aAdd(aRegs,{cPerg,"03","Do Vencimento:		","","","mv_ch3","D",08,00,0,"G","","mv_par03","","","","","","","","","","","","","","","","","","","","","","","","","",""})
+	aAdd(aRegs,{cPerg,"04","Até o Vencimento:	","","","mv_ch4","D",08,00,0,"G","","mv_par04","","","","","","","","","","","","","","","","","","","","","","","","","",""})
+	aAdd(aRegs,{cPerg,"05","Da Baixa:		 	","","","mv_ch5","D",08,00,0,"G","","mv_par05","","","","","","","","","","","","","","","","","","","","","","","","","",""})
+	aAdd(aRegs,{cPerg,"06","Até a Baixa:		","","","mv_ch6","D",08,00,0,"G","","mv_par06","","","","","","","","","","","","","","","","","","","","","","","","","",""})
+	aAdd(aRegs,{cPerg,"07","Do Vendedor:		","","","mv_ch7","C",06,00,0,"G","","mv_par07","","","","","","","","","","","","","","","","","","","","","","","","","SA3",""})
+	aAdd(aRegs,{cPerg,"08","Até o Vendedor:		","","","mv_ch8","C",06,00,0,"G","","mv_par08","","","","","","","","","","","","","","","","","","","","","","","","","SA3",""})
+	aAdd(aRegs,{cPerg,"09","Emissão/Baixa:      ","","","mv_ch9","N",01,00,1,"C","","mv_par09","Emissao","","","","","Baixa","","","","","","","","","","","","","","","","","","","" })
+	aAdd(aRegs,{cPerg,"10","Tipo Vendedor:      ","","","mv_cha","N",01,00,1,"C","","mv_par10","Vendedor CLT","","","","","Vendedor PJ","","","","","","","","","","","","","","","","","","","" })
+	aAdd(aRegs,{cPerg,"11","Assinatura 1:       ","","","mv_chb","C",20,00,0,"G","","mv_par11","","","","","","","","","","","","","","","","","","","","","","","","","",""})
+	aAdd(aRegs,{cPerg,"12","Função 1:           ","","","mv_chc","C",20,00,0,"G","","mv_par12","","","","","","","","","","","","","","","","","","","","","","","","","",""})
+	aAdd(aRegs,{cPerg,"13","Assinatura 2:       ","","","mv_chd","C",20,00,0,"G","","mv_par13","","","","","","","","","","","","","","","","","","","","","","","","","",""})
+	aAdd(aRegs,{cPerg,"14","Função 2:           ","","","mv_che","C",20,00,0,"G","","mv_par14","","","","","","","","","","","","","","","","","","","","","","","","","",""})
+	aAdd(aRegs,{cPerg,"15","Assinatura 3:       ","","","mv_chf","C",20,00,0,"G","","mv_par15","","","","","","","","","","","","","","","","","","","","","","","","","",""})
+	aAdd(aRegs,{cPerg,"16","Função 3:           ","","","mv_chg","C",20,00,0,"G","","mv_par16","","","","","","","","","","","","","","","","","","","","","","","","","",""})
+	aAdd(aRegs,{cPerg,"17","Assinatura 4:       ","","","mv_chh","C",20,00,0,"G","","mv_par17","","","","","","","","","","","","","","","","","","","","","","","","","",""})
+	aAdd(aRegs,{cPerg,"18","Função 4:           ","","","mv_chi","C",20,00,0,"G","","mv_par18","","","","","","","","","","","","","","","","","","","","","","","","","",""})
+	aAdd(aRegs,{cPerg,"19","Assinatura 5:       ","","","mv_chj","C",20,00,0,"G","","mv_par19","","","","","","","","","","","","","","","","","","","","","","","","","",""})
+	aAdd(aRegs,{cPerg,"20","Função 5:           ","","","mv_chk","C",20,00,0,"G","","mv_par20","","","","","","","","","","","","","","","","","","","","","","","","","",""})
+	aAdd(aRegs,{cPerg,"21","Geração no Mês:     ","","","mv_chl","N",01,00,1,"C","","mv_par21","Primeira","","","","","Segunda","","","","","","","","","","","","","","","","","","","",""})
+	aAdd(aRegs,{cPerg,"22","Informação 1:       ","","","mv_chm","C",50,00,0,"G","","mv_par22","","","","","","","","","","","","","","","","","","","","","","","","","",""})
+	aAdd(aRegs,{cPerg,"23","Informação 2:       ","","","mv_chn","C",50,00,0,"G","","mv_par23","","","","","","","","","","","","","","","","","","","","","","","","","",""})
+	aAdd(aRegs,{cPerg,"24","Ano/Mês Comissão:	","","","mv_cho","C",07,00,0,"G","","mv_par24","","","","","","","","","","","","","","","","","","","","","","","","","",""})
+	aAdd(aRegs,{cPerg,"25","Tipo Comissão:      ","","","mv_chp","N",01,00,1,"C","","mv_par25","Geral","","","","","Varejo","","","","","Por Data","","","","","Teste","","","","","","","","","",""})
 
 	For i:=1 to Len(aRegs)
 		If !dbSeek(cPerg+aRegs[i,2])
