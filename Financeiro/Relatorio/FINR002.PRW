@@ -3,11 +3,10 @@
 #INCLUDE 'RPTDEF.CH'
 
 
-
 #DEFINE REL_VERT_STD 16
 #DEFINE REL_START  65
 //#DEFINE REL_END 560 //Paisagem
-#DEFINE REL_END 700 //Retrato
+#DEFINE REL_END 770 //Retrato
 #DEFINE REL_RIGHT 820
 #DEFINE REL_LEFT 10
 
@@ -21,7 +20,6 @@ Relatorio totalizador do repasse
 /*/
 User Function FINR002()
 
-	Local oSay      := Nil
 	Local _cPerg    := "FINR002B"
 
 	Private oPrint
@@ -33,11 +31,9 @@ User Function FINR002()
 	Private oFonte10 	:= u_xFonte(10,,,,"Arial")
 	Private oFonte10N 	:= u_xFonte(10,.T.,,,"Arial")
 
-
 	//If !lLogin
 	//PREPARE ENVIRONMENT EMPRESA "01" FILIAL "01" MODULO "FIN"
 	//EndIf
-
 
 	// Cria e abre a tela de pergunta
 	ValidPerg( _cPerg )
@@ -46,13 +42,9 @@ User Function FINR002()
 		Return
 	EndIf
 
-
 	FwMsgRun(Nil, { || fProcPDF() }, "Processando", "Emitindo relatorio em PDF..." )
 
-
-
 Return
-
 
 /*/{Protheus.doc} fProcPdf
 imprimir relatorio em pdf
@@ -64,28 +56,23 @@ imprimir relatorio em pdf
 /*/
 Static Function fProcPdf()
 
-
 	Local nTotRat   := 0
 	Local nTotal    := 0
 	Local nRegAtu	:= 0
 	Local nTotReg	:= 0
 	Local cDir 		:= Alltrim(MV_PAR04) + "\"
 	Local cTipo 	:= ""
-
 	Local cAssin1 := ""
 	Local cAssin2 := ""
 	Local cAssin3 := ""
 	Local cAssin4 := ""
-
 	Local cCargo1 := ""
 	Local cCargo2 := ""
 	Local cCargo3 := ""
 	Local cCargo4 := ""
 
-
 	Private cTmp1     	:= GetNextAlias()
 	Private cPeriodo 	:= SUBSTRING(DTOS(MV_PAR01),5,2) + SUBSTRING(DTOS(MV_PAR01),1,4)
-	Private cPerTitulo	:= SUBSTRING(DTOS(MV_PAR01),5,2) + "/" + SUBSTRING(DTOS(MV_PAR01),1,4)
 
 	// Query para buscar as informações
 	GetData(cPeriodo,MV_PAR02,MV_PAR03)
@@ -113,7 +100,6 @@ Static Function fProcPdf()
 
 	While (cTmp1)->(!Eof())
 
-
 		nRegAtu++
 		// Atualiza regua de processamento
 		IncProc( "Imprimindo Registro " + cValToChar( nRegAtu ) + " De " + cValToChar( nTotReg ) + " [" + StrZero( Round( ( nRegAtu / nTotReg ) * 100 , 0 ) , 3 ) +"%]" )
@@ -121,10 +107,9 @@ Static Function fProcPdf()
 		oPrint:Say( nLin,020, (cTmp1)->ZAF_CODIGO			  				  ,oFonte)
 		oPrint:Say( nLin,060, (cTmp1)->TIPO  					  			  ,oFonte)
 		oPrint:Say( nLin,110, (cTmp1)->ZAF_DESCRI				  			  ,oFonte)
-		oPrint:Say( nLin,350, (cTmp1)->ZAF_CITY					  			  ,oFonte)
+		oPrint:Say( nLin,330, (cTmp1)->ZAF_CITY					  			  ,oFonte)
 		oPrint:Say( nLin,460, (cTmp1)->ZAF_EST 					  			  ,oFonte)
 		oPrint:Say( nLin,520, PADL(Transform( (cTmp1)->VALOR, "@E 999,999,999.99"),14) ,oFonte)
-
 
 		nLin += REL_VERT_STD
 
@@ -149,7 +134,6 @@ Static Function fProcPdf()
 
 			nLin += REL_VERT_STD
 			nLin += REL_VERT_STD
-
 
 		EndIf
 
@@ -218,7 +202,6 @@ Static Function fProcPdf()
 		oPrint:Say( nLin,470, PADC(cAssin4,40) ,oFonte10)
 	EndIf
 
-
 	nLin += REL_VERT_STD
 
 	If !Empty(cCargo1)
@@ -245,30 +228,24 @@ Static Function fProcPdf()
 Return
 
 /*/{Protheus.doc} ImpProxPag
-
     Imprime cabeçlho da proxima pagina
-
     @author  Bruno Alves de Oliveira
     @since   28-08-2020
 /*/
 
-
 Static Function ImpProxPag()
-
 
 	nPag++
 	oPrint:StartPage()
-	cSubTitle := "DEPARTAMENTO: FINANCEIRO"
-	nLin := u_PXCABECA(@oPrint, "REPASSE A PAGAR - FATURAMENTO DE " + Alltrim(cPerTitulo) , cSubTitle  , nPag)
-
+	cSubTitle := "COMPETÊNCIA: " + UPPER(Alltrim(MesExtenso(Val(Substring(cPeriodo,1,2))))) + "/" + Substring(cPeriodo,3,4)
+	nLin := u_PXCABECA(@oPrint, "REPASSE A PAGAR REFERENTE- FATURAMENTO SPOT", cSubTitle  , nPag)
 
 	oPrint:Say( nLin,020, "PRAÇA",oFonteN)
 	oPrint:Say( nLin,060, "STATUS",oFonteN)
 	oPrint:Say( nLin,110, "TV",oFonteN)
-	oPrint:Say( nLin,350, "CIDADE",oFonteN)
+	oPrint:Say( nLin,330, "CIDADE",oFonteN)
 	oPrint:Say( nLin,460, "ESTADO",oFonteN)
 	oPrint:Say( nLin,540, "VALOR",oFonteN)
-
 
 	oPrint:line(nLin+5,REL_LEFT,nLin+5,REL_RIGHT )
 
@@ -305,15 +282,11 @@ Static Function GetData(cPeriodo,cPracaDe,cPracaAte)
 	ZAH.D_E_L_E_T_ = ''
 	GROUP BY ZAF_CODIGO,ZAF_TIPO,ZAF_DESCRI,ZAF_CITY,ZAF_EST
 	HAVING SUM(ZAH_VLRAT) > 0
-	ORDER BY ZAF_TIPO,7
+	ORDER BY ZAF_TIPO, VALOR DESC
 
 	EndSql
 
-
-
 Return
-
-
 
 /*/{Protheus.doc} ValidPerg
 //TODO Funï¿½ï¿½o que cria as perguntas.
@@ -324,6 +297,7 @@ Return
 @param cPerg, characters, descricao
 @type function
 /*/
+
 Static Function ValidPerg(cPerg)
 
 	Local aArea	:= GetArea()
@@ -342,7 +316,6 @@ Static Function ValidPerg(cPerg)
 	aAdd(aRegs,{cPerg,"07", "Assinatura 3?"		 , "",         "",        "mv_ch7", "C",  06,      00,      0,      "G", "",     "mv_par07", "",       "",       "",       "",    "",    "",       "",       "",       "",    "",    "",    "",       "",       "",       "",    "",    "",       "",       "",    "",    "",    "",       "",       "",    "USR",       "",   "",      "",   "",      ""   })
 	aAdd(aRegs,{cPerg,"08", "Assinatura 4?"		 , "",         "",        "mv_ch8", "C",  06,      00,      0,      "G", "",     "mv_par08", "",       "",       "",       "",    "",    "",       "",       "",       "",    "",    "",    "",       "",       "",       "",    "",    "",       "",       "",    "",    "",    "",       "",       "",    "USR",       "",   "",      "",   "",      ""   })
 
-
 	For i:=1 to Len(aRegs)
 		If !dbSeek(PADR(cPerg,10)+aRegs[i,2])
 			RecLock("SX1",.T.)
@@ -354,5 +327,7 @@ Static Function ValidPerg(cPerg)
 			MsUnlock()
 		Endif
 	Next
+
 	RestArea(aArea)
+
 Return()
