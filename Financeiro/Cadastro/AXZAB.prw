@@ -194,7 +194,7 @@ Else
 
 		dbSelectArea("ZAB")
 		dBSetOrder(1)
-		If !dbSeek(xFilial("ZAB") + "FOL" + TMPBV->DOCUMENTO + "   " + "   " + TMPBV->MATRICULA + "  ") .AND. TMPBV->MATRICULA <> "000784"
+		If !dbSeek(xFilial("ZAB") + "FOL" + ALLTRIM(TMPBV->DOCUMENTO)  + "   " + "   " + "   " + ALLTRIM(TMPBV->MATRICULA) + "  ")
 			Reclock("ZAB",.T.)
 			ZAB->ZAB_FILIAL := xFilial("ZAB")
 			ZAB->ZAB_PREFIX := "FOL"
@@ -217,7 +217,7 @@ Else
 			ZAB->ZAB_LOCAL	:= TMPBV->VALOR
 			ENDIF
 			MsUnlock()
-		ELSEIF dbSeek(xFilial("ZAB") + "FOL" + TMPBV->DOCUMENTO + "   " + "   " + TMPBV->MATRICULA + "  ") .AND. TMPBV->MATRICULA <> "000784"
+		ELSEIF dbSeek(xFilial("ZAB") + "FOL" + ALLTRIM(TMPBV->DOCUMENTO) + "   " + "   " + "   " + ALLTRIM(TMPBV->MATRICULA) + "  ")
 			Reclock("ZAB",.F.)
 			ZAB->ZAB_NOME	:= TMPBV->NOME
 			ZAB->ZAB_EMISSA := STOD(TMPBV->DTPAG)
@@ -466,7 +466,7 @@ User Function RGOVVAR
 		return
 	ENDIF
     // Pedro Leonardo - 17/09/21 - Solicitação Elenn para alterar o titulo do relatorio
-	titulo := UPPER( "BV descontado equipe de vendas - Período " + DTOC(MV_PAR01) + " - " + DTOC(MV_PAR02) + )
+	titulo := UPPER( "BV descontado equipe de vendas - Período " + DTOC(MV_PAR01) + " - " + DTOC(MV_PAR02))
 
 	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 	//³ Monta a interface padrao com o usuario...                           ³
