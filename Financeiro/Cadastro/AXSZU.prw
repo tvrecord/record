@@ -237,11 +237,13 @@ User Function RELBV
 	If Eof()
 		MsgInfo("Nao existem dados a serem impressos!","Verifique")
 		dbSelectArea("TMP")
-		dbCloseArea("TMP")
+		dbCloseArea()
 		Return
 	Endif
 
 	If nLastKey == 27
+		dbSelectArea("TMP")
+		dbCloseArea()
 		Return
 	Endif
 
