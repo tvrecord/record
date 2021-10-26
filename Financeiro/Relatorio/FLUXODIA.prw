@@ -119,7 +119,7 @@ Static Function Relatorio()
 //ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 
 cQuery := "SELECT E5_FILIAL,E5_DATA,E5_NATUREZ,ED_DESCRIC,E5_BANCO,E5_AGENCIA,E5_CONTA,E5_FILIAL, "
-cQuery += "E5_PREFIXO,E5_NUMERO,E5_TIPO,E5_PARCELA,E5_RECPAG,E5_CLIFOR,E5_LOJA,E5_HISTOR,ED_NATGER, "
+cQuery += "E5_PREFIXO,E5_NUMERO,E5_TIPO,E5_PARCELA,E5_RECPAG,E5_CLIFOR,E5_LOJA,E5_HISTOR,ED_NATGER, E5_ORIGEM, "
 cQuery += "E5_VALOR,E5_SEQ "
 cQuery += "FROM SE5010 "
 cQuery += "INNER JOIN SED010 ON "
@@ -205,9 +205,9 @@ COUNT TO nRec
 If nRec != 0 .OR. nVec != 0 // Não permite imprimir o relatório caso alguma informação esteja duplicada!
 	Alert("Existe informações duplicadas no cadastro de Previsões, favor corrigi-las")
 	DBSELECTAREA("DUPPREV")
-	DBCloseArea("DUPPREV")
+	DBCloseArea()
 	DBSELECTAREA("DUPPREV1")
-	DBCloseArea("DUPPREV1")
+	DBCloseArea()
 	REturn
 EndIf
 
@@ -523,7 +523,7 @@ DBGotop()
 
 While !EOF() .AND. DATAVALIDA(STOD(REALIZ->E5_DATA)) < MV_PAR27
 
-	If TemBxCanc(REALIZ->(E5_PREFIXO+E5_NUMERO+E5_PARCELA+E5_TIPO+E5_CLIFOR+E5_LOJA+E5_SEQ)) .AND. REALIZ->E5_NATUREZ <> "1205005"
+	If (TemBxCanc(REALIZ->(E5_PREFIXO+E5_NUMERO+E5_PARCELA+E5_TIPO+E5_CLIFOR+E5_LOJA+E5_SEQ)) .OR. REALIZ->E5_ORIGEM = "FINA100" ) .AND. REALIZ->E5_NATUREZ <> "1205005"
 		REALIZ->(dbSkip())
 		Loop
 	EndIf
@@ -790,7 +790,7 @@ While !TMP->(EOF())
 			nVlComp := aREt[i][2] - nVlComp
 
 			If nVlComp <= 0
-				nVlComp * (-1)
+				nVlComp * -1
 
 			else
 
@@ -1218,27 +1218,27 @@ EndIf
 //DBSelectArea("TMP1")
 //DBCloseARea("TMP1")
 DBSelectArea("TMP")
-DBCloseARea("TMP")
+DBCloseARea()
 DBSelectArea("FIN")
-DBCloseARea("FIN")
+DBCloseARea()
 DBSelectArea("DUPPREV")
-DBCloseARea("DUPPREV")
+DBCloseARea()
 DBSelectArea("DUPPREV1")
-DBCloseARea("DUPPREV1")
+DBCloseARea()
 DBSelectArea("CONTR")
-DBCloseARea("CONTR")
+DBCloseARea()
 DBSelectArea("AENT")
-DBCloseARea("AENT")
+DBCloseARea()
 DBSelectArea("PREV")
-DBCloseARea("PREV")
+DBCloseARea()
 DBSelectArea("ANTAENT")
-DBCloseARea("ANTAENT")
+DBCloseARea()
 DBSelectArea("ANTCONTR")
-DBCloseARea("ANTCONTR")
+DBCloseARea()
 DBSelectArea("REALIZ")
-DBCloseARea("REALIZ")
+DBCloseARea()
 DBSelectArea("CHEQUE")
-DBCloseARea("CHEQUE")
+DBCloseARea()
 
 
 //__CopyFIle(cArq , AllTrim(GetTempPath())+_ctemp+".XLS")
@@ -1358,7 +1358,7 @@ If POSICIONE("SED",1,xFilial("SED") + PREV->ZA6_NATURE,"ED_PREVISA") == "2" // F
 		EndIf
 
 		DBSelectArea("OKCON")
-		DBCLOSEAREA("OKCON")
+		DBCLOSEAREA()
 
 		DBSelectArea("ABAT")
 
@@ -1481,7 +1481,7 @@ ELSEIF POSICIONE("SED",1,xFilial("SED") + PREV->ZA6_NATURE,"ED_PREVISA") == "1" 
 		EndIf
 
 		DBSelectArea("OKCON")
-		DBCLOSEAREA("OKCON")
+		DBCLOSEAREA()
 
 		DBSelectArea("ABAT")
 
@@ -1523,7 +1523,7 @@ ELSEIF POSICIONE("SED",1,xFilial("SED") + PREV->ZA6_NATURE,"ED_PREVISA") == "1" 
 Endif
 
 DBSElectArea("ABAT")
-DBCloseArea("ABAT")
+DBCloseArea()
 
 
 Return(nValAbat)
@@ -1675,7 +1675,7 @@ ELSEIF POSICIONE("SED",1,xFilial("SED") + PREV->ZA6_NATURE,"ED_PREVISA") == "1" 
 EndIf
 
 DBSElectArea("ABAT")
-DBCloseArea("ABAT")
+DBCloseArea()
 
 Return(nValAbat)
 
@@ -1695,7 +1695,7 @@ tcQuery cQuery New Alias "ABAT1"
 nValAbat := ABAT1->E2_VALOR
 
 DBSElectArea("ABAT1")
-DBCloseArea("ABAT1")
+DBCloseArea()
 
 Return(nValAbat)
 
@@ -1729,7 +1729,7 @@ tcQuery cQuery New Alias "ABATSE5"
 nValSE5 := ABATSE5->VALOR
 
 DBSElectArea("ABATSE5")
-DBCloseArea("ABATSE5")
+DBCloseArea()
 
 Return(nValSE5)
 
