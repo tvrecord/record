@@ -36,7 +36,7 @@ Local	_nFatLiq		:= 0
 Local aMeses		:=	{	{"01","Jan"},{"02","Fev"},{"03","Mar"},{"04","Abr"},{"05","Mai"},{"06","Jun"},;
 								{"07","Jul"},{"08","Ago"},{"09","Set"},{"10","Out"},{"11","Nov"},{"12","Dez"} }
 
-Private	cPerg		:= "CALFLR3" // Calculo Faturamento Liquido Record
+Private	cPerg		:= "CALFLR" // Calculo Faturamento Liquido Record
 Private cTipo       := ""
 
 ValidPerg()
@@ -95,6 +95,8 @@ elseif mv_par05 == 1
 cTipo	:= "CI" //Comissão Geral
 elseif mv_par05 == 3
 cTipo	:= "CD" //Comissão Por Data
+elseif mv_par05 == 4
+cTipo	:= "CT" //Comissão de Teste
 endif
 
 dDataFim		:= StoD(dDataFim)
@@ -112,6 +114,9 @@ _Qry += "   and sd2.d_e_l_e_t_  = ' ' "
 _Qry += "   and sc5.d_e_l_e_t_  = ' ' "
 _Qry += "   and sc5.c5_filial   = '" + xFilial("SC5") + "' "
 _Qry += "   and sd2.d2_filial   = '" + xFilial("SD2") + "' "
+if mv_par05 == 4
+_Qry += " 	and sc5.c5_naturez in ('1101007','110101701','110101702','1101046','1101050') "
+endif
 if mv_par05 == 2
 _Qry += "   and sed.ed_tipnat  in ('3','4') "
 endif
@@ -158,8 +163,11 @@ _Qry += "   and sd2.d2_filial   = '" + xFilial("SD2") + "' "
 _Qry += "   and sd2.d_e_l_e_t_  = ' ' "
 _Qry += "   and sc5.d_e_l_e_t_  = ' ' "
 _Qry += "   and sed.d_e_l_e_t_  = ' ' "
+if mv_par05 == 4
+_Qry += " 	and sc5.c5_naturez in ('1101007','110101701','110101702','1101046','1101050') "
+endif
 if mv_par05 == 2
-_Qry += "   and sed.ed_tipnat   in ('3','4') "
+_Qry += "   and sed.ed_tipnat in ('3','4') "
 endif
 _Qry := ChangeQuery(_Qry)
 
@@ -235,11 +243,11 @@ dbSetOrder(1)
 
 cPerg := PadR(cPerg,10)
 
-aAdd(aRegs,{cPerg,"01","Mes de Referencia  ?","","","mv_ch1","C",02,00,0,"G","","mv_par01","","","","","","","","","","","","","","","","","","","","","","","","","",""})
-aAdd(aRegs,{cPerg,"02","Ano de Referencia  ?","","","mv_ch2","C",04,00,0,"G","","mv_par02","","","","","","","","","","","","","","","","","","","","","","","","","",""})
-aAdd(aRegs,{cPerg,"03","BV/DESC ou ABAT ?","","","mv_ch3","N",14,02,0,"C","","mv_par03","","","","","","","","","","","","","","","","","","","","","","","","","",""})
-aAdd(aRegs,{cPerg,"04","PIS e COFINS % ?","","","mv_ch4","N",05,02,0,"C","","mv_par04","","","","","","","","","","","","","","","","","","","","","","","","","",""})
-aAdd(aRegs,{cPerg,"05","Tipo comissão       ?","","","mv_ch5","N",01,00,1,"C","","mv_par05","Geral","","","","","Varejo","","","","","Por Data","","","","","","","","","","","","","","",""})
+aAdd(aRegs,{cPerg,"01","Mês de Referência:	","","","mv_ch1","C",02,00,0,"G","","mv_par01","","","","","","","","","","","","","","","","","","","","","","","","","",""})
+aAdd(aRegs,{cPerg,"02","Ano de Referência:	","","","mv_ch2","C",04,00,0,"G","","mv_par02","","","","","","","","","","","","","","","","","","","","","","","","","",""})
+aAdd(aRegs,{cPerg,"03","BV/DESC ou ABAT:	","","","mv_ch3","N",14,02,0,"C","","mv_par03","","","","","","","","","","","","","","","","","","","","","","","","","",""})
+aAdd(aRegs,{cPerg,"04","PIS e COFINS %:		","","","mv_ch4","N",05,02,0,"C","","mv_par04","","","","","","","","","","","","","","","","","","","","","","","","","",""})
+aAdd(aRegs,{cPerg,"05","Tipo comissão:		","","","mv_ch5","N",01,00,1,"C","","mv_par05","Geral","","","","","Varejo","","","","","Por Data","","","","","Teste","","","","","","","","","",""})
 //aAdd(aRegs,{cPerg,"04","Descontos ?","","","mv_ch4","N",14,02,0,"C","","mv_par04","","","","","","","","","","","","","","","","","","","","","","","","","",""})
 //aAdd(aRegs,{cPerg,"05","Repasse Net ?","","","mv_ch5","N",14,02,0,"C","","mv_par05","","","","","","","","","","","","","","","","","","","","","","","","","",""})
 
