@@ -3,9 +3,7 @@
 #INCLUDE 'TBICONN.CH'
 
 /*/{Protheus.doc} FINR003
-
     Impressão do rateio do repasse
-
     @author  Bruno Alves
     @example Example
     @param   [Parameter_Name],Parameter_type,Parameter_Description
@@ -34,7 +32,6 @@ User Function FINR003()
 	cPeriodo := SUBSTRING(DTOS(MV_PAR01),5,2) + SUBSTRING(DTOS(MV_PAR01),1,4)
 	cFileName := "REPASSE_RATEIO_" + cPeriodo + "_" + StrTran(Time(),":","")
 
-
 	//Busca as informações
 	BusDados()
 
@@ -44,7 +41,6 @@ User Function FINR003()
 	(TMP)->(DbCloseArea())
 
 Return
-
 
 /*/{Protheus.doc} PrintExcel
 
@@ -90,17 +86,17 @@ Static Function PrintExcel()
 	While( (TMP)->(!Eof()) )
 		nNUm += 1
 		aDetRel := {}
-		AADD(aDetRel, cValToChar(nNum))
-		AADD(aDetRel, Alltrim((TMP)->ZAH_PRACA))
-		AADD(aDetRel, Alltrim((TMP)->ZAF_DESCRI))
-		AADD(aDetRel, SPACE(9))
-		AADD(aDetRel, SPACE(9))
-		AADD(aDetRel, (TMP)->ZAH_VLRAT)
-		AADD(aDetRel, SPACE(9))
-		AADD(aDetRel, Alltrim((TMP)->ZAH_CLIENT))
-		AADD(aDetRel, "REPASSE SPOT")
-		AADD(aDetRel, Posicione("SC5",10,xFilial("SC5") + Alltrim((TMP)->ZAH_NUMRP), "C5_NUM"))
-		AADD(aDetRel, Alltrim((TMP)->ZAH_NUMRP))
+		AADD(aDetRel, cValToChar(nNum)) //01
+		AADD(aDetRel, Alltrim((TMP)->ZAH_PRACA)) //02
+		AADD(aDetRel, Alltrim((TMP)->ZAF_DESCRI)) //03
+		AADD(aDetRel, SPACE(9)) //04
+		AADD(aDetRel, SPACE(9)) //05
+		AADD(aDetRel, (TMP)->ZAH_VLRAT) //06
+		AADD(aDetRel, SPACE(9)) //07
+		AADD(aDetRel, Alltrim((TMP)->ZAH_CLIENT)) //08
+		AADD(aDetRel, "REPASSE SPOT") //09
+		AADD(aDetRel, Posicione("SC5",10,xFilial("SC5") + Alltrim((TMP)->ZAH_NUMRP), "C5_NUM")) //10
+		AADD(aDetRel, Alltrim((TMP)->ZAH_NUMRP)) //11
 
 		nTotal += (TMP)->ZAH_VLRAT
 		oExcel:AddRow(cTitWorkSheet,cTitTable,aDetRel)
@@ -110,7 +106,7 @@ Static Function PrintExcel()
 
 	(TMP)->(dbEval({|| nTotREG++}))
 
-	oExcel:AddRow(cTitWorkSheet,cTitTable,{"TOTAL","","", "",nTotal})
+	oExcel:AddRow(cTitWorkSheet,cTitTable,{"TOTAL","","","","",nTotal,"","","","",""})
 
 	oExcel:Activate()
 	oExcel:GetXMLFile(cDir+cFileName+".xml")
@@ -160,6 +156,7 @@ Return
 @param cPerg, characters, descricao
 @type function
 /*/
+
 Static Function ValidPerg(cPerg)
 
 	Local aArea	:= GetArea()
@@ -186,5 +183,7 @@ Static Function ValidPerg(cPerg)
 			MsUnlock()
 		Endif
 	Next
+
 	RestArea(aArea)
+
 Return()
