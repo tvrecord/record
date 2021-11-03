@@ -230,7 +230,7 @@ Return
 
 /*/{Protheus.doc} GetData
     Busca dados no banco
-    @author  Rafael França de Oliveira
+    @author  Rafael França
     @since   24-08-2020
 /*/
 
@@ -241,9 +241,9 @@ Static Function GetData(cPPeriodo,cPPracaDe,cPPracaAte,cPRpDe,cPRpAte)
 
 	SELECT ZAF_CODIGO,ZAF_CITY,
 	CASE
-	WHEN ZAF_TIPO = '1'  THEN 'Filiada'
-	WHEN ZAF_TIPO = '2'  THEN 'Afiliada'
-	WHEN ZAF_TIPO = '3'  THEN 'Cabeça de Rede'
+	WHEN ZAF_TIPO = '1'  THEN 'C. de Rede'
+	WHEN ZAF_TIPO = '2'  THEN 'Filiada'
+	WHEN ZAF_TIPO = '3'  THEN 'Afiliada'
 	END AS TIPO,
 	ZAF_DESCRI,ZAF_CITY,ZAF_EST,SUM(E2_VALOR) AS VALOR
 		FROM
