@@ -3,7 +3,7 @@
 #INCLUDE 'RPTDEF.CH'
 
 
-#DEFINE REL_VERT_STD 16
+#DEFINE REL_VERT_STD 13
 #DEFINE REL_START  65
 //#DEFINE REL_END 560 //Paisagem
 #DEFINE REL_END 770 //Retrato
@@ -26,10 +26,10 @@ User Function FINR002()
 	Private cSubTitle	:= ""
 	Private nPag 		:= 0
 	Private nLin 		:= 0
-	Private oFonte 		:= u_xFonte(12,,,,"Arial")
-	Private oFonteN 	:= u_xFonte(12,.T.,,,"Arial")
-	Private oFonte10 	:= u_xFonte(10,,,,"Arial")
-	Private oFonte10N 	:= u_xFonte(10,.T.,,,"Arial")
+	Private oFonte 		:= u_xFonte(11,,,,"Arial")
+	Private oFonteN 	:= u_xFonte(11,.T.,,,"Arial")
+	Private oFonte10 	:= u_xFonte(11,,,,"Arial")
+	Private oFonte10N 	:= u_xFonte(11,.T.,,,"Arial")
 
 	//If !lLogin
 	//PREPARE ENVIRONMENT EMPRESA "01" FILIAL "01" MODULO "FIN"
@@ -130,17 +130,16 @@ Static Function fProcPdf()
 
 			//Impressão do totalizador por tipo
 			oPrint:Say( nLin,520, PADL(Transform( nTotRat, "@E 999,999,999.99"),14),oFonteN)
-			nTotRat	:= 0
+			nTotRat := 0
 
-			nLin += REL_VERT_STD
-			nLin += REL_VERT_STD
+			nLin += (REL_VERT_STD * 2)
+
 
 		EndIf
 
 	EndDo
 
 	//Impressão do total de todas as praças
-	nLin -= REL_VERT_STD
 	oPrint:Say( nLin,520, PADL(Transform( nTotal, "@E 999,999,999.99"),14),oFonteN)
 
 	nLin += (REL_VERT_STD * 3)
@@ -267,9 +266,9 @@ Static Function GetData(cPeriodo,cPracaDe,cPracaAte)
 
 	SELECT ZAF_CODIGO,ZAF_CITY,
 	CASE
-	WHEN ZAF_TIPO = '1'  THEN 'Filiada'
-	WHEN ZAF_TIPO = '2'  THEN 'Afiliada'
-	WHEN ZAF_TIPO = '3'  THEN 'Cabeça de Rede'
+	WHEN ZAF_TIPO = '1'  THEN 'C. de Rede'
+	WHEN ZAF_TIPO = '2'  THEN 'Filiada'
+	WHEN ZAF_TIPO = '3'  THEN 'Afiliada'
 	END AS TIPO,
 	ZAF_DESCRI,ZAF_CITY,ZAF_EST,SUM(ZAH_VLRAT) AS VALOR FROM %table:ZAH% AS ZAH
 	INNER JOIN %table:ZAF% ZAF ON
