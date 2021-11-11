@@ -254,6 +254,7 @@ Static Function GetData(cPPeriodo,cPPracaDe,cPPracaAte,cPRpDe,cPRpAte)
 			AND ZAH_PRACA = ZAG_PRACA
 			AND ZAH_NUMRP = ZAG_NUMRP
 			AND ZAH_PERIOD = ZAG_PERIOD
+			AND ZAH_UTILIZ = ''
 		INNER JOIN %table:ZAF% AS ZAF
 		ON ZAF_FILIAL = ZAG_FILIAL
 			AND ZAF_CODIGO = ZAG_PRACA
@@ -288,7 +289,7 @@ Static Function GetData(cPPeriodo,cPPracaDe,cPPracaAte,cPRpDe,cPRpAte)
 			AND E2_XNUMRP = ZAG_NUMRP
 			//AND E2_EMISSAO BETWEEN '' AND %Exp:cDataFin%
 			//AND E2_BAIXA = ''
-			AND (E2_VALOR = ZAH_VLRAT OR E2_XNUMRP IN ('234777'))
+			AND (E2_VALOR = ZAH_VLRAT OR E2_XNUMRP IN ('234777','235080'))
 			AND SE2.D_E_L_E_T_ = ''
 			AND E2_VENCTO BETWEEN %Exp:cDataIni% AND %Exp:cDataFin%
 		WHERE
