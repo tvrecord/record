@@ -19,49 +19,49 @@
 */
 
 User Function MT235G1()
-                          
-
-Public cPedido
 
 
-If SC7->C7_NUM != cPedido
-	ExecBlock("TelaMot",.F.,.F.)
-else
-	Reclock("SC7",.F.)
-	SC7->C7_MOTIVO	:= cMotivo
-	SC7->C7_DTMOT	:= DATE()
-	MsUnlock()
-EndIf
+	Public cPedido
+
+
+	If SC7->C7_NUM != cPedido
+		ExecBlock("TelaMot",.F.,.F.)
+	else
+		Reclock("SC7",.F.)
+		SC7->C7_MOTIVO	:= cMotivo
+		SC7->C7_DTMOT	:= DATE()
+		MsUnlock()
+	EndIf
 
 
 Return .T.
 
 
 
-User Function TelaMot
+User Function TelaMot()
 
-Public cMotivo	:= Space(80)
+	Public cMotivo	:= Space(80)
 
-@ 000,000 TO 100,500 DIALOG oDlg TITLE "Motivo - Eliminação Residuo"
-@ 037,148 Say "Pedido: " + SC7->C7_NUM + ""
-@ 017,020 Say "Motivo:"
-@ 016,060 Get cMotivo   Valid !EMPTY(cMotivo)
-@ 035,190 BMPBUTTON TYPE 01 ACTION InserMot(cMotivo)
-ACTIVATE DIALOG oDlg CENTERED
+	@ 000,000 TO 100,500 DIALOG oDlg TITLE "Motivo - Eliminação Residuo"
+	@ 037,148 Say "Pedido: " + SC7->C7_NUM + ""
+	@ 017,020 Say "Motivo:"
+	@ 016,060 Get cMotivo   Valid !EMPTY(cMotivo)
+	@ 035,190 BMPBUTTON TYPE 01 ACTION InserMot(cMotivo)
+	ACTIVATE DIALOG oDlg CENTERED
 
 
-Static Function InserMot(cMotivo)
+	Static Function InserMot(cMotivo)
 
-Close(oDlg)
+		Close(oDlg)
 
-Reclock("SC7",.F.)
-SC7->C7_MOTIVO	:= cMotivo
-SC7->C7_DTMOT	:= DATE()
-MsUnlock()
+		Reclock("SC7",.F.)
+		SC7->C7_MOTIVO	:= cMotivo
+		SC7->C7_DTMOT	:= DATE()
+		MsUnlock()
 
-cPedido := SC7->C7_NUM
+		cPedido := SC7->C7_NUM
 
-Return
+	Return
 
 
 

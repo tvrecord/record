@@ -110,20 +110,20 @@ Static Function fProcPdf()
 	DBGotop()
 	While !cAlias->(EOF())
 
-			If (!EMPTY(cAlias->E1_BAIXA) .AND. STOD(cAlias->E1_BAIXA) <= (STOD(cAlias->E1_VENCTO) + cAlias->ZU_DIAS)) .AND. cAlias->E1_NATUREZ <> "1101006" .OR. (cAlias->ZU_EXCECAO == "1" .AND. !EMPTY(cAlias->E1_BAIXA) .AND. cAlias->E1_NATUREZ <> "1101006")// Valida Pagamento no prazo estimado do contrato //Rafael 10/09/14 - Colocado a pedido da Sra. Edna
+		If (!EMPTY(cAlias->E1_BAIXA) .AND. STOD(cAlias->E1_BAIXA) <= (STOD(cAlias->E1_VENCTO) + cAlias->ZU_DIAS)) .AND. cAlias->E1_NATUREZ <> "1101006" .OR. (cAlias->ZU_EXCECAO == "1" .AND. !EMPTY(cAlias->E1_BAIXA) .AND. cAlias->E1_NATUREZ <> "1101006")// Valida Pagamento no prazo estimado do contrato //Rafael 10/09/14 - Colocado a pedido da Sra. Edna
 
-				IF cVend != cAlias->E1_VEND1
-					aAdd(aRegistro,{cAlias->E1_VEND1,cAlias->LIQUIDO})
-				ELSEIF cVend == cAlias->E1_VEND1
-					nPos := aScan(aRegistro, { |x| x[1] == cAlias->E1_VEND1})
-					aRegistro[nPos][2] += cAlias->LIQUIDO
-				ENDIF
-
-				cVend := cAlias->E1_VEND1
-
+			IF cVend != cAlias->E1_VEND1
+				aAdd(aRegistro,{cAlias->E1_VEND1,cAlias->LIQUIDO})
+			ELSEIF cVend == cAlias->E1_VEND1
+				nPos := aScan(aRegistro, { |x| x[1] == cAlias->E1_VEND1})
+				aRegistro[nPos][2] += cAlias->LIQUIDO
 			ENDIF
 
-			dbSkip() // Avanca o ponteiro do registro no arquivo
+			cVend := cAlias->E1_VEND1
+
+		ENDIF
+
+		dbSkip() // Avanca o ponteiro do registro no arquivo
 
 	ENDDO
 
@@ -131,114 +131,114 @@ Static Function fProcPdf()
 	DBGotop()
 	While !cAlias->(EOF())
 
-			If !EMPTY(ZU_PERC1)
-				aAdd(aContrato,{cAlias->ZU_DEFX1,;  		// 1 - De Valor
-					cAlias->ZU_ATEFX1,;	// 2 - Ate Valor
-					cAlias->ZU_PERC1}) // 3 - Porcentagem
-			EndIf
+		If !EMPTY(ZU_PERC1)
+			aAdd(aContrato,{cAlias->ZU_DEFX1,;  		// 1 - De Valor
+				cAlias->ZU_ATEFX1,;	// 2 - Ate Valor
+				cAlias->ZU_PERC1}) // 3 - Porcentagem
+		EndIf
 
-			If !EMPTY(ZU_PERC2)
-				aAdd(aContrato,{cAlias->ZU_DEFX2,;  		// 1 - De Valor
-					cAlias->ZU_ATEFX2,;	// 2 - Ate Valor
-					cAlias->ZU_PERC2}) // 3 - Porcentagem
-			EndIf
+		If !EMPTY(ZU_PERC2)
+			aAdd(aContrato,{cAlias->ZU_DEFX2,;  		// 1 - De Valor
+				cAlias->ZU_ATEFX2,;	// 2 - Ate Valor
+				cAlias->ZU_PERC2}) // 3 - Porcentagem
+		EndIf
 
-			If !EMPTY(ZU_PERC3)
-				aAdd(aContrato,{cAlias->ZU_DEFX3,;  		// 1 - De Valor
-					cAlias->ZU_ATEFX3,;	// 2 - Ate Valor
-					cAlias->ZU_PERC3}) // 3 - Porcentagem
-			EndIf
+		If !EMPTY(ZU_PERC3)
+			aAdd(aContrato,{cAlias->ZU_DEFX3,;  		// 1 - De Valor
+				cAlias->ZU_ATEFX3,;	// 2 - Ate Valor
+				cAlias->ZU_PERC3}) // 3 - Porcentagem
+		EndIf
 
-			If !EMPTY(ZU_PERC4)
-				aAdd(aContrato,{cAlias->ZU_DEFX4,;  		// 1 - De Valor
-					cAlias->ZU_ATEFX4,;	// 2 - Ate Valor
-					cAlias->ZU_PERC4}) // 3 - Porcentagem
-			EndIf
+		If !EMPTY(ZU_PERC4)
+			aAdd(aContrato,{cAlias->ZU_DEFX4,;  		// 1 - De Valor
+				cAlias->ZU_ATEFX4,;	// 2 - Ate Valor
+				cAlias->ZU_PERC4}) // 3 - Porcentagem
+		EndIf
 
-			If !EMPTY(ZU_PERC5)
-				aAdd(aContrato,{cAlias->ZU_DEFX5,;  		// 1 - De Valor
-					cAlias->ZU_ATEFX5,;	// 2 - Ate Valor
-					cAlias->ZU_PERC5}) // 3 - Porcentagem
-			EndIf
+		If !EMPTY(ZU_PERC5)
+			aAdd(aContrato,{cAlias->ZU_DEFX5,;  		// 1 - De Valor
+				cAlias->ZU_ATEFX5,;	// 2 - Ate Valor
+				cAlias->ZU_PERC5}) // 3 - Porcentagem
+		EndIf
 
-			If !EMPTY(ZU_PERC6)
-				aAdd(aContrato,{cAlias->ZU_DEFX6,;  		// 1 - De Valor
-					cAlias->ZU_ATEFX6,;	// 2 - Ate Valor
-					cAlias->ZU_PERC6}) // 3 - Porcentagem
-			EndIf
+		If !EMPTY(ZU_PERC6)
+			aAdd(aContrato,{cAlias->ZU_DEFX6,;  		// 1 - De Valor
+				cAlias->ZU_ATEFX6,;	// 2 - Ate Valor
+				cAlias->ZU_PERC6}) // 3 - Porcentagem
+		EndIf
 
-			If !EMPTY(ZU_PERC7)
-				aAdd(aContrato,{cAlias->ZU_DEFX7,;  		// 1 - De Valor
-					cAlias->ZU_ATEFX7,;	// 2 - Ate Valor
-					cAlias->ZU_PERC7}) // 3 - Porcentagem
-			EndIf
+		If !EMPTY(ZU_PERC7)
+			aAdd(aContrato,{cAlias->ZU_DEFX7,;  		// 1 - De Valor
+				cAlias->ZU_ATEFX7,;	// 2 - Ate Valor
+				cAlias->ZU_PERC7}) // 3 - Porcentagem
+		EndIf
 
-			If (!EMPTY(cAlias->E1_BAIXA) .AND. STOD(cAlias->E1_BAIXA) <= (STOD(cAlias->E1_VENCTO) + cAlias->ZU_DIAS)) .AND. cAlias->E1_NATUREZ <> "1101006" .OR. (cAlias->ZU_EXCECAO == "1" .AND. !EMPTY(cAlias->E1_BAIXA) .AND. cAlias->E1_NATUREZ <> "1101006") .OR. MV_PAR23 = 1// Valida Pagamento no prazo estimado do contrato //Rafael 10/09/14 - Colocado a pedido da Sra. Edna
-				lPagar := .T.
-			Else
-				lPagar := .F.
-			Endif
+		If (!EMPTY(cAlias->E1_BAIXA) .AND. STOD(cAlias->E1_BAIXA) <= (STOD(cAlias->E1_VENCTO) + cAlias->ZU_DIAS)) .AND. cAlias->E1_NATUREZ <> "1101006" .OR. (cAlias->ZU_EXCECAO == "1" .AND. !EMPTY(cAlias->E1_BAIXA) .AND. cAlias->E1_NATUREZ <> "1101006") .OR. MV_PAR23 = 1// Valida Pagamento no prazo estimado do contrato //Rafael 10/09/14 - Colocado a pedido da Sra. Edna
+			lPagar := .T.
+		Else
+			lPagar := .F.
+		Endif
 
-			IF cVend != cAlias->E1_VEND1 .AND. lPagar
+		IF cVend != cAlias->E1_VEND1 .AND. lPagar
 
-				nTotBV := 0
-				nTotNoBV := 0
-				nPerc := 0
+			nTotBV := 0
+			nTotNoBV := 0
+			nPerc := 0
 
-				nPos := aScan(aRegistro, { |x| x[1] == cAlias->E1_VEND1})
+			nPos := aScan(aRegistro, { |x| x[1] == cAlias->E1_VEND1})
 
-				IF 	nPos > 0
+			IF 	nPos > 0
 
-					For I := 1 To Len(aContrato)
+				For I := 1 To Len(aContrato)
 
-						If aRegistro[nPos][2] >= aContrato[I][1] .AND. aRegistro[nPos][2] <= aContrato[I][2]
-							//nRecLiq :=	aRegistro[nPos][2] * (aContrato[I][3] / 100) // Valor Liquido a Receber
-							nPerc := aContrato[I][3]
-							Exit
-						EndIf
+					If aRegistro[nPos][2] >= aContrato[I][1] .AND. aRegistro[nPos][2] <= aContrato[I][2]
+						//nRecLiq :=	aRegistro[nPos][2] * (aContrato[I][3] / 100) // Valor Liquido a Receber
+						nPerc := aContrato[I][3]
+						Exit
+					EndIf
 
-					Next I
-
-				ENDIF
+				Next I
 
 			ENDIF
 
-			IF cAlias->LIQUIDO > 0 .AND. lPagar
+		ENDIF
+
+		IF cAlias->LIQUIDO > 0 .AND. lPagar
 
 			nLin += REL_VERT_STD
 
 			If nLin > REL_END
-			u_PXRODAPE(@oPrint,"FINR006.PRW","")
-			oPrint:EndPage()
-			ImpProxPag()//Monta cabeçario da proxima pagina
+				u_PXRODAPE(@oPrint,"FINR006.PRW","")
+				oPrint:EndPage()
+				ImpProxPag()//Monta cabeçario da proxima pagina
 			EndIf
 
 			oPrint:Say( nLin,020, cAlias->A1_NOME								,oFonte)
 			oPrint:Say( nLin,120, cAlias->E1_NUM + "/" + cAlias->E1_PARCELA		,oFonte)
 			oPrint:Say( nLin,170, STOD(cAlias->E1_EMISSAO)						,oFonte)
 			oPrint:Say( nLin,210, STOD(cAlias->E1_BAIXA)						,oFonte)
-			oPrint:Say( nLin,250, cAlias->LIQUIDO PICTURE "@E 999,999,999.99" 	,oFonte)
-			oPrint:Say( nLin,300, nPerc PICTURE "@E 99.99%"						,oFonte)
+			oPrint:Say( nLin,250, transform((cAlias)->LIQUIDO,"@E 999,999,999.99") 	,oFonte)
+			oPrint:Say( nLin,300, transform(nPerc,"@E 99.99%")						,oFonte)
 
-			ENDIF
+		ENDIF
 
-			cVend := cAlias->E1_VEND1
+		cVend := cAlias->E1_VEND1
 
-			If lPagar == .T.
-				nTotBV += cAlias->LIQUIDO
-				nTotNoBV += cAlias->LIQUIDO * (nPerc / 100)
-			EndIf
+		If lPagar == .T.
+			nTotBV += cAlias->LIQUIDO
+			nTotNoBV += cAlias->LIQUIDO * (nPerc / 100)
+		EndIf
 
-			DBSelectArea("cAlias")
-			dbSkip() // Avanca o ponteiro do registro no arquivo
+		DBSelectArea("cAlias")
+		dbSkip() // Avanca o ponteiro do registro no arquivo
 
-			IF cVend != cAlias->E1_VEND1 .AND. lPagar
+		IF cVend != cAlias->E1_VEND1 .AND. lPagar
 
-				// Imprime Totais Aqui
+			// Imprime Totais Aqui
 
-			ENDIF
+		ENDIF
 
-		ENDDO
+	ENDDO
 
 	//Impressão do total de todas as praças
 	nLin -= REL_VERT_STD
@@ -330,35 +330,86 @@ Static Function GetData(cPPeriodo,cPPracaDe,cPPracaAte,cPRpDe,cPRpAte)
 
 	// Busca os registros a serem impressos no relatório
 	BeginSql Alias cAlias
-
-SELECT
-E1_FILIAL,E1_VEND1,A3_NOME,A3_CGC,E1_CLIENTE,E1_LOJA,A1_NOME,E1_PREFIXO,E1_TIPO,E1_NATUREZ,E1_NUM,E1_PARCELA,E1_VALOR
-,(E1_VALOR - E1_SALDO) AS VALORLIQUIDO,E1_COMIS1, (E1_VALOR - E1_SALDO) - ((E1_COMIS1 / 100) * ((E1_VALOR - E1_SALDO))) AS LIQUIDO,
-(E1_VALOR) - ((E1_COMIS1 / 100) * ((E1_VALOR))) AS LIQUIDO2,E1_EMISSAO,E1_VENCTO,E1_BAIXA,
-ZU_DEFX1,ZU_ATEFX1,ZU_DEFX2,ZU_ATEFX2,ZU_DEFX3,ZU_ATEFX3,ZU_DEFX4,ZU_ATEFX4,ZU_DEFX5,ZU_ATEFX5,
-ZU_DEFX6,ZU_ATEFX6,ZU_DEFX7,ZU_ATEFX7,ZU_PERC1,ZU_PERC2,ZU_PERC3,ZU_PERC4,ZU_PERC5,ZU_PERC6,
-ZU_PERC7,ZU_ATEVALI,ZU_VALIDA,ZU_EXCECAO,ZU_DIAS,ED_DESCRIC,ED_TIPNAT,ED_TIPNAT
-FROM SE1010
-INNER JOIN SA3010 ON // Tabela de Vendedor/Agencia - Faço uma consulta do seu CNPJ
-SE1010.E1_VEND1 = SA3010.A3_COD
-INNER JOIN SA1010 ON  // Tabela de Cliente - Busco dados do cliente
-SE1010.E1_CLIENTE = SA1010.A1_COD AND
-SE1010.E1_LOJA = SA1010.A1_LOJA
-INNER JOIN SZU010 ON // Tabela de Contrato Agencias - Verificos as regras para contrato
-SE1010.E1_VEND1 = SZU010.ZU_VEND AND
-SE1010.E1_EMISSAO BETWEEN SZU010.ZU_VALIDA AND SZU010.ZU_ATEVALI // Valido a emissão dentro do periodo do contrato
-INNER JOIN SED010 ON E1_NATUREZ = ED_CODIGO // Tabela de Natureza - Busco dados da natureza
-WHERE
-SE1010.E1_FILIAL = '01' AND
-SE1010.E1_EMISSAO BETWEEN '20210701' AND '20210731' AND
-SE1010.E1_BAIXA BETWEEN '' AND '20501231' AND
-SE1010.E1_NATUREZ <> '1101006' AND
-SA1010.D_E_L_E_T_ <> '*'  AND
-SE1010.D_E_L_E_T_ <> '*' AND
-SED010.D_E_L_E_T_ <> '*' AND
-SZU010.D_E_L_E_T_ <> '*'
-ORDER BY E1_VEND1,E1_CLIENTE,E1_LOJA,E1_NUM,E1_PARCELA,E1_VENCTO
-
+		SELECT
+			E1_FILIAL,
+			E1_VEND1,
+			A3_NOME,
+			A3_CGC,
+			E1_CLIENTE,
+			E1_LOJA,
+			A1_NOME,
+			E1_PREFIXO,
+			E1_TIPO,
+			E1_NATUREZ,
+			E1_NUM,
+			E1_PARCELA,
+			E1_VALOR,
+			(E1_VALOR - E1_SALDO) AS VALORLIQUIDO,
+			E1_COMIS1,
+			(E1_VALOR - E1_SALDO) - ((E1_COMIS1 / 100) * ((E1_VALOR - E1_SALDO))) AS LIQUIDO,
+			(E1_VALOR) - ((E1_COMIS1 / 100) * ((E1_VALOR))) AS LIQUIDO2,
+			E1_EMISSAO,
+			E1_VENCTO,
+			E1_BAIXA,
+			ZU_DEFX1,
+			ZU_ATEFX1,
+			ZU_DEFX2,
+			ZU_ATEFX2,
+			ZU_DEFX3,
+			ZU_ATEFX3,
+			ZU_DEFX4,
+			ZU_ATEFX4,
+			ZU_DEFX5,
+			ZU_ATEFX5,
+			ZU_DEFX6,
+			ZU_ATEFX6,
+			ZU_DEFX7,
+			ZU_ATEFX7,
+			ZU_PERC1,
+			ZU_PERC2,
+			ZU_PERC3,
+			ZU_PERC4,
+			ZU_PERC5,
+			ZU_PERC6,
+			ZU_PERC7,
+			ZU_ATEVALI,
+			ZU_VALIDA,
+			ZU_EXCECAO,
+			ZU_DIAS,
+			ED_DESCRIC,
+			ED_TIPNAT,
+			ED_TIPNAT
+		FROM
+			SE1010
+		INNER JOIN SA3010
+		ON // Tabela de Vendedor/Agencia - Faço uma consulta do seu CNPJ
+			SE1010.E1_VEND1 = SA3010.A3_COD
+		INNER JOIN SA1010
+		ON // Tabela de Cliente - Busco dados do cliente
+			SE1010.E1_CLIENTE = SA1010.A1_COD
+			AND SE1010.E1_LOJA = SA1010.A1_LOJA
+		INNER JOIN SZU010
+		ON // Tabela de Contrato Agencias - Verificos as regras para contrato
+			SE1010.E1_VEND1 = SZU010.ZU_VEND
+			AND SE1010.E1_EMISSAO BETWEEN SZU010.ZU_VALIDA AND SZU010.ZU_ATEVALI // Valido a emissão dentro do periodo do contrato
+		INNER JOIN SED010
+		ON E1_NATUREZ = ED_CODIGO // Tabela de Natureza - Busco dados da natureza
+		WHERE
+			SE1010.E1_FILIAL = '01'
+			AND SE1010.E1_EMISSAO BETWEEN '20210701' AND '20210731'
+			AND SE1010.E1_BAIXA BETWEEN '' AND '20501231'
+			AND SE1010.E1_NATUREZ <> '1101006'
+			AND SA1010.D_E_L_E_T_ <> '*'
+			AND SE1010.D_E_L_E_T_ <> '*'
+			AND SED010.D_E_L_E_T_ <> '*'
+			AND SZU010.D_E_L_E_T_ <> '*'
+		ORDER BY
+			E1_VEND1,
+			E1_CLIENTE,
+			E1_LOJA,
+			E1_NUM,
+			E1_PARCELA,
+			E1_VENCTO
 	EndSql
 
 Return
