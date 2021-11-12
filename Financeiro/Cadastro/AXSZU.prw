@@ -195,7 +195,7 @@ User Function RELBV
 	wnrel := SetPrint(cString,NomeProg,"",@titulo,cDesc1,cDesc2,cDesc3,.T.,aOrd,.T.,Tamanho,,.T.)
 
 	IF MV_PAR21 == 1
-		Cabec1       := "Cli.    Nome                                      Numero   Parc    Emissao    VENCTO.      Recebimento   Valor      Val.Baixado  Comiss  Líquido     Pagar  Tipo  Natureza"
+		Cabec1       := "Cli.    Nome                                      Numero   Parc    Emissao    Vencto.    Recebimento        Valor      Val.Baixado  Comiss  Líquido      Pagar Tipo     Natureza"
 	ENDIF
 
 	cQuery += "SELECT "
@@ -586,10 +586,10 @@ Static Function RunReport(Cabec1,Cabec2,Titulo,nLin)
 
 				For I := 1 To Len(aContrato) // Imprimi Tabela de Valores
 
-					@nLin,000 PSAY aContrato[I][1] PICTURE "@E 999,999.99"
+					@nLin,000 PSAY aContrato[I][1] PICTURE "@E 999,999,999.99"
 					@nLin,015 PSAY " A "
-					@nLin,020 PSAY aContrato[I][2] PICTURE "@E 999,999.99"
-					@nLin,032 PSAY aContrato[I][3] PICTURE "@E 99.99%"
+					@nLin,020 PSAY aContrato[I][2] PICTURE "@E 999,999,999.99"
+					@nLin,035 PSAY aContrato[I][3] PICTURE "@E 999.99%"
 
 					nLin++
 
@@ -638,7 +638,7 @@ Static Function RunReport(Cabec1,Cabec2,Titulo,nLin)
 			@nLin,155 PSAY IIF(lPagar == .T. .OR. MV_PAR23 = 1, "SIM","NÃO")
 			IF MV_PAR21 == 1
 				@nLin,160 PSAY IIF(TMP->ED_TIPNAT == "1" .OR. TMP->ED_TIPNAT == "3", "LOCAL","SPOT")
-				@nLin,162 PSAY TMP->ED_DESCRIC
+				@nLin,168 PSAY TMP->ED_DESCRIC
 			ENDIF
 
 			IF MV_PAR23 == 2
