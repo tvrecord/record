@@ -284,14 +284,15 @@ Static Function GetData(cPPeriodo,cPPracaDe,cPPracaAte,cPRpDe,cPRpAte)
 			AND E1_LOJA = F2_LOJA
 			AND E1_PARCELA IN ('', '001')
 			AND SE1.D_E_L_E_T_ = ''
-			AND E1_BAIXA BETWEEN %Exp:cDataIni% AND %Exp:cDataFin%
+			//AND E1_BAIXA BETWEEN %Exp:cDataIni% AND %Exp:cDataFin%
 		INNER JOIN %table:SE2% AS SE2
 		ON E2_FILIAL = F2_FILIAL
 			AND E2_XNUMRP = ZAG_NUMRP
-			AND E2_EMISSAO BETWEEN '' AND %Exp:cDataFin%
-			AND E2_BAIXA = ''
+			//AND E2_EMISSAO BETWEEN '' AND %Exp:cDataFin%
+			//AND E2_BAIXA = ''
 			AND (E2_VALOR = ZAH_VLRAT OR E2_XNUMRP IN ('234777','235080'))
 			AND SE2.D_E_L_E_T_ = ''
+			AND E2_VENCTO BETWEEN %Exp:cDataIni% AND %Exp:cDataFin%
 		WHERE
 			ZAG_FILIAL = '01'
 			AND ZAG_EMISSA BETWEEN '' AND %Exp:cDataFin%
@@ -334,8 +335,8 @@ Static Function ValidPerg(cPerg)
 	aAdd(aRegs,{cPerg,"03", "Do Nº RP:"			 ,"","","mv_ch3","C",06,00,0,"G","","MV_PAR03","","","","","","","","","","","","","","","","","","","","","","","","",""})
 	aAdd(aRegs,{cPerg,"04", "Ate Nº RP:"		 ,"","","mv_ch4","C",06,00,0,"G","","MV_PAR04","","","","","","","","","","","","","","","","","","","","","","","","",""})
 	aAdd(aRegs,{cPerg,"05", "Destino do(s) Arq.:","","","mv_ch5","C",99,00,0,"G","","MV_PAR05","","","","","","","","","","","","","","","","","","","","","","","","",""})
-	aAdd(aRegs,{cPerg,"06", "Da Baixa Rec.:"	 ,"","","mv_ch6","D",08,00,0,"G","","MV_PAR06","","","","","","","","","","","","","","","","","","","","","","","","",""})
-	aAdd(aRegs,{cPerg,"07", "Ate a Baixa Rec.:"	 ,"","","mv_ch7","D",08,00,0,"G","","MV_PAR07","","","","","","","","","","","","","","","","","","","","","","","","",""})
+	aAdd(aRegs,{cPerg,"06", "Do Vencimento:.:"	 ,"","","mv_ch6","D",08,00,0,"G","","MV_PAR06","","","","","","","","","","","","","","","","","","","","","","","","",""})
+	aAdd(aRegs,{cPerg,"07", "Até o Vencimento:.:"	 ,"","","mv_ch7","D",08,00,0,"G","","MV_PAR07","","","","","","","","","","","","","","","","","","","","","","","","",""})
 	aAdd(aRegs,{cPerg,"08","Assinatura 1:" 		 ,"","","mv_ch8","C",06,00,0,"G","","mv_par08","","","","","","","","","","","","","","","","","","","","","","","","","USR"})
 	aAdd(aRegs,{cPerg,"09","Assinatura 2:"		 ,"","","mv_ch9","C",06,00,0,"G","","mv_par09","","","","","","","","","","","","","","","","","","","","","","","","","USR"})
 	aAdd(aRegs,{cPerg,"10","Vencimento:"  		 ,"","","mv_ch10","D",08,00,0, "G","","MV_PAR10","","","","","","","","","","","","","","","","","","","","","","","","",""})
