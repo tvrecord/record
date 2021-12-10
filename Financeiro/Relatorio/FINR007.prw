@@ -64,30 +64,30 @@ EndSql //FINALIZO A MINHA QUERY
     oFWMsExcel := FWMSExcel():New()
 
     //Aba 01 - Nome Guia
-    oFWMsExcel:AddworkSheet("Exames Periódicos") //Não utilizar número junto com sinal de menos. Ex.: 1-
+    oFWMsExcel:AddworkSheet("Comissão de Agências") //Não utilizar número junto com sinal de menos. Ex.: 1-
         //Criando a Tabela
-        oFWMsExcel:AddTable("Exames Periódicos",cNomeTabela)
+        oFWMsExcel:AddTable("Comissão de Agências",cNomeTabela)
         //Criando Colunas
-          oFWMsExcel:AddColumn("Exames Periódicos",cNomeTabela,"Mês",1,1) //1,1 = Modo Texto  // 2,2 = Valor sem R$  //  3,3 = Valor com R$
-        oFWMsExcel:AddColumn("Exames Periódicos",cNomeTabela,"Agência",1,1)
-        oFWMsExcel:AddColumn("Exames Periódicos",cNomeTabela,"Nome",1,1)
-        oFWMsExcel:AddColumn("Exames Periódicos",cNomeTabela,"Nota",1,1)
-        oFWMsExcel:AddColumn("Exames Periódicos",cNomeTabela,"Cliente",1,1)
-        oFWMsExcel:AddColumn("Exames Periódicos",cNomeTabela,"Nome",1,1)
-        oFWMsExcel:AddColumn("Exames Periódicos",cNomeTabela,"Emissão",1,1)
-        oFWMsExcel:AddColumn("Exames Periódicos",cNomeTabela,"Vencimento",1,1)
-		oFWMsExcel:AddColumn("Exames Periódicos",cNomeTabela,"Valor",3,3)
-		oFWMsExcel:AddColumn("Exames Periódicos",cNomeTabela,"Comissão",3,3)
-		oFWMsExcel:AddColumn("Exames Periódicos",cNomeTabela,"Natureza",1,1)
-		oFWMsExcel:AddColumn("Exames Periódicos",cNomeTabela,"Descrição",1,1)
-		oFWMsExcel:AddColumn("Exames Periódicos",cNomeTabela,"Baixa",1,1)
+        oFWMsExcel:AddColumn("Comissão de Agências",cNomeTabela,"Mês",1,1) //1,1 = Modo Texto  // 2,2 = Valor sem R$  //  3,3 = Valor com R$
+        oFWMsExcel:AddColumn("Comissão de Agências",cNomeTabela,"Agência",1,1)
+        oFWMsExcel:AddColumn("Comissão de Agências",cNomeTabela,"Nome",1,1)
+        oFWMsExcel:AddColumn("Comissão de Agências",cNomeTabela,"Nota",1,1)
+        oFWMsExcel:AddColumn("Comissão de Agências",cNomeTabela,"Cliente",1,1)
+        oFWMsExcel:AddColumn("Comissão de Agências",cNomeTabela,"Nome",1,1)
+        oFWMsExcel:AddColumn("Comissão de Agências",cNomeTabela,"Emissão",1,1)
+        oFWMsExcel:AddColumn("Comissão de Agências",cNomeTabela,"Vencimento",1,1)
+		oFWMsExcel:AddColumn("Comissão de Agências",cNomeTabela,"Valor",3,3)
+		oFWMsExcel:AddColumn("Comissão de Agências",cNomeTabela,"Comissão",3,3)
+		oFWMsExcel:AddColumn("Comissão de Agências",cNomeTabela,"Natureza",1,1)
+		oFWMsExcel:AddColumn("Comissão de Agências",cNomeTabela,"Descrição",1,1)
+		oFWMsExcel:AddColumn("Comissão de Agências",cNomeTabela,"Baixa",1,1)
 
 While !(cAlias)->(Eof())
 
 
 
 	//Criando as Linhas
-    oFWMsExcel:AddRow("Exames Periódicos",cNomeTabela,{MES, AGENCIA, NOME, NOTA, CLIENTE, NOME, DTOC(STOD(EMISSAO)), DTOC(STOD(VENCIMENTO)), VALOR, COMISSAO, NATUREZA, DESCRICAO, DTOC(STOD(BAIXA)) })
+    oFWMsExcel:AddRow("Comissão de Agências",cNomeTabela,{MES, AGENCIA, NOME, NOTA, CLIENTE, NOME, DTOC(STOD(EMISSAO)), DTOC(STOD(VENCIMENTO)), VALOR, COMISSAO, NATUREZA, DESCRICAO, DTOC(STOD(BAIXA)) })
 
 
 	(cAlias)->(dbSkip()) //PASSAR PARA O PRÓXIMO REGISTRO DA MINHA QUERY
