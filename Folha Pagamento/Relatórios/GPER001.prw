@@ -33,7 +33,7 @@ EndIf
 
 //TRATO AS PERGUNTAS PARA USO NOS FILTROS
 cNomeTabela	:= UPPER("Vencimento de Exames Periódicos " )
-cFiltro		:= "% AND RA_EXAMEDI BETWEEN '"+DTOS(MV_PAR01)+"' AND '"+DTOS(MV_PAR02)+"' %" //Filtro somente o período solicitado nos parametros
+cFiltro		:= "%  AND RA_MAT BETWEEN '"+(MV_PAR01)+"' AND '"+(MV_PAR02)+ "' AND RA_EXAMEDI BETWEEN '"+DTOS(MV_PAR03)+"' AND '"+DTOS(MV_PAR04)+"' %" //Filtro MATRÍCULA e período solicitado nos parametros
 
 //COMEÇO A MINHA CONSULTA SQL
 BeginSql Alias cAlias
@@ -49,7 +49,6 @@ INNER JOIN %table:CTT% ON RA_FILIAL = CTT_FILIAL AND RA_CC = CTT_CUSTO AND CTT01
 INNER JOIN %table:SRJ% ON RA_CODFUNC = RJ_FUNCAO AND SRJ010.D_E_L_E_T_ <> '*'
 WHERE SRA010.D_E_L_E_T_ = ''
 AND RA_SITFOLH <> 'D'
-AND RA_MAT < '7999999'
 %exp:cFiltro%
 
 EndSql //FINALIZO A MINHA QUERY
@@ -108,8 +107,10 @@ Static Function ValidPerg(cPerg)
 	dbSetOrder(1)
 	aRegs:={}
 
-	AADD(aRegs,{cPerg,"01","Do venc. exame periódico: ","","","mv_ch01","D",08,0,0,"G","","mv_par01","","","","","","","","","","","","","","","","","","","","","","","","",""})
-	AADD(aRegs,{cPerg,"02","Até venc. exame periódico:	  ","","","mv_ch02","D",08,0,0,"G","","mv_par02","","","","","","","","","","","","","","","","","","","","","","","","",""})
+	AADD(aRegs,{cPerg,"01","Da Matrícula:		","","","mv_ch01","C",06,0,0,"G","","mv_par01","","","","","","","","","","","","","","","","","","","","","","","","",""})
+	AADD(aRegs,{cPerg,"02","Até a Matrícula:	","","","mv_ch02","C",06,0,0,"G","","mv_par02","","","","","","","","","","","","","","","","","","","","","","","","",""})
+	AADD(aRegs,{cPerg,"03","Do Vencimento:		","","","mv_ch03","D",08,0,0,"G","","mv_par03","","","","","","","","","","","","","","","","","","","","","","","","",""})
+	AADD(aRegs,{cPerg,"04","Até o Vencimento:	","","","mv_ch04","D",08,0,0,"G","","mv_par04","","","","","","","","","","","","","","","","","","","","","","","","",""})
 
 	For i:=1 to Len(aRegs)
 		If !dbSeek(cPerg+aRegs[i,2])
