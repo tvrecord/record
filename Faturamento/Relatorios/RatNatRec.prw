@@ -58,8 +58,10 @@ Private cNat		 := ""
 Private cDescNat     := ""
 Private nValNat		 := 0
 Private nValTot		 := 0
-Private nVaLiq		 := 0   
+Private nVaLiq		 := 0
 Private nTitulo		 := ""
+Private nValMes		 := 0
+Private cMes 		 := ""
 
 
 
@@ -130,7 +132,7 @@ IF !Empty (MV_PAR16)
 ELSE
 	cQuery += "SE1010.E1_TIPO BETWEEN '" + (MV_PAR05) + "' AND '" + (MV_PAR06) + "' AND "
 ENDIF
-//cQuery += "SE1010.E1_NATUREZ BETWEEN '" + (MV_PAR07) + "' AND '" + (MV_PAR08) + "' AND "  
+//cQuery += "SE1010.E1_NATUREZ BETWEEN '" + (MV_PAR07) + "' AND '" + (MV_PAR08) + "' AND "
 cQuery += "SEV010.EV_NATUREZ BETWEEN '" + (MV_PAR07) + "' AND '" + (MV_PAR08) + "' AND "
 cQuery += "SE1010.E1_CLIENTE BETWEEN '" + (MV_PAR09) + "' AND '" + (MV_PAR10) + "' AND "
 cQuery += "SE1010.E1_EMISSAO BETWEEN '" + DTOS(MV_PAR11) + "' AND '" + DTOS(MV_PAR12) + "' AND "
@@ -145,7 +147,7 @@ cQuery += "SE1010.D_E_L_E_T_ <> '*' AND "
 cQuery += "SA1010.D_E_L_E_T_ <> '*' AND "
 cQuery += "SEV010.D_E_L_E_T_ <> '*' AND "
 cQuery += "SED010.D_E_L_E_T_ <> '*' "
-cQuery += "ORDER BY NATUREZ,E1_CLIENTE,E1_PREFIXO,E1_NUM "
+cQuery += "ORDER BY NATUREZ,E1_EMISSAO,E1_PREFIXO,E1_NUM "
 
 tcQuery cQuery New Alias "TMP"
 
@@ -203,36 +205,36 @@ DBGotop()
 //DEFINE FONT oFont NAME "Courier New" SIZE 0,-11 BOLD
 
 While !EOF()
-	
+
 	SetRegua(RecCount())
-	
+
 	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 	//³ Verifica o cancelamento pelo usuario...                             ³
 	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-	
+
 	If lAbortPrint
 		@nLin,00 PSAY "*** CANCELADO PELO OPERADOR ***"
 		Exit
 	Endif
-	
-	
+
+
 	If nLin > 55 // Salto de Página. Neste caso o formulario tem 55 linhas...
 		Cabec(Titulo,Cabec1,Cabec2,NomeProg,Tamanho,nTipo)
 		nLin := 8
 	Endif
-	
+
 	If MV_PAR15 == 2        //Imprime Analitico
-		
+
 		If lOk == .T.
-			
+
 			@nLin, 000 PSAY TMP->NATUREZ + " - " + TMP->ED_DESCRIC
 			@nLin, 000 PSAY "________________________________________________________________________________________________________________________________________________________________________________"
 			nLin++
-			
+
 		EndIf
-		
-		
-		
+
+
+
 		@nLin, 000 PSAY TMP->E1_PREFIXO
 		@nLin, 005 PSAY TMP->E1_NUM
 		@nLin, 016 PSAY TMP->E1_PARCELA
@@ -245,16 +247,29 @@ While !EOF()
 		@nLin, 134 PSAY STOD(TMP->E1_EMISSAO)
 		@nLin, 146 PSAY STOD(TMP->E1_VENCREA)
 		@nLin, 163 PSAY TMP->VALOR PICTURE "@E 999,999,999.99"
-		
+
 		cNat    := TMP->NATUREZ
 		nVaLiq  += TMP->(VALOR - E1_IRRF - E1_INSS - E1_ISS - E1_PIS - E1_COFINS - E1_CSLL)
 		nValTot += TMP->VALOR
 		nValNat += TMP->VALOR
-		
+		cMes	:= SUBSTR(TMP->E1_EMISSAO,1,6)
+		nValMes += TMP->VALOR
+
 		dbskip()
-		
+
+		If (cMes != SUBSTR(TMP->E1_EMISSAO,1,6) .OR. cNat != TMP->NATUREZ) .AND. MV_PAR17 == 1
+
+			nLin++
+			@nLin, 000 PSAY  "TOTAL DE " + UPPER(MesExtenso(VAL(SUBSTR(cMes,5,2)))) + "/" + SUBSTR(cMes,1,4)
+			@nLin, 163 PSAY nValMes PICTURE "@E 999,999,999.99"
+			nLin++
+
+			nValMes := 0 //Zera a variável para a soma do próximo mês
+
+		EndIf
+
 		If cNat != TMP->NATUREZ
-			
+
 			lOk := .T.
 			nLin++
 			@nLin, 000 PSAY "--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------"
@@ -262,68 +277,68 @@ While !EOF()
 			@nLin, 000 PSAY " T O T A L I Z A D O R - N A T U R E Z A ----------------------------------------------->"
 			@nLin, 094 PSAY nValNat PICTURE "@E 999,999,999.99"
 			nLin++
-			
+
 			nValNat := 0 //Totalizador por Natureza
-			
+
 		Else
-			
+
 			lOk := .F.
-			
+
 		EndIf
-		
+
 		nLin 			+= 1 // Avanca a linha de impressao
-		
-	else // Imprime Sintetico	
-		
-		
+
+	else // Imprime Sintetico
+
+
 
 		cNat := TMP->NATUREZ
 		nValTot += TMP->VALOR
 		nValNat += TMP->VALOR
 		nVaLiq  += TMP->(VALOR - E1_IRRF - E1_INSS - E1_ISS - E1_PIS - E1_COFINS - E1_CSLL)
-		
+
 		If lOk == .T.
-			
+
 			@nLin, 000 PSAY TMP->NATUREZ + " - " + TMP->ED_DESCRIC
 			@nLin, 000 PSAY "_______________________________________________________________________________________"
-			
+
 		EndIf
-		
-		
-		
+
+
+
 		dbskip()
-		
+
 		If cNat != TMP->NATUREZ
-			
+
 			lOk := .T.
 			@nLin, 055 PSAY nValNat PICTURE "@E 999,999,999.99"
 			nValNat := 0 //Totalizador por Natureza
 			nLin++
-			
+
 		Else
-			
-			lOk := .F.			
-			
-			
+
+			lOk := .F.
+
+
 		EndIf
-		
-		
-		
-		
-	EndIf	
-	
-	
-	
-	
-	
+
+
+
+
+	EndIf
+
+
+
+
+
 ENDDO
 
 nLin++
 @nLin, 000 PSAY "Total Geral -------------------------------------------------------------------->"
 @nLin, 085 PSAY nValTot PICTURE "@E 999,999,999,999.99"
-//Rafael - 03/08/17 - Foi verificado que exitem diferenças entre os impostos calculados no titulo para o impostos calculados nas naturezas 1203010 e 1203014. 
+//Rafael - 03/08/17 - Foi verificado que exitem diferenças entre os impostos calculados no titulo para o impostos calculados nas naturezas 1203010 e 1203014.
 //Essa diferença acontece porque o vencimento de alguns impostos caem apenas para o mes seguinte ao vencimento do titulo principal.
-nLin++  
+nLin++
 @nLin, 000 PSAY "Total Liquido (-NCC/RA) - Impostos(PIS/COFINS/CSLL/IRRF/INSS/ISS)--------------->"
 @nLin, 085 PSAY nVaLiq PICTURE "@E 999,999,999,999.99"
 
@@ -370,22 +385,23 @@ dbSetOrder(1)
 aRegs:={}
 
 // Grupo/Ordem/Pergunta/Variavel/Tipo/Tamanho/Decimal/Presel/GSC/Valid/Var01/Def01/Cnt01/Var02/Def02/Cnt02/Var03/Def03/Cnt03/Var04/Def04/Cnt04/Var05/Def05/Cnt05
-AADD(aRegs,{cPerg,"01","Do  Prefixo ?","","","mv_ch01","C",03,0,0,"G","","mv_par01","","","","","","","","","","","","","","","","","","","","","","","","",""})
-AADD(aRegs,{cPerg,"02","Ate Prefixo ?","","","mv_ch02","C",03,0,0,"G","","mv_par02","","","","","","","","","","","","","","","","","","","","","","","","",""})
-AADD(aRegs,{cPerg,"03","Do  Numero ?","","","mv_ch03","C",09,0,0,"G","","mv_par03","","","","","","","","","","","","","","","","","","","","","","","","",""})
-AADD(aRegs,{cPerg,"04","Ate Numero ?","","","mv_ch04","C",09,0,0,"G","","mv_par04","","","","","","","","","","","","","","","","","","","","","","","","",""})
-AADD(aRegs,{cPerg,"05","do Tipo","","","mv_ch05","C",03,0,0,"G","","mv_par05","","","","","","","","","","","","","","","","","","","","","","","","","05"})
-AADD(aRegs,{cPerg,"06","Ate Tipo?","","","mv_ch06","C",03,0,0,"G","","mv_par06","","","","","","","","","","","","","","","","","","","","","","","","","05"})
-AADD(aRegs,{cPerg,"07","Da  Natureza ?","","","mv_ch07","C",10,0,0,"G","","mv_par07","","","","","","","","","","","","","","","","","","","","","","","","","SED"})
-AADD(aRegs,{cPerg,"08","Ate Natureza ?","","","mv_ch08","C",10,0,0,"G","","mv_par08","","","","","","","","","","","","","","","","","","","","","","","","","SED"})
-AADD(aRegs,{cPerg,"09","Do  Cliente ?","","","mv_ch09","C",06,0,0,"G","","mv_par09","","","","","","","","","","","","","","","","","","","","","","","","","SA1"})
-AADD(aRegs,{cPerg,"10","Ate Cliente ?","","","mv_ch10","C",06,0,0,"G","","mv_par10","","","","","","","","","","","","","","","","","","","","","","","","","SA1"})
-AADD(aRegs,{cPerg,"11","Da  Emissao ?","","","mv_ch11","D",08,0,0,"G","","mv_par11","","","","","","","","","","","","","","","","","","","","","","","","",""})
-AADD(aRegs,{cPerg,"12","Ate Emissao ?","","","mv_ch12","D",08,0,0,"G","","mv_par12","","","","","","","","","","","","","","","","","","","","","","","","",""})
-AADD(aRegs,{cPerg,"13","Do  Vencimento ?","","","mv_ch13","D",08,0,0,"G","","mv_par13","","","","","","","","","","","","","","","","","","","","","","","","",""})
-AADD(aRegs,{cPerg,"14","Ate Vencimento ?","","","mv_ch14","D",08,0,0,"G","","mv_par14","","","","","","","","","","","","","","","","","","","","","","","","",""})
-AADD(aRegs,{cPerg,"15","Tipo ?","","","mv_ch15","N",01,0,2,"C","","mv_par15","Sintetico","","","","","Analitico","","","","","","","","","","","","","","","","","","","","","","",""})
-AADD(aRegs,{cPerg,"16","Nao Imprimir Tipos","","","mv_ch16","C",20,0,0,"G","","mv_par16","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""})
+AADD(aRegs,{cPerg,"01","Do  Prefixo:"			,"","","mv_ch01","C",03,0,0,"G","","mv_par01","","","","","","","","","","","","","","","","","","","","","","","","",""})
+AADD(aRegs,{cPerg,"02","Até o Prefixo:"			,"","","mv_ch02","C",03,0,0,"G","","mv_par02","","","","","","","","","","","","","","","","","","","","","","","","",""})
+AADD(aRegs,{cPerg,"03","Do Numero:"				,"","","mv_ch03","C",09,0,0,"G","","mv_par03","","","","","","","","","","","","","","","","","","","","","","","","",""})
+AADD(aRegs,{cPerg,"04","Até Numero:"			,"","","mv_ch04","C",09,0,0,"G","","mv_par04","","","","","","","","","","","","","","","","","","","","","","","","",""})
+AADD(aRegs,{cPerg,"05","Do Tipo:"				,"","","mv_ch05","C",03,0,0,"G","","mv_par05","","","","","","","","","","","","","","","","","","","","","","","","","05"})
+AADD(aRegs,{cPerg,"06","Até o Tipo:"			,"","","mv_ch06","C",03,0,0,"G","","mv_par06","","","","","","","","","","","","","","","","","","","","","","","","","05"})
+AADD(aRegs,{cPerg,"07","Da Natureza:"			,"","","mv_ch07","C",10,0,0,"G","","mv_par07","","","","","","","","","","","","","","","","","","","","","","","","","SED"})
+AADD(aRegs,{cPerg,"08","Até Natureza:"			,"","","mv_ch08","C",10,0,0,"G","","mv_par08","","","","","","","","","","","","","","","","","","","","","","","","","SED"})
+AADD(aRegs,{cPerg,"09","Do Cliente:"			,"","","mv_ch09","C",06,0,0,"G","","mv_par09","","","","","","","","","","","","","","","","","","","","","","","","","SA1"})
+AADD(aRegs,{cPerg,"10","Até Cliente:"			,"","","mv_ch10","C",06,0,0,"G","","mv_par10","","","","","","","","","","","","","","","","","","","","","","","","","SA1"})
+AADD(aRegs,{cPerg,"11","Da Emissao:"			,"","","mv_ch11","D",08,0,0,"G","","mv_par11","","","","","","","","","","","","","","","","","","","","","","","","",""})
+AADD(aRegs,{cPerg,"12","Até Emissao:"			,"","","mv_ch12","D",08,0,0,"G","","mv_par12","","","","","","","","","","","","","","","","","","","","","","","","",""})
+AADD(aRegs,{cPerg,"13","Do Vencimento:"			,"","","mv_ch13","D",08,0,0,"G","","mv_par13","","","","","","","","","","","","","","","","","","","","","","","","",""})
+AADD(aRegs,{cPerg,"14","Até Vencimento:"		,"","","mv_ch14","D",08,0,0,"G","","mv_par14","","","","","","","","","","","","","","","","","","","","","","","","",""})
+AADD(aRegs,{cPerg,"15","Tipo:"					,"","","mv_ch15","N",01,0,2,"C","","mv_par15","Sintetico","","","","","Analitico","","","","","","","","","","","","","","","","","","","","","","",""})
+AADD(aRegs,{cPerg,"16","Nao Imprimir Tipos:"	,"","","mv_ch16","C",20,0,0,"G","","mv_par16","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""})
+AADD(aRegs,{cPerg,"17","Subtotal Por Mês:"		,"","","mv_ch17","N",01,0,2,"C","","mv_par17","Sim","","","","","Não","","","","","","","","","","","","","","","","","","","","","","",""})
 
 
 For i:=1 to Len(aRegs)
