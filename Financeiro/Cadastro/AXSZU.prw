@@ -730,13 +730,13 @@ Static Function RunReport(Cabec1,Cabec2,Titulo,nLin)
 
 				//@nLin,00 PSAY "      Luciano Ribeiro            Wagner Lima           Eleni Caldeira (Elenn)           Alarico Naves            Talita Almeida"
 				//@nLin,00 PSAY "  Eleni Caldeira (Elenn)             Alarico Naves             Maria dos Reis"
-				@nLin,00 PSAY "  Eleni Caldeira (Elenn)             Alarico Naves             Pâmela Aguiar "
+				@nLin,00 PSAY "  Eleni Caldeira (Elenn)             Ronnie Bragança             Pâmela Aguiar "
 				nLin++
 
 				// Cargos
 				//@nLin,00 PSAY "       Diretor Geral          Gerente Executivo         Ger. Adm / Financeiro          Diretor Comercial        Auxiliar Financeiro"
 				//@nLin,00 PSAY "  Ger. Adm / Financeiro            Diretor Comercial         Assistente Financeiro"
-				@nLin,00 PSAY "  Ger. Adm / Financeiro            Diretor Comercial         Assistente Financeiro"
+				@nLin,00 PSAY "  Ger. Adm / Financeiro                 Comercial             Assistente Financeiro"
 
 
 				lOk := .T. //Imprimir o codigo e o nome do vendedor
