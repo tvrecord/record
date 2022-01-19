@@ -593,11 +593,11 @@ Static Function RunReport(Cabec1,Cabec2,Titulo,nLin)
 
 	nLin := nLin + 10
 
-	@nLin, 030 PSAY "___________________          ___________________         ___________________"
+	@nLin, 030 PSAY "  ___________________                 ___________________                 ___________________"
 	nLin += 1
-	@nLin, 030 PSAY "   Alarico Neves               Elenn Caldeira               Pâmela Aguiar   "
+	@nLin, 030 PSAY "Ronnie Anderson Bragança             Eleni Caldeira (Elenn)                  Pâmela Aguiar   "
 	nLin += 1
-	@nLin, 030 PSAY " Diretor Comercial          Gerente Adm/Financeiro         Ass. Financeiro  "
+	@nLin, 030 PSAY "      Comercial                      Gerente Adm/Financeiro                 Ass. Financeiro  "
 
 	dbSelectArea("TMPZAB")
 	dbCloseArea()

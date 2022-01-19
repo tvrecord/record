@@ -77,7 +77,7 @@ User Function MA020TOK()
 
 	//Cadastra conta cotabil do fornecedor.
 
-	IF _lRetorno 
+	IF _lRetorno
 
 		//M->A2_CONTA := '211' + M->A2_GRUPC + SUBSTR(M->A2_COD,3,4)
 
@@ -88,9 +88,9 @@ User Function MA020TOK()
 Return(_lRetorno)
 
 //Exemplo de rotina automática para inclusão de contas contábeis no ambiente Contabilidade Gerencial (SigaCTB).
-/// ROTINA AUTOMATICA - INCLUSAO DE CONTA CONTABIL CTB     
+/// ROTINA AUTOMATICA - INCLUSAO DE CONTA CONTABIL CTB
 
-Static Function ModelCT1() 
+Static Function ModelCT1()
 
 	Local nOpcAuto :=0
 	Local nX
@@ -117,15 +117,15 @@ Static Function ModelCT1()
 	oCT1:SETVALUE('CT1_DESC01',SUBSTR(M->A2_NOME,1,40))
 	oCT1:SETVALUE('CT1_CLASSE','2')
 	oCT1:SETVALUE('CT1_NORMAL' ,'2')
-	oCT1:SETVALUE('CT1_NTSPED','02') 
-	oCT1:SETVALUE('CT1_INDNAT','2') 
+	oCT1:SETVALUE('CT1_NTSPED','02')
+	oCT1:SETVALUE('CT1_INDNAT','2')
 
 	//---------------------------------------------------------
 	// Preencho os valores da CVD
 	//---------------------------------------------------------
 
 	oCVD := __oModelAut:GetModel('CVDDETAIL') //Objeto similar getdados CVD
-	oCVD:SETVALUE('CVD_FILIAL' ,xFilial('CVD')) 
+	oCVD:SETVALUE('CVD_FILIAL' ,xFilial('CVD'))
 	//oCVD:SETVALUE('CVD_CONTA','211' + M->A2_GRUPC + SUBSTR(M->A2_COD,3,4))
 	oCVD:SETVALUE('CVD_ENTREF','10')
 	oCVD:SETVALUE('CVD_CODPLA','2018')
@@ -222,7 +222,7 @@ Return
 Return
 */
 
-Static Function AVISOFOR1()
+User Function AVISOFOR1()
 
 	Local oServer
 	Local oMessage
@@ -232,7 +232,7 @@ Static Function AVISOFOR1()
 
 	//Cria a conexão com o server STMP ( Envio de e-mail )
 	oServer := TMailManager():New()
-	oServer:Init( "", "Outlook.office365.com", "microsiga", "record@micro", 0, 25 )
+	oServer:Init( "", "Outlook.office365.com", "microsiga@recordtvdf.com.br", "record@micro", 0, 25 )
 
 	//seta um tempo de time out com servidor de 1min
 	If oServer:SetSmtpTimeOut( 60 ) != 0
@@ -259,12 +259,12 @@ Static Function AVISOFOR1()
 	oMessage:Clear()
 
 	//Popula com os dados de envio
-	oMessage:cFrom              := "Microsiga "
-	oMessage:cTo                := "contabilidade@recordtvdf.com.br"
-	oMessage:cCc                := "rfranca@recordtvdf.com.br;wsbezerra@recordtvdf.com.br"
+	oMessage:cFrom              := "Microsiga"
+	oMessage:cTo                := "rfranca@recordtvdf.com.br"
+	oMessage:cCc                := "plpontes@recordtvdf.com.br"
 	oMessage:cBcc               := ""
-	oMessage:cSubject           
-	oMessage:cBody              
+	oMessage:cSubject
+	oMessage:cBody
 
 	//Adiciona um attach
 	//If oMessage:AttachFile( "arquivo.txt" ) < 0

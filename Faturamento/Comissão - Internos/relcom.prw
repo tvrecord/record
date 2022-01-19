@@ -1716,6 +1716,7 @@ Static Function Resumo()
 		@nLin,055 psay "-------->"
 		@nLin,065 psay _nDescImp Picture "@E 999,999,999.99" + " (-)"
 
+
 		nLin ++
 
 		_nBase -= _nDescImp // Desconta + o imposto
