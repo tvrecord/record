@@ -13,7 +13,7 @@
 ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
 /*/
 
-User Function RELREPASS()                                    
+User Function RELREPASS()
 
 	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 	//³ Declaracao de Variaveis                                             ³
@@ -57,7 +57,7 @@ User Function RELREPASS()
 	If !Pergunte(cPerg,.T.)
 		alert("OPERAÇÃO CANCELADA")
 		return
-	ENDIF                 
+	ENDIF
 
 
 	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
@@ -70,11 +70,11 @@ User Function RELREPASS()
 	//Imprimir relatorio com dados Financeiros ou de Clientes
 	IF !Empty (MV_PAR06)
 		Titulo := ALLTRIM(Titulo) + " - " + UPPER(MesExtenso(MONTH(MV_PAR06)))
-	ENDIF	
+	ENDIF
 
 	cQuery := "SELECT C5_PRAREP AS PRACA, C5_NUMRP AS RP, C5_NOTA AS NOTA, E1_VALOR AS VALOR "
 	cQuery += ", TRIM(E1_CLIENTE) + '/' + TRIM(E1_NOMCLI) AS CLIENTE, E1_BAIXA AS BAIXA, C5_VLREP AS VLREPASSE "
-	cQuery += "FROM SC5010 " 
+	cQuery += "FROM SC5010 "
 	cQuery += "INNER JOIN SE1010 ON E1_NUM = C5_NUM AND E1_SERIE = C5_SERIE AND E1_CLIENTE = C5_CLIENTE AND E1_LOJA = C5_LOJACLI "
 	cQuery += "WHERE SC5010.D_E_L_E_T_ = '' AND SE1010.D_E_L_E_T_ = '' "
 	cQuery += "AND C5_NUMRP IN " + FormatIn(MV_PAR02,",") + " "
@@ -88,7 +88,7 @@ User Function RELREPASS()
 		Return
 	Endif
 
-	cQuery := "SELECT E2_NUM AS NUMERO, E2_FORNECE AS CODIGO, A2_NOME AS NOME, TRIM(A2_MUN) + '/' + A2_EST AS CIDADE, E2_VALOR AS VALOR, A2_CGC AS CNPJ 
+	cQuery := "SELECT E2_NUM AS NUMERO, E2_FORNECE AS CODIGO, A2_NOME AS NOME, TRIM(A2_MUN) + '/' + A2_EST AS CIDADE, E2_VALOR AS VALOR, A2_CGC AS CNPJ
 	cQuery += "FROM SE2010 "
 	cQuery += "INNER JOIN SA2010 ON E2_FORNECE = A2_COD AND  E2_LOJA = A2_LOJA "
 	cQuery += "WHERE SE2010.D_E_L_E_T_ = '' AND SA2010.D_E_L_E_T_ = '' AND E2_FORNECE = '" + (MV_PAR01) + "' "
@@ -104,11 +104,11 @@ User Function RELREPASS()
 		Return
 	Endif
 
-	IF !Empty(MV_PAR04)	
+	IF !Empty(MV_PAR04)
 
 		cQuery := "SELECT C5_PRAREP AS PRACA, C5_NUMRP AS RP, C5_NOTA AS NOTA, E1_VALOR AS VALOR "
 		cQuery += ", TRIM(E1_CLIENTE) + '/' + TRIM(E1_NOMCLI) AS CLIENTE, E1_BAIXA AS BAIXA, C5_VLREP AS VLREPASSE "
-		cQuery += "FROM SC5010 " 
+		cQuery += "FROM SC5010 "
 		cQuery += "INNER JOIN SE1010 ON E1_NUM = C5_NUM AND E1_SERIE = C5_SERIE AND E1_CLIENTE = C5_CLIENTE AND E1_LOJA = C5_LOJACLI "
 		cQuery += "WHERE SC5010.D_E_L_E_T_ = '' AND SE1010.D_E_L_E_T_ = '' "
 		cQuery += "AND C5_NUMRP IN " + FormatIn(MV_PAR04,",") + " "
@@ -116,13 +116,13 @@ User Function RELREPASS()
 		tcQuery cQuery New Alias "TMP2"
 
 		If Eof()
-			MsgInfo("Não foram encontradas as RPs em aberto!","Verifique")	
+			MsgInfo("Não foram encontradas as RPs em aberto!","Verifique")
 			lOk1 := .F.
 			dbSelectArea("TMP2")
 			dbCloseArea("TMP2")
 		Endif
 
-		cQuery := "SELECT E2_NUM AS NUMERO, E2_FORNECE AS CODIGO, A2_NOME AS NOME, TRIM(A2_MUN) + '/' + A2_EST AS CIDADE, E2_VALOR AS VALOR, A2_CGC AS CNPJ 
+		cQuery := "SELECT E2_NUM AS NUMERO, E2_FORNECE AS CODIGO, A2_NOME AS NOME, TRIM(A2_MUN) + '/' + A2_EST AS CIDADE, E2_VALOR AS VALOR, A2_CGC AS CNPJ
 		cQuery += "FROM SE2010 "
 		cQuery += "INNER JOIN SA2010 ON E2_FORNECE = A2_COD AND  E2_LOJA = A2_LOJA "
 		cQuery += "WHERE SE2010.D_E_L_E_T_ = '' AND SA2010.D_E_L_E_T_ = '' AND E2_FORNECE = '" + (MV_PAR01) + "' "
@@ -134,7 +134,7 @@ User Function RELREPASS()
 		If Eof()
 			MsgInfo("Não foram encontradas as notas fiscais em aberto!","Verifique")
 			dbSelectArea("TMP3")
-			dbCloseArea("TMP3")		
+			dbCloseArea("TMP3")
 		Endif
 
 	ELSE
@@ -183,12 +183,12 @@ Static Function RunReport(Cabec1,Cabec2,Titulo,nLin)
 
 	Local cPraca 	 	:= ""
 	Local aRegistroP	:= {}
-	Local aRegistroA	:= {}	
+	Local aRegistroA	:= {}
 	Local nCont1		:= 0
 	Local nCont2		:= 0
 	Local lOk 			:= .T.
 	Local nTotalP		:= 0
-	Local nTotalA		:= 0	
+	Local nTotalA		:= 0
 
 	//Separa notas em aberto
 
@@ -201,13 +201,13 @@ Static Function RunReport(Cabec1,Cabec2,Titulo,nLin)
 			nCont1 += 1
 
 			aAdd(aRegistroA,{TMP2->RP,;
-			TMP2->NOTA,; 
-			SUBSTR(TMP2->CLIENTE,1,50),;			
+			TMP2->NOTA,;
+			SUBSTR(TMP2->CLIENTE,1,50),;
 			STOD(TMP2->BAIXA),;
 			"",;
 			"",;
 			"",;
-			"",;									
+			"",;
 			0,;
 			""})
 
@@ -229,7 +229,7 @@ Static Function RunReport(Cabec1,Cabec2,Titulo,nLin)
 			aRegistroA[nCont2][7] := TMP3->CNPJ
 			aRegistroA[nCont2][8] := TMP3->CODIGO
 			aRegistroA[nCont2][9] := TMP3->VALOR
-			aRegistroA[nCont2][10]:= TMP3->NUMERO		
+			aRegistroA[nCont2][10]:= TMP3->NUMERO
 
 			dbSkip()
 
@@ -240,8 +240,8 @@ Static Function RunReport(Cabec1,Cabec2,Titulo,nLin)
 
 		If nCont1 <> nCont2
 			MsgInfo("Numero de RPs para pagamento diferente do de notas fiscais!","Verifique")
-		Endif	
-		
+		Endif
+
 			For i:=1 to Len(aRegistroA)
 
 		//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
@@ -262,21 +262,21 @@ Static Function RunReport(Cabec1,Cabec2,Titulo,nLin)
 		IF (aRegistroA[i][8] != cPraca .or. lOk == .T.)
 			@nLin, 000 PSAY Replicate("-",Limite)
 			nLin := nLin + 1 // Avanca a linha de impressao
-			@nLin, 000 PSAY "REPASSE EM ABERTO - " + aRegistroA[i][6]		
-			@nLin, 073 PSAY "CNPJ: "  
-			@nLin, 080 PSAY	aRegistroA[i][7] PICTURE "@R 99.999.999/9999-99"			
+			@nLin, 000 PSAY "REPASSE EM ABERTO - " + aRegistroA[i][6]
+			@nLin, 073 PSAY "CNPJ: "
+			@nLin, 080 PSAY	aRegistroA[i][7] PICTURE "@R 99.999.999/9999-99"
 			nLin := nLin + 1 // Avanca a linha de impressao
 			@nLin, 000 PSAY Replicate("-",Limite)
-			nLin += 1 // Avanca a linha de impressao 
+			nLin += 1 // Avanca a linha de impressao
 		Endif
 
-		@nLin, 000 PSAY aRegistroA[i][1]	
-		@nLin, 010 PSAY aRegistroA[i][2]		
+		@nLin, 000 PSAY aRegistroA[i][1]
+		@nLin, 010 PSAY aRegistroA[i][2]
 		@nLin, 020 PSAY aRegistroA[i][3]
 		@nLin, 075 PSAY aRegistroA[i][4]
 		@nLin, 090 PSAY aRegistroA[i][5]
 		@nLin, 140 PSAY aRegistroA[i][10]
-		@nLin, 160 PSAY aRegistroA[i][9] PICTURE "@E 999,999.99" 				
+		@nLin, 160 PSAY aRegistroA[i][9] PICTURE "@E 999,999.99"
 
 		cPraca := aRegistroA[i][8]
 		nTotalA += aRegistroA[i][9]
@@ -286,15 +286,15 @@ Static Function RunReport(Cabec1,Cabec2,Titulo,nLin)
 		lOk := .F.
 
 	Next
-	
+
 	@nLin, 000 PSAY Replicate("-",Limite)
 	nLin := nLin + 1 // Avanca a linha de impressao
-	@nLin, 000 PSAY "TOTAL EM ABERTO "	
-	@nLin, 159 PSAY	nTotalA  PICTURE "@E 999,999.99" 		
+	@nLin, 000 PSAY "TOTAL EM ABERTO "
+	@nLin, 159 PSAY	nTotalA  PICTURE "@E 999,999.99"
 	nLin := nLin + 1 // Avanca a linha de impressao
 	@nLin, 000 PSAY Replicate("-",Limite)
-	nLin += 4 // Avanca a linha de impressao 
-	
+	nLin += 4 // Avanca a linha de impressao
+
 
 	EndIf
 	//Zera os contadores
@@ -302,7 +302,7 @@ Static Function RunReport(Cabec1,Cabec2,Titulo,nLin)
 	nCont1		:= 0
 	nCont2		:= 0
 	cPraca      := ""
-	lOk 		:= .T.			
+	lOk 		:= .T.
 
 	//Separa notas para pagamento
 
@@ -313,13 +313,13 @@ Static Function RunReport(Cabec1,Cabec2,Titulo,nLin)
 		nCont1 += 1
 
 		aAdd(aRegistroP,{TMP->RP,;
-		TMP->NOTA,; 
-		SUBSTR(TMP->CLIENTE,1,50),;			
+		TMP->NOTA,;
+		SUBSTR(TMP->CLIENTE,1,50),;
 		STOD(TMP->BAIXA),;
 		"",;
 		"",;
 		"",;
-		"",;									
+		"",;
 		0,;
 		""})
 
@@ -341,7 +341,7 @@ Static Function RunReport(Cabec1,Cabec2,Titulo,nLin)
 		aRegistroP[nCont2][7] := TMP1->CNPJ
 		aRegistroP[nCont2][8] := TMP1->CODIGO
 		aRegistroP[nCont2][9] := TMP1->VALOR
-		aRegistroP[nCont2][10]:= TMP1->NUMERO		
+		aRegistroP[nCont2][10]:= TMP1->NUMERO
 
 		dbSkip()
 
@@ -374,21 +374,21 @@ Static Function RunReport(Cabec1,Cabec2,Titulo,nLin)
 		IF (aRegistroP[i][8] != cPraca .or. lOk == .T.)
 			@nLin, 000 PSAY Replicate("-",Limite)
 			nLin := nLin + 1 // Avanca a linha de impressao
-			@nLin, 000 PSAY "REPASSE A PAGAR - " + aRegistroP[i][6]		
-			@nLin, 073 PSAY "CNPJ: "  
-			@nLin, 080 PSAY	aRegistroP[i][7] PICTURE "@R 99.999.999/9999-99"			
+			@nLin, 000 PSAY "REPASSE A PAGAR - " + aRegistroP[i][6]
+			@nLin, 073 PSAY "CNPJ: "
+			@nLin, 080 PSAY	aRegistroP[i][7] PICTURE "@R 99.999.999/9999-99"
 			nLin := nLin + 1 // Avanca a linha de impressao
 			@nLin, 000 PSAY Replicate("-",Limite)
-			nLin += 1 // Avanca a linha de impressao 
+			nLin += 1 // Avanca a linha de impressao
 		Endif
 
-		@nLin, 000 PSAY aRegistroP[i][1]	
-		@nLin, 010 PSAY aRegistroP[i][2]		
+		@nLin, 000 PSAY aRegistroP[i][1]
+		@nLin, 010 PSAY aRegistroP[i][2]
 		@nLin, 020 PSAY aRegistroP[i][3]
 		@nLin, 075 PSAY aRegistroP[i][4]
 		@nLin, 090 PSAY aRegistroP[i][5]
 		@nLin, 140 PSAY aRegistroP[i][10]
-		@nLin, 160 PSAY aRegistroP[i][9] PICTURE "@E 999,999.99" 				
+		@nLin, 160 PSAY aRegistroP[i][9] PICTURE "@E 999,999.99"
 
 		cPraca := aRegistroP[i][8]
 		nTotalP += aRegistroP[i][9]
@@ -401,13 +401,13 @@ Static Function RunReport(Cabec1,Cabec2,Titulo,nLin)
 
 	@nLin, 000 PSAY Replicate("-",Limite)
 	nLin := nLin + 1 // Avanca a linha de impressao
-	@nLin, 000 PSAY "TOTAL A PAGAR"	
-	@nLin, 159 PSAY	nTotalP  PICTURE "@E 999,999.99" 		
+	@nLin, 000 PSAY "TOTAL A PAGAR"
+	@nLin, 159 PSAY	nTotalP  PICTURE "@E 999,999.99"
 	nLin := nLin + 1 // Avanca a linha de impressao
 	@nLin, 000 PSAY Replicate("-",Limite)
-	nLin += 2 // Avanca a linha de impressao 
+	nLin += 2 // Avanca a linha de impressao
 
-	nLin := 55 
+	nLin := 55
 	@nLin,060 PSAY UPPER("       _________________________             _________________________")
 	nLin += 2
 	@nLin,060 PSAY UPPER("        Eleni Caldeira (Elenn)                    Manuela Costa")
@@ -444,12 +444,12 @@ Static Function ValidPerg(cPerg)
 	aRegs:={}
 
 	// Grupo/Ordem/Pergunta/Variavel/Tipo/Tamanho/Decimal/Presel/GSC/Valid/Var01/Def01/Cnt01/Var02/Def02/Cnt02/Var03/Def03/Cnt03/Var04/Def04/Cnt04/Var05/Def05/Cnt05
-	AADD(aRegs,{cPerg,"01","Fornecedor/Praça:	","","","mv_ch01","C",06,0,0,"G","","mv_par01","","","","","","","","","","","","","","","","","","","","","","","","","SA2"})	
+	AADD(aRegs,{cPerg,"01","Fornecedor/Praça:	","","","mv_ch01","C",06,0,0,"G","","mv_par01","","","","","","","","","","","","","","","","","","","","","","","","","SA2"})
 	AADD(aRegs,{cPerg,"02","RPs a Pagar: 		","","","mv_ch02","C",60,0,0,"G","","mv_par02","","","","","","","","","","","","","","","","","","","","","","","","",""})
 	AADD(aRegs,{cPerg,"03","Notas a Pagar:		","","","mv_ch03","C",60,0,0,"G","","mv_par03","","","","","","","","","","","","","","","","","","","","","","","","",""})
-	AADD(aRegs,{cPerg,"04","RPs em Aberto: 		","","","mv_ch04","C",60,0,0,"G","","mv_par04","","","","","","","","","","","","","","","","","","","","","","","","",""})	
-	AADD(aRegs,{cPerg,"05","Notas em Aberto:	","","","mv_ch05","C",60,0,0,"G","","mv_par05","","","","","","","","","","","","","","","","","","","","","","","","",""})	
-	AADD(aRegs,{cPerg,"06","Data Referencia: 	","","","mv_ch06","D",08,0,0,"G","","mv_par06","","","","","","","","","","","","","","","","","","","","","","","","",""})	
+	AADD(aRegs,{cPerg,"04","RPs em Aberto: 		","","","mv_ch04","C",60,0,0,"G","","mv_par04","","","","","","","","","","","","","","","","","","","","","","","","",""})
+	AADD(aRegs,{cPerg,"05","Notas em Aberto:	","","","mv_ch05","C",60,0,0,"G","","mv_par05","","","","","","","","","","","","","","","","","","","","","","","","",""})
+	AADD(aRegs,{cPerg,"06","Data Referencia: 	","","","mv_ch06","D",08,0,0,"G","","mv_par06","","","","","","","","","","","","","","","","","","","","","","","","",""})
 
 	For i:=1 to Len(aRegs)
 		If !dbSeek(cPerg+aRegs[i,2])
