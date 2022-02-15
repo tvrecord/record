@@ -261,7 +261,7 @@ Static Function GetData(cPPeriodo,cPPracaDe,cPPracaAte,cPRpDe,cPRpAte)
 			AND ZAF_CODIGO = ZAG_PRACA
 		INNER JOIN %table:SC5% AS SC5
 		ON C5_FILIAL = ZAG_FILIAL
-			AND C5_NUMRP = ZAG_NUMRP
+			AND (C5_NUMRP = ZAG_NUMRP OR (C5_NUM = '038055' AND ZAG_NUMRP = '235868C'))
 			AND C5_NOTA <> ''
 			AND SC5.D_E_L_E_T_ = ''
 		INNER JOIN %table:SA1% AS SA1
