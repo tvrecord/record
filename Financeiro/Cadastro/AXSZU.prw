@@ -217,6 +217,7 @@ User Function RELBV
 	ELSE
 		cQuery += "SE1010.E1_VEND1 IN " + FormatIn(MV_PAR20,"/") + " AND "
 	ENDIF
+	//cQuery += "(SE1010.E1_VEND1 IN ('000219') AND SE1010.E1_NATUREZ NOT IN ('110101701')) AND "
 	cQuery += "SE1010.E1_EMISSAO BETWEEN '" + DTOS(MV_PAR04) + "' AND '" + DTOS(MV_PAR05) + "' AND "
 	cQuery += "SE1010.E1_VENCTO BETWEEN '" + DTOS(MV_PAR06) + "' AND '" + DTOS(MV_PAR07) + "' AND "
 	cQuery += "SE1010.E1_CLIENTE BETWEEN '" + (MV_PAR08) + "' AND '" + (MV_PAR09) + "' AND "
