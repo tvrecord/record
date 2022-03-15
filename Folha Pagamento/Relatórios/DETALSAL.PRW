@@ -3,18 +3,8 @@
 #INCLUDE "Topconn.ch"
 
 /*/
-ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
-ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
-ฑฑษออออออออออัออออออออออหอออออออัออออออออออออออออออออหออออออัอออออออออออออปฑฑ
 ฑฑบPrograma  ณRATECC    บ Autor ณ Bruno Alves        บ Data ณ 06/04/2011  บฑฑ
-ฑฑฬออออออออออุออออออออออสอออออออฯออออออออออออออออออออสออออออฯอออออออออออออนฑฑ
 ฑฑบDescricao ณ Visualiza o total pago ao funcionario					  บฑฑ
-ฑฑ          ฑฑ  					   									  บฑฑ
-ฑฑฬออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
-ฑฑบUso       ณ AP6 IDEs                                                   บฑฑ
-ฑฑศออออออออออฯออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออผฑฑ
-ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
-฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿
 /*/
 
 User Function DETALSAL
@@ -26,19 +16,13 @@ User Function DETALSAL
 	Local cDesc1         := "Este programa tem como objetivo imprimir relatorio "
 	Local cDesc2         := "de acordo com os parametros informados pelo usuario."
 	Local cDesc3         := ""
-	Local cPict          := ""
 	Local titulo       	 := "Cargos e Salarios"
 	Local nLin           := 100
-	Local cTpVal		 := ""
 	Local Cabec1         := ""
 	Local Cabec2         := ""
-	Local Cabec3         := ""
-	Local imprime        := .T.
-	Local aOrd := {}
 
 	Private lEnd         := .F.
 	Private lAbortPrint  := .F.
-	Private CbTxt        := ""
 	Private limite       := 220
 	Private tamanho      := "G"
 	Private nomeprog     := "DETALSAL" // Coloque aqui o nome do programa para impressao no cabecalho
@@ -59,7 +43,6 @@ User Function DETALSAL
 	Private lBarra 		 := .F.
 	Private _aIExcel 	 := {}
 
-
 	ValidPerg(cPerg)
 
 	If !Pergunte(cPerg,.T.)
@@ -68,9 +51,9 @@ User Function DETALSAL
 	ENDIF
 
 	If MV_PAR07 != 1
-		Cabec1         := "Mat.    Nome                                    Admissao    C. Custo                  Fun็ใo                        Sal. Base    Acumulo    Adicional  Gratifica็ใo  H. Extras  Quinquenio    Peric.  Insalubridade  Sal. Tot."
+		Cabec1         := "Mat.    Nome                                    Admissao    C. Custo                  Fun็ใo                        Sal. Base    Acumulo    Adicional  Gratifica็ใo  H. Extras  Quinquenio    Peric.   Sal. Tot." //Insalub retirado a pedido da Giselly(Pedro 14/03/22)
 	else
-		Cabec1         := "Mat.    Nome                               Admissao    C. Custo                  Fun็ใo              Sal. Base    Acumulo    Adicional  Gratifica็ใo  H. Extras  Dsr. Extra  Quinquenio    Peric.  Insalubridade  Sal. Tot."
+		Cabec1         := "Mat.    Nome                               Admissao    C. Custo                  Fun็ใo              Sal. Base    Acumulo    Adicional  Gratifica็ใo  H. Extras  Dsr. Extra  Quinquenio    Peric.   Sal. Tot." //Insalub retirado a pedido da Giselly(Pedro 14/03/22)
 	EndIf
 
 
@@ -79,56 +62,6 @@ User Function DETALSAL
 	//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
 
 	wnrel := SetPrint("",NomeProg,cPerg,@titulo,cDesc1,cDesc2,cDesc3,.T.,,.T.,Tamanho,,.T.)
-
-	//Imprimir relatorio com dados Financeiros ou de Clientes
-
-	cQuery := "SELECT "
-	cQuery += "RJ_CODCBO,RA_TPDEFFI,RA_DTVTEST,RA_CATFUNC,RA_CODFUNC,(SELECT MIN(R7_DATA) FROM SR7010 WHERE R7_MAT = RA_MAT AND D_E_L_E_T_ <> '*' AND R7_FUNCAO = RA_CODFUNC) AS DATAFUNC,RA_ADMISSA,RA_NASC, "
-	cQuery += "RA_FILIAL,RA_MAT,RA_NOME,RA_ADMISSA,RA_DEPTO,RA_SINDICA,CTT_DESC01,RJ_DESC,RA_SALARIO,RA_ACFUNC,RA_ACUMULA,RA_CALCADI,RA_GRATFUN,RA_ADTPOSE,RA_HRSMES,RA_HEFIX25,RA_HEFIX50,RA_PERICUL,RA_INSMED,RA_PERCQ "
-	cQuery += "FROM SRA010 "
-	cQuery += "INNER JOIN CTT010 ON RA_FILIAL = CTT_FILIAL AND RA_CC = CTT_CUSTO "
-	cQuery += "INNER JOIN SRJ010 ON RA_CODFUNC = RJ_FUNCAO "
-	cQuery += "WHERE "
-	cQuery += "SRA010.RA_FILIAL = '" + (MV_PAR01) + "' AND "
-	cQuery += "SRA010.RA_MAT BETWEEN '" + (MV_PAR02) + "' AND '" + (MV_PAR03) + "' AND "
-	cQuery += "CTT010.CTT_CUSTO BETWEEN '" + (MV_PAR04) + "' AND '" + (MV_PAR05) + "' AND "
-	cQuery += "SRA010.RA_SITFOLH <> 'D' AND "
-	If MV_PAR06 == 2
-		cQuery += "SRA010.RA_CATFUNC <> 'E' AND "
-	EndIf
-	cQuery += "SRJ010.D_E_L_E_T_ <> '*' AND "
-	cQuery += "SRA010.D_E_L_E_T_ <> '*' AND  "
-	cQuery += "CTT010.D_E_L_E_T_ <> '*' "
-	cQuery += "ORDER BY CTT_DESC01,RJ_DESC,RA_NOME "
-
-
-	tcQuery cQuery New Alias "TMP"
-
-
-
-	cQuery1 := "SELECT SUBSTRING(RX_TXT,07,6) AS SALMIN FROM SRX010 WHERE "
-	cQuery1 += "RX_TIP = '11' AND "
-	//cQuery1 += "RX_COD = '" + (TMP->RA_FILIAL + SUBSTR(DTOS(MV_PAR08),1,6) ) + "' AND "
-	cQuery1 += "D_E_L_E_T_ <> '*' "
-
-	tcQuery cQuery1 New Alias "TMP1"
-
-	If Eof()
-		MsgInfo("Nao existem dados a serem impressos!","Verifique")
-		dbSelectArea("TMP")
-		dbCloseArea("TMP")
-		dbSelectArea("TMP1")
-		dbCloseArea("TMP1")
-		Return
-	Endif
-
-	If nLastKey == 27
-		dbSelectArea("TMP")
-		dbCloseArea("TMP")
-		dbSelectArea("TMP1")
-		dbCloseArea("TMP1")
-		Return
-	Endif
 
 	SetDefault(aReturn,cString)
 
@@ -141,8 +74,6 @@ User Function DETALSAL
 	//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
 	//ณ Processamento. RPTSTATUS monta janela com a regua de processamento. ณ
 	//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
-
-
 
 	RptStatus({|| RunReport(Cabec1,Cabec2,Titulo,nLin) },Titulo)
 
@@ -164,6 +95,7 @@ Return
 /*/
 
 Static Function RunReport(Cabec1,Cabec2,Titulo,nLin)
+
 	nAcumulo   		:= 0
 	nAdicional		:= 0
 	nGratificacao 	:= 0
@@ -173,7 +105,7 @@ Static Function RunReport(Cabec1,Cabec2,Titulo,nLin)
 	nDsrExtra		:= 0
 	nQuinquenio		:= 0
 	nPericu			:= 0
-	nInsalu			:= 0
+	//nInsalu			:= 0  - Retirado a pedido da Giselly (Pedro - 14/03/2022)
 	nSalTot			:= 0
 	nTotSalario			:= 0
 	nTotAcumulo   		:= 0
@@ -183,10 +115,48 @@ Static Function RunReport(Cabec1,Cabec2,Titulo,nLin)
 	nTotDsrExtra		:= 0
 	nTotQuinquenio		:= 0
 	nTotPericu			:= 0
-	nTotInsalu			:= 0
+	//nTotInsalu			:= 0  - Retirado a pedido da Giselly (Pedro - 14/03/2022)
 	nTotSalTot			:= 0
 
-	cMesSind := ""
+	cMesSind 			:= ""
+	cHoraExtra			:= ""
+
+	//Imprimir relatorio com dados Financeiros ou de Clientes
+
+	cQuery := "SELECT "
+	cQuery += "RJ_CODCBO,RA_TPDEFFI,RA_DTVTEST,RA_CATFUNC,RA_CODFUNC,RA_CTAPREN,(SELECT MIN(R7_DATA) FROM SR7010 WHERE R7_MAT = RA_MAT AND D_E_L_E_T_ <> '*' AND R7_FUNCAO = RA_CODFUNC) AS DATAFUNC,RA_ADMISSA,RA_NASC, "
+	cQuery += "RA_FILIAL,RA_MAT,RA_NOME,RA_ADMISSA,RA_DEPTO,RA_SINDICA,CTT_DESC01,RJ_DESC,RA_SALARIO,RA_ACFUNC,RA_ACUMULA,RA_CALCADI,RA_GRATFUN,RA_ADTPOSE,RA_HRSMES,RA_HEFIX25,RA_HEFIX50,RA_PERICUL,RA_INSMED,RA_PERCQ "
+	cQuery += "FROM SRA010 "
+	cQuery += "INNER JOIN CTT010 ON RA_FILIAL = CTT_FILIAL AND RA_CC = CTT_CUSTO "
+	cQuery += "INNER JOIN SRJ010 ON RA_CODFUNC = RJ_FUNCAO "
+	cQuery += "WHERE "
+	cQuery += "SRA010.RA_FILIAL = '" + (MV_PAR01) + "' AND "
+	cQuery += "SRA010.RA_MAT BETWEEN '" + (MV_PAR02) + "' AND '" + (MV_PAR03) + "' AND "
+	cQuery += "CTT010.CTT_CUSTO BETWEEN '" + (MV_PAR04) + "' AND '" + (MV_PAR05) + "' AND "
+	cQuery += "SRA010.RA_SITFOLH <> 'D' AND "
+	If MV_PAR06 == 2
+		cQuery += "SRA010.RA_CATFUNC <> 'E' AND "
+	EndIf
+	cQuery += "SRJ010.D_E_L_E_T_ <> '*' AND "
+	cQuery += "SRA010.D_E_L_E_T_ <> '*' AND  "
+	cQuery += "CTT010.D_E_L_E_T_ <> '*' "
+	cQuery += "ORDER BY CTT_DESC01,RJ_DESC,RA_NOME "
+	tcQuery cQuery New Alias "TMP"
+
+	cQuery1 := "SELECT SUBSTRING(RX_TXT,07,6) AS SALMIN FROM SRX010 WHERE "
+	cQuery1 += "RX_TIP = '11' AND "
+	//cQuery1 += "RX_COD = '" + (TMP->RA_FILIAL + SUBSTR(DTOS(MV_PAR08),1,6) ) + "' AND "
+	cQuery1 += "D_E_L_E_T_ <> '*' "
+	tcQuery cQuery1 New Alias "TMP1"
+
+	If Eof() .or. nLastKey == 27
+		MsgInfo("Nao existem dados a serem impressos!","Verifique")
+		dbSelectArea("TMP")
+		dbCloseArea()
+		dbSelectArea("TMP1")
+		dbCloseArea()
+		Return
+	Endif
 
 	If MV_PAR07 != 1
 		// **************************** Cria Arquivo Temporario
@@ -197,22 +167,24 @@ Static Function RunReport(Cabec1,Cabec2,Titulo,nLin)
 		aadd( _aCExcel , {"NASCIMENTO"	, "C" , 10 , 00 } ) //04
 		aadd( _aCExcel , {"CCUSTO"		, "C" , 50 , 00 } ) //05
 		aadd( _aCExcel , {"FUNCAO"		, "C" , 30 , 00 } ) //06
-		aadd( _aCExcel , {"DTFUNCAO"	, "C" , 10 , 00 } ) //07
-		aadd( _aCExcel , {"CBO"		    , "C" , 10 , 00 } ) //08
-		aadd( _aCExcel , {"SALARIO"		, "N" , 10 , 02 } ) //09
-		aadd( _aCExcel , {"ACUMULO"		, "N" , 10 , 02 } ) //10
-		aadd( _aCExcel , {"ADICIONAL"	, "N" , 10 , 02 } ) //11
-		aadd( _aCExcel , {"GRATIFIC"	, "N" , 10 , 02 } ) //12
-		aadd( _aCExcel , {"HEXTRA"		, "N" , 10 , 02 } ) //13
-		aadd( _aCExcel , {"QUINQ"		, "N" , 10 , 02 } ) //14
-		aadd( _aCExcel , {"PERICU"		, "N" , 10 , 02 } ) //15
-		aadd( _aCExcel , {"INSALU"		, "N" , 10 , 02 } ) //16
-		aadd( _aCExcel , {"SALTOT"		, "N" , 10 , 02 } ) //17
-		aadd( _aCExcel , {"OBS"			, "C" , 70 , 00 } ) //18
-		aadd( _aCExcel , {"DEPARTAMENTO", "C" , 15 , 00 } ) //19
-		aadd( _aCExcel , {"DESCRICAO"	, "C" , 70 , 00 } ) //20
-		aadd( _aCExcel , {"SINDICATO"	, "C" , 05 , 00 } ) //21
-		aadd( _aCExcel , {"DESCRICAO"	, "C" , 70 , 00 } ) //22
+		aadd( _aCExcel , {"CT.APRENDIZ"	, "C" , 03 , 00 } ) //07
+		aadd( _aCExcel , {"DTFUNCAO"	, "C" , 10 , 00 } ) //08
+		aadd( _aCExcel , {"CBO"		    , "C" , 10 , 00 } ) //09
+		aadd( _aCExcel , {"SALARIO"		, "N" , 10 , 02 } ) //10
+		aadd( _aCExcel , {"ACUMULO"		, "N" , 10 , 02 } ) //11
+		aadd( _aCExcel , {"ADICIONAL"	, "N" , 10 , 02 } ) //12
+		aadd( _aCExcel , {"GRATIFIC"	, "N" , 10 , 02 } ) //13
+		aadd( _aCExcel , {"TPHEXTRA"	, "C" , 30 , 00 } ) //14  - Incluํdo a pedido da Giselly (Pedro - 14/03/2022)
+		aadd( _aCExcel , {"HEXTRA"		, "N" , 10 , 02 } ) //15
+		aadd( _aCExcel , {"QUINQ"		, "N" , 10 , 02 } ) //16
+		aadd( _aCExcel , {"PERICU"		, "N" , 10 , 02 } ) //17
+		//aadd( _aCExcel , {"INSALU"	, "N" , 10 , 02 } ) //18 - Retirado a pedido da Giselly (Pedro - 14/03/2022)
+		aadd( _aCExcel , {"SALTOT"		, "N" , 10 , 02 } ) //18
+		aadd( _aCExcel , {"OBS"			, "C" , 70 , 00 } ) //19
+		aadd( _aCExcel , {"DEPARTAMENTO", "C" , 15 , 00 } ) //20
+		aadd( _aCExcel , {"DESCRICAO"	, "C" , 70 , 00 } ) //21
+		//aadd( _aCExcel , {"SINDICATO"	, "C" , 05 , 00 } ) //22 - Retirado a pedido da Giselly (Pedro - 14/03/2022)
+		aadd( _aCExcel , {"SINDICATO"	, "C" , 70 , 00 } ) //22
 		aadd( _aCExcel , {"MESDTBASE"	, "C" , 10 , 00 } ) //23
 	else
 		_aCExcel:={}//SPCSQL->(DbStruct())
@@ -222,31 +194,31 @@ Static Function RunReport(Cabec1,Cabec2,Titulo,nLin)
 		aadd( _aCExcel , {"NASCIMENTO"	, "C" , 10 , 00 } ) //04
 		aadd( _aCExcel , {"CCUSTO"		, "C" , 50 , 00 } ) //05
 		aadd( _aCExcel , {"FUNCAO"		, "C" , 30 , 00 } ) //06
-		aadd( _aCExcel , {"DTFUNCAO"	, "C" , 10 , 00 } ) //07
-		aadd( _aCExcel , {"CBO"		    , "C" , 10 , 00 } ) //08
-		aadd( _aCExcel , {"SALARIO"		, "N" , 10 , 02 } ) //09
-		aadd( _aCExcel , {"ACUMULO"		, "N" , 10 , 02 } ) //10
-		aadd( _aCExcel , {"ADICIONAL"	, "N" , 10 , 02 } ) //11
-		aadd( _aCExcel , {"GRATIFIC"	, "N" , 10 , 02 } ) //12
-		aadd( _aCExcel , {"HEXTRA"		, "N" , 10 , 02 } ) //13
-		aadd( _aCExcel , {"DSREXTRA"	, "N" , 10 , 02 } ) //14
-		aadd( _aCExcel , {"QUINQ"		, "N" , 10 , 02 } ) //15
-		aadd( _aCExcel , {"PERICU"		, "N" , 10 , 02 } ) //16
-		aadd( _aCExcel , {"INSALU"		, "N" , 10 , 02 } ) //17
-		aadd( _aCExcel , {"SALTOT"		, "N" , 10 , 02 } ) //18
-		aadd( _aCExcel , {"OBS"			, "C" , 70 , 00 } ) //19
-		aadd( _aCExcel , {"DEPARTAMENTO", "C" , 70 , 00 } ) //20
-		aadd( _aCExcel , {"DESCRICAO"	, "C" , 70 , 00 } ) //21
-		aadd( _aCExcel , {"SINDICATO"	, "C" , 70 , 00 } ) //22
-		aadd( _aCExcel , {"DESCRICAO"	, "C" , 70 , 00 } ) //23
-		aadd( _aCExcel , {"MESDTBASE"	, "C" , 70 , 00 } ) //24	
+		aadd( _aCExcel , {"CT.APRENDIZ" , "C" , 03 , 00 } ) //07
+		aadd( _aCExcel , {"DTFUNCAO"	, "C" , 10 , 00 } ) //08
+		aadd( _aCExcel , {"CBO"		    , "C" , 10 , 00 } ) //09
+		aadd( _aCExcel , {"SALARIO"		, "N" , 10 , 02 } ) //10
+		aadd( _aCExcel , {"ACUMULO"		, "N" , 10 , 02 } ) //11
+		aadd( _aCExcel , {"ADICIONAL"	, "N" , 10 , 02 } ) //12
+		aadd( _aCExcel , {"GRATIFIC"	, "N" , 10 , 02 } ) //13
+		aadd( _aCExcel , {"TPHEXTRA"	, "C" , 30 , 00 } ) //14 - Incluํdo a pedido da Giselly (Pedro - 14/03/2022)
+		aadd( _aCExcel , {"HEXTRA"		, "N" , 10 , 02 } ) //15
+		aadd( _aCExcel , {"DSREXTRA"	, "N" , 10 , 02 } ) //16
+		aadd( _aCExcel , {"QUINQ"		, "N" , 10 , 02 } ) //17
+		aadd( _aCExcel , {"PERICU"		, "N" , 10 , 02 } ) //18
+		//aadd( _aCExcel , {"INSALU"	, "N" , 10 , 02 } ) //19 - Retirado a pedido da Giselly (Pedro - 14/03/2022)
+		aadd( _aCExcel , {"SALTOT"		, "N" , 10 , 02 } ) //19
+		aadd( _aCExcel , {"OBS"			, "C" , 70 , 00 } ) //20
+		aadd( _aCExcel , {"DEPARTAMENTO", "C" , 70 , 00 } ) //21
+		aadd( _aCExcel , {"DESCRICAO"	, "C" , 70 , 00 } ) //22
+		//aadd( _aCExcel , {"SINDICATO"	, "C" , 70 , 00 } ) //23 - Retirado a pedido da Giselly (Pedro - 14/03/2022)
+		aadd( _aCExcel , {"SINDICATO"	, "C" , 70 , 00 } ) //23
+		aadd( _aCExcel , {"MESDTBASE"	, "C" , 70 , 00 } ) //24
 
 	EndIf
 
-
 	//	_cTemp := CriaTrab(_aCExcel, .T.)
 	//	DbUseArea(.T.,"DBFCDX",_cTemp,"TMP2",.F.,.F.)
-
 
 	DBSelectArea("TMP")
 	DBGotop()
@@ -301,7 +273,7 @@ Static Function RunReport(Cabec1,Cabec2,Titulo,nLin)
 */
 
 		nQuinquenio := TMP->RA_SALARIO * TMP->RA_PERCQ / 100
-		 
+
 		 EndIf
 
 		//Calculo de Periculosidade
@@ -310,25 +282,28 @@ Static Function RunReport(Cabec1,Cabec2,Titulo,nLin)
 			nPericu := TMP->RA_SALARIO * 0.30
 		EndIf
 
-		//Calculo de Insalubridade
+		/*Calculo de Insalubridade	 - Retirado a pedido da Giselly (Pedro - 14/03/2022)
 
 		If !EMPTY(TMP->RA_INSMED)
 			nInsalu := VAL(TMP1->SALMIN) * 0.20
 		EndIf
+		*/
 
 
+		nSalTot += nAcumulo + nAdicional + nGratificacao + nQuinquenio + nPericu + TMP->RA_SALARIO //Retirado + nInsalu a pedido da Giselly (Pedro 14/03/2022)
+		cHoraExtra := ""
 
-		nSalTot += nAcumulo + nAdicional + nGratificacao + nQuinquenio + nPericu + nInsalu + TMP->RA_SALARIO
-
-		//Calculo Hora Extra
+		//Calculo Hora Extra Fixa
 		If TMP->RA_HEFIX25="S"
 			nHorasExtras:=(((nSalTot/TMP->RA_HRSMES) * 1.7)*25)
 			nDsrExtra := ((nHorasExtras/25)*5)
+			cHoraExtra := "1 HORA CONTRATUAL"
 		Endif
-		
+
 		If TMP->RA_HEFIX50="S"
 			nHorasExtras:=(((nSalTot/TMP->RA_HRSMES) * 1.7)*50)
 			nDsrExtra := ((nHorasExtras/50)*5)
+			cHoraExtra := "2 HORAS CONTRATUAIS"
 		Endif
 
 		cObs 	:= ""
@@ -403,6 +378,8 @@ Static Function RunReport(Cabec1,Cabec2,Titulo,nLin)
 				cMesSind := ""
 			EndIf
 
+			//Mes de pagamento do Sindicato
+
 			nSalTot += nHorasExtras
 
 			_aItem := ARRAY(LEN(_aCExcel) + 1)
@@ -412,25 +389,32 @@ Static Function RunReport(Cabec1,Cabec2,Titulo,nLin)
 			_aItem[04]		:= DTOC(STOD(TMP->RA_NASC))
 			_aItem[05]		:= TMP->CTT_DESC01
 			_aItem[06]		:= TMP->RJ_DESC
-			If EMPTY(TMP->DATAFUNC)
-				_aItem[07]		:= DTOC(STOD(TMP->RA_ADMISSA))
+			If (TMP->RA_CTAPREN ="1")
+				_aItem[07]		:= "SIM"
 			Else
-				_aItem[07]		:= DTOC(STOD(TMP->DATAFUNC))
+				_aItem[07]		:= "NรO"
+			EndIf
+
+			If EMPTY(TMP->DATAFUNC)
+				_aItem[08]		:= DTOC(STOD(TMP->RA_ADMISSA))
+			Else
+				_aItem[08]		:= DTOC(STOD(TMP->DATAFUNC))
 			Endif
-			_aItem[08]		:= TMP->RJ_CODCBO
-			_aItem[09]		:= TMP->RA_SALARIO
-			_aItem[10]		:= nAcumulo
-			_aItem[11]		:= nAdicional
-			_aItem[12]		:= nGratificacao
-			_aItem[13]		:= nHorasExtras
-			_aItem[14]		:= nQuinquenio
-			_aItem[15]		:= nPericu
-			_aItem[16]		:= nInsalu
-			_aItem[17]		:= nSalTot
-			_aItem[18]		:= cObs
-			_aItem[19]		:= Alltrim(TMP->RA_DEPTO)
-			_aItem[20]		:= Posicione("SQB",1,xFilial("SQB") + TMP->RA_DEPTO,"QB_DESCRIC")
-			_aItem[21]		:= Alltrim(TMP->RA_SINDICA)
+			_aItem[09]		:= TMP->RJ_CODCBO
+			_aItem[10]		:= TMP->RA_SALARIO
+			_aItem[11]		:= nAcumulo
+			_aItem[12]		:= nAdicional
+			_aItem[13]		:= nGratificacao
+			_aItem[14]		:= cHoraExtra //Incluํdo a pedido da Giselly (Pedro - 14/03/2022)
+			_aItem[15]		:= nHorasExtras
+			_aItem[16]		:= nQuinquenio
+			_aItem[17]		:= nPericu
+			//_aItem[18]		:= nInsalu  - Retirado a pedido da Giselly (Pedro - 14/03/2022)
+			_aItem[18]		:= nSalTot
+			_aItem[19]		:= cObs
+			_aItem[20]		:= Alltrim(TMP->RA_DEPTO)
+			_aItem[21]		:= Posicione("SQB",1,xFilial("SQB") + TMP->RA_DEPTO,"QB_DESCRIC")
+			//_aItem[22]		:= Alltrim(TMP->RA_SINDICA)  - Retirado a pedido da Giselly (Pedro - 14/03/2022)
 			_aItem[22]		:= Posicione("RCE",1,xFilial("RCE") + TMP->RA_SINDICA,"RCE_DESCRI")
 			_aItem[23]		:= cMesSind
 
@@ -466,26 +450,33 @@ Static Function RunReport(Cabec1,Cabec2,Titulo,nLin)
 			_aItem[04]		:= DTOC(STOD(TMP->RA_NASC))
 			_aItem[05]		:= TMP->CTT_DESC01
 			_aItem[06]		:= TMP->RJ_DESC
-			If EMPTY(TMP->DATAFUNC)
-				_aItem[07]		:= DTOC(STOD(TMP->RA_ADMISSA))
+			If (TMP->RA_CTAPREN ="1")
+				_aItem[07]		:= "SIM"
 			Else
-				_aItem[07]		:= DTOC(STOD(TMP->DATAFUNC))
+				_aItem[07]		:= "NรO"
+			EndIf
+
+			If EMPTY(TMP->DATAFUNC)
+				_aItem[08]		:= DTOC(STOD(TMP->RA_ADMISSA))
+			Else
+				_aItem[08]		:= DTOC(STOD(TMP->DATAFUNC))
 			Endif
-			_aItem[08]			:= TMP->RJ_CODCBO
-			_aItem[09]		:= TMP->RA_SALARIO
-			_aItem[10]		:= nAcumulo
-			_aItem[11]		:= nAdicional
-			_aItem[12]		:= nGratificacao
-			_aItem[13]		:= nHorasExtras
-			_aItem[14]		:= nDsrExtra
-			_aItem[15]		:= nQuinquenio
-			_aItem[16]		:= nPericu
-			_aItem[17]		:= nInsalu
-			_aItem[18]		:= nSalTot
-			_aItem[19]		:= cObs
-			_aItem[20]		:= TMP->RA_DEPTO
-			_aItem[21]		:= Posicione("SQB",1,xFilial("SQB") + TMP->RA_DEPTO,"QB_DESCRIC")
-			_aItem[22]		:= TMP->RA_SINDICA
+			_aItem[09]			:= TMP->RJ_CODCBO
+			_aItem[10]		:= TMP->RA_SALARIO
+			_aItem[11]		:= nAcumulo
+			_aItem[12]		:= nAdicional
+			_aItem[13]		:= nGratificacao
+			_aItem[14]		:= cHoraExtra //Incluํdo a pedido da Giselly (Pedro - 14/03/2022)
+			_aItem[15]		:= nHorasExtras
+			_aItem[16]		:= nDsrExtra
+			_aItem[17]		:= nQuinquenio
+			_aItem[18]		:= nPericu
+			//_aItem[19]		:= nInsalu  - Retirado a pedido da Giselly (Pedro - 14/03/2022)
+			_aItem[19]		:= nSalTot
+			_aItem[20]		:= cObs
+			_aItem[21]		:= TMP->RA_DEPTO
+			_aItem[22]		:= Posicione("SQB",1,xFilial("SQB") + TMP->RA_DEPTO,"QB_DESCRIC")
+			//_aItem[23]		:= TMP->RA_SINDICA  - Retirado a pedido da Giselly (Pedro - 14/03/2022)
 			_aItem[23]		:= Posicione("RCE",1,xFilial("RCE") + TMP->RA_SINDICA,"RCE_DESCRI")
 			_aItem[24]		:= cMesSind
 			AADD(_aIExcel,_aItem)
@@ -519,7 +510,7 @@ Static Function RunReport(Cabec1,Cabec2,Titulo,nLin)
 		nTotGratifica 	    += nGratificacao
 		nTotHoraExtra	    += nHorasExtras
 		nTotQuinquenio		+= nQuinquenio
-		nTotInsalu			+= nInsalu
+		//nTotInsalu			+= nInsalu  - Retirado a pedido da Giselly (Pedro - 14/03/2022)
 		nTotPericu			+= nPericu
 		nTotSalTot			+= nSalTot
 		nTotDsrExta			+= nDsrExtra
@@ -536,7 +527,7 @@ Static Function RunReport(Cabec1,Cabec2,Titulo,nLin)
 		nHorasExtras	:= 0
 		nQuinquenio		:= 0
 		nPericu			:= 0
-		nInsalu			:= 0
+		//nInsalu			:= 0  - Retirado a pedido da Giselly (Pedro - 14/03/2022)
 		nSalTot			:= 0
 		nDrsExtra		:= 0
 
@@ -558,15 +549,15 @@ Static Function RunReport(Cabec1,Cabec2,Titulo,nLin)
 		_aItem := ARRAY(LEN(_aCExcel) + 1)
 		_aItem[01]			:= "Qtd. Funcionarios:"
 		_aItem[02]			:= cValToChar(nCont)
-		_aItem[09]		:= nTotSalario
-		_aItem[10]		:= nTotAcumulo
-		_aItem[11]		:= nTotAdicional
-		_aItem[12]		:= nTotGratifica
-		_aItem[13]		:= nTotHoraExtra
-		_aItem[14]		:= nTotQuinquenio
-		_aItem[15]		:= nTotPericu
-		_aItem[16]		:= nTotInsalu
-		_aItem[17]		:= nTotSalTot
+		_aItem[10]		:= nTotSalario
+		_aItem[11]		:= nTotAcumulo
+		_aItem[12]		:= nTotAdicional
+		_aItem[13]		:= nTotGratifica
+		_aItem[14]		:= nTotHoraExtra
+		_aItem[16]		:= nTotQuinquenio
+		_aItem[17]		:= nTotPericu
+		//_aItem[18]		:= nTotInsalu  - Retirado a pedido da Giselly (Pedro - 14/03/2022)
+		_aItem[18]		:= nTotSalTot
 		AADD(_aIExcel,_aItem)
 		_aItem := {}
 
@@ -603,16 +594,16 @@ Static Function RunReport(Cabec1,Cabec2,Titulo,nLin)
 		_aItem := ARRAY(LEN(_aCExcel) + 1)
 		_aItem[01]		:= "Qtd. Funcionarios:"
 		_aItem[02]		:= cValToChar(nCont)
-		_aItem[09]		:= nTotSalario
-		_aItem[10]		:= nTotAcumulo
-		_aItem[11]		:= nTotAdicional
-		_aItem[12]		:= nTotGratifica
-		_aItem[13]		:= nTotHoraExtra
-		_aItem[14]		:= nTotDsrExta
-		_aItem[15]		:= nTotQuinquenio
-		_aItem[16]		:= nTotPericu
-		_aItem[17]		:= nTotInsalu
-		_aItem[18]		:= nTotSalTot
+		_aItem[10]		:= nTotSalario
+		_aItem[11]		:= nTotAcumulo
+		_aItem[12]		:= nTotAdicional
+		_aItem[13]		:= nTotGratifica
+		_aItem[15]		:= nTotHoraExtra
+		_aItem[16]		:= nTotDsrExta
+		_aItem[17]		:= nTotQuinquenio
+		_aItem[18]		:= nTotPericu
+		//_aItem[19]		:= nTotInsalu  - Retirado a pedido da Giselly (Pedro - 14/03/2022)
+		_aItem[19]		:= nTotSalTot
 		AADD(_aIExcel,_aItem)
 		_aItem := {}
 
@@ -651,11 +642,11 @@ Static Function RunReport(Cabec1,Cabec2,Titulo,nLin)
 	//	DBSelectArea("TMP2")
 	//	DBCloseARea("TMP2")
 	DBSelectArea("TMP1")
-	DBCloseARea("TMP1")
+	DBCloseARea()
 	DBSelectArea("TMP")
-	DBCloseARea("TMP")
+	DBCloseARea()
 	DBSelectArea("SR8")
-	DBCloseARea("SR8")
+	DBCloseARea()
 
 
 	//__CopyFIle(cArq , AllTrim(GetTempPath())+_ctemp+".XLS")
@@ -707,7 +698,10 @@ Return
 
 Static Function ValidPerg(cPerg)
 
-	_sAlias := Alias()
+	Local aArea	:= GetArea()
+	Local aRegs	:= {}
+	Local i,j
+
 	cPerg := PADR(cPerg,10)
 	dbSelectArea("SX1")
 	dbSetOrder(1)
@@ -735,8 +729,7 @@ Static Function ValidPerg(cPerg)
 		Endif
 	Next
 
-	dbSelectArea(_sAlias)
-
+	RestArea(aArea)
 
 Return
 
