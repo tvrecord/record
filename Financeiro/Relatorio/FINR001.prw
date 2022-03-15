@@ -374,7 +374,8 @@ Static Function GetData(cPPeriodo,cPPracaDe,cPPracaAte,cPRpDe,cPRpAte)
 			F2_CLIENTE,
 			F2_LOJA,
 			A1_NOME,
-			E1_VENCREA
+			E1_VENCREA,
+			E5_MOTBX
 		FROM
 			%table:ZAG% AS ZAG
 		INNER JOIN %table:ZAH% AS ZAH
@@ -452,6 +453,15 @@ Static Function GetData(cPPeriodo,cPPracaDe,cPPracaAte,cPRpDe,cPRpAte)
 				112
 			)
 			AND SE1.D_E_L_E_T_ = ''
+		LEFT JOIN %table:SE5% AS SE5
+				ON E1_FILIAL = E5_FILIAL
+			AND E1_PREFIXO = E5_PREFIXO
+			AND E1_NUM = E5_NUMERO
+			AND E1_TIPO = E5_TIPO
+			AND E1_CLIENTE = E5_CLIFOR
+			AND E1_LOJA = E5_LOJA
+			AND E5_SEQ IN ('01')
+			AND SE5.D_E_L_E_T_ = ''
 		WHERE
 			ZAG_FILIAL = '01'
 			AND ZAG_PERIOD = %Exp:cPPeriodo%
@@ -509,7 +519,7 @@ User Function PXCABECA(oPrint,cTitle,cSubTitle,nPage, lBlackWhite)
 	Default cSubTitle := ""
 
 
-	If oPrint:GetOrientation() == 1
+	If oPrint:GetOrientation() == 1 //Retrato
 
 		oPrint:SayBitmap(30,15,"\system\LOGO01.png",80,40)
 
@@ -527,11 +537,11 @@ User Function PXCABECA(oPrint,cTitle,cSubTitle,nPage, lBlackWhite)
 		oPrint:Line(80,10,80,580,CLR_HGRAY,"-9")
 
 		oPrint:SayAlign(80,10,cTitle,oFont24, 580, 20, /*[ nClrText]*/, 2, 1)
-		oPrint:SayAlign(105,10,cSubTitle,oFont14, 580, 20, /*[ nClrText]*/, 2, 1)
+		oPrint:SayAlign(100,10,cSubTitle,oFont14, 580, 20, /*[ nClrText]*/, 2, 1)
 
 		oPrint:Line(118,10,118,580,CLR_HGRAY,"-9")
 
-	Else
+	Else //Paisagem
 
 		oPrint:Line(20,10,20,820,CLR_HGRAY,"-9")
 		oPrint:SayBitmap(30,15,"\system\LOGO01.PNG",80,40)
