@@ -181,6 +181,12 @@ Local cCorpo 	:= ""
 	cCorpo 		+= "Estado: "+ M->A2_EST + "<br>"
 	cCorpo 		+= "País Bacen: "+ M->A2_CODPAIS + "<br>"
 
+	If PswSeek(RetCodUsr(), .T. )
+		aUsuario := PswRet() // Retorna vetor com informações do usuário
+		cCorpo 	+= "Incluído por: " + Alltrim(aUsuario[1][4]) + "<br>" //Nome do casdastro de usuário
+		//cCorpo 	+= Alltrim(aUsuario[1][13])  //Cargo do usuário
+	EndIf
+
 	u_zEnvMail(cPara, cAssunto, cCorpo, , .T.)
 
 dbSelectArea(aArea)
