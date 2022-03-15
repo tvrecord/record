@@ -1,5 +1,6 @@
 #INCLUDE "TOPCONN.CH"
 #INCLUDE "PROTHEUS.CH"
+#INCLUDE "rwmake.ch"
 
 //Rafael França - 28/10/2020 - Relatorio de controle de banco de horas por periodo
 //SIGAPON -> Relatorios -> Especificos Record -> saldo Banco de Horas
@@ -53,7 +54,7 @@ INNER JOIN %table:SRA% ON ZF_MAT = RA_MAT AND SRA010.D_E_L_E_T_ = ''
 FULL OUTER JOIN %table:SPI% ON ZF_MAT = PI_MAT AND SUBSTRING(PI_DATA,1,6) = %exp:cMesAtu% AND SPI010.D_E_L_E_T_ = ''
 WHERE SZF010.D_E_L_E_T_ = ''
 AND ZF_COMPET = %exp:cMesAnt%  AND ZF_SALDATU <> 0
-ORDER BY MATRICULA
+ORDER BY MATRICULA, TIPO
 
 EndSql //FINALIZO A MINHA QUERY
 
@@ -74,17 +75,19 @@ EndSql //FINALIZO A MINHA QUERY
 
 While !(cAlias)->(Eof())
 
-	 		If TIPO == "1" //Verifica o tipo de hora 1 = positivo e 2 = negativo
-				nExtraMes 	:= SomaHoras(nExtraMes,HORAS)
-			ElseIf TIPO == "2"
-				nFaltaMes   := SomaHoras(nFaltaMes,HORAS)
+PosSP9(EVENTO,xFilial("SP9"),"P9_TIPOCOD")
+
+	 		If SP9->P9_TIPOCOD == "1" //Verifica o tipo de hora 1 = positivo e 2 = negativo
+				nExtraMes 	:= SomaHoras(nExtraMes,(cAlias)->HORAS)
+			Else //TIPO == "2"
+				nFaltaMes   := SomaHoras(nFaltaMes,(cAlias)->HORAS)
 			Endif
 
-	IF cMat <> MATRICULA .AND. cMat <> ""
+	IF cMat <> (cAlias)->MATRICULA .AND. cMat <> ""
 
 	nSaldoAtu	:= nSaldoAnt
-	nSaldoAtu	:= SomaHoras (nSaldoAtu,nExtraMes)
-	nSaldoAtu	:= SubHoras (nSaldoAtu,nFaltaMes)
+	nSaldoAtu	:= SomaHoras(nSaldoAtu,nExtraMes)
+	nSaldoAtu	:= SubHoras(nSaldoAtu,nFaltaMes)
 
 	//Criando as Linhas
     oFWMsExcel:AddRow("Banco de Horas",cNomeTabela,{cMat,cNome,nSaldoAnt,nExtraMes,nFaltaMes,nSaldoAtu})
@@ -95,9 +98,9 @@ While !(cAlias)->(Eof())
 
 	Endif
 
- 	cMat 		:= MATRICULA
- 	cNome   	:= NOME
-	nSaldoAnt	:= SLDANT
+ 	cMat 		:= (cAlias)->MATRICULA
+ 	cNome   	:= (cAlias)->NOME
+	nSaldoAnt	:= (cAlias)->SLDANT
 
 	(cAlias)->(dbSkip()) //PASSAR PARA O PRÓXIMO REGISTRO DA MINHA QUERY
 
@@ -105,8 +108,9 @@ Enddo
 
 	//Calcula e imprime o ultimo registro da tabela
 	nSaldoAtu	:= nSaldoAnt
-	nSaldoAtu	:= SomaHoras (nSaldoAtu,nExtraMes)
-	nSaldoAtu	:= SubHoras (nSaldoAtu,nFaltaMes)
+	nSaldoAtu	:= SomaHoras(nSaldoAtu,nExtraMes)
+	nSaldoAtu	:= SubHoras(nSaldoAtu,nFaltaMes)
+
     oFWMsExcel:AddRow("Banco de Horas",cNomeTabela,{cMat,cNome,nSaldoAnt,nExtraMes,nFaltaMes,nSaldoAtu})
 
     oFWMsExcel:Activate()
@@ -127,7 +131,10 @@ Return
 //Programa usado para criar perguntas na tabela SX1 (Tabela de perguntas)
 Static Function ValidPerg(cPerg)
 
-	_sAlias := Alias()
+	Local aArea	:= GetArea()
+	Local aRegs	:= {}
+	Local i,j
+
 	cPerg := PADR(cPerg,10)
 	dbSelectArea("SX1")
 	dbSetOrder(1)
@@ -147,7 +154,7 @@ Static Function ValidPerg(cPerg)
 		EndIf
 	Next
 
-	dbSelectArea(_sAlias)
+	RestArea(aArea)
 
 Return
 
