@@ -181,7 +181,7 @@ Static Function RunReport(Cabec1,Cabec2,Titulo,nLin)
 
 	If mv_par09 == 2 // Por Baixa
 
-		//Seleciona titulos em aberto no periodo informado
+		//Query de titulos não pagos - inadimplentes
 
 		_cQuery := "select e1_prefixo,"
 		_cQuery += "       e1_num,"
@@ -294,6 +294,7 @@ Static Function RunReport(Cabec1,Cabec2,Titulo,nLin)
 
 		QRY1->(dbCloseArea())
 
+		//Re
 		_cQuery := " select e1_prefixo,"
 		_cQuery += "        e1_num,"
 		_cQuery += "        e1_parcela,"
@@ -413,6 +414,7 @@ Static Function RunReport(Cabec1,Cabec2,Titulo,nLin)
 
 		QRY2->(dbCloseArea())
 
+		//Query de inadimplentes RELCOM - BPARC
 		_cQuery := "select e1_prefixo,"
 		_cQuery += "       e1_num,"
 		_cQuery += "       e1_parcela,"
