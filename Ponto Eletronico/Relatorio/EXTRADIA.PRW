@@ -90,7 +90,7 @@ SetRegua(5000)
 Pergunte(cPerg,.f.)
 
 If MV_PAR11 == 1
-	
+
 	_cQrySPC:="SELECT PH_FILIAL AS PC_FILIAL,PH_MAT AS PC_MAT,RA_NOME,PH_DATA AS PC_DATA,PH_PD AS PC_PD,P9_DESC,PH_QUANTC AS PC_QUANTC,PH_CC AS PC_CC,CTT_DESC01 FROM SPH010 "
 	_cQrySPC+="INNER JOIN CTT010 ON "
 	_cQrySPC+="CTT010.CTT_FILIAL = SPH010.PH_FILIAL AND "
@@ -115,9 +115,9 @@ If MV_PAR11 == 1
 	ELSE
 		_cQrySPC+="ORDER BY PH_FILIAL,PH_CC,PH_MAT,PH_PD "
 	ENDIF
-	
+
 Else
-	
+
 	_cQrySPC:="SELECT PC_FILIAL,PC_MAT,RA_NOME,PC_DATA,PC_PD,P9_DESC,PC_QUANTC,PC_CC,CTT_DESC01 FROM SPC010 "
 	_cQrySPC+="INNER JOIN CTT010 ON "
 	_cQrySPC+="CTT010.CTT_FILIAL = SPC010.PC_FILIAL AND "
@@ -142,7 +142,7 @@ Else
 	ELSE
 		_cQrySPC+="ORDER BY PC_FILIAL,PC_CC,PC_MAT,PC_PD "
 	ENDIF
-	
+
 EndIf
 
 
@@ -159,35 +159,35 @@ SPCSQL->(DbGoTop())
 
 
 If mv_par09 == 1
-	
+
 	While SPCSQL->(!Eof())
-		
-		
-		
+
+
+
 		If lAbortPrint
 			@nLin,00 PSAY "*** CANCELADO PELO OPERADOR ***"
 			Exit
 		Endif
-		
+
 		If nLin > 56
 			Cabec(Titulo,Cabec1,Cabec2,NomeProg,Tamanho,nTipo)
 			nLin := 8
 		Endif
-		
+
 		IF MV_PAR10 == 2
-			
-			
+
+
 			nFHoras := SomaHoras(nFHoras,SPCSQL->PC_QUANTC) //Soma as horas por Funcionario
 			nCCHoras := SomaHoras(nCCHoras,SPCSQL->PC_QUANTC) //Soma as horas por Centro de Custo
-			
+
 			cCC  := SPCSQL->PC_CC
 			cMat := SPCSQL->PC_MAT
-			
-			
+
+
 			//Altera formato para 00:00
 			nHoras  := StrZero(SPCSQL->PC_QUANTC,5,2)
 			nHoras := StrTran(nHoras,".",":")
-			
+
 			@ nLin,000 PSAY SPCSQL->PC_MAT
 			@ nLin,008 PSAY SPCSQL->RA_NOME
 			@ nLin,060 PSAY STOD(SPCSQL->PC_DATA)
@@ -196,9 +196,9 @@ If mv_par09 == 1
 			@ nLin,100 PSAY nHoras
 			@ nLin,110 PSAY SPCSQL->PC_CC
 			@ nLin,120 PSAY SPCSQL->CTT_DESC01
-			
+
 			DBSKIP()
-			
+
 			If cMat != SPCSQL->PC_MAT
 				If nFHoras < 100
 					nFHoras  := StrZero(nFhoras,5,2)
@@ -212,9 +212,9 @@ If mv_par09 == 1
 				nLin++
 				nFHoras := 0
 			EndIf
-			
-			
-			
+
+
+
 			If cCC != SPCSQL->PC_CC
 				If nCCHoras < 100
 					nCCHoras  := StrZero(nCChoras,5,2)
@@ -230,27 +230,27 @@ If mv_par09 == 1
 				nLin++
 				nCCHoras := 0
 			EndIf
-			
-			
-			
+
+
+
 			nLin++
-			
+
 		ELSE
-			
+
 			nFHoras := SomaHoras(nFHoras,SPCSQL->PC_QUANTC) //Soma as horas por Funcionario
 			nCCHoras := SomaHoras(nCCHoras,SPCSQL->PC_QUANTC) //Soma as horas por Centro de Custo
-			
+
 			cMat  	:= SPCSQL->PC_MAT
 			cNome 	:= SPCSQL->RA_NOME
 			cPd	  	:= SPCSQL->PC_PD
 			cDescri := SPCSQL->P9_DESC
 			cCC  	:= SPCSQL->PC_CC
 			cCCDesc := SPCSQL->CTT_DESC01
-			
-			
-			
+
+
+
 			DBSKIP()
-			
+
 			If cMat != SPCSQL->PC_MAT .OR. cPd != SPCSQL->PC_PD
 				If nFHoras < 100
 					nFHoras  := StrZero(nFhoras,5,2)
@@ -268,9 +268,9 @@ If mv_par09 == 1
 				nFHoras := 0
 				nLin++
 			EndIf
-			
-			
-			
+
+
+
 			If cCC != SPCSQL->PC_CC
 				nLin--
 				If nCCHoras < 100
@@ -289,29 +289,29 @@ If mv_par09 == 1
 				nLin++
 				nCCHoras := 0
 			EndIf
-			
-			
+
+
 		EndIf
-		
-		
+
+
 	Enddo
-	
-	
-	
+
+
+
 	SET DEVICE TO SCREEN
 	If aReturn[5]==1
 		dbCommitAll()
 		SET PRINTER TO
 		OurSpool(wnrel)
 	Endif
-	
+
 	MS_FLUSH()
-	
-	
+
+
 Else
-	
+
 	IF MV_PAR10 == 2
-		
+
 		// **************************** Cria Arquivo Temporario
 		_aCExcel:={}//SPCSQL->(DbStruct())
 		aadd( _aCExcel , {"MATRICULA"      	, "C" , 06 , 00 } )
@@ -322,20 +322,20 @@ Else
 		aadd( _aCExcel , {"QUANTIDADE"		, "C" , 08,  00 } )
 		aadd( _aCExcel , {"CCUSTO"			, "C" , 09 , 00 } )
 		aadd( _aCExcel , {"DESCCC"			, "C" , 40 , 00 } )
-		
+
 		DbSelectArea("SPCSQL")
 		Do While SPCSQL->(!Eof())
-			
+
 			nFHoras := SomaHoras(nFHoras,SPCSQL->PC_QUANTC) //Soma as horas por Funcionario
 			nCCHoras := SomaHoras(nCCHoras,SPCSQL->PC_QUANTC) //Soma as horas por Centro de Custo
-			
+
 			cCC  := SPCSQL->PC_CC
 			cMat := SPCSQL->PC_MAT
-			
+
 			nHoras  := StrZero(SPCSQL->PC_QUANTC,5,2)
 			nHoras := StrTran(nHoras,".",":")
-			
-			
+
+
 			_aItem := ARRAY(LEN(_aCExcel) + 1)
 			_aItem[01] 	:= SPCSQL->PC_MAT
 			_aItem[02] 	:= SPCSQL->RA_NOME
@@ -347,11 +347,11 @@ Else
 			_aItem[08] 	:= SPCSQL->CTT_DESC01
 			AADD(_aIExcel,_aItem)
 			_aItem := {}
-			
-			
-			
+
+
+
 			SPCSQL->(DbSkip())
-			
+
 			If cMat != SPCSQL->PC_MAT
 				If nFHoras < 100
 					nFHoras  := StrZero(nFhoras,5,2)
@@ -359,22 +359,22 @@ Else
 					nFHoras  := StrZero(nFhoras,6,2)
 				EndIf
 				nFHoras := StrTran(nFHoras,".",":")
-				
+
 				_aItem := ARRAY(LEN(_aCExcel) + 1)
 				_aItem[02] 	:= "TOTAL FUNCIONARIO"
 				_aItem[06] 	:= nFHoras
 				AADD(_aIExcel,_aItem)
 				_aItem := {}
-				
+
 				nFHoras := 0
 			EndIf
-			
-			
+
+
 		Enddo
-		
-		
+
+
 	ELSE // SINTETICO
-		
+
 		// **************************** Cria Arquivo Temporario
 		_aCExcel:={}//SPCSQL->(DbStruct())
 		aadd( _aCExcel , {"MATRICULA"      	, "C" , 06 , 00 } )  //01
@@ -384,24 +384,24 @@ Else
 		aadd( _aCExcel , {"QUANTIDADE"		, "C" , 08,  00 } )      //05
 		aadd( _aCExcel , {"CCUSTO"			, "C" , 09 , 00 } )      //06
 		aadd( _aCExcel , {"DESCCC"			, "C" , 40 , 00 } )      //07
-		
-		
+
+
 		DbSelectArea("SPCSQL")
 		Do While SPCSQL->(!Eof())
-			
+
 			nFHoras := SomaHoras(nFHoras,SPCSQL->PC_QUANTC) //Soma as horas por Funcionario
 			nCCHoras := SomaHoras(nCCHoras,SPCSQL->PC_QUANTC) //Soma as horas por Centro de Custo
-			
+
 			cMat  	:= SPCSQL->PC_MAT
 			cNome 	:= SPCSQL->RA_NOME
 			cPd	  	:= SPCSQL->PC_PD
 			cDescri := SPCSQL->P9_DESC
 			cCC  	:= SPCSQL->PC_CC
 			cCCDesc := SPCSQL->CTT_DESC01
-			
-			
+
+
 			SPCSQL->(DbSkip())
-			
+
 			If cMat != SPCSQL->PC_MAT .OR. cPd != SPCSQL->PC_PD
 				If nFHoras < 100
 					nFHoras  := StrZero(nFhoras,5,2)
@@ -409,7 +409,7 @@ Else
 					nFHoras  := StrZero(nFhoras,6,2)
 				EndIf
 				nFHoras := StrTran(nFHoras,".",":")
-				
+
 				_aItem := ARRAY(LEN(_aCExcel) + 1)
 				_aItem[01] 	:= cMat
 				_aItem[02] 	:= cNome
@@ -420,18 +420,18 @@ Else
 				_aItem[07] 	:= cCCDEsc
 				AADD(_aIExcel,_aItem)
 				_aItem := {}
-				
+
 				nFHoras := 0
-				
+
 			EndIf
-			
-			
+
+
 		Enddo
-		
-		
+
+
 	EndIf
-	
-	
+
+
 	IF (LEN(_aIExcel) > 0)
 		MSGRUN("Favor Aguardar...", "Exportando os Registros para o Excel",;
 		{ ||CURSORWAIT(), DLGTOEXCEL( {{"GETDADOS", "Hora Extra - Record", _aCExcel, _aIExcel}} ), CURSORARROW() } )
@@ -439,7 +439,7 @@ Else
 		MSGALERT("Nenhum Registro foi encontrado.","EXTRADIA")
 		_lRet := .F.
 	ENDIF
-	
+
 Endif
 Return
 
