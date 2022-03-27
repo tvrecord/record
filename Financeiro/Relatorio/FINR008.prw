@@ -38,10 +38,7 @@ User Function FINR008()
 
 Return
 
-/*/{Protheus.doc} fProcPdf
-Imprime relatório em PDF
-/*/
-
+// fProcPdf - Imprime relatório em PDF
 Static Function fProcPdf()
 
 	Local nRegAtu		:= 0
@@ -82,6 +79,7 @@ Static Function fProcPdf()
 
 // Query para buscar as informações
 // Busca os registros a serem impressos no relatório
+
 BeginSql Alias cAlias1
 
 SELECT A3_COD AS VENDEDOR, A3_NOME AS NOME, A3_NATCOM AS GRUPOS, A3_NATPER AS PERCENTUAL, ED_NATCOM AS NAT_COMISS, E1_NATUREZ AS NATUREZA, ED_DESCRIC AS DESCRICAO
@@ -405,12 +403,7 @@ EndSql
 
 Return
 
-/*/{Protheus.doc} ImpProxPag
-    Imprime cabeçlho da proxima pagina
-    @author  Rafael França
-    @since   28-08-2020
-/*/
-
+// ImpProxPag - Imprime cabeçalho da próxima página
 Static Function ImpProxPag(cVendedor,cNome,cPeriodo)
 
 	nPag++

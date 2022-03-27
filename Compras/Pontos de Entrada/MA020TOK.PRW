@@ -17,6 +17,7 @@
 ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
 /*/
 // Rafael França - Atualizado para validação dos dados bancarios
+// Rafael França - Envia e-mail de aviso de cadastro
 
 Static __oModelAut := NIL //variavel oModel para substituir msexecauto em MVC
 

@@ -20,10 +20,7 @@ Relatorio do rateio do Repasse
 /*/
 User Function FINR001()
 
-	Local oSay      := Nil
-	Local _cPerg    := "FINR001D"
-	Local _lOk      := .T.
-
+	Private _cPerg    := "FINR001D"
 	Private nTotCalc 	:= 0
 	Private nTotRepas := 0
 	Private nTotRat   := 0
@@ -77,7 +74,6 @@ Static Function fProcPdf()
 	Local i
 	Local cPraca 	:= ""
 	Local aInfo		:= {}
-	Local cDep		:= ""
 	Local aUsuario	:= {}
 	Local cUsuario	:= ""
 	Local nQtd		:= 0
@@ -284,7 +280,6 @@ Static Function fProcPdf()
 		MsgInfo("N�o existem registros a serem impressos, favor verificar os parametros","FINR001")
 	EndIf
 
-
 	(cTmp1)->(DbCloseArea())
 
 Return
@@ -301,7 +296,6 @@ Static Function ImpProxPag()
 	oPrint:StartPage()
 	cSubTitle := "COMPET�NCIA: " + Alltrim(MesExtenso(Val(Substring(cPeriodo,1,2)))) + "/" + Substring(cPeriodo,3,4)  + " - CNPJ: " + Transform(Alltrim(ZAF->ZAF_CGC),"@R 99.999.999/9999-99")
 	nLin := u_PXCABECA(@oPrint, "REPASSE A PAGAR - FATURAMENTO SPOT (" + Alltrim(ZAF->ZAF_CODIGO) + " - " + Alltrim(ZAF->ZAF_DESCRI) + ")" , cSubTitle  , nPag)
-
 
 	oPrint:Say( nLin,020, "RP",oFonteN)
 	oPrint:Say( nLin,048, "Utiliza��o",oFonteN)
@@ -328,68 +322,25 @@ Static Function ImpProxPag()
 Return
 
 /*/{Protheus.doc} GetData
-
     Busca dados no banco
-
     @author  Bruno Alves de Oliveira
     @since   24-08-2020
 /*/
+
 Static Function GetData(cPPeriodo,cPPracaDe,cPPracaAte,cPRpDe,cPRpAte)
 
 	// Busca os registros a serem impressos no relat�rio
 	BeginSql Alias cTmp1
-		SELECT
-			ZAG_PRACA,
-			ZAG_NUMRP,
-			ZAG_EMISSA,
-			ZAG_PERIOD,
-			ZAG_USERGI,
-			ZAF_CODIGO,
-			ZAF_DESCRI,
-			ZAF_CGC,
-			ZAF_IMPTOT,
-			ZAH_REPTOT,
-			ZAH_DESCFI,
-			ZAH_INADIM,
-			ZAH_DEDUCO,
-			ZAH_COMREP,
-			ZAH_BV,
-			ZAH_VLCALC,
-			ZAH_REPASS,
-			ZAH_REPCOM,
-			ZAH_AGENCI,
-			ZAH_VALLIQ,
-			ZAH_CLIENT,
-			ZAH_RATEIO,
-			ZAH_VLRAT,
-			ZAH_UTILIZ,
-			QTD,
-			VALTOT,
-			C5_XTPFAT,
-			C5_COMIS1,
-			F2_SERIE,
-			F2_DOC,
-			F2_EMISSAO,
-			F2_VALBRUT,
-			F2_CLIENTE,
-			F2_LOJA,
-			A1_NOME,
-			E1_VENCREA,
-			E5_MOTBX
+
+		SELECT ZAG_PRACA, ZAG_NUMRP, ZAG_EMISSA, ZAG_PERIOD, ZAG_USERGI,
+			ZAF_CODIGO, ZAF_DESCRI, ZAF_CGC, ZAF_IMPTOT, ZAH_REPTOT, ZAH_DESCFI, ZAH_INADIM, ZAH_DEDUCO, ZAH_COMREP, ZAH_BV, ZAH_VLCALC,
+			ZAH_REPASS, ZAH_REPCOM, ZAH_AGENCI, ZAH_VALLIQ, ZAH_CLIENT, ZAH_RATEIO, ZAH_VLRAT, ZAH_UTILIZ, QTD, VALTOT, C5_XTPFAT, C5_COMIS1,
+			F2_SERIE, F2_DOC, F2_EMISSAO, F2_VALBRUT, F2_CLIENTE, F2_LOJA, A1_NOME, E1_VENCREA, E5_MOTBX
 		FROM
 			%table:ZAG% AS ZAG
 		INNER JOIN %table:ZAH% AS ZAH
-		ON ZAH_FILIAL = ZAG_FILIAL
-			AND ZAH_CODIGO = ZAG_CODIGO
-			AND ZAH_PRACA = ZAG_PRACA
-			AND ZAH_NUMRP = ZAG_NUMRP
-			AND ZAH_PERIOD = ZAG_PERIOD
-		LEFT JOIN (
-				SELECT
-					ZAH_FILIAL,
-					ZAH_PRACA,
-					ZAH_PERIOD,
-					COUNT(*) AS QTD
+		ON ZAH_FILIAL = ZAG_FILIAL AND ZAH_CODIGO = ZAG_CODIGO AND ZAH_PRACA = ZAG_PRACA AND ZAH_NUMRP = ZAG_NUMRP AND ZAH_PERIOD = ZAG_PERIOD
+		LEFT JOIN ( SELECT ZAH_FILIAL, ZAH_PRACA, ZAH_PERIOD, COUNT(*) AS QTD
 				FROM
 					%table:ZAH% ZAH01
 				WHERE
@@ -470,6 +421,13 @@ Static Function GetData(cPPeriodo,cPPracaDe,cPPracaAte,cPRpDe,cPRpAte)
 			AND ZAF.D_E_L_E_T_ = ''
 			AND ZAG.D_E_L_E_T_ = ''
 			AND ZAH.D_E_L_E_T_ = ''
+//Rafael Fran�a - 24/03/22 - Remove as duplicidades do relat�rio
+GROUP BY ZAG_PRACA, ZAG_NUMRP, ZAG_EMISSA, ZAG_PERIOD, ZAG_USERGI,
+ZAF_CODIGO, ZAF_DESCRI, ZAF_CGC, ZAF_IMPTOT,
+ZAH_REPTOT, ZAH_DESCFI, ZAH_INADIM, ZAH_DEDUCO, ZAH_COMREP, ZAH_BV, ZAH_VLCALC, ZAH_REPASS,
+ZAH_REPCOM, ZAH_AGENCI, ZAH_VALLIQ, ZAH_CLIENT, ZAH_RATEIO, ZAH_VLRAT, ZAH_UTILIZ,
+QTD, VALTOT, C5_XTPFAT, C5_COMIS1,
+F2_SERIE, F2_DOC, F2_EMISSAO, F2_VALBRUT, F2_CLIENTE, F2_LOJA, A1_NOME, E1_VENCREA, E5_MOTBX
 		ORDER BY
 			1,
 			4,
@@ -479,9 +437,7 @@ Static Function GetData(cPPeriodo,cPPracaDe,cPPracaAte,cPRpDe,cPRpAte)
 Return
 
 /*/{Protheus.doc} xFonte
-
 	Descrição: Realiza o encapsulamento da função TFONT
-
 	@author    Bruno Alves
 	@version   1.00
 	@since     05/07/2020
@@ -501,9 +457,7 @@ User Function xFonte(nTam,lBold,lLine,lItalic,cFont)
 Return oFonte
 
 /*/{Protheus.doc} PXCABECA
-
 	Monta um cabeçalho pré-definido de acordo com a orientação do objeto
-
 	@author    Bruno Alves
 	@version   1.0
 	@since     05/07/2020
@@ -514,10 +468,10 @@ User Function PXCABECA(oPrint,cTitle,cSubTitle,nPage, lBlackWhite)
 	Local oFont24 := u_xFonte(16,,,,"Arial")
 	Local oFont14 := u_xFonte(14,,,,"Arial")
 	Local cData := DTOS(DATE()) //DTOC Não está funcionando
-	Local cData := SUBSTRING(cData,7,2) + "/" +  SUBSTRING(cData,5,2)  + "/" + SUBSTRING(cData,1,4)
+
+	cData := SUBSTRING(cData,7,2) + "/" +  SUBSTRING(cData,5,2)  + "/" + SUBSTRING(cData,1,4)
 
 	Default cSubTitle := ""
-
 
 	If oPrint:GetOrientation() == 1 //Retrato
 
@@ -567,16 +521,16 @@ User Function PXCABECA(oPrint,cTitle,cSubTitle,nPage, lBlackWhite)
 Return 130
 
 /*/{Protheus.doc} PXRODAPE
-
 	Monta um rodapé pré-definido de acordo com a orientação do objeto
-
 	@author    Bruno Alves
 	@version   1.0
 	@since     05/07/2020
 /*/
 
 User Function PXRODAPE(oPrint,cFonteBase,cMsgPad)
+
 	Local oFont8 := u_xFonte(8)
+
 	cMsgPad := If(cMsgPad == Nil,"",AllTrim(cMsgPad) + " ")
 
 	If oPrint:GetOrientation() == 1
@@ -590,17 +544,20 @@ User Function PXRODAPE(oPrint,cFonteBase,cMsgPad)
 
 Return
 
-
 User function InspFonte(cFonte)
+
 	Local cRet			:= ""
 	Local aData			:= {}
 	Local cData         := DTOS(DATE()) //DTOC Não está funcionando
-	Local cData := SUBSTRING(cData,7,2) + "/" +  SUBSTRING(cData,5,2)  + "/" + SUBSTRING(cData,1,4)
+
+	cData := SUBSTRING(cData,7,2) + "/" +  SUBSTRING(cData,5,2)  + "/" + SUBSTRING(cData,1,4)
 
 	Default __cUserId	:= ""
 
 	U_PXVERSAO()
+
 	aData := GetAPOInfo(cFonte)//aFontes[nI])
+
 	/*
     Modos de compilação:
     Valor                     Descrição
@@ -621,14 +578,13 @@ Return cRet
 
 
 /*/{Protheus.doc} PXVERSAO
-
 	Cria uma variável pública baseada no CHANGELOG. MD
-
 	@author  Bruno Alves de Oliveira
 	@since   05/07/2020
 /*/
 
 User Function PXVERSAO()
+
 	Local cChangeLog	:= cValToChar(GetApoRes("CHANGELOG.MD"))
 	Local nIni			:= At( "## [", cChangeLog) + 4//remove os caracteres procurados
 	Local nFim			:= At( "]", cChangeLog,nIni)
@@ -637,6 +593,7 @@ User Function PXVERSAO()
 	If nIni > 0 .AND. nFim > 0
 		cPXVersao	:= SubStr(cChangeLog,nIni,nFim-nIni)
 	EndIf
+
 Return cPXVersao
 
 /*/{Protheus.doc} ImpPerComp
@@ -654,7 +611,6 @@ Static Function ImpPerComp()
 	Local n
 	//Imprimo todos os meses que foram compensados
 	For n:=1 to Len(aImpNeg)
-
 
 		//Executo a query para impress�o
 		GetData(aImpNeg[n][4],aImpNeg[n][2],aImpNeg[n][2],"","ZZZZZZ")
@@ -686,9 +642,6 @@ Static Function ImpPerComp()
 
 	Next
 
-
-
-
 Return
 
 /*/{Protheus.doc} PerNeg
@@ -704,15 +657,14 @@ Return
 Static Function PerNeg(cPraca,cMesAno)
 
 	Local cTmp := GetNextAlias()
-	Local lOk  := .T.
 	Local aPerNeg   := {}
 	Local i
 
 	For i:=1 to 999
 
-
 		// Busca os registros a serem impressos no relat�rio
 		BeginSql Alias cTmp
+
 			SELECT
 				ZAH_CODIGO,
 				ZAH_DTACUM,
@@ -726,6 +678,7 @@ Static Function PerNeg(cPraca,cMesAno)
 				AND ZAH_ACUCAL < 0
 				AND ZAH_PERIOD = %Exp:cMesAno%
 				AND D_E_L_E_T_ = ''
+
 		EndSql
 
 
@@ -763,8 +716,6 @@ Static Function PerNeg(cPraca,cMesAno)
 
 	Next
 
-
-
 Return(aPerNeg)
 
 /*/{Protheus.doc} ValidPerg
@@ -776,6 +727,7 @@ Return(aPerNeg)
 @param cPerg, characters, descricao
 @type function
 /*/
+
 Static Function ValidPerg(cPerg)
 
 	Local aArea	:= GetArea()
