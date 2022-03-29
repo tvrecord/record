@@ -14,17 +14,14 @@ User Function RELPAGCTB
 	Local cDesc1    := "Este programa tem como objetivo imprimir relatorio "
 	Local cDesc2    := "de acordo com os parametros informados pelo usuario."
 	Local cDesc3    := "Entradas a Pagar"
-	Local cPict     := ""
 	Local titulo    := "Relatório por entradas - Contas a Pagar"
 	Local nLin      := 80
 	Local Cabec1    := "Documento       Codigo    CNPJ            Fornecedor                                  Entrada         Vlr Bruto         Historico                                                                     Emissao     Dt Baixa"
 	Local Cabec2    := ""
-	Local imprime   := .T.
 	Local aOrd 		:= {}
 
 	Private lEnd        := .F.
 	Private lAbortPrint := .F.
-	Private CbTxt       := ""
 	Private limite      := 220
 	Private tamanho     := "G"
 	Private nomeprog    := "RELPAGCTB" // Coloque aqui o nome do programa para impressao no cabecalho
@@ -81,6 +78,7 @@ User Function RELPAGCTB
 	cQuery += "AND E2_TIPO NOT IN ('ISS','INS','PA','TX') " // Impostos e pagamentos antecipados
 	cQuery += "AND E2_STATUS NOT IN ('D') "	// Desdobramentos
 	cQuery += "AND E2_FILIAL = '" + (MV_PAR05) + "' AND E2_MULTNAT <> '1' "
+	cQuery += "AND E2_ORIGEM <> 'FINA290'"	// Regra para não apresentar o título gerado por aglutinação, não gerando duplicidade
 	cQuery += "UNION "
 	cQuery += "SELECT EV_NATUREZ AS NATUREZA, ED_DESCRIC AS DESCRICAO, ED_CONTA AS CCONTABIL "
 	cQuery += ",E2_PREFIXO AS PREFIXO, E2_NUM AS NUMERO, E2_PARCELA AS PARCELA, E2_TIPO AS TIPO "
@@ -104,6 +102,7 @@ User Function RELPAGCTB
 	cQuery += "AND E2_TIPO NOT IN ('ISS','INS','PA','TX') " // Impostos e pagamentos antecipados
 	cQuery += "AND E2_STATUS NOT IN ('D') "	// Desdobramentos
 	cQuery += "AND E2_FILIAL = '" + (MV_PAR05) + "' AND E2_MULTNAT = '1' "
+	cQuery += "AND E2_ORIGEM <> 'FINA290'"	//Regra para não apresentar o título gerado por aglutinação, não gerando duplicidade
 	IF MV_PAR08 == 1
 	cQuery += "ORDER BY NATUREZA, ENTRADA, NUMERO, PREFIXO, PARCELA "
 	ELSEIF MV_PAR08 == 2
@@ -117,7 +116,7 @@ User Function RELPAGCTB
 	If Eof()
 		MsgInfo("Nao existem dados a serem impressos!","Verifique")
 		dbSelectArea("TMPSE2")
-		dbCloseArea("TMPSE2")
+		dbCloseArea()
 		Return
 	Endif
 
@@ -157,7 +156,6 @@ Return
 
 Static Function RunReport(Cabec1,Cabec2,Titulo,nLin)
 
-	Local lOk 		:= .F.
 	Local nReg 		:= 0
 	Local cNat 		:= ""
 	Local cDescri	:= ""
@@ -266,7 +264,7 @@ Static Function RunReport(Cabec1,Cabec2,Titulo,nLin)
 	@nLin,098 PSAY TRANSFORM(nTotal,"@e 99,999,999.99")
 
 	DBSelectARea("TMPSE2")
-	DBCloseArea("TMPSE2")
+	DBCloseArea()
 
 	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 	//³ Finaliza a execucao do relatorio...                                 ³
@@ -289,6 +287,10 @@ Static Function RunReport(Cabec1,Cabec2,Titulo,nLin)
 Return
 
 Static Function ValidPerg(cPerg)
+
+	Local aArea	:= GetArea()
+	Local aRegs	:= {}
+	Local i,j
 
 	_sAlias := Alias()
 	cPerg := PADR(cPerg,10)
@@ -319,6 +321,6 @@ Static Function ValidPerg(cPerg)
 		EndIf
 	Next
 
-	dbSelectArea(_sAlias)
+	RestArea(aArea)
 
 Return

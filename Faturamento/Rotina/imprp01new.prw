@@ -51,10 +51,10 @@ User Function IMPRP01NEW()
 	Private INCLUI 		:= .F.
 	Private ALTERA 		:= .F.
 	Private DELETA 		:= .F.
-	Private lCliente		:= .F.
+	Private lCliente	:= .F.
 	Private lPedido		:= .T.
-	Private lVendedor		:= .F.
-	Private cPerg := "IMPRPN100 "
+	Private lVendedor	:= .F.
+	Private cPerg 		:= "IMPRPN100 "
 
 	ValidPerg()
 	Pergunte(cPerg,.T.)
@@ -101,9 +101,7 @@ Return(.T.)
 ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß*/
 
 Static Function OkImpDBF()
-	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-	//³ Inicializa a regua de processamento                                 ³
-	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
 	//Valida o preenchimento dos parametros - Bruno Alves - 24/05/2020
 	If Empty(_dDtIni) .OR. Empty(_dDtFim) .OR.	Empty(_cCond) .OR. Empty(_cCondFix) .OR. Empty(_cNat) .OR.  Empty(_cProd) .OR. Empty(MV_PAR09)
 		MsgAlert("Favor preencher todos os parametros para continuar com a importação e geração dos pedidos de venda","OkImpDBF")
@@ -117,7 +115,6 @@ Static Function OkImpDBF()
 	Close(_oDlg)
 
 Return
-
 
 /*ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
 ±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
@@ -133,6 +130,7 @@ Return
 ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß*/
 
 Static Function GRVPED()
+
 	Local _cArqPed		:= Alltrim(MV_PAR06)+"VENDA.TXT"
 	//Local _lGrava		:= .F.
 	Local _cComp		:= StrTran(DToC(dDataBase),"/")
@@ -140,6 +138,7 @@ Static Function GRVPED()
 	Local  nPos			:= 0
 	Local _aItens		:= {}
 	Local _cVend		:= ""
+	Local _cVend2		:= ""
 	Local _lNovo		:= .F.
 	Local nTotal		:= 0
 	Local nDif			:= 0
@@ -178,8 +177,6 @@ Static Function GRVPED()
 	dbSetOrder(5)
 
 
-
-
 	//Verifico se existe o arquivo no caminho informado
 	If File(@_cArqPed)
 		//Efetua a cópia da máquina local para o servidor. Servirá para processamento do temporario e tambem como backup
@@ -189,35 +186,37 @@ Static Function GRVPED()
 		Return
 	EndIf
 
-	aHeader := LeituraArq(_cArqPed,.T.)
+	aHeader 	:= LeituraArq(_cArqPed,.T.)
 
-	nFILIAL   := aScan(aHeader[1], { |x| x == "Z1_FILIAL"})
-	nCPFCGC	  := aScan(aHeader[1], { |x| x == "Z1_CPFCGC"})
-	nIDCLI	  := aScan(aHeader[1], { |x| x == "Z1_IDCLI"})
-	nCONDPAG  := aScan(aHeader[1], { |x| x == "Z1_CONDPAG"})
-	nCNPJAGE  := aScan(aHeader[1], { |x| x == "Z1_CNPJAGE"})
-	nPARC1	  := aScan(aHeader[1], { |x| x == "Z1_PARC1"})
-	nDATA1	  := aScan(aHeader[1], { |x| x == "Z1_DATA1"})
-	nPARC2	  := aScan(aHeader[1], { |x| x == "Z1_PARC2"})
-	nDATA2	  := aScan(aHeader[1], { |x| x == "Z1_DATA2"})
-	nPARC3	  := aScan(aHeader[1], { |x| x == "Z1_PARC3"})
-	nDATA3	  := aScan(aHeader[1], { |x| x == "Z1_DATA3"})
-	nPARC4	  := aScan(aHeader[1], { |x| x == "Z1_PARC4"})
-	nDATA4	  := aScan(aHeader[1], { |x| x == "Z1_DATA4"})
-	nMENNOTA  := aScan(aHeader[1], { |x| x == "Z1_MENNOTA"})
-	nDESCRI	  := aScan(aHeader[1], { |x| x == "Z1_DESCRI"})
-	nPRCVEN	  := aScan(aHeader[1], { |x| x == "Z1_PRCVEN"})
-	nNUMRP	  := aScan(aHeader[1], { |x| x == "Z1_NUMRP"})
-	nPREFINI  := aScan(aHeader[1], { |x| x == "Z1_PREFINI"})
-	nPREFFIM  := aScan(aHeader[1], { |x| x == "Z1_PREFFIM"})
-	nDESCONT  := aScan(aHeader[1], { |x| x == "Z1_DESCONT"})
-	nCANCELA  := aScan(aHeader[1], { |x| x == "Z1_CANCELA"})
-	nNUMPED	  := aScan(aHeader[1], { |x| x == "Z1_NUMPED"})
-	nNATUREZA := aScan(aHeader[1], { |x| x == "Z1_NATUREZA"})
-	nPRACA	  := aScan(aHeader[1], { |x| x == "Z1_PRACA"})
-	nTIPOFAT  := aScan(aHeader[1], { |x| x == "Z1_TIPOFAT"})
-	nTIPOVEIC := aScan(aHeader[1], { |x| x == "Z1_TIPOVEIC"})
-	nCFOP	  := aScan(aHeader[1], { |x| x == "Z1_CFOP"})
+	nFILIAL   	:= aScan(aHeader[1], { |x| x == "Z1_FILIAL"})
+	nCPFCGC	  	:= aScan(aHeader[1], { |x| x == "Z1_CPFCGC"})
+	nIDCLI	  	:= aScan(aHeader[1], { |x| x == "Z1_IDCLI"})
+	nCONDPAG  	:= aScan(aHeader[1], { |x| x == "Z1_CONDPAG"})
+	nCNPJAGE  	:= aScan(aHeader[1], { |x| x == "Z1_CNPJAGE"})
+	nPARC1	  	:= aScan(aHeader[1], { |x| x == "Z1_PARC1"})
+	nDATA1	  	:= aScan(aHeader[1], { |x| x == "Z1_DATA1"})
+	nPARC2	  	:= aScan(aHeader[1], { |x| x == "Z1_PARC2"})
+	nDATA2	  	:= aScan(aHeader[1], { |x| x == "Z1_DATA2"})
+	nPARC3	  	:= aScan(aHeader[1], { |x| x == "Z1_PARC3"})
+	nDATA3	  	:= aScan(aHeader[1], { |x| x == "Z1_DATA3"})
+	nPARC4	  	:= aScan(aHeader[1], { |x| x == "Z1_PARC4"})
+	nDATA4	  	:= aScan(aHeader[1], { |x| x == "Z1_DATA4"})
+	nMENNOTA  	:= aScan(aHeader[1], { |x| x == "Z1_MENNOTA"})
+	nDESCRI	  	:= aScan(aHeader[1], { |x| x == "Z1_DESCRI"})
+	nPRCVEN	  	:= aScan(aHeader[1], { |x| x == "Z1_PRCVEN"})
+	nNUMRP	  	:= aScan(aHeader[1], { |x| x == "Z1_NUMRP"})
+	nPREFINI  	:= aScan(aHeader[1], { |x| x == "Z1_PREFINI"})
+	nPREFFIM  	:= aScan(aHeader[1], { |x| x == "Z1_PREFFIM"})
+	nDESCONT  	:= aScan(aHeader[1], { |x| x == "Z1_DESCONT"})
+	nCANCELA  	:= aScan(aHeader[1], { |x| x == "Z1_CANCELA"})
+	nNUMPED	  	:= aScan(aHeader[1], { |x| x == "Z1_NUMPED"})
+	nNATUREZA 	:= aScan(aHeader[1], { |x| x == "Z1_NATUREZA"})
+	nPRACA	  	:= aScan(aHeader[1], { |x| x == "Z1_PRACA"})
+	nTIPOFAT  	:= aScan(aHeader[1], { |x| x == "Z1_TIPOFAT"})
+	nTIPOVEIC 	:= aScan(aHeader[1], { |x| x == "Z1_TIPOVEIC"})
+	nCFOP	  	:= aScan(aHeader[1], { |x| x == "Z1_CFOP"})
+	nCODCONTATO := aScan(aHeader[1], { |x| x == "Z1_CODCONTATO"})
+	nCONTATO  	:= aScan(aHeader[1], { |x| x == "Z1_CONTATO"})
 
 	nValParc := 0
 	nValVend := 0
@@ -307,12 +306,20 @@ Static Function GRVPED()
 			Loop
 		Endif
 
-		//Cadastro de vendedores
+		//Cadastro de vendedores - Verifica a Agência = VEND1
 		SA3->(dbSetOrder(3))
 		If SA3->(dbSeek(xFilial("SA3")+aPed[i][nCNPJAGE],.F.))
 			_cVend 	:= SA3->A3_COD
 		Else
 			_cVend	:= ""
+		EndIf
+
+		//Cadastro de vendedores - Verifica a Agência = VEND1
+		SA3->(dbSetOrder(9))
+		If SA3->(dbSeek(xFilial("SA3")+aPed[i][nCODCONTATO],.F.))
+			_cVend2 := SA3->A3_COD
+		Else
+			_cVend2	:= ""
 		EndIf
 
 		//Rafael - Coloca data de inicio e fim de veiculação nas Ordens de Faturamento
@@ -367,7 +374,6 @@ Static Function GRVPED()
 					_aCab[nPos][16] += nValParc
 				EndIf
 
-
 				//Passo o registro para não incluir um novo cabeçalho com a mesma informação
 				Loop
 
@@ -381,49 +387,50 @@ Static Function GRVPED()
 
 			//Array com o cabeçalho do pedido
 			//Acrescentado informação no array posição 09 ao 15 - Bruno Alves de OLiveira 22/09/2019
-			aAdd(_aCab,{SA1->A1_COD,;	//01.Codigo do cliente
-			SA1->A1_LOJA,;			 	//02.Loja do cliente
-			_cVend,;     			 	//03.Vendedor
-			aPed[i][nNUMRP],;   		//04.RP TV+
-			_dINI,;					 	//05.Periodo de veiculação De
-			_dFIM,;         		 	//06.Periodo de veiculação ate
-			aPed[i][nMENNOTA],;			//07.Mensagem para nota fiscal
-			aPed[i][nNUMPED],;		 	//08.Número da NF do TV+ que será o num do ped. no Protheus
-			IIF(aPed[i][nNATUREZA] == "1" .or. Empty(aPed[i][nNATUREZA]),aPed[i][nDATA1],CTOD("//")),;			//09 Data da 1º Parcela
-			IIF(aPed[i][nNATUREZA] == "1" .or. Empty(aPed[i][nNATUREZA]),nValParc,0),;			//10 Valor da 1º Parcela
-			CTOD("//"),;			 	//11 Data da 2º Parcela
-			0,;						 	//12 Valor da 2º Parcela
-			CTOD("//"),;			 	//13 Data da 3º Parcela
-			0,;						 	//14 Valor da 3º Parcela
-			CTOD("//"),;			 	  //15 Data da 4º Parcela
-			0,;						 	  //16 Valor da 4º Parcela
-			Alltrim(aPed[i][nDESCRI]),;	  //17 Descrição da importação aonde buscamos dicas do preenchimento da natureza
-			Alltrim(aPed[i][nNATUREZA]),; //18 Regra da Natureza
-			Alltrim(aPed[i][nPRACA]),;	  //19 Praca
-			Alltrim(aPed[i][nTIPOFAT]),;  //20 Tipo de Faturamento
-			Alltrim(aPed[i][nTIPOVEIC]),; //21 Tipo de Veiculacao
-			Alltrim(aPed[i][nCFOP]),;	  //22 CFOP
-			nPercAg }) 					  //23 Porcentagem Vendedor (Agencia)
-
+			aAdd(_aCab,{SA1->A1_COD,;		//01.Codigo do cliente
+			SA1->A1_LOJA,;			 		//02.Loja do cliente
+			_cVend,;     			 		//03.Vendedor
+			aPed[i][nNUMRP],;   			//04.RP TV+
+			_dINI,;					 		//05.Periodo de veiculação De
+			_dFIM,;         		 		//06.Periodo de veiculação ate
+			aPed[i][nMENNOTA],;				//07.Mensagem para nota fiscal
+			aPed[i][nNUMPED],;		 		//08.Número da NF do TV+ que será o num do ped. no Protheus
+			IIF(aPed[i][nNATUREZA] == "1" .or. Empty(aPed[i][nNATUREZA]),aPed[i][nDATA1],CTOD("//")),;	//09 Data da 1º Parcela
+			IIF(aPed[i][nNATUREZA] == "1" .or. Empty(aPed[i][nNATUREZA]),nValParc,0),;					//10 Valor da 1º Parcela
+			CTOD("//"),;			 		//11 Data da 2º Parcela
+			0,;						 		//12 Valor da 2º Parcela
+			CTOD("//"),;			 		//13 Data da 3º Parcela
+			0,;						 		//14 Valor da 3º Parcela
+			CTOD("//"),;			 	  	//15 Data da 4º Parcela
+			0,;						 	  	//16 Valor da 4º Parcela
+			Alltrim(aPed[i][nDESCRI]),;	  	//17 Descrição da importação aonde buscamos dicas do preenchimento da natureza
+			Alltrim(aPed[i][nNATUREZA]),; 	//18 Regra da Natureza
+			Alltrim(aPed[i][nPRACA]),;	  	//19 Praca
+			Alltrim(aPed[i][nTIPOFAT]),;  	//20 Tipo de Faturamento
+			Alltrim(aPed[i][nTIPOVEIC]),; 	//21 Tipo de Veiculacao
+			Alltrim(aPed[i][nCFOP]),;	  	//22 CFOP
+			nPercAg,;						//23 Porcentagem Vendedor (Agencia)
+			_cVend2,; 						//24 Contato / Vendedor 2 - Controle de comissão de contato
+			Alltrim(aPed[i][nCONTATO])})	//25 Nome do Contato
 
 			cTes := "5" + Substring(Alltrim(aPed[i][nCFOP]),1,1) + Substring(Alltrim(aPed[i][nCFOP]),3,1)
 
 			//Verifico se a TES é valida, caso não seja preencho como em branco para fazer a trativa na inclusão do pedido de venda
-			DbSelectArea("SF4");DbSetOrder(1)
+			DbSelectArea("SF4")
+			DbSetOrder(1)
+
 			If !DbSeek(xFilial("SF4") + cTes)
 				cTes := ""
 			EndIf
 
-
 			//Array com os itens do pedido
-			aAdd(_aItens,{	SA1->A1_COD,;   //01.Codigo do Cliente
+			aAdd(_aItens,{SA1->A1_COD,;   	//01.Codigo do Cliente
 			SA1->A1_LOJA,;    				//02.Loja do cliente
-			nValVend,;  			//03.Preco unitario
+			nValVend,;  					//03.Preco unitario
 			aPed[i][nNUMRP],;				//04.RP TV+
-			cTes }) 						// 05 TES
+			cTes }) 						//05 TES
 
 		Endif
-
 
 	Next
 
@@ -443,7 +450,6 @@ Static Function GRVPED()
 	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 	_aCab 	:= aSort(_aCab,,,     { |x,y| x[1]+x[2]+x[4] > y[1]+y[2]+y[4] })
 	_aItens := aSort(_aItens,,,   { |x,y| x[1]+x[2]+x[4] > y[1]+y[2]+y[4] })
-
 
 	For _I := 1 To Len(_aCab)
 		_aAuxItem := {}
@@ -488,6 +494,7 @@ Static Function GRVPED()
 				nTotal += Round(_aAuxItem[_X,03],2) //Soma o valor total dos itens
 
 			Next _X
+
 			/*
 			//Natureza Spot cadastrado no cadastro do cliente
 			If "PI" $ Substr(_aCab[_I][17],1,3) .AND. !("BRASILIA" $ _aCab[_I][17] ) .AND. !Empty(Posicione("SA1",1,xFilial("SA1")+_aCab[_I][1]+_aCab[_I][2],"A1_XNATSPO"))
@@ -540,6 +547,7 @@ Static Function GRVPED()
 			aAdd(_aCabC5,{"C5_CLIPED",	_aCab[_I,01],Nil})
 			aAdd(_aCabC5,{"C5_LOJPED",	_aCab[_I,02],Nil})
 			aAdd(_aCabC5,{"C5_VEND1",	_aCab[_I,03],Nil})
+			aAdd(_aCabC5,{"C5_VEND2",	_aCab[_I,24],Nil}) //24 Contato / Vendedor 2 - Controle de comissão de contato
 			aAdd(_aCabC5,{"C5_CONDPAG",	IIF(_aCab[_I,18] == "1",_cCondFix,_cCond)	,Nil})
 			aAdd(_aCabC5,{"C5_TIPLIB",	"1",Nil})
 			aAdd(_aCabC5,{"C5_NATUREZ",	cNatureza,Nil})
@@ -569,8 +577,10 @@ Static Function GRVPED()
 			If _aCab[_I,10] > 0 .OR. _aCab[_I,18] == "2" //Se Natureza for igual a 2 a condição de pagamento valor fixo é desnecessario.
 				// Integra com o Pedido de Venda
 				Begin Transaction
+
 					lMsErroAuto := .F.
 					MSExecAuto({|x,y,z|Mata410(x,y,z)},_aCabC5,_aItensC5,3)
+
 					If lMsErroAuto
 						_cMsg := "O pedido de venda " + Alltrim(_cNumPed) +" para o CGC/CNPJ: "+_aCab[_I,01]+" RP: "+_aCab[_I,04]+" apresentou problemas no momento da inclusão do pedido de venda pela rotina do execauto."
 						GeraLog(_cMsg) //Grava no arquivo de log
@@ -585,7 +595,9 @@ Static Function GRVPED()
 							Sleep(400) // andre
 						EndIf
 					EndIf
+
 				End Transaction
+
 				SC5->(dbSetOrder(1))
 
 			Else
@@ -595,8 +607,8 @@ Static Function GRVPED()
 				_nCont ++
 
 			EndIf
-		EndIf
 
+		EndIf
 
 	Next _I
 
@@ -620,7 +632,9 @@ Return
 ±±ÈÍÍÍÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¼±±
 ±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß*/
+
 Static Function ValidPerg()
+
 	Local _sAlias := Alias()
 	Local aRegs := {}
 	Local i,j
@@ -650,6 +664,7 @@ Static Function ValidPerg()
 			MsUnlock()
 		Endif
 	Next
+
 	dbSelectArea(_sAlias)
 
 Return
@@ -665,6 +680,7 @@ Return
 ±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß*/
 Static Function C(nTam)
+
 	Local nHRes	:=	oMainWnd:nClientWidth	// Resolucao horizontal do monitor
 
 	If nHRes == 640	// Resolucao 640x480 (soh o Ocean e o Classic aceitam 640)
@@ -699,6 +715,7 @@ Return Int(nTam)
 ±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß*/
 Static Function GeraLog(_cMsg)
+
 	Local _nTamLin, _cLin, _cCpo
 	Private _nHdl   := 0
 	Private _cEOL    := "CHR(13)+CHR(10)"

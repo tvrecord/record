@@ -65,8 +65,8 @@ Return aRot
 Static Function ModelDef()
 	Local oModel 		:= Nil
 	Local oStPai 		:= FWFormStruct(1, 'ZAJ')
-	Local oStFil1 		:= FWFormStruct( 1, 'ZAK',{ |cCampo| Alltrim(cCampo) $ 'ZAK_ANO/ZAK_GRPNAT/ZAK_NMGRP/ZAK_PERC' } ,/*lViewUsado*/ )
-	Local oStFil2 		:= FWFormStruct( 1, 'ZAL',{ |cCampo| Alltrim(cCampo) $ 'ZAL_MES/ZAL_PERC/ZAL_TIPO/ZAL_VALOR/ZAL_VLATIN/ZAL_FXINI/ZAL_FXGLOB' } ,/*lViewUsado*/ )
+	Local oStFil1 		:= FWFormStruct( 1, 'ZAK',{ |cCampo| Alltrim(cCampo) $ 'ZAK_ANO/ZAK_GRPNAT/ZAK_PERC' } ,/*lViewUsado*/ )
+	Local oStFil2 		:= FWFormStruct( 1, 'ZAL',{ |cCampo| Alltrim(cCampo) $ 'ZAL_MES/ZAL_TIPO/ZAL_PERC/ZAL_PERCIN/ZAL_VALOR/ZAL_MTINDI/ZAL_ATINDI/ZAL_MTCOLE/ZAL_ATCOLE' } ,/*lViewUsado*/ )
 
 
 	//Criando o modelo e os relacionamentos
@@ -86,13 +86,19 @@ Static Function ModelDef()
 	oModel:SetPrimaryKey({"ZAJ_FILIAL","ZAJ_VEND"})
 
 	//Setando as descrições
-	oModel:SetDescription("Calculo Comissão por Vendedor")
+	oModel:SetDescription("Cálculo Comissão Contato")
 	oModel:GetModel('ZAJMASTER'):SetDescription('Vendedor')
 	oModel:GetModel('ZAKDETAIL'):SetDescription('Ano/Natureza')
 	oModel:GetModel('ZALDETAIL'):SetDescription('Meses')
 
-	oModel:AddCalc('TOTAL', 'ZAKDETAIL', 'ZALDETAIL', 'ZAL_PERC'    , 'XX_PERC'     , 'SUM'        , , , "Porcentagem" )
-	oModel:AddCalc('TOTAL', 'ZAKDETAIL', 'ZALDETAIL', 'ZAL_VALOR'   , 'XX_VALOR'     , 'SUM'        , , , "Valor" )
+	oModel:AddCalc('TOTAL', 'ZAKDETAIL', 'ZALDETAIL', 'ZAL_PERC'     , 'XX_PERC'       , 'AVERAGE'    , , , "Média Porcentagem" )
+	oModel:AddCalc('TOTAL', 'ZAKDETAIL', 'ZALDETAIL', 'ZAL_VALOR'    , 'XX_VALOR'      , 'SUM'        , , , "Valor" )
+	oModel:AddCalc('TOTAL', 'ZAKDETAIL', 'ZALDETAIL', 'ZAL_MTINDI'   , 'XX_MTINDI'     , 'SUM'        , , , "Meta Individual" )
+	oModel:AddCalc('TOTAL', 'ZAKDETAIL', 'ZALDETAIL', 'ZAL_ATINDI'   , 'XX_ATINDI'     , 'SUM'        , , , "Atingido Individual" )
+	oModel:AddCalc('TOTAL', 'ZAKDETAIL', 'ZALDETAIL', 'ZAL_MTCOLE'   , 'XX_MTCOLE'     , 'SUM'        , , , "Meta Coletiva" )
+	oModel:AddCalc('TOTAL', 'ZAKDETAIL', 'ZALDETAIL', 'ZAL_ATCOLE'   , 'XX_ATCOLE'     , 'SUM'        , , , "Atingido Coletiva" )
+	oModel:AddCalc('TOTAL', 'ZAKDETAIL', 'ZALDETAIL', 'ZAL_PERCIN'   , 'XX_PERCIN'     , 'AVERAGE'    , , , "Média Porcentagem Individual" )
+
 
 
 Return oModel
@@ -107,8 +113,8 @@ Static Function ViewDef()
 	Local oView		:= Nil
 	Local oModel	:= FWLoadModel('AXZAJ')
 	Local oStPai	:= FWFormStruct(2, 'ZAJ')
-	Local oStFil1 	:= FWFormStruct(2, 'ZAK',{ |cCampo| Alltrim(cCampo) $ 'ZAK_ANO/ZAK_GRPNAT/ZAK_NMGRP/ZAK_PERC' } ,/*lViewUsado*/ )
-	Local oStFil2 	:= FWFormStruct(2, 'ZAL',{ |cCampo| Alltrim(cCampo) $ 'ZAL_MES/ZAL_PERC/ZAL_TIPO/ZAL_VALOR/ZAL_VLATIN/ZAL_FXINI/ZAL_FXGLOB' } ,/*lViewUsado*/ )
+	Local oStFil1 	:= FWFormStruct(2, 'ZAK',{ |cCampo| Alltrim(cCampo) $ 'ZAK_ANO/ZAK_GRPNAT/ZAK_PERC' } ,/*lViewUsado*/ )
+	Local oStFil2 	:= FWFormStruct(2, 'ZAL',{ |cCampo| Alltrim(cCampo) $ 'ZAL_MES/ZAL_TIPO/ZAL_PERC/ZAL_PERCIN/ZAL_VALOR/ZAL_MTINDI/ZAL_ATINDI/ZAL_MTCOLE/ZAL_ATCOLE' } ,/*lViewUsado*/ )
 	Local oStTot 	:= FWCalcStruct(oModel:GetModel('TOTAL'))
 
 	//Criando a View
@@ -123,11 +129,11 @@ Static Function ViewDef()
 
 	//Setando o dimensionamento de tamanho
 	oView:CreateHorizontalBox('CABEC',15)
-	oView:CreateHorizontalBox('INFERIOR',70)
-	oView:CreateHorizontalBox('TOTALIZADOR',15)
+	oView:CreateHorizontalBox('INFERIOR',60)
+	oView:CreateHorizontalBox('TOTALIZADOR',25)
 
-	oView:CreateVerticalBox("GRID", 35,"INFERIOR")
-	oView:CreateVerticalBox("GRID1",65,"INFERIOR")
+	oView:CreateVerticalBox("GRID", 20,"INFERIOR")
+	oView:CreateVerticalBox("GRID1",80,"INFERIOR")
 
 	//Amarrando a view com as box
 	oView:SetOwnerView('VIEW_ZAJ','CABEC')
