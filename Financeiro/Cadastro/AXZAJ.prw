@@ -67,6 +67,7 @@ Static Function ModelDef()
 	Local oStPai 		:= FWFormStruct(1, 'ZAJ')
 	Local oStFil1 		:= FWFormStruct( 1, 'ZAK',{ |cCampo| Alltrim(cCampo) $ 'ZAK_ANO/ZAK_GRPNAT/ZAK_PERC' } ,/*lViewUsado*/ )
 	Local oStFil2 		:= FWFormStruct( 1, 'ZAL',{ |cCampo| Alltrim(cCampo) $ 'ZAL_MES/ZAL_TIPO/ZAL_PERC/ZAL_PERCIN/ZAL_VALOR/ZAL_MTINDI/ZAL_ATINDI/ZAL_MTCOLE/ZAL_ATCOLE' } ,/*lViewUsado*/ )
+	Local oStFil3 		:= FWFormStruct( 1, 'ZAM',{ |cCampo| Alltrim(cCampo) $ 'ZAM_GRPNAT/ZAM_NMGRP/ZAM_PERC' } ,/*lViewUsado*/ )
 
 
 	//Criando o modelo e os relacionamentos
@@ -77,12 +78,16 @@ Static Function ModelDef()
 	oModel:AddFields('ZAJMASTER',/*cOwner*/,oStPai)
 	oModel:AddGrid('ZAKDETAIL','ZAJMASTER',oStFil1,/*bLinePre*/, /*bLinePost*/,/*bPre - Grid Inteiro*/,/*bPos - Grid Inteiro*/,/*bLoad - Carga do modelo manualmente*/)  //cOwner é para quem pertence
 	oModel:AddGrid('ZALDETAIL','ZAKDETAIL',oStFil2,/*bLinePre*/, /*bLinePost*/,/*bPre - Grid Inteiro*/,/*bPos - Grid Inteiro*/,/*bLoad - Carga do modelo manualmente*/)  //cOwner é para quem pertence
+	oModel:AddGrid('ZAMDETAIL','ZAJMASTER',oStFil3,/*bLinePre*/, /*bLinePost*/,/*bPre - Grid Inteiro*/,/*bPos - Grid Inteiro*/,/*bLoad - Carga do modelo manualmente*/)  //cOwner é para quem pertence
 
 
 	oModel:SetRelation("ZAKDETAIL", {{ 'ZAK_FILIAL', 'xFilial( "ZAK" )' },{"ZAK_VEND","ZAJ_VEND"}}, ZAK->(IndexKey( 1 )))
 	oModel:SetRelation("ZALDETAIL", {{ 'ZAL_FILIAL', 'xFilial( "ZAK" )' },{"ZAL_VEND","ZAJ_VEND"},{"ZAL_GRPNAT","ZAK_GRPNAT"},{"ZAL_ANO","ZAK_ANO"}}, ZAL->(IndexKey( 1 )))
+	oModel:SetRelation("ZAMDETAIL", {{ 'ZAM_FILIAL', 'xFilial( "ZAM" )' },{"ZAM_VEND","ZAJ_VEND"}}, ZAM->(IndexKey( 1 )))
 	oModel:GetModel('ZAKDETAIL'):SetUniqueLine({"ZAK_ANO","ZAK_GRPNAT"})	//Não repetir informações ou combinações {"CAMPO1","CAMPO2","CAMPOX"}
+	oModel:GetModel('ZAMDETAIL'):SetUniqueLine({"ZAM_GRPNAT"})	//Não repetir informações ou combinações {"CAMPO1","CAMPO2","CAMPOX"}
 	oModel:GetModel('ZALDETAIL'):SetUniqueLine({"ZAL_MES"})	//Não repetir informações ou combinações {"CAMPO1","CAMPO2","CAMPOX"}
+
 	oModel:SetPrimaryKey({"ZAJ_FILIAL","ZAJ_VEND"})
 
 	//Setando as descrições
@@ -90,6 +95,7 @@ Static Function ModelDef()
 	oModel:GetModel('ZAJMASTER'):SetDescription('Vendedor')
 	oModel:GetModel('ZAKDETAIL'):SetDescription('Ano/Natureza')
 	oModel:GetModel('ZALDETAIL'):SetDescription('Meses')
+	oModel:GetModel('ZAMDETAIL'):SetDescription('Rateio Natureza')
 
 	oModel:AddCalc('TOTAL', 'ZAKDETAIL', 'ZALDETAIL', 'ZAL_PERC'     , 'XX_PERC'       , 'AVERAGE'    , , , "Média Porcentagem" )
 	oModel:AddCalc('TOTAL', 'ZAKDETAIL', 'ZALDETAIL', 'ZAL_VALOR'    , 'XX_VALOR'      , 'SUM'        , , , "Valor" )
@@ -115,6 +121,7 @@ Static Function ViewDef()
 	Local oStPai	:= FWFormStruct(2, 'ZAJ')
 	Local oStFil1 	:= FWFormStruct(2, 'ZAK',{ |cCampo| Alltrim(cCampo) $ 'ZAK_ANO/ZAK_GRPNAT/ZAK_PERC' } ,/*lViewUsado*/ )
 	Local oStFil2 	:= FWFormStruct(2, 'ZAL',{ |cCampo| Alltrim(cCampo) $ 'ZAL_MES/ZAL_TIPO/ZAL_PERC/ZAL_PERCIN/ZAL_VALOR/ZAL_MTINDI/ZAL_ATINDI/ZAL_MTCOLE/ZAL_ATCOLE' } ,/*lViewUsado*/ )
+	Local oStFil3 	:= FWFormStruct(2, 'ZAM',{ |cCampo| Alltrim(cCampo) $ 'ZAM_GRPNAT/ZAM_NMGRP/ZAM_PERC' } ,/*lViewUsado*/ )
 	Local oStTot 	:= FWCalcStruct(oModel:GetModel('TOTAL'))
 
 	//Criando a View
@@ -125,6 +132,7 @@ Static Function ViewDef()
 	oView:AddField('VIEW_ZAJ',oStPai,'ZAJMASTER')
 	oView:AddGrid('VIEW_ZAK',oStFil1,'ZAKDETAIL')
 	oView:AddGrid('VIEW_ZAL',oStFil2,'ZALDETAIL')
+	oView:AddGrid('VIEW_ZAM',oStFil3,'ZAMDETAIL')
 	oView:AddField('VIEW_TOT', oStTot,'TOTAL')
 
 	//Setando o dimensionamento de tamanho
@@ -135,16 +143,21 @@ Static Function ViewDef()
 	oView:CreateVerticalBox("GRID", 20,"INFERIOR")
 	oView:CreateVerticalBox("GRID1",80,"INFERIOR")
 
+	oView:CreateVerticalBox("NATUREZA",30,"TOTALIZADOR")
+	oView:CreateVerticalBox("TOTAIS"  ,70,"TOTALIZADOR")
+
 	//Amarrando a view com as box
 	oView:SetOwnerView('VIEW_ZAJ','CABEC')
 	oView:SetOwnerView('VIEW_ZAK','GRID')
 	oView:SetOwnerView('VIEW_ZAL','GRID1')
-	oView:SetOwnerView('VIEW_TOT','TOTALIZADOR')
+	oView:SetOwnerView('VIEW_ZAM','NATUREZA')
+	oView:SetOwnerView('VIEW_TOT','TOTAIS')
 
 	//Habilitando título
 	oView:EnableTitleView('VIEW_ZAJ','Vendedor')
 	oView:EnableTitleView('VIEW_ZAK','Ano/Grupo Natureza')
 	oView:EnableTitleView('VIEW_ZAL','Meses')
+	oView:EnableTitleView('VIEW_ZAM','Natureza')
 	oView:EnableTitleView('VIEW_TOT','Totalizador')
 
 Return oView
