@@ -57,9 +57,9 @@ cQuery  += "ORDER BY CTJ_DEBITO"
 tcQuery cQuery New Alias "TMPRAT"
 
 If Eof()
-	MsgInfo("Não existe rateio informado!","Verifique")
+	MsgInfo("Não existe o rateio informado!","Verifique")
 	dbSelectArea("TMPRAT")
-	dbCloseArea("TMPRAT")
+	dbCloseArea()
 	Return
 Endif
 
@@ -78,72 +78,72 @@ ENDIF
 cHist		:= TMPRAT->CTJ_HIST
 
 dbSelectArea("TMPRAT")
-dbCloseArea("TMPRAT")
+dbCloseArea()
 
 IF MsgYesNo("O sistema irá substituir o rateio " + ALLTRIM(cRat) + " - " + ALLTRIM(cDescri) + ". Deseja continuar?","Atenção")
-	
-	
+
+
 	FT_FUSE(cArq)
 	ProcRegua(FT_FLASTREC())
 	FT_FGOTOP()
 	While !FT_FEOF()
-		
+
 		IncProc("Lendo arquivo de rateio externo...")
-		
+
 		cLinha := FT_FREADLN()
-		
+
 		If lPrim //Tira a primeira linha
-			
+
 			lPrim := .F.
-			
+
 			AADD(aCampos,Separa(cLinha,";",.T.))
-			
+
 		Else
-			
+
 			AADD(aDados,Separa(cLinha,";",.T.))
-			
+
 		EndIF
-		
+
 		FT_FSKIP()
 	EndDo
-	
+
 	For i:=1 to Len(aDados) //Verifica integridade das informações
-		
+
 		nNum += 1
 		nTotal += VAL(StrTran(StrTran(StrTran(aDados[i,3],"%","",1,),".","",1,),",",".",1,))
-		
+
 		IF !EXISTCPO("CTT",aDados[i,1]) .AND. !EMPTY(aDados[i,1])
 			ApMsgInfo("Centro de custo não existe! " + ALLTRIM(aDados[i,1]) + " linha: " + STRZERO(nNum,3) + ".","Verificar")
 			Return
 		ENDIF
-		
+
 	Next i
-	
+
 	//IF nTotal <> 100
 	//ApMsgInfo("Soma da porcentagem não foi igual a 100%.","Verificar")
 	//Return
 	//ENDIF
-	
+
 	Processa({|| TcSqlExec("DELETE FROM CTJ010 WHERE CTJ_RATEIO = '" + MV_PAR01 + "'")},"Deletando registro antigo!")
-	
+
 	Begin Transaction
 	ProcRegua(Len(aDados))
 	nNum := 1
 	For i:=1 to Len(aDados)
-		
+
 		IncProc("Processando CTJ...")
-		
+
 		IF !EMPTY(aDados[i,1])
-			
+
 			dbSelectArea("CTJ")
 			dbSetOrder(1)
 			dbGoTop()
-			
+
 			//Altera a conta de acordo com o Centro de Custo
 			If  cTempConta >= '41' .AND. cTempConta <= '439999999'
-				
+
 				cGrupo 	:= Posicione("CTT",1,xFilial("CTT") + IIF(ALLTRIM(aDados[i,1])==" ", " ",ALLTRIM(aDados[i,1]))   ,"CTT_GRUPO")// Busca o grupo do plano de contas no cadastro do centro de custo
-				
+
 				If SUBSTR(cTempConta,2,1) == cGrupo // Verifica se a conta contabil do cadastro está OK
 					cConta := cTempConta
 					//Se a Conta contabil não for o mesmo grupo do centro de custo, o programa pesquisa
@@ -154,7 +154,7 @@ IF MsgYesNo("O sistema irá substituir o rateio " + ALLTRIM(cRat) + " - " + ALLTR
 					cConta := Posicione("SZI",1,xFilial("SZI") + cTempConta, "ZI_CC3")
 				EndIf
 			ENDIF
-			
+
 			Reclock("CTJ",.T.)
 			CTJ_FILIAL	:= "01"
 			CTJ_RATEIO	:= cRat
@@ -167,19 +167,19 @@ IF MsgYesNo("O sistema irá substituir o rateio " + ALLTRIM(cRat) + " - " + ALLTR
 			CTJ_HIST	:= cHist
 			CTJ_CCD  	:= aDados[i,1]
 			ZA7->(MsUnlock())
-			
+
 			nNum += 1
-			
+
 		ENDIF
-		
+
 	Next i
-	
+
 	ApMsgInfo("Cadastro realizado com Sucesso!","SUCESSO")
-	
+
 	End Transaction
-	
+
 	FT_FUSE()
-	
+
 EndIf
 
 Return
