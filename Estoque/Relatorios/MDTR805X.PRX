@@ -88,8 +88,8 @@ Private _xSTR0017 := "EPI"
 Private _xSTR0018 := "Nome do EPI"
 Private _xSTR0019 := "Dt. Entr"
 Private _xSTR0020 := "Dev."
-Private _xSTR0021 := "SIM"
-Private _xSTR0022 := "NAO"
+Private _xSTR0021 := "Sim"
+Private _xSTR0022 := "Não"
 Private _xSTR0023 := "|  Data : ____/____/____"
 Private _xSTR0024 := "|  Assinatura: _______________________     Resp Empr: _______________________"
 Private _xSTR0025 := "Qtde"
@@ -829,6 +829,7 @@ AADD(aDBF,{"DESEPI" , "C", 40,0})
 AADD(aDBF,{"DTENT"  , "D", 08,0})
 AADD(aDBF,{"HRENT"  , "C", 05,0})
 AADD(aDBF,{"QTDE"   , "N", 06,2})
+AADD(aDBF,{"QTDEVO" , "N", 06,2})
 AADD(aDBF,{"DEV"    , "C", 01,0})
 AADD(aDBF,{"NUMCAP" , "C", 12,0})
 AADD(aDBF,{"NUMCRI" , "C", 12,0})
@@ -1234,8 +1235,11 @@ Return NIL
 ±±³ Uso      ³ MDTR805                                                    ³±±
 ±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
 ±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±/*/
+
 Static Function Somalinha_()
+
 Li++
+
 If Li > 70
 	Cabec(titulo,cabec1,cabec2,nomeprog,tamanho,nTipo)
 EndIf
@@ -1301,8 +1305,10 @@ Return
 ±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß/*/
 Static Function NGIMP805TRB_()   //Rafael alterado Function -> Static Function
+
 Local LinhaCorrente
 Local lPrimvez := .t.
+//Local cTpTermo := "E"
 
 If lSigaMdtps
 
@@ -1389,15 +1395,16 @@ If lSigaMdtps
 		Somalinha_()
 		@ Li,000 Psay "|"
 		@ Li,001 PSay "Item" //_xSTR0017     //"EPI"
-		@ Li,017+nDist PSay "Descrição" //_xSTR0018     //"Nome do EPI"
-		@ Li,053+nDist PSay _xSTR0019     //"Dt. Entr"
-		@ Li,063+nDist PSay _xSTR0040     //"Hora"
-		@ Li,072+nDist PSay _xSTR0025     //"Qtde"
-		@ Li,078+nDist PSay _xSTR0020     //"Dev."
+		@ Li,012+nDist PSay "Descrição" //_xSTR0018     //"Nome do EPI"
+		@ Li,047+nDist PSay _xSTR0019     //"Dt. Entr"
+		@ Li,057+nDist PSay _xSTR0040     //"Hora"
+		@ Li,066+nDist PSay _xSTR0025     //"Qtde"
+		@ Li,071+nDist PSay _xSTR0020     //"Dev."
 		If TNF->(FieldPos("TNF_DTDEVO")) > 0
-			@ Li,083+nDist PSay _xSTR0042 //"Dt. Devo"
+			@ Li,078+nDist PSay _xSTR0042 //"Dt. Devo"
+			@ Li,088+nDist PSay "Qtd Dev"
 		EndIf
-		@ Li,093+nDist PSay "Func. outra Filial"
+		@ Li,099+nDist PSay "Func. outra Filial"
 		@ Li,132 Psay "|"
 		Somalinha_()
 		@ Li,000 Psay "|"
@@ -1433,6 +1440,11 @@ If lSigaMdtps
 			Somalinha_()
 			@ Li,000 PSay "|"
 			lPrimeiro := .T.
+
+			// Rafael França - 31/03/22 - Verifica se é uma devolução ou entrega
+			//If TMZ->TMZ_TIPO == "D"
+			//cTpTermo := "D"
+			//EndIf
 
 			nLinhasMemo := MLCOUNT(TMZ->TMZ_DESCRI,130)
 			For LinhaCorrente := 1 to nLinhasMemo
@@ -1474,20 +1486,25 @@ If lSigaMdtps
 			EndIf
 			lFirst := .f.
 			@ Li,001 PSAY (cTRB)->CODEPI
-			@ Li,017+nDist PSay substr(alltrim((cTRB)->DESEPI),1,32) PICTURE "@!"
-			@ Li,053+nDist PSay NG805DATE_((cTRB)->DTENT) PICTURE "99/99/9999"
-			@ Li,063+nDist PSay (cTRB)->HRENT PICTURE "99:99"
-			@ Li,070+nDist PSay (cTRB)->QTDE  PICTURE "@E 999.99"
+			@ Li,013+nDist PSay substr(alltrim((cTRB)->DESEPI),1,32) PICTURE "@!"
+			@ Li,048+nDist PSay NG805DATE_((cTRB)->DTENT) PICTURE "99/99/9999"
+			@ Li,058+nDist PSay (cTRB)->HRENT PICTURE "99:99"
+			@ Li,064+nDist PSay (cTRB)->QTDE  PICTURE "@E 999.99"
 			IF (cTRB)->DEV = "1"
-				@ LI,078+nDist PSAY _xSTR0021 //"SIM"
+				If (cTRB)->QTDE == (cTRB)->QTDEVO
+				@ LI,072+nDist PSAY _xSTR0021 //"SIM"
+				ElseIf (cTRB)->QTDEVO < (cTRB)->QTDE
+				@ LI,072+nDist PSAY "Parc."
+				Endif
 			ELSE
-				@ LI,078+nDist PSAY _xSTR0022  //"NAO"
+				@ LI,072+nDist PSAY _xSTR0022  //"NAO"
 			ENDIF
 			If TNF->(FieldPos("TNF_DTDEVO")) > 0
-				@ Li,083+nDist PSay NG805DATE_((cTRB)->DTDEVO) PICTURE "99/99/9999"
+				@ Li,079+nDist PSay NG805DATE_((cTRB)->DTDEVO) PICTURE "99/99/9999"
+				@ Li,090+nDist PSay (cTRB)->QTDEVO  PICTURE "@E 999.99"
 			ENDIF
 			If !Empty(TNF->TNF_MATFUN)
-				@ Li,093+nDist PSay Alltrim(SUBSTR(TNF->TNF_MATFUN,1,9))
+				@ Li,100+nDist PSay Alltrim(SUBSTR(TNF->TNF_MATFUN,1,9))
 				@ Li,103 PSay Alltrim(SUBSTR(TNF->TNF_FUNNAM,1,28))
 			EndIf
 			If lLinha
@@ -1711,7 +1728,13 @@ Else
 			@ Li,000 PSay "|"
 			lPrimeiro := .T.
 
+			// Rafael França - 31/03/22 - Verifica se é uma devolução ou entrega
+			If TMZ->TMZ_TIPO == "D"
+				cTpTermo := "D"
+			EndIf
+
 			nLinhasMemo := MLCOUNT(TMZ->TMZ_DESCRI,130)
+
 			For LinhaCorrente := 1 to nLinhasMemo
 				If lPrimeiro
 					if !empty((MemoLine(TMZ->TMZ_DESCRI,56,LinhaCorrente)))
@@ -1728,10 +1751,13 @@ Else
 				EndIf
 				Somalinha_()
 			Next
+
 			If !lPrimeiro
 				@ Li,000 PSay "|"
 			Endif
+
 			@ Li,132 PSay "|"
+
 		EndIf
 		// fim do termo
 
@@ -1743,15 +1769,16 @@ Else
 		Somalinha_()
 		@ Li,000 Psay "|"
 		@ Li,001 PSay "Item" //_xSTR0017     //"EPI"
-		@ Li,017+nDist PSay "Descrição" //_xSTR0018     //"Nome do EPI"
-		@ Li,053+nDist PSay _xSTR0019     //"Dt. Entr"
-		@ Li,063+nDist PSay _xSTR0040     //"Hora"
-		@ Li,072+nDist PSay _xSTR0025     //"Qtde"
-		@ Li,078+nDist PSay _xSTR0020     //"Dev."
+		@ Li,012+nDist PSay "Descrição" //_xSTR0018     //"Nome do EPI"
+		@ Li,047+nDist PSay _xSTR0019     //"Dt. Entr"
+		@ Li,057+nDist PSay "Hora"
+		@ Li,066+nDist PSay "Qtd"
+		@ Li,071+nDist PSay _xSTR0020     //"Dev."
 		If TNF->(FieldPos("TNF_DTDEVO")) > 0
-			@ Li,083+nDist PSay _xSTR0042 //"Dt. Devo"
+			@ Li,078+nDist PSay _xSTR0042 //"Dt. Devo"
+			@ Li,088+nDist PSay "Qtd Dev"
 		EndIf
-		@ Li,093+nDist PSay "Func. outra Filial"
+		@ Li,099+nDist PSay "Func. outra Filial"
 		@ Li,132 Psay "|"
 		Somalinha_()
 		@ Li,000 Psay "|"
@@ -1782,24 +1809,30 @@ Else
 			EndIf
 			lFirst := .f.
 			@ Li,001 PSAY (cTRB)->CODEPI
-			@ Li,017+nDist PSay substr(alltrim((cTRB)->DESEPI),1,32) PICTURE "@!"
-			@ Li,053+nDist PSay NG805DATE_((cTRB)->DTENT) PICTURE "99/99/9999"
-			@ Li,063+nDist PSay (cTRB)->HRENT PICTURE "99:99"
-			@ Li,070+nDist PSay (cTRB)->QTDE  PICTURE "@E 999.99"
+			@ Li,013+nDist PSay substr(alltrim((cTRB)->DESEPI),1,32) PICTURE "@!"
+			@ Li,048+nDist PSay NG805DATE_((cTRB)->DTENT) PICTURE "99/99/9999"
+			@ Li,058+nDist PSay (cTRB)->HRENT PICTURE "99:99"
+			// Verifica se é um termo de devolução
+			@ Li,064+nDist PSay (cTRB)->QTDE  PICTURE "@E 999.99"
 			IF (cTRB)->DEV = "1"
-				@ LI,078+nDist PSAY _xSTR0021 //"SIM"
+				If (cTRB)->QTDE == (cTRB)->QTDEVO
+					@ LI,072+nDist PSAY _xSTR0021 //"SIM"
+				ElseIf (cTRB)->QTDEVO < (cTRB)->QTDE
+					@ LI,072+nDist PSAY "Parc."
+				Endif
 			ELSE
-				@ LI,078+nDist PSAY _xSTR0022  //"NAO"
+				@ LI,072+nDist PSAY _xSTR0022  //"NAO"
 			ENDIF
 			If TNF->(FieldPos("TNF_DTDEVO")) > 0
-				@ Li,083+nDist PSay NG805DATE_((cTRB)->DTDEVO) PICTURE "99/99/9999"
+				@ Li,079+nDist PSay NG805DATE_((cTRB)->DTDEVO) PICTURE "99/99/9999"
+				@ Li,090+nDist PSay (cTRB)->QTDEVO  PICTURE "@E 999.99"
 			ENDIF
 
 			If !Empty(Posicione("TNF",3,xFilial("TNF") + CFUNC + (cTRB)->CODEPI + DTOS((cTRB)->DTENT) + (cTRB)->HRENT,"TNF_MATFUN"))
 				//TNF_FILIAL+TNF_FORNEC+TNF_LOJA+TNF_CODEPI+TNF_NUMCAP+TNF_MAT+DTOS(TNF_DTENTR)+TNF_HRENTR
 				//TNF_FILIAL+TNF_MAT+TNF_CODEPI+DTOS(TNF_DTENTR)+TNF_HRENTR
 				//Posicione("TNF",1,xFilial("TNF") + "999999" + "01" + (cTRB)->CODEPI + (cTRB)->NUMCAP + DTOS((cTRB)->DTENT) + (cTRB)->HRENT,"TNF_MATFUN"),1,12)
-				@ Li,093+nDist PSay Alltrim(SUBSTR(Posicione("TNF",3,xFilial("TNF") + CFUNC + (cTRB)->CODEPI + DTOS((cTRB)->DTENT) + (cTRB)->HRENT,"TNF_MATFUN"),1,9))
+				@ Li,100+nDist PSay Alltrim(SUBSTR(Posicione("TNF",3,xFilial("TNF") + CFUNC + (cTRB)->CODEPI + DTOS((cTRB)->DTENT) + (cTRB)->HRENT,"TNF_MATFUN"),1,9))
 				@ Li,103 PSay Alltrim(SUBSTR(Posicione("TNF",3,xFilial("TNF") + CFUNC + (cTRB)->CODEPI + DTOS((cTRB)->DTENT) + (cTRB)->HRENT,"TNF_FUNNAM"),1,28))
 			EndIf
 			If lLinha
@@ -2002,6 +2035,7 @@ If lSigaMdtps
 	(cTRB)->DTENT    := TNF->TNF_DTENTR
 	(cTRB)->HRENT    := TNF->TNF_HRENTR
 	(cTRB)->QTDE     := TNF->TNF_QTDENT
+	(cTRB)->QTDEVO   := TNF->TNF_QTDEVO
 	(cTRB)->DEV      := TNF->TNF_INDDEV
 	(cTRB)->NUMCAP   := If(lCPONumcap,TNF->TNF_NUMCAP,TN3->TN3_NUMCAP)
 
@@ -2063,6 +2097,7 @@ Else
 	(cTRB)->DTENT    := TNF->TNF_DTENTR
 	(cTRB)->HRENT    := TNF->TNF_HRENTR
 	(cTRB)->QTDE     := TNF->TNF_QTDENT
+	(cTRB)->QTDEVO   := TNF->TNF_QTDEVO
 	(cTRB)->DEV      := TNF->TNF_INDDEV
 	(cTRB)->NUMCAP   := If(lCPONumcap,TNF->TNF_NUMCAP,TN3->TN3_NUMCAP)
 
