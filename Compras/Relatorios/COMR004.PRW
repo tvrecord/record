@@ -40,7 +40,7 @@ If !ApOleClient("MsExcel")
 EndIf
 
 //TRATO AS PERGUNTAS PARA USO NOS FILTROS
-cFiltro		:= "% AND B2_COD BETWEEN '"+(MV_PAR01)+"' AND '"+(MV_PAR02)+"' AND D1_DTDIGIT BETWEEN '"+DTOS(MV_PAR03)+"' AND '"+DTOS(MV_PAR04)+"' %"
+cFiltro		:= "% AND B2_COD BETWEEN '"+(MV_PAR01)+"' AND '"+(MV_PAR02)+"' AND D1_DTDIGIT BETWEEN '"+DTOS(MV_PAR03)+"' AND '"+DTOS(MV_PAR04)+"' AND Y3_COD BETWEEN '"+(MV_PAR05)+"' AND '"+(MV_PAR06)+"' %"
 
 //COMEÇO A MINHA CONSULTA SQL
 BeginSql Alias cAlias
@@ -48,10 +48,11 @@ BeginSql Alias cAlias
 //QUERY
 SELECT B2_COD AS CODIGO, D1_DESCRI AS DESC_PROD, B2_LOCAL AS LOCAL
 , D1_DOC AS NOTA_FISCAL, D1_SERIE AS SERIE, D1_DTDIGIT AS DT_ENTRADA, D1_FORNECE AS FORNECEDOR, D1_QUANT AS QTD_NF
-, B2_QATU AS ESTOQUE, B2_VATU1 AS VL_ESTOQUE, C1_UNIDREQ AS DESC_REQ, D1_PEDIDO AS PEDIDO
+, B2_QATU AS ESTOQUE, B2_VATU1 AS VL_ESTOQUE, Y3_COD AS UNI_REQ, Y3_DESC AS DESC_UNID, D1_PEDIDO AS PEDIDO
 FROM %table:SB2%
 INNER JOIN %table:SD1% ON B2_COD = D1_COD AND %table:SD1%.D_E_L_E_T_ = '' AND B2_LOCAL = D1_LOCAL
-LEFT JOIN %table:SC1%  ON D1_PEDIDO = C1_PEDIDO AND %table:CTT%.D_E_L_E_T_ = ''
+LEFT JOIN %table:SC1%  ON D1_PEDIDO = C1_PEDIDO AND %table:SC1%.D_E_L_E_T_ = ''
+LEFT JOIN %table:SY3%  ON C1_UNIDREQ = Y3_COD AND %table:SY3%.D_E_L_E_T_ = ''
 WHERE %table:SB2%.D_E_L_E_T_ = '' AND B2_QATU > 0
 %exp:cFiltro%
 ORDER BY B2_COD, B2_LOCAL, D1_DTDIGIT DESC
@@ -66,7 +67,9 @@ EndSql //FINALIZO A MINHA QUERY
         //Criando a Tabela
         oFWMsExcel:AddTable(cNomePlan,cNomeTabela)
         //Criando Colunas
-        oFWMsExcel:AddColumn(cNomePlan,cNomeTabela,"PRODUTO",1,1) //1,1 = Modo Texto  // 2,2 = Valor sem R$  //  3,3 = Valor com R$
+        oFWMsExcel:AddColumn(cNomePlan,cNomeTabela,"COD_SOLICITANTE",1,1)
+		oFWMsExcel:AddColumn(cNomePlan,cNomeTabela,"DESC_SOLICITANTE",1,1)
+	    oFWMsExcel:AddColumn(cNomePlan,cNomeTabela,"PRODUTO",1,1) //1,1 = Modo Texto  // 2,2 = Valor sem R$  //  3,3 = Valor com R$
         oFWMsExcel:AddColumn(cNomePlan,cNomeTabela,"DESC_PRODUTO",1,1)
         oFWMsExcel:AddColumn(cNomePlan,cNomeTabela,"ARMAZEM",1,1)
         oFWMsExcel:AddColumn(cNomePlan,cNomeTabela,"NFISCAL",1,1)
@@ -79,7 +82,6 @@ EndSql //FINALIZO A MINHA QUERY
 		oFWMsExcel:AddColumn(cNomePlan,cNomeTabela,"DIAS_ESTOQUE",1,1)
 		oFWMsExcel:AddColumn(cNomePlan,cNomeTabela,"PEDIDO",1,1)
 		oFWMsExcel:AddColumn(cNomePlan,cNomeTabela,"HISTORICO",1,1)
-		oFWMsExcel:AddColumn(cNomePlan,cNomeTabela,"DEP_SOLICITANTE",1,1)
 
 While !(cAlias)->(Eof())
 
@@ -126,7 +128,7 @@ cCodigo := ""
 cDescri := ""
 EndIf
 
-    oFWMsExcel:AddRow(cNomePlan,cNomeTabela,{cCodigo,cDescri,LOCAL,NOTA_FISCAL,SERIE,FORNECEDOR,DTOC(STOD(DT_ENTRADA)),QTD_NF,nEst,nVlEst,cValToChar(nDias),PEDIDO,UPPER(cDescricao),""})
+    oFWMsExcel:AddRow(UNI_REQ,DESC_UNID, cNomePlan,cNomeTabela,{cCodigo,cDescri,LOCAL,NOTA_FISCAL,SERIE,FORNECEDOR,DTOC(STOD(DT_ENTRADA)),QTD_NF,nEst,nVlEst,cValToChar(nDias),PEDIDO,ALLTRIM(UPPER(cDescricao))})
 
 EndIf
 
@@ -159,18 +161,20 @@ Return
 //Programa usado para criar perguntas na tabela SX1 (Tabela de perguntas)
 Static Function ValidPerg(cPerg)
 
-	_sAlias := Alias()
-	cPerg := PADR(cPerg,10)
+	Local _sAlias := Alias()
+	Local aRegs	:={}
+	Local i, j
+
 	dbSelectArea("SX1")
 	dbSetOrder(1)
 	aRegs:={}
 
 	AADD(aRegs,{cPerg,"01","Do Produto:			","","","mv_ch01","C",09,0,0,"G","","mv_par01","","","","","","","","","","","","","","","","","","","","","","","","","SB1"})
 	AADD(aRegs,{cPerg,"02","Até o Produto:		","","","mv_ch02","C",09,0,0,"G","","mv_par02","","","","","","","","","","","","","","","","","","","","","","","","","SB1"})
-	AADD(aRegs,{cPerg,"03","Da Data:			","","","mv_ch03","D",08,0,0,"G","","mv_par03","","","","","","","","","","","","","","","","","","","","","","","","",""})
-	AADD(aRegs,{cPerg,"04","Até a Data:			","","","mv_ch04","D",08,0,0,"G","","mv_par04","","","","","","","","","","","","","","","","","","","","","","","","",""})
-	AADD(aRegs,{cPerg,"05","Do Departamento:	","","","mv_ch05","D",05,0,0,"G","","mv_par05","","","","","","","","","","","","","","","","","","","","","","","","","SY3"})
-	AADD(aRegs,{cPerg,"06","Até o Departamento:	","","","mv_ch06","D",05,0,0,"G","","mv_par06","","","","","","","","","","","","","","","","","","","","","","","","","SY3"})
+	AADD(aRegs,{cPerg,"03","Da Entrada:			","","","mv_ch03","D",08,0,0,"G","","mv_par03","","","","","","","","","","","","","","","","","","","","","","","","",""})
+	AADD(aRegs,{cPerg,"04","Até a Entrada:		","","","mv_ch04","D",08,0,0,"G","","mv_par04","","","","","","","","","","","","","","","","","","","","","","","","",""})
+	AADD(aRegs,{cPerg,"05","Do Departamento:	","","","mv_ch05","C",05,0,0,"G","","mv_par05","","","","","","","","","","","","","","","","","","","","","","","","","SY3"})
+	AADD(aRegs,{cPerg,"06","Até o Departamento:	","","","mv_ch06","C",05,0,0,"G","","mv_par06","","","","","","","","","","","","","","","","","","","","","","","","","SY3"})
 
 	For i:=1 to Len(aRegs)
 		If !dbSeek(cPerg+aRegs[i,2])
