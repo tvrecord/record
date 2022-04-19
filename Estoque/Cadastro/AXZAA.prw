@@ -18,13 +18,12 @@
 
 User Function AXZAA
 
-	LOCAL aCores  		:= {;
-		{"EMPTY(ZAA->ZAA_DTDEVO)","BR_VERDE"		},;
-		{"!EMPTY(ZAA->ZAA_DTDEVO) .AND. ZAA->ZAA_QTDEVO < ZAA->ZAA_QTDENT .AND. ZAA->ZAA_QTDEVO > 0","BR_AMARELO"		},;
-		{"!EMPTY(ZAA->ZAA_DTDEVO) .AND. (ZAA->ZAA_QTDEVO == ZAA->ZAA_QTDENT .OR. ZAA->ZAA_QTDEVO == 0)","BR_VERMELHO"	}}
+	LOCAL aCores  		:= {{"EMPTY(ZAA->ZAA_DTDEVO)","BR_VERDE"						},;
+		{"ZAA->ZAA_QTDEVO < ZAA->ZAA_QTDENT .AND. ZAA->ZAA_QTDEVO > 0","BR_AMARELO"		},;
+		{"ZAA->ZAA_QTDEVO == ZAA->ZAA_QTDENT","BR_VERMELHO"								},;
+		{"ZAA->ZAA_QTDEVO > ZAA->ZAA_QTDENT","BR_PRETO"									}}
 
 	Private cCadastro 	:= "Controle de EPI"
-	Private nOpca 		:= 0
 	Private aParam 		:= {}
 	Private lOk1 		:= .T.
 	Private nOpca 		:= 0
@@ -47,6 +46,7 @@ User Function AXZAA
 		{"Excluir","AxDeleta",0,5},;
 		{"Devolução","U_TelaZAA",0,4},;
 		{"Termo de Responsabilidade","U_MDTR805X ",0,4},;
+		{"Relatório de EPI","U_RELEPI ",0,4},;
 		{"Legenda","U_LegZAA",0,6}}
 
 	Private cString := "ZAA"
@@ -59,10 +59,11 @@ Return
 
 User Function LegZAA
 
-	BrwLegenda("Legenda","Controle de EPI",{;
-		{ "BR_VERDE"    ,"Item com Funcionario"}	,;
-		{ "BR_AMARELO"  ,"Item Parcialmente Devolvido"}	,;
-		{ "BR_VERMELHO"	,"Item Devolvido"}	})
+	BrwLegenda("Legenda","Controle de EPI",;
+	{{ "BR_VERDE"    	,"Item com Funcionario"}	,;
+	{  "BR_AMARELO"  	,"Item Parcialmente Devolvido"}	,;
+	{  "BR_VERMELHO"	,"Item Devolvido"},;
+	{  "BR_PRETO"		,"Qtd Devolvida Maior"}})
 
 Return
 
@@ -178,7 +179,7 @@ User function ZAATudoOK()
 			MsUnLock()
 
 			dbSelectArea("TNF")
-			dbCloseArea("TNF")
+			dbCloseArea()
 
 		ENDIF
 
@@ -211,9 +212,11 @@ User Function TelaZAA
 	Private cEPI 		:= ZAA->ZAA_CODEPI
 	Private cDescri 	:= ZAA->ZAA_DESC
 	Private cLocal		:= ZAA->ZAA_LOCAL
+	Private nDevolvido  := ZAA->ZAA_QTDEVO
 	Private dDevol		:= CTOD("  /  /  ")
 	Private nQTDDev		:= 000
 	Private cObs		:= SPACE(50)
+
 
 	Private aItems:= {'Sim','Nao'}
 	Private oArquivo
@@ -244,16 +247,21 @@ User Function TelaZAA
 	@ 105,100 COMBOBOX oArquivo ITEMS aItems SIZE 040,015 OF oDlg PIXEL FONT oFont
 	@ 125,005 SAY "OBSERVAÇÃO :"
 	@ 125,100 GET cObs
-	@ 175,150 BUTTON "Devolver" SIZE 35,10 ACTION DevolveZAA(dDevol,nQtdDev,cObs)
+	@ 175,150 BUTTON "Devolver" SIZE 35,10 ACTION DevolveZAA(dDevol,nQtdDev,cObs,nQTD)
 	@ 175,200 BUTTON "Fechar" 	SIZE 35,10 ACTION Close(oDlg)
 	ACTIVATE DIALOG oDlg CENTERED
 
 Return
 
-Static Function DevolveZAA(dDevol,nQtdDev,cObs)
+Static Function DevolveZAA(dDevol,nQtdDev,cObs,nQTD)
 
 	If Empty(dDevol) .OR. nQTDDev == 0
-		MsgInfo("Informe a Data e a Quantidade da Devolução","VAZIO")
+		MsgInfo("Informe a Data e a Quantidade da Devolução.","Vazio")
+		Return
+	Endif
+
+	If nQTDDev <= (nQtd - nDevolvido)
+		MsgInfo("Quantidade informada maior que o saldo com o funcionário.","Atenção")
 		Return
 	Endif
 
@@ -343,7 +351,7 @@ Static Function DevolveZAA(dDevol,nQtdDev,cObs)
 	MsUnLock()
 
 	dbSelectArea("TNF")
-	dbCloseArea("TNF")
+	dbCloseArea()
 
 	Close(oDlg)
 
