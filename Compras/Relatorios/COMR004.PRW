@@ -2,6 +2,7 @@
 #INCLUDE "PROTHEUS.CH"
 
 //Rafael França - 18/05/2021 - Relatorio para saber o periodo que os itens ficam em estoque sem uso
+//Pedro Leonardo - 12/04/2022 - Alterações(Inclusão de unidade requisitante, correções nos parâmetros)
 //SIGACOM -> Relatorios -> Especificos Record -> Estoque por Periodo
 
 User Function COMR004()
