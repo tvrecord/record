@@ -88,60 +88,60 @@ DBSelectARea("TMP")
 DBGotop()
 
 While !EOF()
-	
+
 	dVenc 	  := STOD(MV_PAR04 + MV_PAR03 + SUBSTR(TMP->ZA6_VENC,7,2))
 	dVencR1   := DATAVALIDA(STOD(MV_PAR04 + MV_PAR03 + SUBSTR(TMP->ZA6_VENC,7,2)))
-	
+
 	If EMPTY(dVenc)   // Se a data não existir
-		
+
 		dVenc 		:= LASTDATE(STOD(MV_PAR04 + MV_PAR03 + "01"))
 		dVencR1	    := DATAVALIDA(LASTDATE(STOD(MV_PAR04 + MV_PAR03 + "01")))
-		
+
 		If SUBSTR(DTOC(dVencR1),4,2) != MV_PAR03
-			
+
 			FOR i:= 1 to 10
-				
+
 				if SUBSTR(DTOC((LASTDATE(STOD(MV_PAR04 + MV_PAR03 + "01"))) -i ) ,4,2) == MV_PAR03
 					if SUBSTR(DTOC(DATAVALIDA((LASTDATE(STOD(MV_PAR04 + MV_PAR03 + "01"))) - i)),4,2) == MV_PAR03 // VERIFICA SE REALMENTE É O ULTIMA DIA UTIL DO MES
-						
+
 						dVenc 	  := DATAVALIDA((LASTDATE(STOD(MV_PAR04 + MV_PAR03 + "01"))) - i)
 						dVencR1   := DATAVALIDA((LASTDATE(STOD(MV_PAR04 + MV_PAR03 + "01"))) - i)
-						
+
 						Exit
 					EndIf
-					
+
 				EndIf
-				
+
 			next
-			
+
 		Endif
-		
-		
-		
+
+
+
 	ELSE // VERIFICA SE A DATA É O ULTIMO DIA UTIL DO MES SEM PULAR PARA O PROXIMO MES CORRENTE
-		
-		
+
+
 		If SUBSTR(DTOC(dVencR1),4,2) != MV_PAR03
-			
+
 			FOR i:= 1 to 10
-				
+
 				if SUBSTR(DTOC(((STOD(MV_PAR04 + MV_PAR03 + SUBSTR(TMP->ZA6_VENC,7,2))) - i)),4,2) == MV_PAR03
 					if SUBSTR(DTOC(DATAVALIDA((STOD(MV_PAR04 + MV_PAR03 + SUBSTR(TMP->ZA6_VENC,7,2))) - i)),4,2) == MV_PAR03
-						
+
 						dVenc 	  := DATAVALIDA((STOD(MV_PAR04 + MV_PAR03 + SUBSTR(TMP->ZA6_VENC,7,2))) - i)
 						dVencR1   := DATAVALIDA((STOD(MV_PAR04 + MV_PAR03 + SUBSTR(TMP->ZA6_VENC,7,2))) - i)
-						
+
 						Exit
 					EndIf
 				Endif
-				
+
 			next
-			
+
 		Endif
-		
+
 	ENDIF
-	
-	
+
+
 	Reclock("ZA6",.T.)
 	ZA6_FILIAL  := TMP->ZA6_FILIAL
 	ZA6_CODIGO  := EXECBLOCK("ZA6NUMSEQ")
@@ -158,11 +158,11 @@ While !EOF()
 	ZA6_HIST    := TMP->ZA6_HIST
 	ZA6_NATGER  := POSICIONE("SED",1,xFilial("SED")+TMP->ZA6_NATURE,"ED_NATGER")
 	MsUnlock()
-	
+
 	dbSelectArea("TMP")
 	DBSkip()
-	
-	
+
+
 EndDo
 
 dbSelectArea("TMP")
