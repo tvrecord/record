@@ -78,7 +78,7 @@ User Function RELPAGCTB
 	cQuery += "AND E2_TIPO NOT IN ('ISS','INS','PA','TX') " // Impostos e pagamentos antecipados
 	cQuery += "AND E2_STATUS NOT IN ('D') "	// Desdobramentos
 	cQuery += "AND E2_FILIAL = '" + (MV_PAR05) + "' AND E2_MULTNAT <> '1' "
-	cQuery += "AND E2_ORIGEM <> 'FINA290'"	// Regra para não apresentar o título gerado por aglutinação, não gerando duplicidade
+	cQuery += "AND E2_FATURA <> 'NOTFAT'"	// Regra para não apresentar o título gerado por aglutinação, não gerando duplicidade
 	cQuery += "UNION "
 	cQuery += "SELECT EV_NATUREZ AS NATUREZA, ED_DESCRIC AS DESCRICAO, ED_CONTA AS CCONTABIL "
 	cQuery += ",E2_PREFIXO AS PREFIXO, E2_NUM AS NUMERO, E2_PARCELA AS PARCELA, E2_TIPO AS TIPO "
@@ -102,7 +102,7 @@ User Function RELPAGCTB
 	cQuery += "AND E2_TIPO NOT IN ('ISS','INS','PA','TX') " // Impostos e pagamentos antecipados
 	cQuery += "AND E2_STATUS NOT IN ('D') "	// Desdobramentos
 	cQuery += "AND E2_FILIAL = '" + (MV_PAR05) + "' AND E2_MULTNAT = '1' "
-	cQuery += "AND E2_ORIGEM <> 'FINA290'"	//Regra para não apresentar o título gerado por aglutinação, não gerando duplicidade
+	cQuery += "AND E2_FATURA <> 'NOTFAT'"	//Regra para não apresentar o título gerado por aglutinação, não gerando duplicidade
 	IF MV_PAR08 == 1
 	cQuery += "ORDER BY NATUREZA, ENTRADA, NUMERO, PREFIXO, PARCELA "
 	ELSEIF MV_PAR08 == 2

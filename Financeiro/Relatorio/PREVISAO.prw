@@ -253,6 +253,7 @@ Static Function Relatorio()
 	cQuery += "E2_EMISSAO BETWEEN '" + DTOS(MV_PAR01) +  "' AND '" + DTOS(MV_PAR02) +  "' AND "
 	cQuery += "SE2010.E2_TIPO BETWEEN '" + (MV_PAR17) + "' AND '" + (MV_PAR18) + "' AND "
 	cQuery += "E2_BAIXA = '' AND "
+	cQuery += "E2_FATURA <> 'NOTFAT' AND "	//Regra para não apresentar o título gerado por aglutinação, não gerando duplicidade
 	cQuery += "E2_FLUXO <> 'N' AND "
 	cQuery += "SE2010.D_E_L_E_T_ <> '*' AND "
 	cQuery += "SA2010.D_E_L_E_T_ <> '*'  AND "
@@ -268,6 +269,7 @@ Static Function Relatorio()
 	cQuery += "SE2010.E2_FORNECE = SA2010.A2_COD AND "
 	cQuery += "SE2010.E2_LOJA = SA2010.A2_LOJA "
 	cQuery += "INNER JOIN SED010 ON "
+	cQuery += "E2_FATURA <> 'NOTFAT' AND "	//Regra para não apresentar o título gerado por aglutinação, não gerando duplicidade
 	cQuery += "E2_NATUREZ = ED_CODIGO "
 	cQuery += "WHERE "
 	cQuery += "SE2010.E2_FILIAL  = '" + xFilial("SE2") + "' AND "
@@ -283,6 +285,7 @@ Static Function Relatorio()
 	cQuery += "E2_EMISSAO BETWEEN '" + DTOS(MV_PAR01) +  "' AND '" + DTOS(MV_PAR02) +  "' AND "
 	cQuery += "SE2010.E2_TIPO BETWEEN '" + (MV_PAR17) + "' AND '" + (MV_PAR18) + "' AND "
 	cQuery += "E2_BAIXA >= '" + DTOS(MV_PAR28) + "' AND "
+	cQuery += "E2_FATURA <> 'NOTFAT' AND "	//Regra para não apresentar o título gerado por aglutinação, não gerando duplicidade
 	cQuery += "E2_FLUXO <> 'N' AND "
 	cQuery += "SE2010.D_E_L_E_T_ <> '*' AND "
 	cQuery += "SA2010.D_E_L_E_T_ <> '*'  AND "
@@ -315,6 +318,7 @@ Static Function Relatorio()
 	cQuery += "E2_BAIXA < '" + DTOS(MV_PAR28) + "' AND "
 	cQuery += "E2_BAIXA <> '' AND "
 	cQuery += "E2_SALDO  <> 0 AND "
+	cQuery += "E2_FATURA <> 'NOTFAT' AND "	//Regra para não apresentar o título gerado por aglutinação, não gerando duplicidade
 	cQuery += "E2_FLUXO <> 'N' AND "
 	cQuery += "SE2010.D_E_L_E_T_ <> '*' AND "
 	cQuery += "SA2010.D_E_L_E_T_ <> '*'  AND "
@@ -1396,6 +1400,7 @@ Static Function AbaFin()
 		cQuery += "E2_EMISSAO BETWEEN '" + DTOS(MV_PAR01) +  "' AND '" + DTOS(MV_PAR02) +  "' AND "
 		cQuery += "SE2010.E2_TIPO BETWEEN '" + (MV_PAR17) + "' AND '" + (MV_PAR18) + "' AND "
 		cQuery += "SE2010.E2_NATUREZ = '" + PREV->ZA6_NATURE + "' AND "
+		cQuery += "E2_FATURA <> 'NOTFAT' AND "	//Regra para não apresentar o título gerado por aglutinação, não gerando duplicidade
 		cQuery += "SE2010.E2_VENCREA = '" + PREV->ZA6_VENCRE + "' AND "
 		If !EMPTY(PREV->ZA6_FORNEC)
 			cQuery += "SE2010.E2_FORNECE = '" + PREV->ZA6_FORNEC + "' AND "
@@ -1422,6 +1427,7 @@ Static Function AbaFin()
 		cQuery += "E2_EMISSAO BETWEEN '" + DTOS(MV_PAR01) +  "' AND '" + DTOS(MV_PAR02) +  "' AND "
 		cQuery += "SE2010.E2_TIPO BETWEEN '" + (MV_PAR17) + "' AND '" + (MV_PAR18) + "' AND "
 		cQuery += "SE2010.E2_NATUREZ = '" + PREV->ZA6_NATURE + "' AND "
+		cQuery += "E2_FATURA <> 'NOTFAT' AND "	//Regra para não apresentar o título gerado por aglutinação, não gerando duplicidade
 		cQuery += "SE2010.E2_VENCREA = '" + PREV->ZA6_VENCRE + "' AND "
 		If !EMPTY(PREV->ZA6_FORNEC)
 			cQuery += "SE2010.E2_FORNECE = '" + PREV->ZA6_FORNEC + "' AND "
@@ -1519,6 +1525,7 @@ Static Function AbaFin()
 		cQuery += "SE2010.E2_TIPO BETWEEN '" + (MV_PAR17) + "' AND '" + (MV_PAR18) + "' AND "
 		cQuery += "SE2010.E2_NATUREZ = '" + PREV->ZA6_NATURE + "' AND "
 		cQuery += "SE2010.E2_BAIXA >= '" + DTOS(MV_PAR28) + "' AND "
+		cQuery += "E2_FATURA <> 'NOTFAT' AND "	//Regra para não apresentar o título gerado por aglutinação, não gerando duplicidade
 		cQuery += "SE2010.E2_FLUXO <> 'N' AND "
 		cQuery += "SE2010.E2_VENCREA BETWEEN '" + MV_PAR20 + MV_PAR19 + "01" + "' AND '" + MV_PAR20 + MV_PAR19 + "31" + "' AND "
 		If !EMPTY(PREV->ZA6_FORNEC)
@@ -1547,6 +1554,7 @@ Static Function AbaFin()
 		cQuery += "SE2010.E2_NATUREZ = '" + PREV->ZA6_NATURE + "' AND "
 		cQuery += "SE2010.E2_BAIXA = '' AND "
 		cQuery += "SE2010.E2_FLUXO <> 'N' AND "
+		cQuery += "E2_FATURA <> 'NOTFAT' AND "	//Regra para não apresentar o título gerado por aglutinação, não gerando duplicidade
 		cQuery += "SE2010.E2_VENCREA BETWEEN '" + MV_PAR20 + MV_PAR19 + "01" + "' AND '" + MV_PAR20 + MV_PAR19 + "31" + "' AND "
 		If !EMPTY(PREV->ZA6_FORNEC)
 			cQuery += "SE2010.E2_FORNECE = '" + PREV->ZA6_FORNEC + "' AND "
