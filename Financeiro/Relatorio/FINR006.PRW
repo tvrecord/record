@@ -15,15 +15,15 @@
 
 User Function FINR006()
 
-	Private _cPerg    := "FINR006A"
+	Private _cPerg    	:= "FINR006A"
 	Private oPrint
-	Private cSubTitle := ""
-	Private nPag      := 0
-	Private nLin      := 0
-	Private oFonte    := u_xFonte(10,,,,"Arial")
-	Private oFonteN   := u_xFonte(10,.T.,,,"Arial")
-	Private oFonte10  := u_xFonte(10,,,,"Arial")
-	Private oFonte10N := u_xFonte(10,.T.,,,"Arial")
+	Private cSubTitle 	:= ""
+	Private nPag      	:= 0
+	Private nLin      	:= 0
+	Private oFonte    	:= u_xFonte(10,,,,"Arial")
+	Private oFonteN   	:= u_xFonte(10,.T.,,,"Arial")
+	Private oFonte11   	:= u_xFonte(11,,,,"Arial")
+	Private oFonte11N  	:= u_xFonte(11,.T.,,,"Arial")
 
 	// Cria e abre a tela de pergunta
 	ValidPerg( _cPerg )
@@ -79,7 +79,7 @@ Static Function fProcPdf()
 	Private cFiltro2	:= ""
 
 	// Query para buscar as informações
-	cFiltro1	:= "% AND SE1010.E1_EMISSAO BETWEEN '"+DTOS(MV_PAR04)+"' AND '"+DTOS(MV_PAR05)+"' AND SE1010.E1_BAIXA BETWEEN '"+DTOS(MV_PAR06)+"' AND '"+DTOS(MV_PAR07)+"' AND SE1010.E1_VEND1 BETWEEN '"+(MV_PAR02)+"' AND '"+(MV_PAR03)+"' %"
+	cFiltro1	:= "% SE1010.E1_EMISSAO BETWEEN '"+DTOS(MV_PAR04)+"' AND '"+DTOS(MV_PAR05)+"' AND SE1010.E1_BAIXA BETWEEN '"+DTOS(MV_PAR06)+"' AND '"+DTOS(MV_PAR07)+"' AND SE1010.E1_VEND1 BETWEEN '"+(MV_PAR02)+"' AND '"+(MV_PAR03)+"' %"
 
 	// Busca os registros a serem impressos no relatório - BonIficação de volume
 	BeginSql Alias cAlias
@@ -102,7 +102,7 @@ Static Function fProcPdf()
 		INNER JOIN SED010 // Tabela de Natureza - Busco dados da natureza
 		ON E1_NATUREZ = ED_CODIGO AND SED010.D_E_L_E_T_ <> '*'
 		WHERE SE1010.E1_FILIAL = '01' AND SE1010.D_E_L_E_T_ <> '*' AND SE1010.E1_NATUREZ <> '1101006'
-		%exp:cFiltro1%
+		AND %exp:cFiltro1%
 		AND ( E1_CLIENTE <> '001689' OR E1_VEND1 <> '000219' )
 		ORDER BY E1_VEND1, MESFAT, E1_CLIENTE, E1_LOJA, E1_NUM, E1_PARCELA, E1_VENCTO
 
@@ -217,7 +217,7 @@ Static Function fProcPdf()
 
 				// Query para buscar as informações
 				cFiltro2	:= "% AND SUBSTRING(SE1010.E1_EMISSAO,1,6) = '"+(cAlias)->MESFAT+"' AND SE1010.E1_BAIXA BETWEEN '"+dIniBxA+"' AND '"+dFimBxA+"' AND SE1010.E1_VEND1 = '"+(cAlias)->E1_VEND1+"' %"
-				FatMesAnt()
+				//FatMesAnt()
 
 			EndIf //Fim do controle do mês anterior
 
@@ -266,7 +266,7 @@ Static Function fProcPdf()
 			oPrint:Say(nLin,270, SUBSTRING(cMesFat,5,2)+"/"+SUBSTRING(cMesFat,1,4)		,oFonteN)
 			oPrint:Say(nLin,395, PADL(transform(nMesFat,"@E 999,999,999.99"),14) 		,oFonteN)
 			oPrint:Say(nLin,475, PADL(transform(nPerc,"@E 99.99%"),6)					,oFonteN)
-			oPrint:Say(nLin,530, PADL(transform(nMesBV,"@E 999,999,999.99"),14)		,oFonteN)
+			oPrint:Say(nLin,530, PADL(transform(nMesBV,"@E 999,999,999.99"),14)			,oFonteN)
 
 			nMesFat	:= 0
 			nMesBV	:= 0
@@ -300,13 +300,11 @@ Static Function fProcPdf()
 	(cAlias)->(DbCloseArea())
 
 	//Impressão do total de todas as praças
-	nLin    += REL_LIN_RED
-	oPrint:Say(nLin,020,"TOTAL BONIfICAÇÃO VOLUME: "							,oFonteN)
-	oPrint:Say(nLin,395, PADL(Transform(nTotFat1, "@E 999,999,999.99"),14)		,oFonteN)
-	oPrint:Say(nLin,530, PADL(transform(nTotBV1,"@E 999,999,999.99"),14) 		,oFonteN)
-	nLin 	+= REL_LIN_RED
-	oPrint:Line(nLin,REL_LEFT,nLin,REL_RIGHT,CLR_HGRAY,"-9")
-	nLin 	+= (REL_LIN_STD * 2)
+	nLin    -= REL_LIN_RED
+	oPrint:Say(nLin,020,"TOTAL BONIFICAÇÃO VOLUME: "							,oFonte11N)
+	oPrint:Say(nLin,395, PADL(Transform(nTotFat1, "@E 999,999,999.99"),14)		,oFonte11N)
+	oPrint:Say(nLin,530, PADL(transform(nTotBV1,"@E 999,999,999.99"),14) 		,oFonte11N)
+	nLin 	+= (REL_LIN_TOT * 2)
 
 	nFatAge := 0
 	nBVAge 	:= 0
@@ -323,10 +321,15 @@ Static Function fProcPdf()
 		INNER JOIN SA3010 ON E1_VEND1 = A3_COD AND SA3010.D_E_L_E_T_ = ''
 		INNER JOIN SED010 ON E1_NATUREZ = ED_CODIGO AND SED010.D_E_L_E_T_ = ''
 		WHERE SE1010.D_E_L_E_T_ = '' AND E1_COMIS1 > 0
-		%exp:cFiltro1%
+		AND (%exp:cFiltro1% OR E1_NUM = '038071') // Coloque sua exceção aqui
 		ORDER BY A3_COD, MESFAT
 
 	EndSql //FINALIZO A MINHA QUERY
+
+	oPrint:Say(nLin,020, "COMISSÃO DE AGÊNCIA: "						,oFonte11N)
+	nLin 	+= REL_LIN_RED
+	oPrint:Line(nLin,REL_LEFT,nLin,REL_RIGHT,CLR_HGRAY,"-9")
+	nLin 	+= REL_LIN_STD
 
 			DBSelectArea(cAlias1)
 			DBGotop()
@@ -336,6 +339,7 @@ Static Function fProcPdf()
 			u_PXRODAPE(@oPrint, "FINR006.PRW", "")
 			oPrint:EndPage()
 			ImpProxPag() //Monta cabeçario da proxima pagina
+			nLin 	+= REL_LIN_RED
 			EndIf
 
 			If Empty(SUBSTR((cAlias1)->NOMECLI, 35, 1))
@@ -387,42 +391,44 @@ Static Function fProcPdf()
 
 			EndDo
 
-			nLin += REL_LIN_RED
+			nLin -= REL_LIN_RED
 
-			oPrint:Say(nLin, 020, "TOTAL COMISSÃO DE AGÊNCIA: ", oFonteN)
-			oPrint:Say(nLin,395,PADL(Transform(nTotFat2, "@E 999,999,999.99"), 14),oFonteN)
-			oPrint:Say(nLin,530,PADL(transform(nTotBV2, "@E 999,999,999.99"), 14),oFonteN)
+			oPrint:Say(nLin,020, "TOTAL COMISSÃO DE AGÊNCIA: "						,oFonte11N)
+			oPrint:Say(nLin,395,PADL(Transform(nTotFat2, "@E 999,999,999.99"), 14)	,oFonte11N)
+			oPrint:Say(nLin,530,PADL(transform(nTotBV2, "@E 999,999,999.99"), 14)	,oFonte11N)
 
-			nLin += REL_LIN_RED
-			oPrint:Line(nLin, REL_LEFT, nLin, REL_RIGHT, CLR_HGRAY, "-9")
-			nLin += (REL_LIN_STD * 3)
+			nLin += REL_LIN_STD
+			oPrint:Say(nLin,020, "TOTAL: "														,oFonte11N)
+			oPrint:Say(nLin,395,PADL(Transform(nTotFat1 + nTotFat2, "@E 999,999,999.99"), 14)	,oFonte11N)
+			oPrint:Say(nLin,530,PADL(transform(nTotBV1 + nTotBV2, "@E 999,999,999.99"), 14)		,oFonte11N)
+			nLin += (REL_LIN_TOT * 3)
 
 			DBSelectArea(cAlias1)
 			DBCloseArea() //Imprime linha das assinaturas
 
 			If !Empty(MV_PAR08).and.PswSeek(MV_PAR08,.T.)
-			oPrint:Say(nLin, 024, "_________________________", oFonte10N)
+			oPrint:Say(nLin, 024, "_________________________", oFonteN)
 			aUsuario := PswRet() // Retorna vetor com informações do usuário
 			cAssin1  := Alltrim(aUsuario[1][4])
 			cCargo1  := Alltrim(aUsuario[1][13])
 			EndIf
 
 			If !Empty(MV_PAR09).and.PswSeek(MV_PAR09,.T.)
-			oPrint:Say(nLin, 175, "_________________________", oFonte10N)
+			oPrint:Say(nLin, 175, "_________________________", oFonteN)
 			aUsuario := PswRet() // Retorna vetor com informações do usuário
 			cAssin2  := Alltrim(aUsuario[1][4])
 			cCargo2  := Alltrim(aUsuario[1][13])
 			EndIf
 
 			If !Empty(MV_PAR10).and.PswSeek(MV_PAR10,.T.)
-			oPrint:Say(nLin, 318, "_________________________", oFonte10N)
+			oPrint:Say(nLin, 318, "_________________________", oFonteN)
 			aUsuario := PswRet() // Retorna vetor com informações do usuário
 			cAssin3  := Alltrim(aUsuario[1][4])
 			cCargo3  := Alltrim(aUsuario[1][13])
 			EndIf
 
 			If !Empty(MV_PAR11).and.PswSeek(MV_PAR11,.T.)
-			oPrint:Say(nLin, 470, "_________________________", oFonte10N)
+			oPrint:Say(nLin, 470, "_________________________", oFonteN)
 			aUsuario := PswRet() // Retorna vetor com informações do usuário
 			cAssin4  := Alltrim(aUsuario[1][4])
 			cCargo4  := Alltrim(aUsuario[1][13])
@@ -431,37 +437,37 @@ Static Function fProcPdf()
 			nLin += REL_LIN_STD //Imprime o nome das assinaturas
 
 			If !Empty(cAssin1)
-			oPrint:Say(nLin, 024, PADC(cAssin1, 40), oFonte10)
+			oPrint:Say(nLin, 024, PADC(cAssin1, 40), oFonte)
 			EndIf
 
 			If !Empty(cAssin2)
-			oPrint:Say(nLin, 175, PADC(cAssin2, 40), oFonte10)
+			oPrint:Say(nLin, 175, PADC(cAssin2, 40), oFonte)
 			EndIf
 
 			If !Empty(cAssin3)
-			oPrint:Say(nLin, 318, PADC(cAssin3, 40), oFonte10)
+			oPrint:Say(nLin, 318, PADC(cAssin3, 40), oFonte)
 			EndIf
 
 			If !Empty(cAssin4)
-			oPrint:Say(nLin, 470, PADC(cAssin4, 40), oFonte10)
+			oPrint:Say(nLin, 470, PADC(cAssin4, 40), oFonte)
 			EndIf
 
 			nLin += REL_LIN_STD
 
 			If !Empty(cCargo1)
-			oPrint:Say(nLin, 024, PADC(cCargo1, 33), oFonte10N)
+			oPrint:Say(nLin, 024, PADC(cCargo1, 33), oFonteN)
 			EndIf
 
 			If !Empty(cCargo2)
-			oPrint:Say(nLin, 175, PADC(cCargo2, 33), oFonte10N)
+			oPrint:Say(nLin, 175, PADC(cCargo2, 33), oFonteN)
 			EndIf
 
 			If !Empty(cCargo3)
-			oPrint:Say(nLin, 318, PADC(cCargo3, 33), oFonte10N)
+			oPrint:Say(nLin, 318, PADC(cCargo3, 33), oFonteN)
 			EndIf
 
 			If !Empty(cCargo4)
-			oPrint:Say(nLin, 470, PADC(cCargo4, 33), oFonte10N)
+			oPrint:Say(nLin, 470, PADC(cCargo4, 33), oFonteN)
 			EndIf
 
 			u_PXRODAPE(@oPrint, "FINR006.PRW", "")
@@ -489,7 +495,7 @@ Static Function fProcPdf()
 		INNER JOIN SED010 // Tabela de Natureza - Busco dados da natureza
 		ON E1_NATUREZ = ED_CODIGO AND SED010.D_E_L_E_T_ <> '*'
 		WHERE SE1010.E1_FILIAL = '01' AND SE1010.D_E_L_E_T_ <> '*' AND SE1010.E1_NATUREZ <> '1101006'
-		%exp:cFiltro1%
+		AND %exp:cFiltro1%
 		AND (E1_CLIENTE <> '001689' OR E1_VEND1 <> '000219')
 		ORDER BY E1_VEND1, MESFAT, E1_CLIENTE, E1_LOJA, E1_NUM, E1_PARCELA, E1_VENCTO
 		EndSql
@@ -550,7 +556,7 @@ Static Function ImpProxPag()
 	nPag++
 	oPrint:StartPage()
 	cSubTitle := "PAGAMENTO DIA " + DTOC(MV_PAR01)
-	nLin := u_PXCABECA(@oPrint, "BONIfICAÇÃO DE VOLUME BSB E COMISSÃO DE AGÊNCIA", cSubTitle  , nPag)
+	nLin := u_PXCABECA(@oPrint, "BONIFICAÇÃO DE VOLUME BSB E COMISSÃO DE AGÊNCIA", cSubTitle  , nPag)
 
 	oPrint:Say(nLin,020, "CLIENTE"		,oFonteN)
 	oPrint:Say(nLin,200, "NF CLIENTE"	,oFonteN)
