@@ -120,7 +120,8 @@ Static Function fProcPdf()
 		cImpTot := Alltrim((cTmp1)->ZAF_IMPTOT)
 		//Usuario responsavel pela assinatura
 		If Empty(cUsuario)
-			cUsuario	:= Substr(Embaralha((cTmp1)->ZAG_USERGI,1),3,6)
+			//cUsuario	:= Substr(Embaralha((cTmp1)->ZAG_USERGI,1),3,6)
+			cUsuario	:= RetCodUsr()
 		EndIf
 
 		// Atualiza regua de processamento
@@ -227,7 +228,8 @@ Static Function GetData(cPPeriodo,cPPracaDe,cPPracaAte,cPRpDe,cPRpAte)
 	// Busca os registros a serem impressos no relatório
 	BeginSql Alias cTmp1
 
-		SELECT ZAG_PRACA, ZAG_NUMRP, ZAG_USERGI, ZAF_CODIGO, ZAF_DESCRI, ZAF_CGC, ZAF_IMPTOT,
+		//Rafael França - DISTINCT - Colocado para evitar duplicidade
+		SELECT DISTINCT ZAG_PRACA, ZAG_NUMRP, ZAF_CODIGO, ZAF_DESCRI, ZAF_CGC, ZAF_IMPTOT,
 		ZAH_VLCALC, ZAH_REPCOM, ZAH_AGENCI, ZAH_CLIENT, ZAH_VLRAT,
 		F2_DOC, F2_EMISSAO, E1_BAIXA, E2_NUM, E2_VALOR, E2_EMISSAO, E2_VENCTO
 		FROM %table:ZAG% AS ZAG
@@ -272,7 +274,7 @@ Static Function GetData(cPPeriodo,cPPracaDe,cPPracaAte,cPRpDe,cPRpAte)
 			AND E2_XNUMRP = ZAG_NUMRP
 			//AND E2_EMISSAO BETWEEN '' AND %Exp:cDataFin%
 			//AND E2_BAIXA = ''
-			AND (E2_VALOR = ZAH_VLRAT OR E2_XNUMRP IN ('234777','235080','235983','235000'))
+			AND (E2_VALOR = ZAH_VLRAT OR E2_XNUMRP IN ('234777','235080','235000'))
 			AND SE2.D_E_L_E_T_ = ''
 			AND E2_VENCTO BETWEEN %Exp:cDataIni% AND %Exp:cDataFin%
 		WHERE
@@ -312,13 +314,13 @@ Static Function ValidPerg(cPerg)
 	SX1->(DbSetOrder(1))
 	cPerg := PADR(cPerg,10)
 	//          Grupo Ordem Desc Por               Desc Espa   Desc Ingl  Variavel  Tipo  Tamanho  Decimal  PreSel  GSC  Valid   Var01       Def01     DefSpa01  DefEng01  CNT01  Var02  Def02     DefSpa02  DefEng02  CNT02  Var03  Def03  DefEsp03  DefEng03  CNT03     Var04  Def04  DefEsp04  DefEng04  CNT04  Var05  Def05  DefEsp05  DefEng05  CNT05  F3        PYME  GRPSXG   HELP  PICTURE  IDFIL
-	aAdd(aRegs,{cPerg,"01", "Da Praça:"			 	,"","","mv_ch01","C",03,00,0,"G","","MV_PAR01","","","","","","","","","","","","","","","","","","","","","","","","","ZAF"})
-	aAdd(aRegs,{cPerg,"02", "Ate Praça:"		 	,"","","mv_ch02","C",03,00,0,"G","","MV_PAR02","","","","","","","","","","","","","","","","","","","","","","","","","ZAF"})
-	aAdd(aRegs,{cPerg,"03", "Do Nº RP:"			 	,"","","mv_ch03","C",06,00,0,"G","","MV_PAR03","","","","","","","","","","","","","","","","","","","","","","","","",""})
-	aAdd(aRegs,{cPerg,"04", "Ate Nº RP:"		 	,"","","mv_ch04","C",06,00,0,"G","","MV_PAR04","","","","","","","","","","","","","","","","","","","","","","","","",""})
-	aAdd(aRegs,{cPerg,"05", "Destino do(s) Arq.:"	,"","","mv_ch05","C",99,00,0,"G","","MV_PAR05","","","","","","","","","","","","","","","","","","","","","","","","",""})
-	aAdd(aRegs,{cPerg,"06", "Do Vencimento:.:"	 	,"","","mv_ch06","D",08,00,0,"G","","MV_PAR06","","","","","","","","","","","","","","","","","","","","","","","","",""})
-	aAdd(aRegs,{cPerg,"07", "Até o Vencimento:.:"	,"","","mv_ch07","D",08,00,0,"G","","MV_PAR07","","","","","","","","","","","","","","","","","","","","","","","","",""})
+	aAdd(aRegs,{cPerg,"01","Da Praça:"			 	,"","","mv_ch01","C",03,00,0,"G","","MV_PAR01","","","","","","","","","","","","","","","","","","","","","","","","","ZAF"})
+	aAdd(aRegs,{cPerg,"02","Ate Praça:"			 	,"","","mv_ch02","C",03,00,0,"G","","MV_PAR02","","","","","","","","","","","","","","","","","","","","","","","","","ZAF"})
+	aAdd(aRegs,{cPerg,"03","Do Nº RP:"			 	,"","","mv_ch03","C",06,00,0,"G","","MV_PAR03","","","","","","","","","","","","","","","","","","","","","","","","",""})
+	aAdd(aRegs,{cPerg,"04","Ate Nº RP:"			 	,"","","mv_ch04","C",06,00,0,"G","","MV_PAR04","","","","","","","","","","","","","","","","","","","","","","","","",""})
+	aAdd(aRegs,{cPerg,"05","Destino do(s) Arq.:"	,"","","mv_ch05","C",99,00,0,"G","","MV_PAR05","","","","","","","","","","","","","","","","","","","","","","","","",""})
+	aAdd(aRegs,{cPerg,"06","Do Vencimento:.:"	 	,"","","mv_ch06","D",08,00,0,"G","","MV_PAR06","","","","","","","","","","","","","","","","","","","","","","","","",""})
+	aAdd(aRegs,{cPerg,"07","Até o Vencimento:.:"	,"","","mv_ch07","D",08,00,0,"G","","MV_PAR07","","","","","","","","","","","","","","","","","","","","","","","","",""})
 	aAdd(aRegs,{cPerg,"08","Assinatura 1:" 		 	,"","","mv_ch08","C",06,00,0,"G","","mv_par08","","","","","","","","","","","","","","","","","","","","","","","","","USR"})
 	aAdd(aRegs,{cPerg,"09","Assinatura 2:"		 	,"","","mv_ch09","C",06,00,0,"G","","mv_par09","","","","","","","","","","","","","","","","","","","","","","","","","USR"})
 	aAdd(aRegs,{cPerg,"10","Vencimento:"  		 	,"","","mv_ch10","D",08,00,0,"G","","MV_PAR10","","","","","","","","","","","","","","","","","","","","","","","","",""})
