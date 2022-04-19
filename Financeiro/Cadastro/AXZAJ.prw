@@ -11,32 +11,30 @@ Objetivo: Cadastro de Comissão
 
 STATIC cTitulo := "Cadastro de Comissão"
 
-
 /*/{Protheus.doc} AXZAJ
-
     Cadastro de Comissão
-
     @author  Bruno Alves de Oliveira
     @table   ZAJ,ZAK,ZAL
     @since   27-03-2022
 /*/
+
 User Function AXZAJ()
+
 	Local aArea   := GetArea()
 	Local oBrowse
 
 	//Instânciando FWMBrowse - Somente com dicionário de dados
 	oBrowse := FWMBrowse():New()
-
 	//Setando a tabela de cadastro de Autor/Interprete
 	oBrowse:SetAlias("ZAJ")
 	//Setando a descrição da rotina
 	oBrowse:SetDescription(cTitulo)
 
-
 	//Ativa a Browse
 	oBrowse:Activate()
 
 	RestArea(aArea)
+
 Return Nil
 /*---------------------------------------------------------------------*
  | Func:  MenuDef                                                      |
@@ -46,6 +44,7 @@ Return Nil
  | Obs.:  /                                                            |
 *---------------------------------------------------------------------*/
 Static Function MenuDef()
+
 	Local aRot := {}
 
 	//Adicionando opções
@@ -53,7 +52,8 @@ Static Function MenuDef()
 	ADD OPTION aRot TITLE 'Incluir'    ACTION 'VIEWDEF.AXZAJ' OPERATION MODEL_OPERATION_INSERT ACCESS 0 //OPERATION 3
 	ADD OPTION aRot TITLE 'Alterar'    ACTION 'VIEWDEF.AXZAJ' OPERATION MODEL_OPERATION_UPDATE ACCESS 0 //OPERATION 4
 	ADD OPTION aRot TITLE 'Excluir'    ACTION 'VIEWDEF.AXZAJ' OPERATION MODEL_OPERATION_DELETE ACCESS 0 //OPERATION 5
-	ADD OPTION aRot TITLE 'Imprimir'   ACTION 'U_Imprimir'      OPERATION 9 ACCESS 0 //OPERATION 5
+	ADD OPTION aRot TITLE 'Imprimir'   ACTION 'U_FINR008'    OPERATION 9 ACCESS 0 //OPERATION 5
+
 Return aRot
 /*---------------------------------------------------------------------*
  | Func:  ModelDef                                                     |
@@ -62,7 +62,9 @@ Return aRot
  | Desc:  Criação do modelo de dados MVC                               |
  | Obs.:  /                                                            |
 *---------------------------------------------------------------------*/
+
 Static Function ModelDef()
+
 	Local oModel 		:= Nil
 	Local oStPai 		:= FWFormStruct(1, 'ZAJ')
 	Local oStFil1 		:= FWFormStruct( 1, 'ZAK',{ |cCampo| Alltrim(cCampo) $ 'ZAK_ANO/ZAK_GRPNAT/ZAK_TPSUB/ZAK_PERC' } ,/*lViewUsado*/ )
@@ -105,9 +107,8 @@ Static Function ModelDef()
 	oModel:AddCalc('TOTAL', 'ZAKDETAIL', 'ZALDETAIL', 'ZAL_ATCOLE'   , 'XX_ATCOLE'     , 'SUM'        , , , "Atingido Coletiva" )
 	oModel:AddCalc('TOTAL', 'ZAKDETAIL', 'ZALDETAIL', 'ZAL_PERCIN'   , 'XX_PERCIN'     , 'AVERAGE'    , , , "Média Porcentagem Individual" )
 
-
-
 Return oModel
+
 /*---------------------------------------------------------------------*
  | Func:  ViewDef                                                      |
  | Autor: Daniel Atilio                                                |
@@ -116,6 +117,7 @@ Return oModel
  | Obs.:  /                                                            |
 *---------------------------------------------------------------------*/
 Static Function ViewDef()
+
 	Local oView		:= Nil
 	Local oModel	:= FWLoadModel('AXZAJ')
 	Local oStPai	:= FWFormStruct(2, 'ZAJ')
@@ -162,15 +164,10 @@ Static Function ViewDef()
 
 Return oView
 
-
-
 /*/{Protheus.doc} Imprimir
-
     Rotina responsavel por imprimir o relatório comissão
-
     @author  Bruno Alves de OLiveira
     @since   27-03-2022
-/*/
 
 User Function Imprimir()
 
@@ -178,5 +175,6 @@ User Function Imprimir()
 			"<b>Favor verificar</b>","Imprimir")
 
 
-
 Return
+
+/*/
