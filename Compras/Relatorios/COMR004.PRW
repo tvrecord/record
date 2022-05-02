@@ -7,24 +7,25 @@
 
 User Function COMR004()
 
-Private cAlias 		:= GetNextAlias() //Declarei meu ALIAS
-Private aArea        	:= GetArea()
-Private oFWMsExcel
-Private oExcel
-Private cArquivo    	:= GetTempPath()+'COMR004.xml'
+Local cAlias 		:= GetNextAlias() //Declarei meu ALIAS
+Local aArea        	:= GetArea()
+Local oFWMsExcel
+Local oExcel
+Local cArquivo    	:= GetTempPath()+'COMR004.xml'
+Local cNomeTabela	:= UPPER("Itens em Estoque por Periodo")
+Local cNomePlan		:= "Saldos SB2"
+Local cFiltro		:= ""
+Local cDescricao	:= ""
+Local nSaldo		:= 0
+Local cProduto		:= ""
+Local cArmazem		:= ""
+Local cCodigo 		:= ""
+Local cDescri 		:= ""
+Local nDias			:= 0
+Local nEst        	:= 0
+Local nVlEst		:= 0
+
 Private cPerg  		:= "COMR004"
-Private cNomeTabela	:= UPPER("Itens em Estoque por Periodo")
-Private cNomePlan	:= "Saldos SB2"
-Private cFiltro		:= ""
-Private cDescricao	:= ""
-Private nSaldo		:= 0
-Private cProduto	:= ""
-Private cLocal		:= ""
-Private cCodigo 	:= ""
-Private cDescri 	:= ""
-Private nDias		:= 0
-Private nEst        := 0
-Private nVlEst		:= 0
 
 	ValidPerg(cPerg) //INICIA A STATIC FUNCTION PARA CRIAÇÃO DAS PERGUNTAS
 
@@ -34,11 +35,11 @@ Private nVlEst		:= 0
 		Return
 	EndIf
 
-If !ApOleClient("MsExcel")
-	MsgStop("Microsoft Excel nao instalado.")  //"Microsoft Excel nao instalado."
-	RestArea(aArea)
-	Return
-EndIf
+	If !ApOleClient("MsExcel")
+		MsgStop("Microsoft Excel nao instalado.")  //"Microsoft Excel nao instalado."
+		RestArea(aArea)
+		Return
+	EndIf
 
 //TRATO AS PERGUNTAS PARA USO NOS FILTROS
 cFiltro		:= "% AND B2_COD BETWEEN '"+(MV_PAR01)+"' AND '"+(MV_PAR02)+"' AND D1_DTDIGIT BETWEEN '"+DTOS(MV_PAR03)+"' AND '"+DTOS(MV_PAR04)+"' AND Y3_COD BETWEEN '"+(MV_PAR05)+"' AND '"+(MV_PAR06)+"' %"
@@ -86,27 +87,27 @@ EndSql //FINALIZO A MINHA QUERY
 
 While !(cAlias)->(Eof())
 
-nDias := dDatabase - STOD(DT_ENTRADA)
+nDias := dDatabase - STOD((cAlias)->DT_ENTRADA)
 
 If !Empty(PEDIDO)
-	IF !EMPTY(Posicione("SZL",2,xFilial("SZL") + PEDIDO,"ZL_OBS1"))
-		cDescricao	:= MemoLine(Posicione("SZL",2,xFilial("SZL") + PEDIDO,"ZL_OBS1"),100,1)
-		IF !EMPTY(ALLTRIM(SUBSTR(Posicione("SZL",2,xFilial("SZL") + PEDIDO,"ZL_OBS1"),101,100)))
-			cDescricao	+= MemoLine(Posicione("SZL",2,xFilial("SZL") + PEDIDO,"ZL_OBS1"),100,2)
-			IF !EMPTY(ALLTRIM(SUBSTR(Posicione("SZL",2,xFilial("SZL") + PEDIDO,"ZL_OBS1"),201,100)))
-				cDescricao	+= MemoLine(Posicione("SZL",2,xFilial("SZL") + PEDIDO,"ZL_OBS1"),100,3)
+	IF !EMPTY(Posicione("SZL",2,xFilial("SZL") + (cAlias)->PEDIDO,"ZL_OBS1"))
+		cDescricao	:= MemoLine(Posicione("SZL",2,xFilial("SZL") + (cAlias)->PEDIDO,"ZL_OBS1"),100,1)
+		IF !EMPTY(ALLTRIM(SUBSTR(Posicione("SZL",2,xFilial("SZL") + (cAlias)->PEDIDO,"ZL_OBS1"),101,100)))
+			cDescricao	+= MemoLine(Posicione("SZL",2,xFilial("SZL") + (cAlias)->PEDIDO,"ZL_OBS1"),100,2)
+			IF !EMPTY(ALLTRIM(SUBSTR(Posicione("SZL",2,xFilial("SZL") + (cAlias)->PEDIDO,"ZL_OBS1"),201,100)))
+				cDescricao	+= MemoLine(Posicione("SZL",2,xFilial("SZL") + (cAlias)->PEDIDO,"ZL_OBS1"),100,3)
 			ENDIF
 		ENDIF
 	ENDIF
 EndIf
 
-If cProduto <> CODIGO .OR. cLocal <> LOCAL
+If cProduto <> CODIGO .OR. cArmazem <> (cAlias)->LOCAL
 nSaldo 	:= 0
-nEst 	:= ESTOQUE
-nVlEst	:= VL_ESTOQUE
+nEst 	:= (cAlias)->ESTOQUE
+nVlEst	:= (cAlias)->VL_ESTOQUE
 EndIf
 
-If nSaldo < ESTOQUE
+If nSaldo < (cAlias)->ESTOQUE
 
 /*
 If QTD_NF >= ESTOQUE
@@ -121,23 +122,24 @@ nVlEst	:= (ESTOQUE - nSaldo) * (VL_ESTOQUE/ESTOQUE)
 EndIf
 */
 
-If cCodigo <> CODIGO
-cCodigo := CODIGO
-cDescri := DESC_PROD
-Else
-cCodigo := ""
-cDescri := ""
-EndIf
+//If cCodigo <> CODIGO
+cCodigo := (cAlias)->CODIGO
+cDescri := (cAlias)->DESC_PROD
+//Else
+//cCodigo := ""
+//cDescri := ""
+//EndIf
 
-    oFWMsExcel:AddRow(UNI_REQ,DESC_UNID, cNomePlan,cNomeTabela,{cCodigo,cDescri,LOCAL,NOTA_FISCAL,SERIE,FORNECEDOR,DTOC(STOD(DT_ENTRADA)),QTD_NF,nEst,nVlEst,cValToChar(nDias),PEDIDO,ALLTRIM(UPPER(cDescricao))})
+    oFWMsExcel:AddRow(cNomePlan,cNomeTabela,{(cAlias)->UNI_REQ,(cAlias)->DESC_UNID,cCodigo,cDescri,(cAlias)->LOCAL,(cAlias)->NOTA_FISCAL,(cAlias)->SERIE,;
+	(cAlias)->FORNECEDOR,DTOC(STOD((cAlias)->DT_ENTRADA)),(cAlias)->QTD_NF,nEst,nVlEst,cValToChar(nDias),(cAlias)->PEDIDO,ALLTRIM(UPPER(cDescricao))})
 
 EndIf
 
 nEst 		:= 0
 nVlEst		:= 0
-nSaldo 		+= QTD_NF
-cProduto	:= CODIGO
-cLocal 		:= LOCAL
+nSaldo 		+= (cAlias)->QTD_NF
+cProduto	:= (cAlias)->CODIGO
+cArmazem 	:= (cAlias)->LOCAL
 cDescricao	:= ""
 
 	(cAlias)->(dbSkip()) //PASSAR PARA O PRÓXIMO REGISTRO DA MINHA QUERY
@@ -178,7 +180,7 @@ Static Function ValidPerg(cPerg)
 	AADD(aRegs,{cPerg,"06","Até o Departamento:	","","","mv_ch06","C",05,0,0,"G","","mv_par06","","","","","","","","","","","","","","","","","","","","","","","","","SY3"})
 
 	For i:=1 to Len(aRegs)
-		If !dbSeek(cPerg+aRegs[i,2])
+		If !dbSeek(PADR(cPerg,10)+aRegs[i,2])
 			RecLock("SX1",.T.)
 			For j:=1 to FCount()
 				If j <= Len(aRegs[i])
