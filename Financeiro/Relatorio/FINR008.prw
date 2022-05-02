@@ -156,6 +156,7 @@ Static Function fProcPdf()
 		, SUM(E1_VALOR) AS VL_BRUTO, SUM(E1_VALOR * E1_COMIS1 / 100) AS COMISSAO
 		, SUM(CASE WHEN E1_VEND2 = A3_COD THEN E1_VALOR - (E1_VALOR * E1_COMIS1 / 100) ELSE 0 END) AS VL_IND
 		FROM %table:SA3%
+		INNER JOIN %table:ZAJ% ON A3_COD = ZAJ_VEND AND %table:ZAJ%.D_E_L_E_T_ = ''
 		INNER JOIN %table:ZAM% ON A3_COD = ZAM_VEND AND %table:ZAM%.D_E_L_E_T_ = ''
 		INNER JOIN %table:SED% ON %table:SED%.D_E_L_E_T_ = '' AND ED_NATCOM <> '' AND ED_NATCOM = ZAM_GRPNAT
 		INNER JOIN %table:SE1% ON %table:SE1%.D_E_L_E_T_ = '' AND E1_NATUREZ = ED_CODIGO AND E1_MULTNAT <> '1'
@@ -170,6 +171,7 @@ Static Function fProcPdf()
 		, SUM(EV_VALOR) AS VL_BRUTO, SUM(EV_VALOR * E1_COMIS1 / 100) AS COMISSAO
 		, SUM(CASE WHEN E1_VEND2 = A3_COD THEN EV_VALOR - (EV_VALOR * E1_COMIS1 / 100) ELSE 0 END) AS VL_IND
 		FROM %table:SA3%
+		INNER JOIN %table:ZAJ% ON A3_COD = ZAJ_VEND AND %table:ZAJ%.D_E_L_E_T_ = ''
 		INNER JOIN %table:ZAM% ON A3_COD = ZAM_VEND AND %table:ZAM%.D_E_L_E_T_ = ''
 		INNER JOIN %table:SED% ON %table:SED%.D_E_L_E_T_ = '' AND ED_NATCOM <> '' AND ED_NATCOM = ZAM_GRPNAT
 		INNER JOIN %table:SEV% ON %table:SEV%.D_E_L_E_T_ = '' AND EV_NATUREZ = ED_CODIGO
@@ -524,7 +526,7 @@ Static Function ImpTotais()
 		oPrint:Say( nLin,300, PADR(Transform(20, "999%"),6)						,oFonteN)
 		oPrint:Say( nLin,520, PADR(Transform(nDescAge1, "@E 999,999,999.99"),14)	,oFonteN)
 
-		nLin += REL_LIN_TOT
+		nLin += REL_LIN_STD
 		oPrint:Say( nLin,020, "(-) BONIFICAÇÃO DE VOLUME:"		  				,oFonteN)
 		oPrint:Say( nLin,520, PADR(Transform(nDescBV1, "@E 999,999,999.99"),14)	,oFonteN)
 
