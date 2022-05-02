@@ -174,12 +174,12 @@ Static Function RunReport(Cabec1,Cabec2,Titulo,nLin)
 		aadd( _aCExcel , {"ACUMULO"		, "N" , 10 , 02 } ) //11
 		aadd( _aCExcel , {"ADICIONAL"	, "N" , 10 , 02 } ) //12
 		aadd( _aCExcel , {"GRATIFIC"	, "N" , 10 , 02 } ) //13
-		aadd( _aCExcel , {"TPHEXTRA"	, "C" , 30 , 00 } ) //14  - Incluído a pedido da Giselly (Pedro - 14/03/2022)
-		aadd( _aCExcel , {"HEXTRA"		, "N" , 10 , 02 } ) //15
-		aadd( _aCExcel , {"QUINQ"		, "N" , 10 , 02 } ) //16
-		aadd( _aCExcel , {"PERICU"		, "N" , 10 , 02 } ) //17
-		//aadd( _aCExcel , {"INSALU"	, "N" , 10 , 02 } ) //18 - Retirado a pedido da Giselly (Pedro - 14/03/2022)
-		aadd( _aCExcel , {"SALTOT"		, "N" , 10 , 02 } ) //18
+		aadd( _aCExcel , {"HEXTRA"		, "N" , 10 , 02 } ) //14
+		aadd( _aCExcel , {"QUINQ"		, "N" , 10 , 02 } ) //15
+		aadd( _aCExcel , {"PERICU"		, "N" , 10 , 02 } ) //16
+		//aadd( _aCExcel , {"INSALU"	, "N" , 10 , 02 } ) //17 - Retirado a pedido da Giselly (Pedro - 14/03/2022)
+		aadd( _aCExcel , {"SALTOT"		, "N" , 10 , 02 } ) //17
+		aadd( _aCExcel , {"TPHEXTRA"	, "C" , 30 , 00 } ) //18  - Incluído a pedido da Giselly (Pedro - 14/03/2022)
 		aadd( _aCExcel , {"OBS"			, "C" , 70 , 00 } ) //19
 		aadd( _aCExcel , {"DEPARTAMENTO", "C" , 15 , 00 } ) //20
 		aadd( _aCExcel , {"DESCRICAO"	, "C" , 70 , 00 } ) //21
@@ -201,13 +201,13 @@ Static Function RunReport(Cabec1,Cabec2,Titulo,nLin)
 		aadd( _aCExcel , {"ACUMULO"		, "N" , 10 , 02 } ) //11
 		aadd( _aCExcel , {"ADICIONAL"	, "N" , 10 , 02 } ) //12
 		aadd( _aCExcel , {"GRATIFIC"	, "N" , 10 , 02 } ) //13
-		aadd( _aCExcel , {"TPHEXTRA"	, "C" , 30 , 00 } ) //14 - Incluído a pedido da Giselly (Pedro - 14/03/2022)
-		aadd( _aCExcel , {"HEXTRA"		, "N" , 10 , 02 } ) //15
-		aadd( _aCExcel , {"DSREXTRA"	, "N" , 10 , 02 } ) //16
-		aadd( _aCExcel , {"QUINQ"		, "N" , 10 , 02 } ) //17
-		aadd( _aCExcel , {"PERICU"		, "N" , 10 , 02 } ) //18
-		//aadd( _aCExcel , {"INSALU"	, "N" , 10 , 02 } ) //19 - Retirado a pedido da Giselly (Pedro - 14/03/2022)
-		aadd( _aCExcel , {"SALTOT"		, "N" , 10 , 02 } ) //19
+		aadd( _aCExcel , {"HEXTRA"		, "N" , 10 , 02 } ) //14
+		aadd( _aCExcel , {"DSREXTRA"	, "N" , 10 , 02 } ) //15
+		aadd( _aCExcel , {"QUINQ"		, "N" , 10 , 02 } ) //16
+		aadd( _aCExcel , {"PERICU"		, "N" , 10 , 02 } ) //17
+		//aadd( _aCExcel , {"INSALU"	, "N" , 10 , 02 } ) //18 - Retirado a pedido da Giselly (Pedro - 14/03/2022)
+		aadd( _aCExcel , {"SALTOT"		, "N" , 10 , 02 } ) //18
+		aadd( _aCExcel , {"TPHEXTRA"	, "C" , 30 , 00 } ) //19 - Incluído a pedido da Giselly (Pedro - 14/03/2022)
 		aadd( _aCExcel , {"OBS"			, "C" , 70 , 00 } ) //20
 		aadd( _aCExcel , {"DEPARTAMENTO", "C" , 70 , 00 } ) //21
 		aadd( _aCExcel , {"DESCRICAO"	, "C" , 70 , 00 } ) //22
@@ -405,12 +405,12 @@ Static Function RunReport(Cabec1,Cabec2,Titulo,nLin)
 			_aItem[11]		:= nAcumulo
 			_aItem[12]		:= nAdicional
 			_aItem[13]		:= nGratificacao
-			_aItem[14]		:= cHoraExtra //Incluído a pedido da Giselly (Pedro - 14/03/2022)
-			_aItem[15]		:= nHorasExtras
-			_aItem[16]		:= nQuinquenio
-			_aItem[17]		:= nPericu
-			//_aItem[18]		:= nInsalu  - Retirado a pedido da Giselly (Pedro - 14/03/2022)
-			_aItem[18]		:= nSalTot
+			_aItem[14]		:= nHorasExtras
+			_aItem[15]		:= nQuinquenio
+			_aItem[16]		:= nPericu
+			//_aItem[17]		:= nInsalu  - Retirado a pedido da Giselly (Pedro - 14/03/2022)
+			_aItem[17]		:= nSalTot
+			_aItem[18]		:= cHoraExtra //Incluído a pedido da Giselly (Pedro - 14/03/2022)
 			_aItem[19]		:= cObs
 			_aItem[20]		:= Alltrim(TMP->RA_DEPTO)
 			_aItem[21]		:= Posicione("SQB",1,xFilial("SQB") + TMP->RA_DEPTO,"QB_DESCRIC")
@@ -466,13 +466,13 @@ Static Function RunReport(Cabec1,Cabec2,Titulo,nLin)
 			_aItem[11]		:= nAcumulo
 			_aItem[12]		:= nAdicional
 			_aItem[13]		:= nGratificacao
-			_aItem[14]		:= cHoraExtra //Incluído a pedido da Giselly (Pedro - 14/03/2022)
-			_aItem[15]		:= nHorasExtras
-			_aItem[16]		:= nDsrExtra
-			_aItem[17]		:= nQuinquenio
-			_aItem[18]		:= nPericu
-			//_aItem[19]		:= nInsalu  - Retirado a pedido da Giselly (Pedro - 14/03/2022)
-			_aItem[19]		:= nSalTot
+			_aItem[14]		:= nHorasExtras
+			_aItem[15]		:= nDsrExtra
+			_aItem[16]		:= nQuinquenio
+			_aItem[17]		:= nPericu
+			//_aItem[18]		:= nInsalu  - Retirado a pedido da Giselly (Pedro - 14/03/2022)
+			_aItem[18]		:= nSalTot
+			_aItem[19]		:= cHoraExtra //Incluído a pedido da Giselly (Pedro - 14/03/2022)
 			_aItem[20]		:= cObs
 			_aItem[21]		:= TMP->RA_DEPTO
 			_aItem[22]		:= Posicione("SQB",1,xFilial("SQB") + TMP->RA_DEPTO,"QB_DESCRIC")
