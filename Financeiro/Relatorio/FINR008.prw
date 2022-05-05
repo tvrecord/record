@@ -415,6 +415,12 @@ Static Function CalcDesc()
 
 	(cAlias3)->(DbCloseArea())
 
+	//Calculo desconto de BV - Previsão pelo faturamento - Pedido Sra. Elenn
+	IF MV_PAR09 > 0 //Se o parâmetro estiver preenchido, usar o valor informado, se não usar o valor calculado
+
+	nDescBV := MV_PAR09
+
+	ELSE
 
 	// Query para calcular bonificação de volume provisionado pelo faturamento - Pedido Sra. Elenn
 	BeginSql Alias cAlias4
@@ -461,6 +467,8 @@ Static Function CalcDesc()
 	EndDo
 
 	(cAlias4)->(DbCloseArea())
+
+	ENDIF
 
 	// Calculo manual Cachê
 	nDescCac := MV_PAR10
