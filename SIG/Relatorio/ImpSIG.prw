@@ -72,11 +72,57 @@ ELSEIF MV_PAR01  == 4
 	tamanho      := "M"
 ENDIF
 
-
 wnrel := SetPrint("",NomeProg,cPerg,@titulo,cDesc1,cDesc2,cDesc3,.T.,,.T.,Tamanho,,.T.)
 
+If nLastKey == 27
+	Return
+Endif
+
+SetDefault(aReturn,cString)
+
+If nLastKey == 27
+	Return
+Endif
+
+nTipo := If(aReturn[4]==1,15,18)
+
+//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
+//ณ Processamento. RPTSTATUS monta janela com a regua de processamento. ณ
+//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
+
+RptStatus({|| RunReport(Cabec1,Cabec2,Titulo,nLin) },Titulo)
+
+Return
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+ฑฑษออออออออออัออออออออออหอออออออัออออออออออออออออออออหออออออัอออออออออออออปฑฑ
+ฑฑบFuno    ณRUNREPORT บ Autor ณ AP6 IDE            บ Data ณ  28/09/09   บฑฑ
+ฑฑฬออออออออออุออออออออออสอออออออฯออออออออออออออออออออสออออออฯอออออออออออออนฑฑ
+ฑฑบDescrio ณ Funcao auxiliar chamada pela RPTSTATUS. A funcao RPTSTATUS บฑฑ
+ฑฑบ          ณ monta a janela com a regua de processamento.               บฑฑ
+ฑฑฬออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบUso       ณ Programa principal                                         บฑฑ
+ฑฑศออออออออออฯออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออผฑฑ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿
+/*/
+
+Static Function RunReport(Cabec1,Cabec2,Titulo,nLin)
+
+Local nVlTotalD	 := 0
+Local nVlTotalC	 := 0
+Local nVlTotalC1 := 0
+Local nValorCCD	 := 0
+Local nValorCCC	 := 0
+Local cTipo		 := ""
+Local cCustoSIG	 := "  "
+Local cSubTot	 := "  "
+Local nSubTot	 := 0
+
 IF 	   MV_PAR01 == 1  //Sintetico
-	cQuery := "SELECT ZR_TIPO,ZR_CTASIG,SUM(ZR_VALOR) AS VALOR FROM SZR010 "
+	cQuery := "SELECT ZR_TIPO,ZR_CTASIG,ZR_CONTA,SUM(ZR_VALOR) AS VALOR FROM SZR010 "
 	//cQuery += "INNER JOIN CTT010 ON CTT_CUSTO = ZR_CC "
 	cQuery += "WHERE SZR010.D_E_L_E_T_ = '' "//AND CTT010.D_E_L_E_T_ = '' AND CTT010.CTT_CCSIG <> '' "
 	cQuery += "AND ZR_EMISSAO BETWEEN '"+DTOS(MV_PAR03)+"' AND '"+DTOS(MV_PAR04)+"' "
@@ -90,8 +136,8 @@ IF 	   MV_PAR01 == 1  //Sintetico
 	ELSEIF MV_PAR02 == 2
 		cQuery += "AND ZR_TIPO = 'C' "
 	ENDIF
-	cQuery += "GROUP BY ZR_TIPO,ZR_CTASIG "
-	cQuery += "ORDER BY ZR_TIPO,ZR_CTASIG "
+	cQuery += "GROUP BY ZR_TIPO,ZR_CTASIG,ZR_CONTA "
+	cQuery += "ORDER BY ZR_TIPO,ZR_CTASIG,ZR_CONTA "
 
 ELSEIF MV_PAR01 == 2  //Centro de custo - Sintetico
 	cQuery := "SELECT CTT_CCSIG,ZR_TIPO,ZR_CTASIG,SUM(ZR_VALOR) AS VALOR FROM SZR010 INNER JOIN CTT010 ON ZR_CC = CTT_CUSTO  "
@@ -147,7 +193,6 @@ ELSEIF MV_PAR01 == 4 //Verificar os erros Log
 	cQuery += "ORDER BY ZR_CONTA "
 ENDIF
 
-
 tcQuery cQuery New Alias "TMP"
 
 If Eof()
@@ -156,53 +201,6 @@ If Eof()
 	dbCloseArea()
 	Return
 Endif
-
-If nLastKey == 27
-	Return
-Endif
-
-SetDefault(aReturn,cString)
-
-If nLastKey == 27
-	Return
-Endif
-
-nTipo := If(aReturn[4]==1,15,18)
-
-//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
-//ณ Processamento. RPTSTATUS monta janela com a regua de processamento. ณ
-//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
-
-RptStatus({|| RunReport(Cabec1,Cabec2,Titulo,nLin) },Titulo)
-
-Return
-
-/*/
-ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
-ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
-ฑฑษออออออออออัออออออออออหอออออออัออออออออออออออออออออหออออออัอออออออออออออปฑฑ
-ฑฑบFuno    ณRUNREPORT บ Autor ณ AP6 IDE            บ Data ณ  28/09/09   บฑฑ
-ฑฑฬออออออออออุออออออออออสอออออออฯออออออออออออออออออออสออออออฯอออออออออออออนฑฑ
-ฑฑบDescrio ณ Funcao auxiliar chamada pela RPTSTATUS. A funcao RPTSTATUS บฑฑ
-ฑฑบ          ณ monta a janela com a regua de processamento.               บฑฑ
-ฑฑฬออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
-ฑฑบUso       ณ Programa principal                                         บฑฑ
-ฑฑศออออออออออฯออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออผฑฑ
-ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
-฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿
-/*/
-
-Static Function RunReport(Cabec1,Cabec2,Titulo,nLin)
-
-Local nVlTotalD	 := 0
-Local nVlTotalC	 := 0
-Local nVlTotalC1 := 0
-Local nValorCCD	 := 0
-Local nValorCCC	 := 0
-Local cTipo		 := ""
-Local cCustoSIG	 := "  "
-Local cSubTot	 := "  "
-Local nSubTot	 := 0
 
 DBSelectArea("TMP")
 DBGotop()
@@ -534,7 +532,10 @@ Return
 
 Static Function ValidPerg(cPerg)
 
-_sAlias := Alias()
+	Local aArea	:= GetArea()
+	Local aRegs	:= {}
+	Local i,j
+
 cPerg := PADR(cPerg,10)
 dbSelectArea("SX1")
 dbSetOrder(1)
@@ -566,6 +567,6 @@ For i:=1 to Len(aRegs)
 	Endif
 Next
 
-dbSelectArea(_sAlias)
+RestArea(aArea)
 
 Return

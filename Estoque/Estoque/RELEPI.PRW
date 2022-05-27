@@ -44,7 +44,7 @@ Private CONTFL       := 01
 Private m_pag        := 01
 Private wnrel        := "RELEPI"// Coloque aqui o nome do arquivo usado para impressao em disco
 Private cPerg	     := "RELEPI9"
-Private cString      := "TNF"
+Private cString      := "ZAA"
 Private cQuery       := ""
 Private nCont	    := 0
 
@@ -113,34 +113,34 @@ Local nDevTot   := 0
 Local nDevFun   := 0
 Local nDevCC	:= 0
 
-cQuery	:= "SELECT TNF_FILIAL,TNF_CODEPI,TNF_MAT,TNF_DTENTR,TNF_QTDENT,TNF_INDDEV,TNF_QTDEVO,TNF_DTDEVO,TNF_MATFUN,TNF_FUNNAM,B1_DESC,RA_CC,TNF_OBS "
-cQuery	+= "FROM TNF010 "
-cQuery	+= "INNER JOIN SB1010 ON TNF010.TNF_CODEPI = SB1010.B1_COD "
-cQuery	+= "INNER JOIN SRA010 ON TNF_FILIAL = RA_FILIAL AND TNF_MAT = RA_MAT "
-cQuery	+= "WHERE TNF010.D_E_L_E_T_ <> '*' AND SB1010.D_E_L_E_T_ <> '*' AND SRA010.D_E_L_E_T_ <> '*'"
+cQuery	:= "SELECT ZAA_FILIAL,ZAA_CODEPI,ZAA_MAT,ZAA_DTENTR,ZAA_QTDENT,ZAA_INDDEV,ZAA_QTDEVO,ZAA_DTDEVO,ZAA_MATFUN,ZAA_FUNNAM,B1_DESC,RA_CC,ZAA_OBS "
+cQuery	+= "FROM ZAA010 "
+cQuery	+= "INNER JOIN SB1010 ON ZAA010.ZAA_CODEPI = SB1010.B1_COD "
+cQuery	+= "INNER JOIN SRA010 ON ZAA_FILIAL = RA_FILIAL AND ZAA_MAT = RA_MAT "
+cQuery	+= "WHERE ZAA010.D_E_L_E_T_ <> '*' AND SB1010.D_E_L_E_T_ <> '*' AND SRA010.D_E_L_E_T_ <> '*'"
 IF 		MV_PAR10 == 2
-	cQuery	+= "AND TNF_QTDEVO = TNF_QTDENT "
+	cQuery	+= "AND ZAA_QTDEVO = ZAA_QTDENT "
 ELSEIF 	MV_PAR10 == 3
-	cQuery	+= "AND TNF_QTDEVO < TNF_QTDENT "
+	cQuery	+= "AND ZAA_QTDEVO < ZAA_QTDENT "
 ENDIF
 
 IF 	   !EMPTY(MV_PAR17)
 	cQuery	+= "AND SB1010.B1_DESC LIKE '%"+ALLTRIM(MV_PAR17)+"%' "
 ENDIF
-cQuery	+= "AND TNF010.TNF_CODEPI BETWEEN '" + MV_PAR07 + "' AND '" + MV_PAR08 + "' "
-cQuery	+= "AND TNF010.TNF_MAT BETWEEN '" + MV_PAR01 + "' AND '" + MV_PAR02 + "' "
-//cQuery	+= "AND TNF010.TNF_MAT BETWEEN '" + MV_PAR03 + "' AND '" + MV_PAR04 + "' "
-cQuery	+= "AND TNF010.TNF_DTENTR BETWEEN '" + DTOS(MV_PAR05) + "' AND '" + DTOS(MV_PAR06) + "' "
+cQuery	+= "AND ZAA010.ZAA_CODEPI BETWEEN '" + MV_PAR07 + "' AND '" + MV_PAR08 + "' "
+cQuery	+= "AND ZAA010.ZAA_MAT BETWEEN '" + MV_PAR01 + "' AND '" + MV_PAR02 + "' "
+//cQuery	+= "AND ZAA010.ZAA_MAT BETWEEN '" + MV_PAR03 + "' AND '" + MV_PAR04 + "' "
+cQuery	+= "AND ZAA010.ZAA_DTENTR BETWEEN '" + DTOS(MV_PAR05) + "' AND '" + DTOS(MV_PAR06) + "' "
 IF MV_PAR10 == 2
-cQuery	+= "AND TNF010.TNF_DTDEVO BETWEEN '" + DTOS(MV_PAR11) + "' AND '" + DTOS(MV_PAR12) + "' "
+cQuery	+= "AND ZAA010.ZAA_DTDEVO BETWEEN '" + DTOS(MV_PAR11) + "' AND '" + DTOS(MV_PAR12) + "' "
 ENDIF
 cQuery	+= "AND SB1010.B1_LOCPAD BETWEEN '" + MV_PAR14 + "' AND '" + MV_PAR15 + "' "
 IF 		MV_PAR09 == 1
-	cQuery	+= "ORDER BY SRA010.RA_CC,TNF010.TNF_MAT,TNF010.TNF_MATFUN,TNF010.TNF_CODEPI"
+	cQuery	+= "ORDER BY SRA010.RA_CC,ZAA010.ZAA_MAT,ZAA010.ZAA_MATFUN,ZAA010.ZAA_CODEPI"
 ELSEIF 	MV_PAR09 == 2
-	cQuery	+= "ORDER BY SRA010.RA_CC,TNF010.TNF_MAT,TNF010.TNF_MATFUN,SB1010.B1_DESC"
+	cQuery	+= "ORDER BY SRA010.RA_CC,ZAA010.ZAA_MAT,ZAA010.ZAA_MATFUN,SB1010.B1_DESC"
 ELSEIF 	MV_PAR09 == 3
-	cQuery	+= "ORDER BY SRA010.RA_CC,TNF010.TNF_MAT,TNF010.TNF_MATFUN,TNF010.TNF_DTENTR"
+	cQuery	+= "ORDER BY SRA010.RA_CC,ZAA010.ZAA_MAT,ZAA010.ZAA_MATFUN,ZAA010.ZAA_DTENTR"
 ENDIF
 
 tcQuery cQuery New Alias "TMP"
@@ -200,12 +200,12 @@ While !EOF()
 		nLin := 8
 	Endif
 
-	IF (TMP->TNF_MAT != cMat)
+	IF (TMP->ZAA_MAT != cMat)
 		//@nLin, 000 PSAY "------------------------------------------------------------------------------------------------------------------------------------"
 		nLin := nLin + 1 // Avanca a linha de impressao
 		@nLin, 001 PSAY UPPER("Matricula:")
-		@nLin, 015 PSAY TMP->TNF_MAT
-		@nLin, 026 PSAY SUBSTR(Posicione("SRA",1,xFilial("SRA")+TMP->TNF_MAT,"RA_NOME"),1,35)
+		@nLin, 015 PSAY TMP->ZAA_MAT
+		@nLin, 026 PSAY SUBSTR(Posicione("SRA",1,xFilial("SRA")+TMP->ZAA_MAT,"RA_NOME"),1,35)
 		@nLin, 065 PSAY "FUNÇAO:"
 		@nLin, 073 PSAY Posicione("SRJ",1,xFilial("SRJ")+SRA->RA_CODFUNC,"RJ_DESC")
 		IF MV_PAR13 == 2
@@ -224,44 +224,44 @@ While !EOF()
 		nLin := 8
 	Endif
 
-	@nLin, 001 PSAY Alltrim(TMP->TNF_CODEPI)
+	@nLin, 001 PSAY Alltrim(TMP->ZAA_CODEPI)
 	@nLin, 012 PSAY SUBSTR(TMP->B1_DESC,1,40)
-	@nLin, 061 PSAY TMP->TNF_QTDENT PICTURE "@E 999"
-	@nLin, 074 PSAY STOD(TMP->TNF_DTENTR)
-	IF TMP->TNF_QTDENT == TNF_QTDEVO
+	@nLin, 061 PSAY TMP->ZAA_QTDENT PICTURE "@E 999"
+	@nLin, 074 PSAY STOD(TMP->ZAA_DTENTR)
+	IF TMP->ZAA_QTDENT == ZAA_QTDEVO
 	@nLin, 086 PSAY "Devolvido"
-	ELSEIF TMP->TNF_QTDEVO > 0 .AND.TMP->TNF_QTDEVO < TMP->TNF_QTDENT
+	ELSEIF TMP->ZAA_QTDEVO > 0 .AND.TMP->ZAA_QTDEVO < TMP->ZAA_QTDENT
 	@nLin, 086 PSAY "Dev. Parc."
 	ELSE
 	@nLin, 086 PSAY "Com Funcionario"
 	ENDIF
-	@nLin, 107 PSAY TMP->TNF_QTDEVO PICTURE "@E 999"
+	@nLin, 107 PSAY TMP->ZAA_QTDEVO PICTURE "@E 999"
 
-	IF !EMPTY(TMP->TNF_OBS)
+	IF !EMPTY(TMP->ZAA_OBS)
 	nLin += 1
 	@nLin, 001 PSAY "OBS: "
-	@nLin, 006 PSAY ALLTRIM(TMP->TNF_OBS)
+	@nLin, 006 PSAY ALLTRIM(TMP->ZAA_OBS)
 	ENDIF
 
-	nItens   	+= TMP->TNF_QTDENT
-	nItensTot 	+= TMP->TNF_QTDENT
-	nItensFun 	+= TMP->TNF_QTDENT
-	nItensCC	+= TMP->TNF_QTDENT
-	nDev	   	+= TMP->TNF_QTDEVO
-	nDevTot 	+= TMP->TNF_QTDEVO
-	nDevFun 	+= TMP->TNF_QTDEVO
-	nDevCC		+= TMP->TNF_QTDEVO
+	nItens   	+= TMP->ZAA_QTDENT
+	nItensTot 	+= TMP->ZAA_QTDENT
+	nItensFun 	+= TMP->ZAA_QTDENT
+	nItensCC	+= TMP->ZAA_QTDENT
+	nDev	   	+= TMP->ZAA_QTDEVO
+	nDevTot 	+= TMP->ZAA_QTDEVO
+	nDevFun 	+= TMP->ZAA_QTDEVO
+	nDevCC		+= TMP->ZAA_QTDEVO
 	cCustos		:= TMP->RA_CC
-	cMat 		:= TMP->TNF_MAT
-	cMatFun		:= TMP->TNF_MATFUN
-	cFunName    := TMP->TNF_FUNNAM
+	cMat 		:= TMP->ZAA_MAT
+	cMatFun		:= TMP->ZAA_MATFUN
+	cFunName    := TMP->ZAA_FUNNAM
 
 
 	dbSelectArea ("TMP")
 	dbskip()
 
 
-	IF (TMP->TNF_MATFUN != cMatFun) .AND. !EMPTY(cMatFun)
+	IF (TMP->ZAA_MATFUN != cMatFun) .AND. !EMPTY(cMatFun)
 	nLin += 2
 	@nLin, 000 PSAY UPPER("Funcionario -->")
 	@nLin, 018 PSAY Alltrim(cMatFun)
@@ -275,7 +275,7 @@ While !EOF()
 	ENDIF
 
 
-	IF (TMP->TNF_MAT != cMat)
+	IF (TMP->ZAA_MAT != cMat)
 		nLin += 2
 		@nLin, 001 PSAY "Total do Matricula -->"
 		@nLin, 026 PSAY Posicione("SRA",1,xFilial("SRA")+ cMat ,"RA_NOME")

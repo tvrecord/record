@@ -260,7 +260,7 @@ Static Function DevolveZAA(dDevol,nQtdDev,cObs,nQTD)
 		Return
 	Endif
 
-	If nQTDDev <= (nQtd - nDevolvido)
+	If nQTDDev < (nQtd - nDevolvido)
 		MsgInfo("Quantidade informada maior que o saldo com o funcionário.","Atenção")
 		Return
 	Endif

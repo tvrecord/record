@@ -79,7 +79,7 @@ Static Function fProcPdf()
 	Private cFiltro2	:= ""
 
 	// Query para buscar as informações
-	cFiltro1	:= "% SE1010.E1_EMISSAO BETWEEN '"+DTOS(MV_PAR04)+"' AND '"+DTOS(MV_PAR05)+"' AND SE1010.E1_BAIXA BETWEEN '"+DTOS(MV_PAR06)+"' AND '"+DTOS(MV_PAR07)+"' AND SE1010.E1_VEND1 BETWEEN '"+(MV_PAR02)+"' AND '"+(MV_PAR03)+"' %"
+	cFiltro1	:= "% (E1_EMISSAO BETWEEN '"+DTOS(MV_PAR04)+"' AND '"+DTOS(MV_PAR05)+"' AND E1_BAIXA BETWEEN '"+DTOS(MV_PAR06)+"' AND '"+DTOS(MV_PAR07)+"' AND E1_VEND1 BETWEEN '"+(MV_PAR02)+"' AND '"+(MV_PAR03)+"' OR E1_NUM IN " + FormatIn(ALLTRIM(MV_PAR14),"/") + ") %"
 
 	// Busca os registros a serem impressos no relatório - BonIficação de volume
 	BeginSql Alias cAlias
@@ -92,16 +92,16 @@ Static Function fProcPdf()
 		ZU_DEFX1, ZU_ATEFX1, ZU_PERC1, ZU_DEFX2, ZU_ATEFX2, ZU_PERC2, ZU_DEFX3, ZU_ATEFX3, ZU_PERC3,
 		ZU_DEFX4, ZU_ATEFX4, ZU_PERC4, ZU_DEFX5, ZU_ATEFX5, ZU_PERC5, ZU_DEFX6, ZU_ATEFX6, ZU_PERC6,
 		ZU_DEFX7, ZU_ATEFX7, ZU_PERC7, ZU_ATEVALI, ZU_VALIDA, ZU_EXCECAO, ZU_DIAS
-		FROM SE1010
-		INNER JOIN SA3010 // Tabela de Vendedor/Agência - Faço uma consulta do seu CNPJ
-		ON SE1010.E1_VEND1 = SA3010.A3_COD
+		FROM %table:SE1%
+		INNER JOIN %table:SA3% // Tabela de Vendedor/Agência - Faço uma consulta do seu CNPJ
+		ON E1_VEND1 = A3_COD
 		INNER JOIN SA1010 // Tabela de Cliente - Busco dados do cliente
-		ON SE1010.E1_CLIENTE = SA1010.A1_COD AND SE1010.E1_LOJA = SA1010.A1_LOJA AND SA1010.D_E_L_E_T_ <> '*'
+		ON E1_CLIENTE = A1_COD AND E1_LOJA = A1_LOJA AND SA1010.D_E_L_E_T_ <> '*'
 		INNER JOIN SZU010 // Tabela de Contrato Agências - VerIficos as regras para contrato
-		ON SE1010.E1_VEND1 = SZU010.ZU_VEND AND SZU010.D_E_L_E_T_ <> '*' AND SE1010.E1_EMISSAO BETWEEN SZU010.ZU_VALIDA AND SZU010.ZU_ATEVALI // Valido a emissão dentro do periodo do contrato
-		INNER JOIN SED010 // Tabela de Natureza - Busco dados da natureza
-		ON E1_NATUREZ = ED_CODIGO AND SED010.D_E_L_E_T_ <> '*'
-		WHERE SE1010.E1_FILIAL = '01' AND SE1010.D_E_L_E_T_ <> '*' AND SE1010.E1_NATUREZ <> '1101006'
+		ON E1_VEND1 = ZU_VEND AND SZU010.D_E_L_E_T_ <> '*' AND E1_EMISSAO BETWEEN ZU_VALIDA AND ZU_ATEVALI // Valido a emissão dentro do periodo do contrato
+		INNER JOIN %table:SED% // Tabela de Natureza - Busco dados da natureza
+		ON E1_NATUREZ = ED_CODIGO AND %table:SED%.D_E_L_E_T_ <> '*'
+		WHERE E1_FILIAL = '01' AND %table:SE1%.D_E_L_E_T_ <> '*' AND %table:SE1%.E1_NATUREZ <> '1101006'
 		AND %exp:cFiltro1%
 		AND ( E1_CLIENTE <> '001689' OR E1_VEND1 <> '000219' )
 		ORDER BY E1_VEND1, MESFAT, E1_CLIENTE, E1_LOJA, E1_NUM, E1_PARCELA, E1_VENCTO
@@ -216,7 +216,7 @@ Static Function fProcPdf()
 			If (STOD((cAlias)->E1_BAIXA) > STOD((cAlias)->E1_VENCTO)) .AND. (STOD((cAlias)->E1_BAIXA)) <= (STOD((cAlias)->E1_VENCTO) + (cAlias)->ZU_DIAS) .AND. lVend
 
 				// Query para buscar as informações
-				cFiltro2	:= "% AND SUBSTRING(SE1010.E1_EMISSAO,1,6) = '"+(cAlias)->MESFAT+"' AND SE1010.E1_BAIXA BETWEEN '"+dIniBxA+"' AND '"+dFimBxA+"' AND SE1010.E1_VEND1 = '"+(cAlias)->E1_VEND1+"' %"
+				cFiltro2	:= "% AND SUBSTRING(E1_EMISSAO,1,6) = '"+(cAlias)->MESFAT+"' AND E1_BAIXA BETWEEN '"+dIniBxA+"' AND '"+dFimBxA+"' AND E1_VEND1 = '"+(cAlias)->E1_VEND1+"' %"
 				//FatMesAnt()
 
 			EndIf //Fim do controle do mês anterior
@@ -317,11 +317,11 @@ Static Function fProcPdf()
 		E1_CLIENTE AS CLIENTE, E1_NOMCLI AS NOMECLI, E1_COMIS1 AS PERC, E1_EMISSAO AS EMISSAO, E1_VENCREA AS VENCIMENTO,
 		(E1_VALOR + E1_MULTA) AS VALOR, ((E1_VALOR + E1_MULTA) * E1_COMIS1 / 100) AS COMISSAO,
 		E1_NATUREZ AS NATUREZA, ED_DESCRIC AS DESCRICAO, E1_BAIXA AS BAIXA
-		FROM SE1010
-		INNER JOIN SA3010 ON E1_VEND1 = A3_COD AND SA3010.D_E_L_E_T_ = ''
-		INNER JOIN SED010 ON E1_NATUREZ = ED_CODIGO AND SED010.D_E_L_E_T_ = ''
-		WHERE SE1010.D_E_L_E_T_ = '' AND E1_COMIS1 > 0
-		AND (%exp:cFiltro1% OR E1_NUM = '038071') // Coloque sua exceção aqui
+		FROM %table:SE1%
+		INNER JOIN %table:SA3% ON E1_VEND1 = A3_COD AND %table:SA3%.D_E_L_E_T_ = ''
+		INNER JOIN %table:SED% ON E1_NATUREZ = ED_CODIGO AND %table:SED%.D_E_L_E_T_ = ''
+		WHERE %table:SE1%.D_E_L_E_T_ = '' AND E1_COMIS1 > 0
+		AND %exp:cFiltro1%  // Coloque sua exceção aqui
 		ORDER BY A3_COD, MESFAT
 
 	EndSql //FINALIZO A MINHA QUERY
@@ -485,16 +485,16 @@ Static Function fProcPdf()
 		SUBSTRING(E1_EMISSAO, 1, 6) AS MESFAT, (E1_VALOR - E1_SALDO) AS VALORLIQUIDO,
 		E1_COMIS1, (E1_VALOR - E1_SALDO) - ((E1_COMIS1 / 100) * ((E1_VALOR - E1_SALDO))) AS LIQUIDO,
 		(E1_VALOR) - ((E1_COMIS1 / 100) * ((E1_VALOR))) AS LIQUIDO2
-		FROM SE1010
-		INNER JOIN SA3010 // Tabela de Vendedor/Agência - Faço uma consulta do seu CNPJ
-		ON SE1010.E1_VEND1 = SA3010.A3_COD
+		FROM %table:SE1%
+		INNER JOIN %table:SA3% // Tabela de Vendedor/Agência - Faço uma consulta do seu CNPJ
+		ON E1_VEND1 = A3_COD
 		INNER JOIN SA1010 // Tabela de Cliente - Busco dados do cliente
-		ON SE1010.E1_CLIENTE = SA1010.A1_COD AND SE1010.E1_LOJA = SA1010.A1_LOJA AND SA1010.D_E_L_E_T_ <> '*'
+		ON E1_CLIENTE = A1_COD AND E1_LOJA = A1_LOJA AND SA1010.D_E_L_E_T_ <> '*'
 		INNER JOIN SZU010 // Tabela de Contrato Agências - VerIficos as regras para contrato
-		ON SE1010.E1_VEND1 = SZU010.ZU_VEND AND SZU010.D_E_L_E_T_ <> '*' AND SE1010.E1_EMISSAO BETWEEN SZU010.ZU_VALIDA AND SZU010.ZU_ATEVALI // Valido a emissão dentro do periodo do contrato
-		INNER JOIN SED010 // Tabela de Natureza - Busco dados da natureza
-		ON E1_NATUREZ = ED_CODIGO AND SED010.D_E_L_E_T_ <> '*'
-		WHERE SE1010.E1_FILIAL = '01' AND SE1010.D_E_L_E_T_ <> '*' AND SE1010.E1_NATUREZ <> '1101006'
+		ON E1_VEND1 = ZU_VEND AND SZU010.D_E_L_E_T_ <> '*' AND E1_EMISSAO BETWEEN ZU_VALIDA AND ZU_ATEVALI // Valido a emissão dentro do periodo do contrato
+		INNER JOIN %table:SED% // Tabela de Natureza - Busco dados da natureza
+		ON E1_NATUREZ = ED_CODIGO AND %table:SED%.D_E_L_E_T_ <> '*'
+		WHERE E1_FILIAL = '01' AND %table:SE1%.D_E_L_E_T_ <> '*' AND E1_NATUREZ <> '1101006'
 		AND %exp:cFiltro1%
 		AND (E1_CLIENTE <> '001689' OR E1_VEND1 <> '000219')
 		ORDER BY E1_VEND1, MESFAT, E1_CLIENTE, E1_LOJA, E1_NUM, E1_PARCELA, E1_VENCTO
@@ -562,9 +562,9 @@ Static Function ImpProxPag()
 	oPrint:Say(nLin,200, "NF CLIENTE"	,oFonteN)
 	oPrint:Say(nLin,260, "EMISSÃO"		,oFonteN)
 	oPrint:Say(nLin,320, "RECEBIMENTO"	,oFonteN)
-	oPrint:Say(nLin,400, "VALOR NF"	,oFonteN)
+	oPrint:Say(nLin,400, "VALOR NF"		,oFonteN)
 	oPrint:Say(nLin,470, "% PERC."		,oFonteN)
-	oPrint:Say(nLin,535, "VALOR BV"	,oFonteN)
+	oPrint:Say(nLin,535, "VALOR BV"		,oFonteN)
 
 	oPrint:line(nLin+5,REL_LEFT,nLin+5,REL_RIGHT )
 
@@ -597,6 +597,7 @@ Static Function ValidPerg(cPerg)
 	aAdd(aRegs,{cPerg,"11","Assinatura 4:		","","","mv_ch11","C",06,00,0,"G","","MV_PAR11","","","","","","","","","","","","","","","","","","","","","","","","","USR"})
 	aAdd(aRegs,{cPerg,"12","Destino do(s) Arq.: ","","","mv_ch12","C",99,00,0,"G","","MV_PAR12","","","","","","","","","","","","","","","","","","","","","","","","",""})
 	AADD(aRegs,{cPerg,"13","Imprime Não Pagos:	","","","mv_ch13","N",01,00,0,"C","","mv_par13","Sim","","","","","Não","","","","","","","","","","","","","","","","","","",""})
+	AADD(aRegs,{cPerg,"14","NF Exceção a Regra:	","","","mv_ch14","C",35,00,0,"G","","mv_par14","","","","","","","","","","","","","","","","","","","","","","","","","SE1"})
 
 	For i:=1 to Len(aRegs)
 		If !dbSeek(PADR(cPerg,10)+aRegs[i,2])

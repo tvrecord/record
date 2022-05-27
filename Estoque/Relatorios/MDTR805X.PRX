@@ -11,10 +11,10 @@
 ±±³Descri‡…o ³Recibo de entrega do epi.                                   ³±±
 ±±³          ³Todo funcionario que recebe epi da empresa deve assinar o   ³±±
 ±±³          ³recibo comprovando o seu recebimento. o programa inicia     ³±±
-±±³          ³lendo a tabela de epi's entregues (TNF). Conforme parametros³±±
+±±³          ³lendo a tabela de epi's entregues (ZAA). Conforme parametros³±±
 ±±³          ³seleciona os funcionarios que receberam epi em um determina-³±±
 ±±³          ³do periodo. O programa podera listar apenas os epi's ainda  ³±±
-±±³          ³lendo a tabela de epi's entregues (TNF). Conforme parametros³±±
+±±³          ³lendo a tabela de epi's entregues (ZAA). Conforme parametros³±±
 ±±³          ³com data de emissao do recibo em branco ou todos se o usu  -³±±
 ±±³          ³rio desejar.                                                ³±±
 ±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
@@ -38,7 +38,7 @@ LOCAL limite  := 132
 LOCAL cDesc1  := "Relatorio de Comprovante de Entrega de EPI.                                     "
 LOCAL cDesc2  := "Conforme parametros o usuario pode selecionar os funcionarios, periodo desejado "
 LOCAL cDesc3  := "e indicar se deseja imprimir apenas epi's nao impressos ou para todos.          "
-LOCAL cString := "TNF"
+LOCAL cString := "ZAA"
 LOCAL nFor
 
 Private aOldACols := {}
@@ -154,7 +154,7 @@ Private _xSTR0083  :="Item SA"
 
 Private cUsaInt1  := AllTrim(GetMv("MV_NGMDTES"))
 Private lMdtGerSA := If( SuperGetMv("MV_NG2SA",.F.,"N") == "S", .T. , .F. ) //Indica se gera SA ao inves de requisitar do estoque
-Private lGera_SA  := If(NGCADICBASE("TNF_ITEMSA","D","TNF",.F.) .and. NGCADICBASE("TNF_NUMSA","D","TNF",.F.) , .T. , .F. )
+Private lGera_SA  := If(NGCADICBASE("ZAA_ITEMSA","D","ZAA",.F.) .and. NGCADICBASE("ZAA_NUMSA","D","ZAA",.F.) , .T. , .F. )
 
 If lMdtGerSA .and. !lGera_SA .and. cUsaInt1 == "S"
 	If !NGINCOMPDIC("UPDMDT52","23534/2009")
@@ -808,7 +808,7 @@ Local aFiliais := {}
 //ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 PRIVATE li := 80 ,m_pag := 1
 PRIVATE lCPONumcap := .t.,lCPODtVenc := .t.
-If TNF->(FieldPos("TNF_NUMCAP")) <= 0
+If ZAA->(FieldPos("ZAA_NUMCAP")) <= 0
 	lCPONumcap := .f.
 Endif
 
@@ -848,10 +848,10 @@ Else
 Endif
 
 If Len(aOldACols) > 0
-	nPOSCOD := aSCAN( aHEADER, { |x| Trim( Upper(x[2]) ) == "TNF_CODEPI" }) // Codigo do Epi
-	nPOSNUM := aSCAN( aHEADER, { |x| Trim( Upper(x[2]) ) == "TNF_NUMCAP" }) // Num C. A.
-	nPOSDAT := aSCAN( aHEADER, { |x| Trim( Upper(x[2]) ) == "TNF_DTENTR" }) // Data da Entrega
-	nPOSHOR := aSCAN( aHEADER, { |x| Trim( Upper(x[2]) ) == "TNF_HRENTR" }) // Hora da Entrega
+	nPOSCOD := aSCAN( aHEADER, { |x| Trim( Upper(x[2]) ) == "ZAA_CODEPI" }) // Codigo do Epi
+	nPOSNUM := aSCAN( aHEADER, { |x| Trim( Upper(x[2]) ) == "ZAA_NUMCAP" }) // Num C. A.
+	nPOSDAT := aSCAN( aHEADER, { |x| Trim( Upper(x[2]) ) == "ZAA_DTENTR" }) // Data da Entrega
+	nPOSHOR := aSCAN( aHEADER, { |x| Trim( Upper(x[2]) ) == "ZAA_HRENTR" }) // Hora da Entrega
 EndIf
 
 cArqTrab := CriaTrab(aDBF,.t.)
@@ -895,38 +895,40 @@ If lSigaMdtps
 	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 	nTipo  := IIF(aReturn[4]==1,15,18)
 
-	dbSelectArea("TNF")
-	If mv_par09 == 3
-		dbSetOrder(10) //TNF_FILIAL+TNF_CLIENT+TNF_LOJACL+TNF_MAT+DTOS(TNF_DTENTR)+TNF_HRENTR+TNF_CODEPI
+	dbSelectArea("ZAA")
+	/* If mv_par09 == 3
+		dbSetOrder(10) //ZAA_FILIAL+ZAA_CLIENT+ZAA_LOJACL+ZAA_MAT+DTOS(ZAA_DTENTR)+ZAA_HRENTR+ZAA_CODEPI
 	Else  //parei aki
-		dbSetOrder(08) //TNF_FILIAL+TNF_CLIENT+TNF_LOJACL+TNF_MAT+TNF_CODEPI+DTOS(TNF_DTENTR)+TNF_HRENTR
-	EndIf
-	dbSeek(xFilial("TNF")+MV_PAR01+MV_PAR02,.T.)
+		dbSetOrder(08) //ZAA_FILIAL+ZAA_CLIENT+ZAA_LOJACL+ZAA_MAT+ZAA_CODEPI+DTOS(ZAA_DTENTR)+ZAA_HRENTR
+	EndIf */
+
+	dbSetOrder(02) //ZAA_FILIAL+ZAA_MAT+ZAA_CODEPI
+	dbSeek(xFilial("ZAA")+MV_PAR01,.T.)
 
 	SetRegua(LastRec())
 
 	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-	//³ Correr TNF para ler os  EPI's Entregues aos Funcionarios ³
+	//³ Correr ZAA para ler os  EPI's Entregues aos Funcionarios ³
 	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 
 	While !Eof()                             	.AND.;
-		TNF->TNF_FILIAL == xFIlial("TNF")  	.AND.;
-		TNF->(TNF_CLIENT+TNF_LOJACL) >= mv_par01+mv_par02 .AND. TNF->(TNF_CLIENT+TNF_LOJACL) <= mv_par03+mv_par04
+		ZAA->ZAA_FILIAL == xFIlial("ZAA")  	.AND.;
+		ZAA->(ZAA_CLIENT+ZAA_LOJACL) >= mv_par01+mv_par02 .AND. ZAA->(ZAA_CLIENT+ZAA_LOJACL) <= mv_par03+mv_par04
 
 		IncRegua()
 
-		If TNF->TNF_MAT < MV_PAR05 .OR. TNF->TNF_MAT > MV_PAR06
+		If ZAA->ZAA_MAT < MV_PAR05 .OR. ZAA->ZAA_MAT > MV_PAR06
 			dbSkip()
 			Loop
 		Endif
 
 		DbSelectArea("SRA")
 		DbSetOrder(01)
-		DbSeek(xFilial("SRA")+TNF->TNF_MAT)
+		DbSeek(xFilial("SRA")+ZAA->ZAA_MAT)
 
 		If mv_par11 == 2  //Nao considerar funcionarios demitidos
 			If ( SRA->RA_SITFOLH == "D" ) .OR. ( !Empty( SRA->RA_DEMISSA ) )
-				dbSelectArea("TNF")
+				dbSelectArea("ZAA")
 				dbSkip()
 				Loop
 			Endif
@@ -934,7 +936,7 @@ If lSigaMdtps
 
 		//Data de Admissao
 		If SRA->RA_ADMISSA < mv_par17 .OR. SRA->RA_ADMISSA > mv_par18
-			dbSelectArea("TNF")
+			dbSelectArea("ZAA")
 			dbSkip()
 			Loop
 		Endif
@@ -943,26 +945,26 @@ If lSigaMdtps
 
 		If ValType(mv_par13) == "C" .AND. ValType(mv_par14) == "C"
 			If (cCC < mv_par13) .OR. (cCC > mv_par14)
-				dbselectarea("TNF")
+				dbselectarea("ZAA")
 				DbSkip()
 				Loop
 			EndIf
 		EndIf
 
-		If TNF->TNF_DTENTR < MV_PAR07 .OR. TNF->TNF_DTENTR > MV_PAR08
-			dbSelectArea("TNF")
+		If ZAA->ZAA_DTENTR < MV_PAR07 .OR. ZAA->ZAA_DTENTR > MV_PAR08
+			dbSelectArea("ZAA")
 			dbSkip()
 			loop
 		Endif
 
-		If TNF->TNF_DTDEVO < MV_PAR20 .OR. TNF->TNF_DTDEVO > MV_PAR21 //Rafael - 11/08/21 - Controle de data de devolução por parametro
-			dbSelectArea("TNF")
+		If ZAA->ZAA_DTDEVO < MV_PAR20 .OR. ZAA->ZAA_DTDEVO > MV_PAR21 //Rafael - 11/08/21 - Controle de data de devolução por parametro
+			dbSelectArea("ZAA")
 			dbSkip()
 			loop
 		Endif
 
-		If MV_PAR09 == 2 .AND. !EMPTY(TNF->TNF_DTRECI)
-			dbSelectArea("TNF")
+		If MV_PAR09 == 2 .AND. !EMPTY(ZAA->ZAA_TDRECI)
+			dbSelectArea("ZAA")
 			dbSkip()
 			loop
 		EndIf
@@ -970,10 +972,10 @@ If lSigaMdtps
 		lExistOld := .F.
 		If Len(aOldACols) > 0
 			For nCont := 1 To Len(aOldACols)
-				If aOldACols[nCont][nPOSCOD] == TNF->TNF_CODEPI
-					If aOldACols[nCont][nPOSNUM] == TNF->TNF_NUMCAP
-						If aOldACols[nCont][nPOSDAT] == TNF->TNF_DTENTR
-							If aOldACols[nCont][nPOSHOR] == TNF->TNF_HRENTR
+				If aOldACols[nCont][nPOSCOD] == ZAA->ZAA_CODEPI
+					If aOldACols[nCont][nPOSNUM] == ZAA->ZAA_NUMCAP
+						If aOldACols[nCont][nPOSDAT] == ZAA->ZAA_DTENTR
+							If aOldACols[nCont][nPOSHOR] == ZAA->ZAA_HRENTR
 								lExistOld := .T.
 								Exit
 							EndIf
@@ -983,30 +985,30 @@ If lSigaMdtps
 			Next nCont
 
 			If lExistOld
-				dbSelectArea("TNF")
+				dbSelectArea("ZAA")
 				dbSkip()
 				Loop
 			EndIf
 		EndIf
 
-		cFuncMat := TNF->TNF_MAT
+		cFuncMat := ZAA->ZAA_MAT
 
 		If mv_par09 == 3
-			DbSelectArea("TNF")
-			dDataEnt := TNF->TNF_DTENTR
+			DbSelectArea("ZAA")
+			dDataEnt := ZAA->ZAA_DTENTR
 			nRegAtual := RecNo()
 			DbSkip()
-			If cFuncMat <> TNF->TNF_MAT
+			If cFuncMat <> ZAA->ZAA_MAT
 				DbSkip(-1)
 				While !Bof()								.AND.;
-					TNF->TNF_FILIAL == xFIlial("TNF")  	.AND.;
-					TNF->TNF_MAT	== cFuncMat           	.AND.;
-					TNF->TNF_DTENTR == dDataEnt
+					ZAA->ZAA_FILIAL == xFIlial("ZAA")  	.AND.;
+					ZAA->ZAA_MAT	== cFuncMat           	.AND.;
+					ZAA->ZAA_DTENTR == dDataEnt
 					AddRec805_()
-					DbSelectArea ("TNF")
-					Reclock("TNF",.f.)
-					TNF->TNF_DTRECI := Date()
-					MsUnlock("TNF")
+					DbSelectArea ("ZAA")
+					Reclock("ZAA",.f.)
+					ZAA->ZAA_TDRECI := Date()
+					MsUnlock("ZAA")
 					DbSkip(-1)
 				EndDo
 				DbGoTo(nRegAtual)
@@ -1015,11 +1017,11 @@ If lSigaMdtps
 			Loop
 		Else
 			AddRec805_()
-			dbSelectArea("TNF")
-			Reclock("TNF",.f.)
-			TNF->TNF_DTRECI := Date()
-			MsUnlock("TNF")
-			dbSetOrder(03)
+			dbSelectArea("ZAA")
+			Reclock("ZAA",.f.)
+			ZAA->ZAA_TDRECI := Date()
+			MsUnlock("ZAA")
+			dbSetOrder(09)
 			DbSkip()
 		EndIf
 
@@ -1058,41 +1060,41 @@ Else
 	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 	//³ Define Filiais a percorrer                                   ³
 	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-	If Valtype(aDad695) == "A"
+//	If Valtype(aDad695) == "A"
 		aFiliais := {{cFilAnt, Upper(Substr(SM0->M0_NOME, 1, 40)) }}
-	Else
-		aFiliais := MDTRETFIL("TNF", MV_PAR15, MV_PAR16)
-	EndIf
+//	Else
+//		aFiliais := MTDRETFIL("ZAA", MV_PAR15, MV_PAR16)
+//	EndIf
 	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 	//³ Verifica se deve comprimir ou nao                            ³
 	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 	nTipo  := IIF(aReturn[4]==1,15,18)
 
 	For i:=1 to Len(aFiliais)
-		dbSelectArea("TNF")
+		dbSelectArea("ZAA")
 		If mv_par05 == 3
-			dbSetOrder(05) //TNF_MAT + DTOS(TNF_DTENTR) + TNF_HRENTR + TNF_CODEPI
+			dbSetOrder(11) //ZAA_MAT + DTOS(ZAA_DTENTR) + ZAA_HRENTR + ZAA_CODEPI
 		Else
-			dbSetOrder(03) //TNF_MAT + TNF_CODEPI + DTOS(TNF_DTENTR) + TNF_HRENTR
+			dbSetOrder(09) //ZAA_MAT + ZAA_CODEPI + DTOS(ZAA_DTENTR) + ZAA_HRENTR
 		EndIf
-		dbSeek(xFilial("TNF",aFiliais[i,1])+MV_PAR01,.T.)
+		dbSeek(xFilial("ZAA",aFiliais[i,1])+MV_PAR01,.T.)
 
 		SetRegua(LastRec())
 
 		//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-		//³ Correr TNF para ler os  EPI's Entregues aos Funcionarios ³
+		//³ Correr ZAA para ler os  EPI's Entregues aos Funcionarios ³
 		//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-		While !Eof() .AND. TNF->TNF_FILIAL == xFilial("TNF",aFiliais[i,1]) .AND. TNF->TNF_MAT <= MV_PAR02
+		While !Eof() .AND. ZAA->ZAA_FILIAL == xFilial("ZAA",aFiliais[i,1]) .AND. ZAA->ZAA_MAT <= MV_PAR02
 
 			IncRegua()
 
 			DbSelectArea("SRA")
 			DbSetOrder(01)
-			DbSeek(xFilial("SRA",aFiliais[i,1])+TNF->TNF_MAT)
+			DbSeek(xFilial("SRA",aFiliais[i,1])+ZAA->ZAA_MAT)
 
 			If mv_par11 == 2  //Nao considerar funcionarios demitidos
 				If ( SRA->RA_SITFOLH == "D" ) .OR. ( !Empty( SRA->RA_DEMISSA ) )
-					dbSelectArea("TNF")
+					dbSelectArea("ZAA")
 					dbSkip()
 					Loop
 				Endif
@@ -1100,7 +1102,7 @@ Else
 
 			//Data de Admissao
 			If SRA->RA_ADMISSA < mv_par13 .OR. SRA->RA_ADMISSA > mv_par14
-				dbSelectArea("TNF")
+				dbSelectArea("ZAA")
 				dbSkip()
 				Loop
 			Endif
@@ -1109,26 +1111,26 @@ Else
 
 			If ValType(mv_par09) == "C" .AND. ValType(mv_par10) == "C"
 				If (cCC < mv_par09) .OR. (cCC > mv_par10)
-					dbselectarea("TNF")
+					dbselectarea("ZAA")
 					DbSkip()
 					Loop
 				EndIf
 			EndIf
 
-			If TNF->TNF_DTENTR < MV_PAR03 .OR. TNF->TNF_DTENTR > MV_PAR04
-				dbSelectArea("TNF")
+			If ZAA->ZAA_DTENTR < MV_PAR03 .OR. ZAA->ZAA_DTENTR > MV_PAR04
+				dbSelectArea("ZAA")
 				dbSkip()
 				loop
 			Endif
 
-			If TNF->TNF_DTDEVO < MV_PAR20 .OR. TNF->TNF_DTDEVO > MV_PAR21 //Rafael - 11/08/21 - Controle de data de devolução por parametro
-			dbSelectArea("TNF")
+			If ZAA->ZAA_DTDEVO < MV_PAR20 .OR. ZAA->ZAA_DTDEVO > MV_PAR21 //Rafael - 11/08/21 - Controle de data de devolução por parametro
+			dbSelectArea("ZAA")
 			dbSkip()
 			loop
 			Endif
 
-			If MV_PAR05 == 2 .AND. !EMPTY(TNF->TNF_DTRECI)
-				dbSelectArea("TNF")
+			If MV_PAR05 == 2 .AND. !EMPTY(ZAA->ZAA_TDRECI)
+				dbSelectArea("ZAA")
 				dbSkip()
 				loop
 			EndIf
@@ -1136,10 +1138,10 @@ Else
 			lExistOld := .F.
 			If Len(aOldACols) > 0
 				For nCont := 1 To Len(aOldACols)
-					If aOldACols[nCont][nPOSCOD] == TNF->TNF_CODEPI
-						If aOldACols[nCont][nPOSNUM] == TNF->TNF_NUMCAP
-							If aOldACols[nCont][nPOSDAT] == TNF->TNF_DTENTR
-								If aOldACols[nCont][nPOSHOR] == TNF->TNF_HRENTR
+					If aOldACols[nCont][nPOSCOD] == ZAA->ZAA_CODEPI
+						If aOldACols[nCont][nPOSNUM] == ZAA->ZAA_NUMCAP
+							If aOldACols[nCont][nPOSDAT] == ZAA->ZAA_DTENTR
+								If aOldACols[nCont][nPOSHOR] == ZAA->ZAA_HRENTR
 									lExistOld := .T.
 									Exit
 								EndIf
@@ -1149,28 +1151,28 @@ Else
 				Next nCont
 
 				If lExistOld
-					dbSelectArea("TNF")
+					dbSelectArea("ZAA")
 					dbSkip()
 					Loop
 				EndIf
 			EndIf
 
-			cFuncMat := TNF->TNF_MAT
+			cFuncMat := ZAA->ZAA_MAT
 
 			If mv_par05 == 3
-				DbSelectArea("TNF")
-				dDataEnt := TNF->TNF_DTENTR
+				DbSelectArea("ZAA")
+				dDataEnt := ZAA->ZAA_DTENTR
 				nRegAtual := RecNo()
 				DbSkip()
-				If cFuncMat <> TNF->TNF_MAT
+				If cFuncMat <> ZAA->ZAA_MAT
 					DbSkip(-1)
-					While !Bof() .AND. TNF->TNF_FILIAL == xFIlial("TNF",aFiliais[i,1]) .AND.;
-						TNF->TNF_MAT	== cFuncMat .AND. TNF->TNF_DTENTR == dDataEnt
+					While !Bof() .AND. ZAA->ZAA_FILIAL == xFIlial("ZAA",aFiliais[i,1]) .AND.;
+						ZAA->ZAA_MAT	== cFuncMat .AND. ZAA->ZAA_DTENTR == dDataEnt
 						AddRec805_(aFiliais[i,1], aFiliais[i,2])
-						DbSelectArea ("TNF")
-						Reclock("TNF",.f.)
-						TNF->TNF_DTRECI := Date()
-						MsUnlock("TNF")
+						DbSelectArea ("ZAA")
+						Reclock("ZAA",.f.)
+						ZAA->ZAA_TDRECI := Date()
+						MsUnlock("ZAA")
 						DbSkip(-1)
 					EndDo
 					DbGoTo(nRegAtual)
@@ -1179,11 +1181,11 @@ Else
 				Loop
 			Else
 				AddRec805_(aFiliais[i,1], aFiliais[i,2])
-				dbSelectArea("TNF")
-				Reclock("TNF",.f.)
-				TNF->TNF_DTRECI := Date()
-				MsUnlock("TNF")
-				dbSetOrder(03)
+				dbSelectArea("ZAA")
+				Reclock("ZAA",.f.)
+				ZAA->ZAA_TDRECI := Date()
+				MsUnlock("ZAA")
+				dbSetOrder(09)
 				DbSkip()
 			EndIf
 
@@ -1203,7 +1205,7 @@ USE
 //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 //³ Devolve a condicao original do arquivo principal             ³
 //ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-RetIndex("TNF")
+RetIndex("ZAA")
 Set Filter To
 
 If lImp
@@ -1219,8 +1221,8 @@ Else
 	MsgStop(_xSTR0079, _xSTR0080) //"Não existem dados para montar o relatório."###"Atenção"
 Endif
 
-dbSelectArea("TNF")
-dbSetOrder(1)
+dbSelectArea("ZAA")
+dbSetOrder(07)
 
 Return NIL
 /*/
@@ -1400,7 +1402,7 @@ If lSigaMdtps
 		@ Li,057+nDist PSay _xSTR0040     //"Hora"
 		@ Li,066+nDist PSay _xSTR0025     //"Qtde"
 		@ Li,071+nDist PSay _xSTR0020     //"Dev."
-		If TNF->(FieldPos("TNF_DTDEVO")) > 0
+		If ZAA->(FieldPos("ZAA_DTDEVO")) > 0
 			@ Li,078+nDist PSay _xSTR0042 //"Dt. Devo"
 			@ Li,088+nDist PSay "Qtd Dev"
 		EndIf
@@ -1409,7 +1411,7 @@ If lSigaMdtps
 		Somalinha_()
 		@ Li,000 Psay "|"
 		//DbSelectArea("TN3")
-		If TNF->(FieldPos("TNF_OBS")) > 0
+		If ZAA->(FieldPos("ZAA_OBS")) > 0
 			@ Li,002 PSay "Observação"
 			lLinha := .t.
 		EndIf
@@ -1499,13 +1501,13 @@ If lSigaMdtps
 			ELSE
 				@ LI,072+nDist PSAY _xSTR0022  //"NAO"
 			ENDIF
-			If TNF->(FieldPos("TNF_DTDEVO")) > 0
+			If ZAA->(FieldPos("ZAA_DTDEVO")) > 0
 				@ Li,079+nDist PSay NG805DATE_((cTRB)->DTDEVO) PICTURE "99/99/9999"
 				@ Li,090+nDist PSay (cTRB)->QTDEVO  PICTURE "@E 999.99"
 			ENDIF
-			If !Empty(TNF->TNF_MATFUN)
-				@ Li,100+nDist PSay Alltrim(SUBSTR(TNF->TNF_MATFUN,1,9))
-				@ Li,103 PSay Alltrim(SUBSTR(TNF->TNF_FUNNAM,1,28))
+			If !Empty(ZAA->ZAA_MATFUN)
+				@ Li,100+nDist PSay Alltrim(SUBSTR(ZAA->ZAA_MATFUN,1,9))
+				@ Li,103 PSay Alltrim(SUBSTR(ZAA->ZAA_FUNNAM,1,28))
 			EndIf
 			If lLinha
 				@ Li,132 Psay "|"
@@ -1513,8 +1515,8 @@ If lSigaMdtps
 				@ Li,000 Psay "|"
 			EndIf
 			//DbSelectArea("TN3")
-			If TNF->(FieldPos("TNF_OBS")) > 0
-				@ Li,002 PSay TNF->TNF_OBS
+			If ZAA->(FieldPos("ZAA_OBS")) > 0
+				@ Li,002 PSay ZAA->ZAA_OBS
 			EndIf
 			//IF TN3->(FieldPos("TN3_NUMCRI") > 0)
 			//	@ Li,016 PSay (cTRB)->NUMCRI
@@ -1656,7 +1658,7 @@ Else
 		@ Li,001 Psay _xSTR0027+ Substr(SM0->M0_NOMECOM,1,60) //"Empresa...:"
 		@ Li,083 Psay _xSTR0075+ SM0->M0_CGC //"CGC..:"
 		@ Li,132 PSay "|"
-		If NGSX2MODO("TNF") != "C"
+		If NGSX2MODO("ZAA") != "C"
 			Somalinha_()
 			@ Li,000 PSay "|"
 			@ Li,001 Psay _xSTR0081+AllTrim((cTRB)->FILIAL) + " - " + (cTRB)->NOMFIL //"Filial....:"
@@ -1774,7 +1776,7 @@ Else
 		@ Li,057+nDist PSay "Hora"
 		@ Li,066+nDist PSay "Qtd"
 		@ Li,071+nDist PSay _xSTR0020     //"Dev."
-		If TNF->(FieldPos("TNF_DTDEVO")) > 0
+		If ZAA->(FieldPos("ZAA_DTDEVO")) > 0
 			@ Li,078+nDist PSay _xSTR0042 //"Dt. Devo"
 			@ Li,088+nDist PSay "Qtd Dev"
 		EndIf
@@ -1783,7 +1785,7 @@ Else
 		Somalinha_()
 		@ Li,000 Psay "|"
 		//DbSelectArea("TN3")
-		If TNF->(FieldPos("TNF_OBS")) > 0
+		If ZAA->(FieldPos("ZAA_OBS")) > 0
 			@ Li,002 PSay "Observação"
 			lLinha := .t.
 		EndIf
@@ -1823,17 +1825,17 @@ Else
 			ELSE
 				@ LI,072+nDist PSAY _xSTR0022  //"NAO"
 			ENDIF
-			If TNF->(FieldPos("TNF_DTDEVO")) > 0
+			If ZAA->(FieldPos("ZAA_DTDEVO")) > 0
 				@ Li,079+nDist PSay NG805DATE_((cTRB)->DTDEVO) PICTURE "99/99/9999"
 				@ Li,090+nDist PSay (cTRB)->QTDEVO  PICTURE "@E 999.99"
 			ENDIF
 
-			If !Empty(Posicione("TNF",3,xFilial("TNF") + CFUNC + (cTRB)->CODEPI + DTOS((cTRB)->DTENT) + (cTRB)->HRENT,"TNF_MATFUN"))
-				//TNF_FILIAL+TNF_FORNEC+TNF_LOJA+TNF_CODEPI+TNF_NUMCAP+TNF_MAT+DTOS(TNF_DTENTR)+TNF_HRENTR
-				//TNF_FILIAL+TNF_MAT+TNF_CODEPI+DTOS(TNF_DTENTR)+TNF_HRENTR
-				//Posicione("TNF",1,xFilial("TNF") + "999999" + "01" + (cTRB)->CODEPI + (cTRB)->NUMCAP + DTOS((cTRB)->DTENT) + (cTRB)->HRENT,"TNF_MATFUN"),1,12)
-				@ Li,100+nDist PSay Alltrim(SUBSTR(Posicione("TNF",3,xFilial("TNF") + CFUNC + (cTRB)->CODEPI + DTOS((cTRB)->DTENT) + (cTRB)->HRENT,"TNF_MATFUN"),1,9))
-				@ Li,103 PSay Alltrim(SUBSTR(Posicione("TNF",3,xFilial("TNF") + CFUNC + (cTRB)->CODEPI + DTOS((cTRB)->DTENT) + (cTRB)->HRENT,"TNF_FUNNAM"),1,28))
+			If !Empty(Posicione("ZAA",3,xFilial("ZAA") + CFUNC + (cTRB)->CODEPI + DTOS((cTRB)->DTENT) + (cTRB)->HRENT,"ZAA_MATFUN"))
+				//ZAA_FILIAL+ZAA_FORNEC+ZAA_LOJA+ZAA_CODEPI+ZAA_NUMCAP+ZAA_MAT+DTOS(ZAA_DTENTR)+ZAA_HRENTR
+				//ZAA_FILIAL+ZAA_MAT+ZAA_CODEPI+DTOS(ZAA_DTENTR)+ZAA_HRENTR
+				//Posicione("ZAA",1,xFilial("ZAA") + "999999" + "01" + (cTRB)->CODEPI + (cTRB)->NUMCAP + DTOS((cTRB)->DTENT) + (cTRB)->HRENT,"ZAA_MATFUN"),1,12)
+				@ Li,100+nDist PSay Alltrim(SUBSTR(Posicione("ZAA",3,xFilial("ZAA") + CFUNC + (cTRB)->CODEPI + DTOS((cTRB)->DTENT) + (cTRB)->HRENT,"ZAA_MATFUN"),1,9))
+				@ Li,103 PSay Alltrim(SUBSTR(Posicione("ZAA",3,xFilial("ZAA") + CFUNC + (cTRB)->CODEPI + DTOS((cTRB)->DTENT) + (cTRB)->HRENT,"ZAA_FUNNAM"),1,28))
 			EndIf
 			If lLinha
 				@ Li,132 Psay "|"
@@ -1841,8 +1843,8 @@ Else
 				@ Li,000 Psay "|"
 			EndIf
 			//DbSelectArea("TN3")
-			If TNF->(FieldPos("TNF_OBS")) > 0
-				@ Li,002 PSay TNF->TNF_OBS
+			If ZAA->(FieldPos("ZAA_OBS")) > 0
+				@ Li,002 PSay ZAA->ZAA_OBS
 			EndIf
 			//IF TN3->(FieldPos("TN3_NUMCRI") > 0)
 			//	@ Li,016 PSay (cTRB)->NUMCRI
@@ -2010,7 +2012,7 @@ If lSigaMdtps
 
 	DBSELECTAREA("TN3")
 	DBSETORDER(5)  //TN3_FILIAL+TN3_CLIENT+TN3_LOJACL+TN3_FORNEC+TN3_LOJA+TN3_CODEPI+TN3_NUMCAP
-	DBSEEK(XFILIAL("TN3")+TNF->TNF_CLIENT+TNF->TNF_LOJACL+TNF->TNF_FORNEC+TNF->TNF_LOJA+TNF->TNF_CODEPI+TNF->TNF_NUMCAP)
+	DBSEEK(XFILIAL("TN3")+ZAA->ZAA_CLIENT+ZAA->ZAA_LOJACL+ZAA->ZAA_FORNEC+ZAA->ZAA_LOJA+ZAA->ZAA_CODEPI+ZAA->ZAA_NUMCAP)
 
 	DbSelectArea("SRA")
 	DbSetOrder(01)
@@ -2030,14 +2032,14 @@ If lSigaMdtps
 	(cTRB)->DESCC    := NgSeek(cAliasCC,(cTRB)->CC,1,cDescCC)
 	(cTRB)->FUNCAO   := SRA->RA_CODFUNC
 	(cTRB)->DESCFUN  := Alltrim (NgSeek("SRJ",(cTRB)->FUNCAO,1,"SRJ->RJ_DESC"))
-	(cTRB)->CODEPI   := TNF->TNF_CODEPI
-	(cTRB)->DESEPI   := NgSeek("SB1",TNF->TNF_CODEPI,1,"SB1->B1_DESC")
-	(cTRB)->DTENT    := TNF->TNF_DTENTR
-	(cTRB)->HRENT    := TNF->TNF_HRENTR
-	(cTRB)->QTDE     := TNF->TNF_QTDENT
-	(cTRB)->QTDEVO   := TNF->TNF_QTDEVO
-	(cTRB)->DEV      := TNF->TNF_INDDEV
-	(cTRB)->NUMCAP   := If(lCPONumcap,TNF->TNF_NUMCAP,TN3->TN3_NUMCAP)
+	(cTRB)->CODEPI   := ZAA->ZAA_CODEPI
+	(cTRB)->DESEPI   := NgSeek("SB1",ZAA->ZAA_CODEPI,1,"SB1->B1_DESC")
+	(cTRB)->DTENT    := ZAA->ZAA_DTENTR
+	(cTRB)->HRENT    := ZAA->ZAA_HRENTR
+	(cTRB)->QTDE     := ZAA->ZAA_QTDENT
+	(cTRB)->QTDEVO   := ZAA->ZAA_QTDEVO
+	(cTRB)->DEV      := ZAA->ZAA_INDDEV
+	(cTRB)->NUMCAP   := If(lCPONumcap,ZAA->ZAA_NUMCAP,TN3->TN3_NUMCAP)
 
 	IF TN3->(FieldPos("TN3_NUMCRI")) > 0
 		(cTRB)->NUMCRI := TN3->TN3_NUMCRI
@@ -2045,22 +2047,22 @@ If lSigaMdtps
 	IF TN3->(FieldPos("TN3_NUMCRF")) > 0
 		(cTRB)->NUMCRF := TN3->TN3_NUMCRF
 	Endif
-	If TNF->(FieldPos("TNF_DTDEVO")) > 0
-		(cTRB)->DTDEVO := TNF->TNF_DTDEVO
+	If ZAA->(FieldPos("ZAA_DTDEVO")) > 0
+		(cTRB)->DTDEVO := ZAA->ZAA_DTDEVO
 	Endif
 	If lGera_SA
-		(cTRB)->NUMSA  := TNF->TNF_NUMSA
-		(cTRB)->ITEMSA := TNF->TNF_ITEMSA
+		(cTRB)->NUMSA  := ZAA->ZAA_NUMSA
+		(cTRB)->ITEMSA := ZAA->ZAA_ITEMSA
 	EndIf
 
-	(cTRB)->CLIENT    := TNF->TNF_CLIENT
-	(cTRB)->LOJA      := TNF->TNF_LOJACL
+	(cTRB)->CLIENT    := ZAA->ZAA_CLIENT
+	(cTRB)->LOJA      := ZAA->ZAA_LOJACL
 
 Else
 
 	DBSELECTAREA("TN3")
 	DBSETORDER(1)
-	DBSEEK(XFILIAL("TN3",cCodFil)+TNF->TNF_FORNEC+TNF->TNF_LOJA+TNF->TNF_CODEPI+TNF->TNF_NUMCAP)
+	DBSEEK(XFILIAL("TN3",cCodFil)+ZAA->ZAA_FORNEC+ZAA->ZAA_LOJA+ZAA->ZAA_CODEPI+ZAA->ZAA_NUMCAP)
 
 	DbSelectArea("SRA")
 	DbSetOrder(01)
@@ -2076,7 +2078,7 @@ Else
 
 	DbSelectArea("SB1")
 	DbSetOrder(01)
-	DbSeek(xFilial("SB1",cCodFil)+TNF->TNF_CODEPI)
+	DbSeek(xFilial("SB1",cCodFil)+ZAA->ZAA_CODEPI)
 
 	dbSelectArea(cTRB)
 	(cTRB)->(DbAppend())
@@ -2092,14 +2094,14 @@ Else
 	(cTRB)->DESCC    := AllTrim(&(cDescCC))
 	(cTRB)->FUNCAO   := SRA->RA_CODFUNC
 	(cTRB)->DESCFUN  := Alltrim(SRJ->RJ_DESC)
-	(cTRB)->CODEPI   := TNF->TNF_CODEPI
+	(cTRB)->CODEPI   := ZAA->ZAA_CODEPI
 	(cTRB)->DESEPI   := IIF(!Empty(SB1->B1_MODEL),Alltrim(SB1->B1_MODEL) + " - " + AllTrim(SB1->B1_DESC),AllTrim(SB1->B1_DESC)) // Imprimir o modelo dos celulares e nexteis - Bruno Alves (26/01/2012)
-	(cTRB)->DTENT    := TNF->TNF_DTENTR
-	(cTRB)->HRENT    := TNF->TNF_HRENTR
-	(cTRB)->QTDE     := TNF->TNF_QTDENT
-	(cTRB)->QTDEVO   := TNF->TNF_QTDEVO
-	(cTRB)->DEV      := TNF->TNF_INDDEV
-	(cTRB)->NUMCAP   := If(lCPONumcap,TNF->TNF_NUMCAP,TN3->TN3_NUMCAP)
+	(cTRB)->DTENT    := ZAA->ZAA_DTENTR
+	(cTRB)->HRENT    := ZAA->ZAA_HRENTR
+	(cTRB)->QTDE     := ZAA->ZAA_QTDENT
+	(cTRB)->QTDEVO   := ZAA->ZAA_QTDEVO
+	(cTRB)->DEV      := ZAA->ZAA_INDDEV
+	(cTRB)->NUMCAP   := If(lCPONumcap,ZAA->ZAA_NUMCAP,TN3->TN3_NUMCAP)
 
 	IF TN3->(FieldPos("TN3_NUMCRI")) > 0
 		(cTRB)->NUMCRI := TN3->TN3_NUMCRI
@@ -2107,12 +2109,12 @@ Else
 	IF TN3->(FieldPos("TN3_NUMCRF")) > 0
 		(cTRB)->NUMCRF := TN3->TN3_NUMCRF
 	Endif
-	If TNF->(FieldPos("TNF_DTDEVO")) > 0
-		(cTRB)->DTDEVO := TNF->TNF_DTDEVO
+	If ZAA->(FieldPos("ZAA_DTDEVO")) > 0
+		(cTRB)->DTDEVO := ZAA->ZAA_DTDEVO
 	Endif
 	If lGera_SA
-		(cTRB)->NUMSA  := TNF->TNF_NUMSA
-		(cTRB)->ITEMSA := TNF->TNF_ITEMSA
+		(cTRB)->NUMSA  := ZAA->ZAA_NUMSA
+		(cTRB)->ITEMSA := ZAA->ZAA_ITEMSA
 	EndIf
 
 	(cTRB)->FILIAL    := xFilial("SRA",cCodFil)
