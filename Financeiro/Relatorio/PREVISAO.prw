@@ -466,8 +466,8 @@ Static Function Relatorio()
 	cQuery += "SA2010.D_E_L_E_T_ <> '*' AND "
 	cQuery += "SED010.D_E_L_E_T_ <> '*' AND "
 	cQuery += "ED_NATGER BETWEEN '" + (MV_PAR24) + "' AND '" + (MV_PAR25) + "' AND "
+	cQuery += "'"+DTOS(MV_PAR08)+"' >= C3_DATPRI AND '"+ DTOS(MONTHSUB(MV_PAR08,1)) +"' <= C3_DATPRF AND " //Rafael França - 17/08/2020 - Valida vigencia do contrato, 07/06/2022 - Alterado para pegar contratos finalizados no mês anterior e o vencimento nesse mês.
 	cQuery += "C3_ENCER <> 'E' AND "
-	cQuery += "'"+DTOS(MV_PAR08)+"' BETWEEN C3_DATPRI AND C3_DATPRF AND " //Rafael França - 17/08/2020 - Valida vigencia do contrato
 	cQuery += "C3_RENOVA = '' AND "
 	cQuery += "C3_PERMUTA <> '1' AND "
 	cQuery += "C3_FLUXO = '1' AND "
