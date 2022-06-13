@@ -77,9 +77,10 @@ Static Function fProcPdf()
 	Private dFimBxA		:= DTOS(LastDate(MonthSub(MV_PAR07,1)))
 	Private cFiltro1	:= ""
 	Private cFiltro2	:= ""
+	Private cFiltro3	:= ""
 
 	// Query para buscar as informações
-	cFiltro1	:= "% (E1_EMISSAO BETWEEN '"+DTOS(MV_PAR04)+"' AND '"+DTOS(MV_PAR05)+"' AND E1_BAIXA BETWEEN '"+DTOS(MV_PAR06)+"' AND '"+DTOS(MV_PAR07)+"' AND E1_VEND1 BETWEEN '"+(MV_PAR02)+"' AND '"+(MV_PAR03)+"' OR E1_NUM IN " + FormatIn(ALLTRIM(MV_PAR14),"/") + ") %"
+	cFiltro1	:= "% (E1_EMISSAO BETWEEN '"+DTOS(MV_PAR04)+"' AND '"+DTOS(MV_PAR05)+"' AND E1_BAIXA BETWEEN '"+DTOS(MV_PAR06)+"' AND '"+DTOS(MV_PAR07)+"' AND E1_VEND1 BETWEEN '"+(MV_PAR02)+"' AND '"+(MV_PAR03)+"') %"
 
 	// Busca os registros a serem impressos no relatório - BonIficação de volume
 	BeginSql Alias cAlias
@@ -263,7 +264,7 @@ Static Function fProcPdf()
 
 		If cMesFat != (cAlias)->MESFAT .AND. nPerc > 0 .AND. cVend == (cAlias)->E1_VEND1
 
-			oPrint:Say(nLin,270, SUBSTRING(cMesFat,5,2)+"/"+SUBSTRING(cMesFat,1,4)		,oFonteN)
+			oPrint:Say(nLin,270, SUBSTRING(cMesFat,5,2)+"/"+SUBSTRING(cMesFat,3,2)		,oFonteN)
 			oPrint:Say(nLin,395, PADL(transform(nMesFat,"@E 999,999,999.99"),14) 		,oFonteN)
 			oPrint:Say(nLin,475, PADL(transform(nPerc,"@E 99.99%"),6)					,oFonteN)
 			oPrint:Say(nLin,530, PADL(transform(nMesBV,"@E 999,999,999.99"),14)			,oFonteN)
@@ -287,6 +288,8 @@ Static Function fProcPdf()
 			nLin 	+= REL_LIN_RED
 			oPrint:Line(nLin,REL_LEFT,nLin,REL_RIGHT,CLR_HGRAY,"-9")
 
+			nMesFat	:= 0
+			nMesBV	:= 0
 			nFatAge := 0
 			nBVAge 	:= 0
 			nPerc 	:= 0
@@ -306,9 +309,10 @@ Static Function fProcPdf()
 	oPrint:Say(nLin,530, PADL(transform(nTotBV1,"@E 999,999,999.99"),14) 		,oFonte11N)
 	nLin 	+= (REL_LIN_TOT * 2)
 
-	nFatAge := 0
-	nBVAge 	:= 0
-	nPerc 	:= 0
+	nFatAge  := 0
+	nBVAge 	 := 0
+	nPerc 	 := 0
+	cFiltro3 := "% (E1_EMISSAO BETWEEN '"+DTOS(MV_PAR04)+"' AND '"+DTOS(MV_PAR05)+"' AND E1_BAIXA BETWEEN '"+DTOS(MV_PAR06)+"' AND '"+DTOS(MV_PAR07)+"' AND E1_VEND1 BETWEEN '"+(MV_PAR02)+"' AND '"+(MV_PAR03)+"' OR E1_NUM IN " + FormatIn(ALLTRIM(MV_PAR14),"/") + ") %"
 
 	// Busca os registros a serem impressos no relatório - Comissão de Agência
 	BeginSql Alias cAlias1
@@ -321,7 +325,7 @@ Static Function fProcPdf()
 		INNER JOIN %table:SA3% ON E1_VEND1 = A3_COD AND %table:SA3%.D_E_L_E_T_ = ''
 		INNER JOIN %table:SED% ON E1_NATUREZ = ED_CODIGO AND %table:SED%.D_E_L_E_T_ = ''
 		WHERE %table:SE1%.D_E_L_E_T_ = '' AND E1_COMIS1 > 0
-		AND %exp:cFiltro1%  // Coloque sua exceção aqui
+		AND %exp:cFiltro3%  // Coloque sua exceção aqui
 		ORDER BY A3_COD, MESFAT
 
 	EndSql //FINALIZO A MINHA QUERY
