@@ -67,20 +67,24 @@ Private oFonte10N 	:= u_xFonte(10,.T.,,,"Arial")
 
 
 //TRATO AS PERGUNTAS PARA USO NOS FILTROS
-IF MV_PAR03 == 1
-cNomeTabela		:= "MAPAS LIBERADOS PELA GERÊNCIA DE " + DTOC(MV_PAR01) + " - " + DTOC(MV_PAR02)
-IF MV_PAR08 == 1
-cFiltro			:= "%AND C7_EMISSAO BETWEEN '"+cPDiaSem+"' AND '"+cUDiaSem+"' AND C7_TIPO = '1' AND CR_APROV = '000001' AND CR_TOTAL BETWEEN 1000 AND 10000 %" //Aprovados pela Sra. Elenn durante a semana --ALTERADO O CR_APROV PARA O 000032 DA LUCILENE e diminuido o valor para 4 mil
+IF MV_PAR03 == 3
+	cNomeTabela		:= "MAPAS PARA LIBERAÇÃO NO MICROSIGA - " + DTOC(MV_PAR01) + " - " + DTOC(MV_PAR02)
+	cFiltro			:= "%AND C7_EMISSAO BETWEEN '"+cPDiaSem+"' AND '"+cUDiaSem+"' AND C7_TIPO = '1' AND CR_APROV = '000001' %"
 ELSE
-cFiltro			:= "%AND CR_DATALIB BETWEEN '"+cPDiaSem+"' AND '"+cUDiaSem+"' AND C7_TIPO = '1' AND CR_APROV = '000001' AND CR_TOTAL BETWEEN 1000 AND 10000 %" //Aprovados pela Sra. Elenn durante a semana --ALTERADO O CR_APROV PARA O 000032 DA LUCILENE e diminuido o valor para 4 mil
+	cNomeTabela		:= "MAPAS LIBERADOS PELA GERÊNCIA DE " + DTOC(MV_PAR01) + " - " + DTOC(MV_PAR02)
+	IF MV_PAR08 == 1
+		cFiltro			:= "%AND C7_EMISSAO BETWEEN '"+cPDiaSem+"' AND '"+cUDiaSem+"' AND C7_TIPO = '1' %" //Aprovados pela Sra. Elenn durante a semana --ALTERADO O CR_APROV PARA O 000032 DA LUCILENE e diminuido o valor para 4 mil
+	ELSE
+		cFiltro			:= "%AND CR_DATALIB BETWEEN '"+cPDiaSem+"' AND '"+cUDiaSem+"' AND C7_TIPO = '1' %" //Aprovados pela Sra. Elenn durante a semana --ALTERADO O CR_APROV PARA O 000032 DA LUCILENE e diminuido o valor para 4 mil
+	ENDIF
 ENDIF
+/*   Pedro L - (23/06/2022) - Todos os pedidos de compras passam a serem liberados exclusivamente pela Dona Elenn. E enviado para conhecimento do diretor
 ELSEIF MV_PAR03 == 2
 cNomeTabela		:= "MAPAS PARA LIBERAÇÃO NO MICROSIGA - " + DTOC(MV_PAR01) + " - " + DTOC(MV_PAR02)
 cFiltro			:= "%AND C7_EMISSAO BETWEEN '"+cPDiaSem+"' AND '"+cUDiaSem+"' AND CR_APROV = '000028' AND CR_DATALIB = '' %" //Apenas pedidos enviados para aprovação do diretor
-ELSEIF MV_PAR03 == 3
-cNomeTabela		:= "MAPAS PARA LIBERAÇÃO NO MICROSIGA - " + DTOC(MV_PAR01) + " - " + DTOC(MV_PAR02)
-cFiltro			:= "%AND C7_EMISSAO BETWEEN '"+cPDiaSem+"' AND '"+cUDiaSem+"' AND C7_TIPO = '1' AND CR_APROV = '000001' %"
-ENDIF
+*/
+
+
 
 cCampo1			:= "ZY_MES" + SUBSTR(DTOS(MV_PAR01),5,2)
 cCampo2			:= "ZY_USO" + SUBSTR(DTOS(MV_PAR01),5,2)
