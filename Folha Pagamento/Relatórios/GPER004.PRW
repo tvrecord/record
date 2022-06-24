@@ -1,8 +1,8 @@
 #INCLUDE "TOPCONN.CH"
 #INCLUDE "PROTHEUS.CH"
 
-//Pedro Leonardo -> Relatório para extrair o cálculo de plano de saúde em excel
-//SIGAGPE -> Relatorios -> Especificos Record -> Cal. Plano Saúde
+//Pedro Leonardo -> Relatório para extrair o cálculo de plano de saúde e odontologico em excel
+//SIGAGPE > Relatórios > Específicos Record > Plano Saude e Odonto
 
 
 User Function GPER004()
@@ -16,9 +16,9 @@ Local cArquivo    	:= GetTempPath()+'GPER004.xml'
 Private cPerg  		:= "GPER004"
 Private cNomeTabela	:= ""
 Private cFiltro		:= ""
+Private cOrdem		:= ""
 Private cTipo		:= ""
 Private cPlano 		:= ""
-
 
 	ValidPerg(cPerg) //INICIA A STATIC FUNCTION PARA CRIAÇÃO DAS PERGUNTAS
 
@@ -34,9 +34,11 @@ If !ApOleClient("MsExcel")
 	Return
 EndIf
 
-//TRATO AS PERGUNTAS PARA USO NOS FILTROS
+
 cNomeTabela	:= UPPER("CALCULO DE PLANO DE SAUDE/ODONTO" )
 
+//TRATO AS PERGUNTAS PARA USO NOS FILTROS
+//FILTRO PARA EXTRAIR PLANOS DE SAÚDE, ODONTOLÓGICO OU AMBOS RESPECTIVAMENTE
 If  MV_PAR05 == 1
 cFiltro		:= "% AND RA_MAT BETWEEN '"+(MV_PAR01)+"' AND '"+(MV_PAR02)+"'AND CTT_CUSTO BETWEEN '"+(MV_PAR03)+"' AND '"+(MV_PAR04)+"' AND RHK_TPFORN = '1' %"
 ElseIf MV_PAR05 == 2
@@ -45,12 +47,19 @@ ElseIf MV_PAR05 == 3
 cFiltro		:= "% AND RA_MAT BETWEEN '"+(MV_PAR01)+"' AND '"+(MV_PAR02)+"'AND CTT_CUSTO BETWEEN '"+(MV_PAR03)+"' AND '"+(MV_PAR04)+"' %"
 EndIf
 
+//ORDENO POR MATRÍCULA OU POR NOME DO TITULAR
+If  MV_PAR06 == 1
+cOrdem		:= "% MATRICULA %"
+Else
+cOrdem		:= "% FILIAL, NOME_ORD, DEPENDENTE %"
+EndIf
+
 //COMEÇO A MINHA CONSULTA SQL
 BeginSql Alias cAlias
 
 //QUERY QUE BUSCA OS ATIVOS POR DATA DE AQUISICAO
 
-SELECT '1 - TITULAR' AS TIPO, RA_FILIAL AS FILIAL,RA_CC AS CCUSTO, CTT_DESC01 AS DESCRICAO,RA_MAT AS MATRICULA,'' AS DEPENDENTE, RA_NOME AS NOME
+SELECT  RA_FILIAL AS FILIAL,'1 - TITULAR' AS TIPO,RA_CC AS CCUSTO, CTT_DESC01 AS DESCRICAO,RA_MAT AS MATRICULA,'' AS DEPENDENTE, RA_NOME AS NOME
 , RHK_TPFORN AS TP_FORNEC, RHK_CODFOR AS COD_FORN, RHK_TPPLAN AS TP_PLAN, RHK_PLANO AS COD_PLANO
 , CASE RHK_TPFORN
 WHEN '1' THEN SUBSTRING(RCC1.RCC_CONTEU,3,20)
@@ -60,16 +69,15 @@ END AS DESC_PLANO
 WHEN '1' THEN SUBSTRING(RCC1.RCC_CONTEU,35,12)
 WHEN '2' THEN SUBSTRING(RCC2.RCC_CONTEU,35,12)
 END AS VALOR
-,RHK_PD AS VERBA_FUNCIONARIO, RHK_PDDAGR AS VERBA_DEPEND
+,RHK_PD AS VERBA_FUNCIONARIO, RHK_PDDAGR AS VERBA_DEPEND, RA_NOME AS NOME_ORD,  '' AS PLANO
 FROM SRA010
 INNER JOIN CTT010 ON CTT_CUSTO = RA_CC AND CTT010.D_E_L_E_T_ = ''
 INNER JOIN RHK010 ON RHK_FILIAL = RA_FILIAL AND RHK_MAT = RA_MAT AND RHK010.D_E_L_E_T_ = ''
 LEFT JOIN RCC010 AS RCC1 ON RCC1.RCC_CODIGO = 'S008' AND  RHK_PLANO = SUBSTRING(RCC1.RCC_CONTEU,1,2) AND RCC1.D_E_L_E_T_ = ''
 LEFT JOIN RCC010 AS RCC2 ON RCC2.RCC_CODIGO = 'S013' AND  RHK_PLANO = SUBSTRING(RCC2.RCC_CONTEU,1,2) AND RCC2.D_E_L_E_T_ = ''
-WHERE SRA010.D_E_L_E_T_ = '' AND RA_SITFOLH <> 'D'
-%exp:cFiltro%
+WHERE SRA010.D_E_L_E_T_ = '' AND RA_SITFOLH <> 'D' AND RHK_TPFORN = '1'
 UNION
-SELECT '2 - DEPENDENTE' AS TIPO, RB_FILIAL AS FILIAL,RA_CC AS CCUSTO, CTT_DESC01 AS DESCRICAO,RB_MAT AS MATRICULA, RB_COD AS DEPENDENTE, RB_NOME AS NOME
+SELECT  RB_FILIAL AS FILIAL,'2 - DEPENDENTE' AS TIPO,RA_CC AS CCUSTO, CTT_DESC01 AS DESCRICAO,RB_MAT AS MATRICULA, RB_COD AS DEPENDENTE, RB_NOME AS NOME
 , RHK_TPFORN AS TP_FORNEC, RHK_CODFOR AS COD_FORN, RHK_TPPLAN AS TP_PLAN, RHK_PLANO AS COD_PLANO
 , CASE RHK_TPFORN
 WHEN '1' THEN SUBSTRING(RCC1.RCC_CONTEU,3,20)
@@ -79,17 +87,17 @@ END AS DESC_PLANO
 WHEN '1' THEN SUBSTRING(RCC1.RCC_CONTEU,47,12)
 WHEN '2' THEN SUBSTRING(RCC2.RCC_CONTEU,47,12)
 END AS VALOR
-,RHK_PD AS VERBA_FUNCIONARIO, RHK_PDDAGR AS VERBA_DEPEND
+,RHK_PD AS VERBA_FUNCIONARIO, RHK_PDDAGR AS VERBA_DEPEND, RA_NOME AS NOME_ORD, RB_PLSAUDE AS PLANO
 FROM SRB010
 INNER JOIN SRA010 ON RB_FILIAL = RA_FILIAL AND RB_MAT = RA_MAT AND SRA010.D_E_L_E_T_ = ''
 INNER JOIN CTT010 ON CTT_CUSTO = RA_CC AND CTT010.D_E_L_E_T_ = ''
 INNER JOIN RHK010 ON RHK_FILIAL = RB_FILIAL AND RHK_MAT = RB_MAT AND RHK010.D_E_L_E_T_ = ''
 LEFT JOIN RCC010 AS RCC1 ON RCC1.RCC_CODIGO = 'S008' AND  RHK_PLANO = SUBSTRING(RCC1.RCC_CONTEU,1,2) AND RCC1.D_E_L_E_T_ = ''
 LEFT JOIN RCC010 AS RCC2 ON RCC2.RCC_CODIGO = 'S013' AND  RHK_PLANO = SUBSTRING(RCC2.RCC_CONTEU,1,2) AND RCC2.D_E_L_E_T_ = ''
-WHERE SRB010.D_E_L_E_T_ = '' AND RA_SITFOLH <> 'D'
+WHERE SRB010.D_E_L_E_T_ = '' AND RA_SITFOLH <> 'D' AND RHK_TPFORN = '1' AND RB_PLSAUDE <> '2'
 %exp:cFiltro%
-AND RB_PLSAUDE = '1'
-ORDER BY MATRICULA
+ORDER BY
+%exp:cOrdem%
 
 EndSql //FINALIZO A MINHA QUERY
 
@@ -118,6 +126,7 @@ dbSelectArea(cAlias)
 dbGoTop()
 While !(cAlias)->(Eof())
 
+	//INCLUSÃO DE NOVA COLUNA INDICANDO SAÚDE OU ODONTO
 	If (cAlias)->TP_PLAN == '1'
 	cPlano = 'Plano de Saude'
 	else
@@ -127,11 +136,9 @@ While !(cAlias)->(Eof())
 	//Criando as Linhas
     oFWMsExcel:AddRow("CALCULO DE PLANO DE SAUDE/ODONTO",cNomeTabela,{FILIAL, CCUSTO, DESCRICAO, TIPO, MATRICULA, DEPENDENTE, NOME, TP_FORNEC,cPlano, COD_PLANO, DESC_PLANO, VALOR })
 
-
 	(cAlias)->(dbSkip()) //PASSAR PARA O PRÓXIMO REGISTRO DA MINHA QUERY
 
 Enddo
-
 
     oFWMsExcel:Activate()
     oFWMsExcel:GetXMLFile(cArquivo)
@@ -141,9 +148,7 @@ Enddo
     oExcel:WorkBooks:Open(cArquivo)     	//Abre uma planilha
     oExcel:SetVisible(.T.)              	//Visualiza a planilha
     oExcel:Destroy()                    	//Encerra o processo do gerenciador de tarefas
-
 	(cAlias)->(dbClosearea()) 				//FECHO A TABELA APOS O USO
-
 	RestArea(aArea)
 
 Return
@@ -165,6 +170,8 @@ Static Function ValidPerg(cPerg)
 	AADD(aRegs,{cPerg,"03","Do Centro de custo:		","","","mv_ch03","C",09,0,0,"G","","mv_par03","","","","","","","","","","","","","","","","","","","","","","","","","CTT"})
 	AADD(aRegs,{cPerg,"04","Até o Centro de custo:	","","","mv_ch04","C",09,0,0,"G","","mv_par04","","","","","","","","","","","","","","","","","","","","","","","","","CTT"})
 	AADD(aRegs,{cPerg,"05","Tipo Plano:				","","","mv_ch05","N",01,0,1,"C","","mv_par05","Saúde","","","","","Odontológico","","","","","Ambos","","","","","","","","","","","","","","",""})
+	AADD(aRegs,{cPerg,"06","Ordenar por:			","","","mv_ch06","N",01,0,1,"C","","mv_par06","Matrícula","","","","","Nome do Titular","","","","","","","","","","","","","","","","","","","",""})
+
 
 	For i:=1 to Len(aRegs)
 		If !dbSeek(cPerg+aRegs[i,2])
@@ -179,5 +186,4 @@ Static Function ValidPerg(cPerg)
 	Next
 
 	RestArea(aArea)
-
 Return
