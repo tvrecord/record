@@ -24,6 +24,7 @@ User Function FINR001()
 	Private nTotCalc 	:= 0
 	Private nTotRepas := 0
 	Private nTotRat   := 0
+	Private nTotalR	  := 0
 
 	//Private lLogin    := Type("cEmpAnt") != "U"
 	Private cTmp1     := GetNextAlias()
@@ -34,6 +35,8 @@ User Function FINR001()
 	Private nLin 		:= 0
 	Private oFonte 		:= u_xFonte(8,,,,"Arial")
 	Private oFonteN 	:= u_xFonte(8,.T.,,,"Arial")
+	Private oFonte10 	:= u_xFonte(10,,,,"Arial")
+	Private oFonte10N 	:= u_xFonte(10,.T.,,,"Arial")
 
 	Private aImpNeg := {}
 
@@ -175,9 +178,16 @@ Static Function fProcPdf()
 			//Impressão dos totalizadores
 			oPrint:Say( nLin,675, Transform( nTotCalc,  "@E 999,999,999.99"),oFonteN)
 			oPrint:Say( nLin,780, Transform( nTotRepas, "@E 999,999,999.99"),oFonteN)
+			nTotalR	  += nTotRepas
 			nTotCalc  := 0
 			nTotRepas := 0
 			nTotRat	  := 0
+
+	nLin += REL_VERT_STD
+
+	oPrint:Say( nLin,685, "TOTAL:",oFonte10N)
+	oPrint:Say( nLin,776, Transform(nTotalR, "@E 999,999,999.99"),oFonte10N)
+
 
 			//Verifico se imprime apenas o total ou n�o
 			If cImpTot == "N"
@@ -632,6 +642,7 @@ Static Function ImpPerComp()
 		//Impressão dos totalizadores
 		oPrint:Say( nLin,675, Transform( nTotCalc,  "@E 999,999,999.99"),oFonteN)
 		oPrint:Say( nLin,780, Transform( nTotRepas, "@E 999,999,999.99"),oFonteN)
+		nTotalR	  += nTotRepas
 		nTotCalc  := 0
 		nTotRepas := 0
 
@@ -791,7 +802,6 @@ Static Function ImpDetalhe()
 	oPrint:Say( nLin,780, Transform( (cTmp1)->ZAH_REPCOM, "@E 999,999,999.99"),oFonte)
 
 	nLin += REL_VERT_STD
-
 
 	nTotCalc 	+= (cTmp1)->ZAH_VLCALC
 	nTotRepas 	+= (cTmp1)->ZAH_REPCOM
