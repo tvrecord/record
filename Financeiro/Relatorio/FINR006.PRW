@@ -80,7 +80,7 @@ Static Function fProcPdf()
 	Private cFiltro3	:= ""
 
 	// Query para buscar as informações
-	cFiltro1	:= "% (E1_EMISSAO BETWEEN '"+DTOS(MV_PAR04)+"' AND '"+DTOS(MV_PAR05)+"' AND E1_BAIXA BETWEEN '"+DTOS(MV_PAR06)+"' AND '"+DTOS(MV_PAR07)+"' AND E1_VEND1 BETWEEN '"+(MV_PAR02)+"' AND '"+(MV_PAR03)+"') %"
+	cFiltro1	:= "% (E1_EMISSAO BETWEEN '"+DTOS(MV_PAR04)+"' AND '"+DTOS(MV_PAR05)+"' AND E1_BAIXA BETWEEN '"+DTOS(MV_PAR06)+"' AND '"+DTOS(MV_PAR07)+"' AND E1_VEND1 BETWEEN '"+(MV_PAR02)+"' AND '"+(MV_PAR03)+"' OR E1_NUM IN " + FormatIn(ALLTRIM(MV_PAR14),"/") + " ) %"
 
 	// Busca os registros a serem impressos no relatório - BonIficação de volume
 	BeginSql Alias cAlias
@@ -217,7 +217,7 @@ Static Function fProcPdf()
 			If (STOD((cAlias)->E1_BAIXA) > STOD((cAlias)->E1_VENCTO)) .AND. (STOD((cAlias)->E1_BAIXA)) <= (STOD((cAlias)->E1_VENCTO) + (cAlias)->ZU_DIAS) .AND. lVend
 
 				// Query para buscar as informações
-				cFiltro2	:= "% AND SUBSTRING(E1_EMISSAO,1,6) = '"+(cAlias)->MESFAT+"' AND E1_BAIXA BETWEEN '"+dIniBxA+"' AND '"+dFimBxA+"' AND E1_VEND1 = '"+(cAlias)->E1_VEND1+"' %"
+				cFiltro2	:= "% AND (SUBSTRING(E1_EMISSAO,1,6) = '"+(cAlias)->MESFAT+"' AND E1_BAIXA BETWEEN '"+dIniBxA+"' AND '"+dFimBxA+"' AND E1_VEND1 = '"+(cAlias)->E1_VEND1+"' OR E1_NUM IN " + FormatIn(ALLTRIM(MV_PAR14),"/") + ") %"
 				//FatMesAnt()
 
 			EndIf //Fim do controle do mês anterior
@@ -312,7 +312,7 @@ Static Function fProcPdf()
 	nFatAge  := 0
 	nBVAge 	 := 0
 	nPerc 	 := 0
-	cFiltro3 := "% (E1_EMISSAO BETWEEN '"+DTOS(MV_PAR04)+"' AND '"+DTOS(MV_PAR05)+"' AND E1_BAIXA BETWEEN '"+DTOS(MV_PAR06)+"' AND '"+DTOS(MV_PAR07)+"' AND E1_VEND1 BETWEEN '"+(MV_PAR02)+"' AND '"+(MV_PAR03)+"' OR E1_NUM IN " + FormatIn(ALLTRIM(MV_PAR14),"/") + ") %"
+	cFiltro3 := "% (E1_EMISSAO BETWEEN '"+DTOS(MV_PAR04)+"' AND '"+DTOS(MV_PAR05)+"' AND E1_BAIXA BETWEEN '"+DTOS(MV_PAR06)+"' AND '"+DTOS(MV_PAR07)+"' AND E1_VEND1 BETWEEN '"+(MV_PAR02)+"' AND '"+(MV_PAR03)+"' OR E1_NUM IN " + FormatIn(ALLTRIM(MV_PAR15),"/") + ") %"
 
 	// Busca os registros a serem impressos no relatório - Comissão de Agência
 	BeginSql Alias cAlias1
@@ -601,7 +601,8 @@ Static Function ValidPerg(cPerg)
 	aAdd(aRegs,{cPerg,"11","Assinatura 4:		","","","mv_ch11","C",06,00,0,"G","","MV_PAR11","","","","","","","","","","","","","","","","","","","","","","","","","USR"})
 	aAdd(aRegs,{cPerg,"12","Destino do(s) Arq.: ","","","mv_ch12","C",99,00,0,"G","","MV_PAR12","","","","","","","","","","","","","","","","","","","","","","","","",""})
 	AADD(aRegs,{cPerg,"13","Imprime Não Pagos:	","","","mv_ch13","N",01,00,0,"C","","mv_par13","Sim","","","","","Não","","","","","","","","","","","","","","","","","","",""})
-	AADD(aRegs,{cPerg,"14","NF Exceção a Regra:	","","","mv_ch14","C",35,00,0,"G","","mv_par14","","","","","","","","","","","","","","","","","","","","","","","","","SE1"})
+	AADD(aRegs,{cPerg,"14","Exceção NF BV: 		","","","mv_ch14","C",35,00,0,"G","","mv_par14","","","","","","","","","","","","","","","","","","","","","","","","","SE1"})
+	AADD(aRegs,{cPerg,"15","Exceção NF Agência: ","","","mv_ch15","C",35,00,0,"G","","mv_par15","","","","","","","","","","","","","","","","","","","","","","","","","SE1"})
 
 	For i:=1 to Len(aRegs)
 		If !dbSeek(PADR(cPerg,10)+aRegs[i,2])
