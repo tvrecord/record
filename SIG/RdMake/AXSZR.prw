@@ -14,7 +14,7 @@
 ±±ÈÍÍÍÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¼±±
 ±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
-/*/                                                                            
+/*/
 
 User Function AXSZR  // Rafael -> AxCadastro da rotina
 
@@ -26,15 +26,15 @@ Private aRotina := { {"Pesquisar","AxPesqui",0,1} ,;
 {"Excluir","AxDeleta",0,5},;
 {"Calc Receita","u_TelaRECE()",0,2},;
 {"Calc Despesa","u_TelaDESP()",0,2},;
-{"Calc Ativo","u_TelaATF()",0,2},;   
+{"Calc Ativo","u_TelaATF()",0,2},;
 {"Compensação Desp.","u_TelaComp()",0,2},;
 {"Compensação Desp. Ativo","u_TelCompAt()",0,2},;
-{"Relatorio","u_ImpSIG()",0,2},;
-{"Legenda","u_LegenSZR()",0,4}} 
+{"Relatorio","u_FINR009()",0,2},;
+{"Legenda","u_LegenSZR()",0,4}}
 
 Private aCores := {{'ZR_TIPO == "D"','BR_VERMELHO'},{'ZR_TIPO == "C"','BR_VERDE'},{'ZR_TIPO == "E"','BR_AMARELO'},{'ZR_TIPO == "F"','BR_PRETO'}}
 Private cString := "SZR"
-                                                                    
+
 
 dbSelectArea(cString)
 dbSetOrder(1)
@@ -179,7 +179,7 @@ ENDDOC*/
 Static Function VerificaDESP(dData1,dData2,cCusto1,cCusto2)
 
 IF MsgYesNo("O sistema irá apagar os lançamentos de debito do periodo antes de executar o programa. Deseja continuar?","Atenção")
-	
+
 	Processa({|| TcSqlExec("DELETE FROM " + RetSqlName("SZR") + " WHERE ZR_EMISSAO  BETWEEN '" + DTOS(dData1) + "' AND '" + DTOS(dData2) + "' AND ZR_TIPO = 'D' AND ZR_ROTINA = '2'")},"Deletando registros anteriores")
 	Processa({|| TcSqlExec("DELETE FROM " + RetSqlName("SZR") + " WHERE ZR_EMISSAO  BETWEEN '" + DTOS(dData1) + "' AND '" + DTOS(dData2) + "' AND ZR_TIPO = 'X' AND ZR_ROTINA = '2'")},"Deletando registros CD")
 	Processa({|| _GeraDESP(dData1,dData2,cCusto1,cCusto2)},"Atualizando registros do SIG")
@@ -214,14 +214,14 @@ ENDDOC*/
 Static Function CompDesp(dData10,dData11)
 IF MsgYesNo("O sistema irá apagar os lançamentos do Ativo do periodo antes de executar o programa. Deseja continuar?","Atenção")
 	Processa({|| _RateioDesp(dData10,dData11)},"Executando Compensacao")
-EndIf	
+EndIf
 Return
 
 Static Function CompAtivo(dData10,dData11)
 
 IF MsgYesNo("O sistema irá apagar os lançamentos do Ativo do periodo antes de executar o programa. Deseja continuar?","Atenção")
 	Processa({|| _RateioATIVO(dData10,dData11)},"Executando Compensacao de Despesa Ativo Fixo")
-EndIf	
+EndIf
 
 Return
 
@@ -230,7 +230,7 @@ Return
 Static Function _GeraRECE(dData3,dData4,cCusto3,cCusto4)
 
 Local cQueryRECE	:= ""
-Local cQueryRECEE	:= ""                                              
+Local cQueryRECEE	:= ""
 Local nRec2			:= 0
 Local nCod2			:= 1
 Local cCusto		:= ""
@@ -264,9 +264,9 @@ dbGoTop()
 ProcRegua(nRec2)
 
 While !EOF()
-	
+
 	IncProc()
-	
+
 	dbSelectArea("SZR")
 	dBSetOrder(2)
 	If !EMPTY(TMPRECE->CT2_CCC)
@@ -345,17 +345,17 @@ While !EOF()
 			SZR->ZR_MODULO	:= TMPRECE->CT2_ROTINA
 			SZR->ZR_HIST	:= TMPRECE->CT2_HIST
 			SZR->ZR_ORIGEM	:= TMPRECE->CT2_ORIGEM
-			SZR->ZR_TIPO	:= "C"  
-			SZR->ZR_SEQUEN	:= TMPRECE->CT2_SEQUEN 
-			SZR->ZR_SEQLAN	:= TMPRECE->CT2_SEQLAN 			
-			SZR->ZR_ROTINA  := "1" // 1 = Receita; 2 = Despesa; 3 = Despesa Ativo Fixo			
+			SZR->ZR_TIPO	:= "C"
+			SZR->ZR_SEQUEN	:= TMPRECE->CT2_SEQUEN
+			SZR->ZR_SEQLAN	:= TMPRECE->CT2_SEQLAN
+			SZR->ZR_ROTINA  := "1" // 1 = Receita; 2 = Despesa; 3 = Despesa Ativo Fixo
 			MsUnlock()
   //		END
 	END
-	
+
 	dbSelectArea("TMPRECE")
 	dbSkip()
-	
+
 EndDo
 
 dbSelectArea("TMPRECE")
@@ -373,7 +373,7 @@ Local cQueryDESPE	:= ""
 Local cQueryDESP	:= ""
 Local nGPE          := 0
 Local nRec1			:= 0
-Local nCod1			:= 1 
+Local nCod1			:= 1
 Local nCod2			:= 1
 Local nCD 			:= 1
 
@@ -399,10 +399,10 @@ cQueryDESP += "SELECT 'IMP' AS PREFIXO,CT2_DEBITO,CT2_CCD,CT2_HIST,CT2_ORIGEM,CT
 cQueryDESP += "INNER JOIN CT1010 ON CT2_DEBITO = CT1_CONTA "
 cQueryDESP += "WHERE CT2010.D_E_L_E_T_ <> '*' AND CT1010.D_E_L_E_T_ <> '*' AND "
 cQueryDESP += "CT2_ROTINA NOT LIKE ('%ATF%') AND SUBSTRING(CT2_DEBITO,1,5) <> '41160' AND "  // Separa registros dos ativos
-cQueryDESP += "CT2_DEBITO IN (SELECT CT1_CONTA FROM CT1010 WHERE CT1_SIG BETWEEN '14001' AND '14999' AND CT1_BLOQ <> '1' AND D_E_L_E_T_ = '') AND "  
+cQueryDESP += "CT2_DEBITO IN (SELECT CT1_CONTA FROM CT1010 WHERE CT1_SIG BETWEEN '14001' AND '14999' AND CT1_BLOQ <> '1' AND D_E_L_E_T_ = '') AND "
 cQueryDESP += "CT2_CCD BETWEEN '' AND 'ZZZZZZZ' AND "
 cQueryDESP += "CT2_DATA BETWEEN '" + DTOS(dData1) + "' AND '" + DTOS(dData2) + "' AND CT2_TPSALD = '1' AND "
-cQueryDESP += "CT2_FILIAL = '01' "  
+cQueryDESP += "CT2_FILIAL = '01' "
 cQueryDESP += "UNION " // TRI - REGRA PARA CALCULOS DE TRIBUTOS
 cQueryDESP += "SELECT 'TRI' AS PREFIXO,CT2_DEBITO,CT2_CCD,CT2_HIST,CT2_ORIGEM,CT2_DATA,CT2_ROTINA,CT1_SIG,CT2_SEQUEN,CT2_SEQLAN,CT2_VALOR AS VALOR FROM CT2010 "
 cQueryDESP += "INNER JOIN CT1010 ON CT2_DEBITO = CT1_CONTA "
@@ -467,49 +467,49 @@ While !EOF()
 			ELSE
 				SZR->ZR_FORNECE	:= "000131"
 				SZR->ZR_LOJA	:= "01"
-			ENDIF 
+			ENDIF
 		ELSEIF TMPDESP->PREFIXO == "IMP"
 			SZR->ZR_PREFIXO	:= TMPDESP->PREFIXO
 			SZR->ZR_DOC		:= SUBSTR(TMPDESP->CT2_DATA,3,6) + SUBSTR(TMPDESP->CT1_SIG,2,4)
 			SZR->ZR_FORNECE	:= "000131"
-			SZR->ZR_LOJA	:= "01"		
-		ELSEIF TMPDESP->PREFIXO == "FIS"			
+			SZR->ZR_LOJA	:= "01"
+		ELSEIF TMPDESP->PREFIXO == "FIS"
 			SZR->ZR_PREFIXO	:= TMPDESP->PREFIXO
 			SZR->ZR_DOC		:= SUBSTR(TMPDESP->CT2_DATA,3,6) + STRZERO(nCod2,04)
 			SZR->ZR_FORNECE	:= "000131"
-			SZR->ZR_LOJA	:= "01"	  
-			nCod2 ++			
+			SZR->ZR_LOJA	:= "01"
+			nCod2 ++
 		ENDIF
 		SZR->ZR_EMISSAO	:= STOD(TMPDESP->CT2_DATA)
-		IF (TMPDESP->CT2_ORIGEM == "A01-001 305                             " .OR. TMPDESP->CT2_ORIGEM == "A01-001 307                             " .OR. TMPDESP->CT2_ORIGEM == "A01-001 389                             ") .AND. TMPDESP->CT1_SIG == "04011" 
+		IF (TMPDESP->CT2_ORIGEM == "A01-001 305                             " .OR. TMPDESP->CT2_ORIGEM == "A01-001 307                             " .OR. TMPDESP->CT2_ORIGEM == "A01-001 389                             ") .AND. TMPDESP->CT1_SIG == "04011"
 		SZR->ZR_CTASIG  := "05008"
 		ELSE
-		SZR->ZR_CTASIG  := TMPDESP->CT1_SIG 
+		SZR->ZR_CTASIG  := TMPDESP->CT1_SIG
 		ENDIF
 		SZR->ZR_CONTA  	:= TMPDESP->CT2_DEBITO
-		SZR->ZR_CTADESC := Posicione("CT1",1,xfilial("CT1")+TMPDESP->CT2_DEBITO,"CT1_DESC01")  
+		SZR->ZR_CTADESC := Posicione("CT1",1,xfilial("CT1")+TMPDESP->CT2_DEBITO,"CT1_DESC01")
 		IF TMPDESP->PREFIXO <> "DES" .AND. EMPTY(TMPDESP->CT2_CCD)
-		SZR->ZR_CC     	:= "4001001"   
-		SZR->ZR_NOMECC 	:= Posicione("CTT",1,xFilial("CTT")+"4001001","CTT_DESC01")		
+		SZR->ZR_CC     	:= "4001001"
+		SZR->ZR_NOMECC 	:= Posicione("CTT",1,xFilial("CTT")+"4001001","CTT_DESC01")
 		ELSE
-		SZR->ZR_CC     	:= TMPDESP->CT2_CCD  
-		SZR->ZR_NOMECC 	:= Posicione("CTT",1,xFilial("CTT")+TMPDESP->CT2_CCD,"CTT_DESC01")		
+		SZR->ZR_CC     	:= TMPDESP->CT2_CCD
+		SZR->ZR_NOMECC 	:= Posicione("CTT",1,xFilial("CTT")+TMPDESP->CT2_CCD,"CTT_DESC01")
 		END
 		SZR->ZR_VALOR	:= TMPDESP->VALOR
 		SZR->ZR_MODULO	:= TMPDESP->CT2_ROTINA
 		SZR->ZR_HIST	:= TMPDESP->CT2_HIST
 		SZR->ZR_ORIGEM	:= TMPDESP->CT2_ORIGEM
-		SZR->ZR_TIPO	:= "D"  
-		SZR->ZR_SEQUEN	:= TMPDESP->CT2_SEQUEN 
+		SZR->ZR_TIPO	:= "D"
+		SZR->ZR_SEQUEN	:= TMPDESP->CT2_SEQUEN
 		SZR->ZR_SEQLAN	:= TMPDESP->CT2_SEQLAN
-		SZR->ZR_ROTINA  := "2" // 1 = Receita; 2 = Despesa; 3 = Despesa Ativo Fixo		
+		SZR->ZR_ROTINA  := "2" // 1 = Receita; 2 = Despesa; 3 = Despesa Ativo Fixo
 		MsUnlock()
 	End
-	
-	
+
+
 	dbSelectArea("TMPDESP")
 	dbSkip()
-	
+
 EndDo
 
 dbSelectArea("TMPDESP")
@@ -529,7 +529,7 @@ tcQuery cQueryDESPE New Alias "ESTDESP"
 dbSelectArea("ESTDESP")
 dbGoTop()
 While !EOF()
-	
+
 	dbSelectArea("SZR")
 	dbSetOrder(3)
 	If dbSeek(xFilial("SZR") + PADR(ESTDESP->CT2_CREDIT,20) + PADR(ESTDESP->CT2_CCC,10) + ESTDESP->CT2_DATA + "D" + PADL(ALLTRIM(STR(ESTDESP->VALOR)),12) + SUBSTR(ESTDESP->CT2_ROTINA,1,7))
@@ -557,17 +557,17 @@ While !EOF()
 		SZR->ZR_MODULO	:= ESTDESP->CT2_ROTINA
 		SZR->ZR_HIST	:= ESTDESP->CT2_HIST
 		SZR->ZR_ORIGEM	:= ESTDESP->CT2_ORIGEM
-		SZR->ZR_TIPO	:= "X" 
+		SZR->ZR_TIPO	:= "X"
 		SZR->ZR_SEQUEN	:= ESTDESP->CT2_SEQUEN
 		SZR->ZR_SEQLAN	:= ESTDESP->CT2_SEQLAN
-		SZR->ZR_ROTINA  := "2" // 1 = Receita; 2 = Despesa; 3 = Despesa Ativo Fixo		
+		SZR->ZR_ROTINA  := "2" // 1 = Receita; 2 = Despesa; 3 = Despesa Ativo Fixo
 		MsUnlock()
 		nCD ++
 	End
-	
+
 	dbSelectArea("ESTDESP")
 	dbSkip()
-	
+
 EndDo
 
 dbSelectArea("ESTDESP")
@@ -616,9 +616,9 @@ dbGoTop()
 ProcRegua(nRec3)
 
 While !EOF()
-	
+
 	IncProc()
-	
+
 	dbSelectArea("SZR")
 	dBSetOrder(2)
 	If !dbSeek(xFilial("SZR")+ SUBSTR(TMPATF->CT2_DEBITO,1,10) + TMPATF->CT2_CCD + " " + TMPATF->CT2_DATA + SUBSTR(TMPATF->CT2_ORIGEM,1,40))
@@ -640,27 +640,27 @@ While !EOF()
 		SZR->ZR_VALOR	:= TMPATF->VALOR
 		SZR->ZR_MODULO	:= TMPATF->CT2_ROTINA
 		SZR->ZR_HIST	:= "DEPRECIACAO MES " + MesExtenso(STOD(TMPATF->CT2_DATA)) + "C. CUSTO: " + TMPATF->CT2_CCD
-		SZR->ZR_ORIGEM	:= TMPATF->CT2_ORIGEM      
-		IF SUBSTR(TMPATF->CT2_ORIGEM,09,3) == 'ZZZ'     //SUBSTR(TMPDESP->CT2_ORIGEM,09,3)   
+		SZR->ZR_ORIGEM	:= TMPATF->CT2_ORIGEM
+		IF SUBSTR(TMPATF->CT2_ORIGEM,09,3) == 'ZZZ'     //SUBSTR(TMPDESP->CT2_ORIGEM,09,3)
 	   	SZR->ZR_TIPO	:= "Y"
 		ELSE
-		SZR->ZR_TIPO	:= "D"      
-		ENDIF   
+		SZR->ZR_TIPO	:= "D"
+		ENDIF
 		SZR->ZR_SEQUEN	:= TMPATF->CT2_SEQUEN
-		SZR->ZR_SEQLAN	:= TMPATF->CT2_SEQLAN		
-		SZR->ZR_ROTINA  := "3" // 1 = Receita; 2 = Despesa; 3 = Despesa Ativo Fixo		
+		SZR->ZR_SEQLAN	:= TMPATF->CT2_SEQLAN
+		SZR->ZR_ROTINA  := "3" // 1 = Receita; 2 = Despesa; 3 = Despesa Ativo Fixo
 		MsUnlock()
 	End
-	
+
 	nATF ++
-	
+
 	dbSelectArea("TMPATF")
 	dbSkip()
-	
+
 EndDo
 
 dbSelectArea("TMPATF")
-dbCloseArea("TMPATF") 
+dbCloseArea("TMPATF")
 
 _GeraVLJ(dData5,dData6)
 
@@ -670,7 +670,7 @@ Return
 
 //Seleciona registros de valor justo do ativo fixo tipo D
 
-Static Function _GeraVLJ(dData5,dData6)                                    
+Static Function _GeraVLJ(dData5,dData6)
 
 Local cQueryVLJ	:= ""
 Local nVLJ      := 0
@@ -699,9 +699,9 @@ dbGoTop()
 ProcRegua(nRec4)
 
 While !EOF()
-	
+
 	IncProc()
-	
+
 	dbSelectArea("SZR")
 	dBSetOrder(2)
 	If !dbSeek(xFilial("SZR")+ SUBSTR(TMPVLJ->CT2_DEBITO,1,10) + TMPVLJ->CT2_CCD + " " + TMPVLJ->CT2_DATA + SUBSTR(TMPVLJ->CT2_ORIGEM,1,40))
@@ -723,23 +723,23 @@ While !EOF()
 		SZR->ZR_VALOR	:= TMPVLJ->VALOR
 		SZR->ZR_MODULO	:= TMPVLJ->CT2_ROTINA
 		SZR->ZR_HIST	:= "DEPRECIACAO SOCIETARIA MES " + MesExtenso(STOD(TMPVLJ->CT2_DATA)) + "C. CUSTO: " + TMPVLJ->CT2_CCD
-		SZR->ZR_ORIGEM	:= TMPVLJ->CT2_ORIGEM      
-		IF SUBSTR(TMPVLJ->CT2_ORIGEM,09,3) == 'ZZZ'     //SUBSTR(TMPDESP->CT2_ORIGEM,09,3)   
+		SZR->ZR_ORIGEM	:= TMPVLJ->CT2_ORIGEM
+		IF SUBSTR(TMPVLJ->CT2_ORIGEM,09,3) == 'ZZZ'     //SUBSTR(TMPDESP->CT2_ORIGEM,09,3)
 	   	SZR->ZR_TIPO	:= "Y"
 		ELSE
-		SZR->ZR_TIPO	:= "D"      
-		ENDIF   
+		SZR->ZR_TIPO	:= "D"
+		ENDIF
 		SZR->ZR_SEQUEN	:= TMPVLJ->CT2_SEQUEN
-		SZR->ZR_SEQLAN	:= TMPVLJ->CT2_SEQLAN		
-		SZR->ZR_ROTINA  := "4" // 1 = Receita; 2 = Despesa; 3 = Despesa Ativo Fixo; 4 = Valor Justo		
+		SZR->ZR_SEQLAN	:= TMPVLJ->CT2_SEQLAN
+		SZR->ZR_ROTINA  := "4" // 1 = Receita; 2 = Despesa; 3 = Despesa Ativo Fixo; 4 = Valor Justo
 		MsUnlock()
 	End
-	
+
 	nVLJ ++
-	
+
 	dbSelectArea("TMPVLJ")
 	dbSkip()
-	
+
 EndDo
 
 dbSelectArea("TMPVLJ")
@@ -749,7 +749,7 @@ Close(oDlg)
 
 Return
 
-//Faz a compensação do credito nas despesas 
+//Faz a compensação do credito nas despesas
 
 Static Function _RateioDESP(dData10,dData11)
 
@@ -774,30 +774,30 @@ cQueryCt += "D_E_L_E_T_ <> '*'"
 tcQuery cQueryCt New Alias "TMPCT"
 
 dBSelectArea("TMPCT")
-While !EOF() 
-	
+While !EOF()
+
 	//aAdd(aConta,{Posicione("CT1",1,xfilial("CT1")+TMPCT->ZT_CONTA,"CT1_SIG")})
-	aAdd(aConta,{ALLTRIM(TMPCT->ZT_CTASIG)})	
-	
+	aAdd(aConta,{ALLTRIM(TMPCT->ZT_CTASIG)})
+
 	Dbskip()
-	
+
 EndDo
 
 dBSelectArea("TMPCT")
 dbCloseArea("TMPCT")
 
 If Len(aConta) > 0
-	
+
 	For i := 1 To Len(aConta)
-		
+
 		If i != Len(aConta)
 			cContas += aConta[i][1] + ";"
 		else
-			cContas += aConta[i][1]            
+			cContas += aConta[i][1]
 		Endif
-		
+
 	Next i
-	
+
 EndIf
 
 cQueryTot := "SELECT ZR_CODIGO,ZR_CTASIG,ZR_CC,SUM(ZR_VALOR) AS VALOR FROM SZR010 WHERE "
@@ -812,15 +812,15 @@ tcQuery cQueryTot New Alias "TMPTOT"
 dBSelectArea("TMPTOT")
 
 While !EOF()
-	
+
 	aAdd(aInfo,{TMPTOT->ZR_CODIGO,;
 	TMPTOT->ZR_CC,;
 	TMPTOT->ZR_CTASIG,;
 	TMPTOT->VALOR})
-	
+
 	dBSelectArea("TMPTOT")
 	dbSkip()
-	                                          
+
 Enddo
 
 dBSelectArea("TMPTOT")
@@ -840,63 +840,63 @@ dBSelectArea("TMPDEB")
 While !EOF()
 
 
-	
+
 	For i := 1 To Len(aInfo)
-		
+
 		IF (aInfo[i][2] == TMPDEB->ZR_CC .AND. aInfo[i][3] == TMPDEB->ZR_CTASIG)
 			nPos := i
 			lOk := .T.
 			Exit
 		EndIf
-		
+
 	Next i
-	
-	If lOk == .T.		
-		
+
+	If lOk == .T.
+
 		cQueryCon := "SELECT * FROM SZR010 WHERE "
 		cQueryCon += "ZR_TIPO = 'D' AND "
 		cQueryCon += "ZR_CTASIG = '"+ TMPDEB->ZR_CTASIG +"' AND "
 		cQueryCon += "ZR_CC = '"+ TMPDEB->ZR_CC +"' AND "
 		cQueryCon += "ZR_EMISSAO BETWEEN '" + DTOS(dData10) + "'  AND '" + DTOS(dData11) + "' AND ZR_ROTINA = '2' "
 		cQueryCon += "ORDER BY ZR_CTASIG "
-		
+
 		tcQuery cQueryCon New Alias "TMPCON"
-		
+
 		DBSelectArea("TMPCON")
 		While !EOF() //.AND. dData1 <= SZR->ZR_EMISSAO .AND. dData2 >= SZR->ZR_EMISSAO .AND. TMPDEB->ZR_CC == SZR->ZR_CC .AND. TMPDEB->ZR_CONTA == SZR->ZR_CONTA
-			
-			
+
+
 			DBSelectArea("SZR")
 			dbSetOrder(9)
 			If dbSeek(xFilial("SZR") + PADR(TMPCON->ZR_CTASIG,10) + PADR(TMPCON->ZR_CC,10) + TMPCON->ZR_EMISSAO + "D" + PADL(TMPCON->ZR_VALOR,14) + "2")
-				
+
 				nValDesc := TMPCON->ZR_VALOR - ((TMPCON->ZR_VALOR /aInfo[nPos][4]) * (TMPDEB->VALOR))
 				Reclock("SZR",.F.)
 				SZR->ZR_VALOR	:= nValDesc
 				ZR_USERLGA := "COMPDESP"
 				MsUnlock()
-				
+
 			EndIf
-			
+
 			nValDesc :=  0
-			
+
 			DBSelectArea("TMPCON")
 			DBSkip()
-			
+
 		EndDo
-		
+
 		dBSelectArea("TMPCON")
 		dbCloseArea("TMPCON")
-		
+
 	EndIf
-	
+
 	lOk := .F.
-	
-	
-	
+
+
+
 	dBSelectArea("TMPDEB")
 	DBSkip()
-	
+
 Enddo
 
 dBSelectArea("TMPDEB")
@@ -923,65 +923,65 @@ dbgotop()
 ProcRegua(1000)
 
 While !EOF()
-	
+
 	cQueryDeb := "SELECT ZR_CODIGO,ZR_CONTA,SUM(ZR_VALOR) AS VALOR FROM SZR010 WHERE "
 	cQueryDeb += "ZR_TIPO = 'X' AND ZR_CONTA = '" + TMPTOT->ZR_CONTA + "' AND "
 	cQueryDeb += "ZR_EMISSAO BETWEEN '" + DTOS(dData10) + "'  AND '" + DTOS(dData11) + "' AND ZR_ROTINA = '2' "
 	cQueryDeb += "GROUP BY ZR_CODIGO,ZR_CONTA "
 	cQueryDeb += "ORDER BY ZR_CONTA "
-	
+
 	tcQuery cQueryDeb New Alias "TMPDEB"
-	
+
 	dBSelectArea("TMPDEB")
 	While !EOF()
-		
+
 		cQueryCon := "SELECT * FROM SZR010 WHERE "
 		cQueryCon += "ZR_TIPO = 'D' AND "
 		cQueryCon += "ZR_CONTA = '"+ TMPDEB->ZR_CONTA + "' AND "
 		cQueryCon += "ZR_EMISSAO BETWEEN '" + DTOS(dData10) + "'  AND '" + DTOS(dData11) + "' AND ZR_ROTINA = '2' "
 		cQueryCon += "ORDER BY ZR_CONTA "
-		
+
 		tcQuery cQueryCon New Alias "TMPCON"
-		
+
 		DBSelectArea("TMPCON")
 		While !EOF() //.AND. dData1 <= SZR->ZR_EMISSAO .AND. dData2 >= SZR->ZR_EMISSAO .AND. TMPDEB->ZR_CC == SZR->ZR_CC .AND. TMPDEB->ZR_CONTA == SZR->ZR_CONTA
 			   IncProc()
-			
+
 			DBSelectArea("SZR")
 			dbSetOrder(3)
 			//If dbSeek(xFilial("SZR") + PADR(TMPCON->ZR_CONTA,20) + "D" + PADL(TMPCON->ZR_VALOR,12))
 			If dbSeek(xFilial("SZR") + PADR(TMPCON->ZR_CONTA,20) + PADR(TMPCON->ZR_CC,10) + TMPCON->ZR_EMISSAO + "D" + PADL(TMPCON->ZR_VALOR,14) + "2")
-				
-				
+
+
 				nValDesc := TMPCON->ZR_VALOR - ((TMPCON->ZR_VALOR /TMPTOT->VALOR) * (TMPDEB->VALOR))
 				Reclock("SZR",.F.)
 				SZR->ZR_VALOR	:= nValDesc
 				ZR_USERLGA := ""
 				MsUnlock()
-				
+
 			EndIf
-			
+
 			nValDesc :=  0
-			
+
 			DBSelectArea("TMPCON")
 			DBSkip()
-			
+
 		EndDo
-		
+
 		dBSelectArea("TMPCON")
 		dbCloseArea("TMPCON")
-		
+
 		dBSelectArea("TMPDEB")
 		DBSkip()
-		
+
 	Enddo
-	
+
 	dBSelectArea("TMPDEB")
 	dbCloseArea("TMPDEB")
-	
+
 	dBSelectArea("TMPTOT")
 	DBSkip()
-	
+
 ENDDO
 
 dBSelectArea("TMPTOT")
@@ -1029,28 +1029,28 @@ tcQuery cQueryCt New Alias "TMPCT"
 
 dBSelectArea("TMPCT")
 While !EOF()
-	
+
 	aAdd(aConta,{TMPCT->ZT_CONTA})
-	
+
 	Dbskip()
-	
+
 EndDo
 
 dBSelectArea("TMPCT")
 dbCloseArea("TMPCT")
 
 If Len(aConta) > 0
-	
+
 	For i := 1 To Len(aConta)
-		
+
 		If i != Len(aConta)
 			cContas += aConta[i][1] + ";"
 		else
 			cContas += aConta[i][1]
 		Endif
-		
+
 	Next i
-	
+
 EndIf
 
 cQueryTot := "SELECT ZR_CODIGO,ZR_CONTA,ZR_CC,SUM(ZR_VALOR) AS VALOR FROM SZR010 WHERE "
@@ -1064,15 +1064,15 @@ tcQuery cQueryTot New Alias "TMPTOT"
 
 dBSelectArea("TMPTOT")
 While !EOF()
-	
+
 	aAdd(aInfo,{TMPTOT->ZR_CODIGO,;
 	TMPTOT->ZR_CC,;
 	TMPTOT->ZR_CONTA,;
 	TMPTOT->VALOR})
-	
+
 	dBSelectArea("TMPTOT")
 	dbSkip()
-	
+
 Enddo
 
 dBSelectArea("TMPTOT")
@@ -1089,61 +1089,61 @@ tcQuery cQueryDeb New Alias "TMPDEB"
 
 dBSelectArea("TMPDEB")
 While !EOF()
-	
+
 	For i := 1 To Len(aInfo)
-		
+
 		IF (aInfo[i][2] == TMPDEB->ZR_CC .AND. aInfo[i][3] == TMPDEB->ZR_CONTA)
 			nPos := i
 			lOk := .T.
 			Exit
 		EndIf
-		
+
 	Next i
-	
+
 	If lOk == .T.
-		
+
 		cQueryCon := "SELECT * FROM SZR010 WHERE "
 		cQueryCon += "ZR_TIPO = 'D' AND "
 		cQueryCon += "ZR_CONTA = '"+ TMPDEB->ZR_CONTA +"' AND "
 		cQueryCon += "ZR_CC = '"+ TMPDEB->ZR_CC +"' AND "
 		cQueryCon += "ZR_EMISSAO BETWEEN '" + DTOS(dData10) + "'  AND '" + DTOS(dData11) + "' AND ZR_ROTINA = '3' "
 		cQueryCon += "ORDER BY ZR_CONTA "
-		
+
 		tcQuery cQueryCon New Alias "TMPCON"
-		
+
 		DBSelectArea("TMPCON")
 		While !EOF() //.AND. dData1 <= SZR->ZR_EMISSAO .AND. dData2 >= SZR->ZR_EMISSAO .AND. TMPDEB->ZR_CC == SZR->ZR_CC .AND. TMPDEB->ZR_CONTA == SZR->ZR_CONTA
-			
-			
+
+
 			DBSelectArea("SZR")
 			dbSetOrder(3)
 			If dbSeek(xFilial("SZR") + PADR(TMPCON->ZR_CONTA,20) + PADR(TMPCON->ZR_CC,10) + TMPCON->ZR_EMISSAO + "D" + PADL(TMPCON->ZR_VALOR,14) + "3")
-				
+
 				nValDesc := TMPCON->ZR_VALOR - ((TMPCON->ZR_VALOR /aInfo[nPos][4]) * (TMPDEB->VALOR))
 				Reclock("SZR",.F.)
 				SZR->ZR_VALOR	:= nValDesc
 				ZR_USERLGA := ""
 				MsUnlock()
-				
+
 			EndIf
-			
+
 			nValDesc :=  0
-			
+
 			DBSelectArea("TMPCON")
 			DBSkip()
-			
+
 		EndDo
-		
+
 		dBSelectArea("TMPCON")
 		dbCloseArea("TMPCON")
-		
+
 	EndIf
-	
+
 	lOk := .F.
-	
+
 	dBSelectArea("TMPDEB")
 	DBSkip()
-	
+
 Enddo
 
 dBSelectArea("TMPDEB")
@@ -1166,63 +1166,63 @@ tcQuery cQueryTot New Alias "TMPTOT"
 
 dBSelectArea("TMPTOT")
 While !EOF()
-	
+
 	cQueryDeb := "SELECT ZR_CODIGO,ZR_CONTA,SUM(ZR_VALOR) AS VALOR FROM SZR010 WHERE "
 	cQueryDeb += "ZR_TIPO = 'X' AND ZR_CONTA = '" + TMPTOT->ZR_CONTA + "' AND "
 	cQueryDeb += "ZR_EMISSAO BETWEEN '" + DTOS(dData10) + "'  AND '" + DTOS(dData11) + "' AND ZR_ROTINA = '3' "
 	cQueryDeb += "GROUP BY ZR_CODIGO,ZR_CONTA "
 	cQueryDeb += "ORDER BY ZR_CONTA "
-	
+
 	tcQuery cQueryDeb New Alias "TMPDEB"
-	
+
 	dBSelectArea("TMPDEB")
 	While !EOF()
-		
+
 		cQueryCon := "SELECT * FROM SZR010 WHERE "
 		cQueryCon += "ZR_TIPO = 'D' AND "
 		cQueryCon += "ZR_CONTA = '"+ TMPDEB->ZR_CONTA + "' AND "
 		cQueryCon += "ZR_EMISSAO BETWEEN '" + DTOS(dData10) + "'  AND '" + DTOS(dData11) + "' AND ZR_ROTINA = '3' "
 		cQueryCon += "ORDER BY ZR_CONTA "
-		
+
 		tcQuery cQueryCon New Alias "TMPCON"
-		
+
 		DBSelectArea("TMPCON")
-		While !EOF() //.AND. dData1 <= SZR->ZR_EMISSAO .AND. dData2 >= SZR->ZR_EMISSAO .AND. TMPDEB->ZR_CC == SZR->ZR_CC .AND. TMPDEB->ZR_CONTA == SZR->ZR_CONTA		
-			
+		While !EOF() //.AND. dData1 <= SZR->ZR_EMISSAO .AND. dData2 >= SZR->ZR_EMISSAO .AND. TMPDEB->ZR_CC == SZR->ZR_CC .AND. TMPDEB->ZR_CONTA == SZR->ZR_CONTA
+
 			DBSelectArea("SZR")
 			dbSetOrder(3)
 			//If dbSeek(xFilial("SZR") + PADR(TMPCON->ZR_CONTA,20) + "D" + PADL(TMPCON->ZR_VALOR,12))
 			If dbSeek(xFilial("SZR") + PADR(TMPCON->ZR_CONTA,20) + PADR(TMPCON->ZR_CC,10) + TMPCON->ZR_EMISSAO + "D" + PADL(TMPCON->ZR_VALOR,14) + "3")
-						
+
 				nValDesc := TMPCON->ZR_VALOR - ((TMPCON->ZR_VALOR /TMPTOT->VALOR) * (TMPDEB->VALOR))
 				Reclock("SZR",.F.)
 				SZR->ZR_VALOR	:= nValDesc
 				ZR_USERLGA := ""
 				MsUnlock()
-				
+
 			EndIf
-			
+
 			nValDesc :=  0
-			
+
 			DBSelectArea("TMPCON")
 			DBSkip()
-			
+
 		EndDo
-		
+
 		dBSelectArea("TMPCON")
 		dbCloseArea("TMPCON")
-		
+
 		dBSelectArea("TMPDEB")
 		DBSkip()
-		
+
 	Enddo
-	
+
 	dBSelectArea("TMPDEB")
 	dbCloseArea("TMPDEB")
-	
+
 	dBSelectArea("TMPTOT")
 	DBSkip()
-	
+
 ENDDO
 
 dBSelectArea("TMPTOT")
