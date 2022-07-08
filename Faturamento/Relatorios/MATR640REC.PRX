@@ -131,6 +131,7 @@ Local cPedido := ""
 Local lOk := .T.
 
 Private _cNaoTipo	:= Alltrim(mv_par21) //Nao imprimir tipos...
+Private _cNaoNota	:= Alltrim(mv_par22) //Não imprimir notas...
 
 nOrdem	:= aReturn[8]
 
@@ -224,6 +225,11 @@ If	nOrdem == 4 		// Por Vendedor
 		EndIF
 
 		If	Alltrim(SE1->E1_TIPO) $ _cNaoTipo
+			dbSkip()
+			Loop
+		EndIF
+
+		If	Alltrim(SE1->E1_NUM) $ _cNaoNota
 			dbSkip()
 			Loop
 		EndIF
@@ -431,7 +437,7 @@ ElseIf nOrdem == 6		// Por Natureza
 			Exit
 		Endif
 
-		If QRY->E1_TIPO $ MVABATIM .and. QRY->E1_TIPO $ _cNaoTipo .and. mv_par16 == 2
+		If QRY->E1_TIPO $ MVABATIM .and. QRY->E1_TIPO $ _cNaoTipo .and. QRY->E1_NUM $ _cNaoNota .and. mv_par16 == 2
 			dbSkip()
 			Loop
 		EndIF
@@ -466,6 +472,11 @@ ElseIf nOrdem == 6		// Por Natureza
 			EndIf
 
 			If Alltrim(QRY->E1_TIPO) $ _cNaoTipo
+				QRY->(dbSkip())
+				Loop
+			EndIF
+
+			If Alltrim(QRY->E1_NUM) $ _cNaoNota
 				QRY->(dbSkip())
 				Loop
 			EndIF
@@ -582,6 +593,11 @@ Else
 			Loop
 		ENDIF
 
+		IF Alltrim(E1_NUM) $ _cNaoNota //Alltrim(mv_par22)
+			dbSkip()
+			Loop
+		ENDIF
+
 		If	   E1_NUM      < mv_par01 .or.  E1_NUM      > mv_par02   .or. ;
 			E1_EMISSAO  < mv_par07 .or.  E1_EMISSAO  > mv_par08   .or. ;
 			E1_VENCTO   < mv_par09 .or.  E1_VENCTO   > mv_par10   .or. ;
@@ -628,6 +644,11 @@ Else
 			endif
 
 			if Alltrim(SE1->E1_TIPO) $ _cNaoTipo
+				dbSkip()
+				Loop
+			endif
+
+			if Alltrim(SE1->E1_NUM) $ _cNaoNota
 				dbSkip()
 				Loop
 			endif
@@ -988,5 +1009,6 @@ PutSx1("MT640R","18","Da natureza ?","","","mv_chi","C",10,0,0,"G","","SED","","
 PutSx1("MT640R","19","Ate a natureza ?","","","mv_chj","C",10,0,0,"G","","SED","","S","mv_par19","","","","","","","","","","","","","","","","","","","","","")
 PutSx1("MT640R","20","Analitico/Sintetico?","","","mv_chk","N",1,0,1,"C","","","","","mv_par20","Analitico","","","","Sintetico","","","","","","","","","","","","","")
 PutSx1("MT640R","21","Nao Imprimir Tipos ?","","","mv_chl","C",30,0,0,"G","","","","S","mv_par21","","","","","","","","","","","","","","","","","","","","","")
+PutSx1("MT640R","22","Nao Imprimir Notas ?","","","mv_chm","C",30,0,0,"G","","","","S","mv_par22","","","","","","","","","","","","","","","","","","","","","")
 
 Return(.t.)
