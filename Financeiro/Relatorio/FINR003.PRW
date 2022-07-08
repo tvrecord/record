@@ -70,33 +70,36 @@ Static Function PrintExcel()
 	oExcel:AddworkSheet(cTitWorkSheet)
 	oExcel:AddTable (cTitWorkSheet,cTitTable)
 
-	oExcel:AddColumn(cTitWorkSheet,cTitTable,"Sequencia",1,1)
-	oExcel:AddColumn(cTitWorkSheet,cTitTable,"Praca",1,1)
-	oExcel:AddColumn(cTitWorkSheet,cTitTable,"Nome Praca",1,1)
-	oExcel:AddColumn(cTitWorkSheet,cTitTable,"NF Fornecedor",1,1)
-	oExcel:AddColumn(cTitWorkSheet,cTitTable,"Emissao",1,1)
-	oExcel:AddColumn(cTitWorkSheet,cTitTable,"Valor NF",1,2)
-	oExcel:AddColumn(cTitWorkSheet,cTitTable,"Vencimento NF",1,2)
-	oExcel:AddColumn(cTitWorkSheet,cTitTable,"Cliente",1,1)
-	oExcel:AddColumn(cTitWorkSheet,cTitTable,"Natureza",1,1)
-	oExcel:AddColumn(cTitWorkSheet,cTitTable,"NF RP",1,1)
-	oExcel:AddColumn(cTitWorkSheet,cTitTable,"RP",1,1)
+	oExcel:AddColumn(cTitWorkSheet,cTitTable,"Sequencia",1,1)		//01
+	oExcel:AddColumn(cTitWorkSheet,cTitTable,"Praca",1,1)			//02
+	oExcel:AddColumn(cTitWorkSheet,cTitTable,"Nome Praca",1,1)		//03
+	oExcel:AddColumn(cTitWorkSheet,cTitTable,"NF Fornecedor",1,1)	//04
+	oExcel:AddColumn(cTitWorkSheet,cTitTable,"Emissao",1,1)			//05
+	oExcel:AddColumn(cTitWorkSheet,cTitTable,"Valor NF",1,2)		//06
+	oExcel:AddColumn(cTitWorkSheet,cTitTable,"Vencimento NF",1,2)	//07
+	oExcel:AddColumn(cTitWorkSheet,cTitTable,"Cliente",1,1)			//08
+	oExcel:AddColumn(cTitWorkSheet,cTitTable,"Natureza",1,1)		//09
+	oExcel:AddColumn(cTitWorkSheet,cTitTable,"RP",1,1)				//11
+	oExcel:AddColumn(cTitWorkSheet,cTitTable,"NF RP",1,1)			//10
+	oExcel:AddColumn(cTitWorkSheet,cTitTable,"Recebimento",1,1)		//12
+
 
 
 	While( (TMP)->(!Eof()) )
 		nNUm += 1
 		aDetRel := {}
-		AADD(aDetRel, cValToChar(nNum)) //01
-		AADD(aDetRel, Alltrim((TMP)->ZAH_PRACA)) //02
-		AADD(aDetRel, Alltrim((TMP)->ZAF_DESCRI)) //03
-		AADD(aDetRel, SPACE(9)) //04
-		AADD(aDetRel, SPACE(9)) //05
-		AADD(aDetRel, (TMP)->ZAH_VLRAT) //06
-		AADD(aDetRel, SPACE(9)) //07
-		AADD(aDetRel, Alltrim((TMP)->ZAH_CLIENT)) //08
-		AADD(aDetRel, "REPASSE SPOT") //09
-		AADD(aDetRel, Posicione("SC5",10,xFilial("SC5") + Alltrim((TMP)->ZAH_NUMRP), "C5_NUM")) //10
-		AADD(aDetRel, Alltrim((TMP)->ZAH_NUMRP)) //11
+		AADD(aDetRel, cValToChar(nNum)) 							//01
+		AADD(aDetRel, Alltrim((TMP)->ZAH_PRACA)) 					//02
+		AADD(aDetRel, Alltrim((TMP)->ZAF_DESCRI)) 					//03
+		AADD(aDetRel, SPACE(9)) 									//04
+		AADD(aDetRel, SPACE(9)) 									//05
+		AADD(aDetRel, (TMP)->ZAH_VLRAT) 							//06
+		AADD(aDetRel, SPACE(9)) 									//07
+		AADD(aDetRel, Alltrim((TMP)->ZAH_CLIENT)) 					//08
+		AADD(aDetRel, "REPASSE SPOT") 								//09
+		AADD(aDetRel, Alltrim((TMP)->ZAH_NUMRP)) 					//11
+		AADD(aDetRel, Alltrim((TMP)->F2_DOC)) 						//10
+		AADD(aDetRel, Alltrim((TMP)->E1_BAIXA)) 					//12
 
 		nTotal += (TMP)->ZAH_VLRAT
 		oExcel:AddRow(cTitWorkSheet,cTitTable,aDetRel)
@@ -106,7 +109,7 @@ Static Function PrintExcel()
 
 	(TMP)->(dbEval({|| nTotREG++}))
 
-	oExcel:AddRow(cTitWorkSheet,cTitTable,{"TOTAL","","","","",nTotal,"","","","",""})
+	oExcel:AddRow(cTitWorkSheet,cTitTable,{"TOTAL","","","","",nTotal,"","","","","",""})
 
 	oExcel:Activate()
 	oExcel:GetXMLFile(cDir+cFileName+".xml")
@@ -130,19 +133,50 @@ Static Function BusDados()
 			ZAH_NUMRP,
 			ZAH_CLIENT,
 			ZAH_VLRAT,
-			ZAF_DESCRI
+			ZAF_DESCRI,
+			F2_DOC,
+			SUBSTRING(E1_BAIXA,7,2) + '/' + SUBSTRING(E1_BAIXA,5,2) + '/'+  SUBSTRING(E1_BAIXA,1,4) AS E1_BAIXA
 		FROM
 			%table:ZAH%
 		INNER JOIN %table:ZAF%
 		ON ZAH_PRACA = ZAF_CODIGO
 			AND %table:ZAF%.D_E_L_E_T_ = ''
 			AND ZAH_FILIAL = ZAF_FILIAL
+		INNER JOIN ZAG010 AS ZAG
+		ON ZAG_FILIAL = ZAH_FILIAL
+			AND ZAG_CODIGO = ZAH_CODIGO
+			AND ZAG_PRACA = ZAH_PRACA
+			AND ZAG_NUMRP = ZAH_NUMRP
+			AND ZAG_PERIOD = ZAH_PERIOD
+			//AND ZAG_UTILIZ = ''
+		LEFT JOIN %table:SC5% AS SC5
+		ON C5_FILIAL = ZAG_FILIAL
+			AND (C5_NUMRP = ZAG_NUMRP OR (C5_NUM = '038055' AND ZAG_NUMRP = '235868C'))
+			AND C5_NOTA <> ''
+			AND SC5.D_E_L_E_T_ = ''
+		LEFT JOIN %table:SF2% AS SF2
+		ON F2_FILIAL = C5_FILIAL
+			AND F2_SERIE = C5_SERIE
+			AND F2_DOC = C5_NOTA
+			AND F2_CLIENTE = C5_CLIENTE
+			AND F2_LOJA = C5_LOJACLI
+			AND SF2.D_E_L_E_T_ = ''
+		LEFT JOIN %table:SE1% AS SE1
+		ON E1_FILIAL = F2_FILIAL
+			AND E1_PREFIXO = F2_SERIE
+			AND E1_NUM = F2_DOC
+			AND E1_TIPO = 'NF'
+			AND E1_CLIENTE = F2_CLIENTE
+			AND E1_LOJA = F2_LOJA
+			AND E1_PARCELA IN ('', '001')
+			AND SE1.D_E_L_E_T_ = ''
 		WHERE
 			ZAH_PERIOD = %exp:cPeriodo%
 			AND ZAH_PRACA BETWEEN %exp:MV_PAR02% AND %exp:MV_PAR03%
 			AND ZAH_NUMRP BETWEEN %exp:MV_PAR04% AND %exp:MV_PAR05%
 			AND ZAH_VLRAT > 0
 			AND %table:ZAH%.D_E_L_E_T_ = ''
+		ORDER BY ZAH_PRACA, ZAH_PERIOD, ZAH_NUMRP
 	EndSql
 
 Return
