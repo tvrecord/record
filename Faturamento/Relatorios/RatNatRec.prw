@@ -102,6 +102,11 @@ IF !Empty (MV_PAR16)
 ELSE
 	cQuery += "SE1010.E1_TIPO BETWEEN '" + (MV_PAR05) + "' AND '" + (MV_PAR06) + "' AND "
 ENDIF
+
+IF !Empty (MV_PAR18)
+	cQuery += "SE1010.E1_NUM NOT IN " + FormatIn(MV_PAR18,"/") + " AND "
+ENDIF
+
 cQuery += "SE1010.E1_NATUREZ BETWEEN '" + (MV_PAR07) + "' AND '" + (MV_PAR08) + "' AND "
 cQuery += "SE1010.E1_CLIENTE BETWEEN '" + (MV_PAR09) + "' AND '" + (MV_PAR10) + "' AND "
 cQuery += "SE1010.E1_EMISSAO BETWEEN '" + DTOS(MV_PAR11) + "' AND '" + DTOS(MV_PAR12) + "' AND "
@@ -131,6 +136,9 @@ IF !Empty (MV_PAR16)
 	cQuery += "SE1010.E1_TIPO NOT IN " + FormatIn(MV_PAR16,"/") + " AND "
 ELSE
 	cQuery += "SE1010.E1_TIPO BETWEEN '" + (MV_PAR05) + "' AND '" + (MV_PAR06) + "' AND "
+ENDIF
+IF !Empty (MV_PAR18)
+	cQuery += "SE1010.E1_NUM NOT IN " + FormatIn(MV_PAR18,"/") + " AND "
 ENDIF
 //cQuery += "SE1010.E1_NATUREZ BETWEEN '" + (MV_PAR07) + "' AND '" + (MV_PAR08) + "' AND "
 cQuery += "SEV010.EV_NATUREZ BETWEEN '" + (MV_PAR07) + "' AND '" + (MV_PAR08) + "' AND "
@@ -402,6 +410,7 @@ AADD(aRegs,{cPerg,"14","Até Vencimento:"		,"","","mv_ch14","D",08,0,0,"G","","mv
 AADD(aRegs,{cPerg,"15","Tipo:"					,"","","mv_ch15","N",01,0,2,"C","","mv_par15","Sintetico","","","","","Analitico","","","","","","","","","","","","","","","","","","","","","","",""})
 AADD(aRegs,{cPerg,"16","Nao Imprimir Tipos:"	,"","","mv_ch16","C",20,0,0,"G","","mv_par16","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""})
 AADD(aRegs,{cPerg,"17","Subtotal Por Mês:"		,"","","mv_ch17","N",01,0,2,"C","","mv_par17","Sim","","","","","Não","","","","","","","","","","","","","","","","","","","","","","",""})
+AADD(aRegs,{cPerg,"18","Nao Imprimir Notas:"	,"","","mv_ch18","C",20,0,0,"G","","mv_par18","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""})
 
 
 For i:=1 to Len(aRegs)
