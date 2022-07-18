@@ -323,7 +323,7 @@ Static Function ImpProxPag()
 	nPag++
 	oPrint:StartPage()
 	cSubTitle := "VENCIMENTO: " + DTOC(MV_PAR12)
-	nLin := u_PXCABECA(@oPrint, "REPASSE A PAGAR REFERENTE FATURAMENTO SPOT", cSubTitle  , nPag)
+	nLin := u_PXCABECA(@oPrint, "REPASSE A PAGAR REFERENTE FATURAMENTO SPOT-> PAGAMENTO", cSubTitle  , nPag)
 
 	oPrint:Say( nLin,020, "PRAÇA",oFonteN)
 	oPrint:Say( nLin,060, "STATUS",oFonteN)
