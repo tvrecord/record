@@ -23,7 +23,7 @@ User Function RELNATSIG
 	Local cPict         := ""
 	Local titulo       	:= "PEDIDOS POR CONTA SIG"
 	Local nLin         	:= 80
-	Local Cabec1       	:= " Pedido   Tp  Emissao     Fornece Lj  Nome                                 Descrição                                                                                              Orçado Liberado   Data               Valor"
+	Local Cabec1       	:= " Pedido   Tp  Emissao     Fornece Lj  Nome                                 Descrição                                                                                Tp.Pagamento  Orçado Liberado   Data               Valor"
 	Local Cabec2       	:= "                                                                           Continuação"
 	Local imprime      	:= .T.
 	Local aOrd 			:= {}
@@ -42,6 +42,8 @@ User Function RELNATSIG
 	Private m_pag      	:= 01
 	Private wnrel      	:= "RELNATSIG"
 	Private cString 	:= "SC7"
+	Private cCondPag	:= ""
+
 
 	dbSelectArea("SC7")
 	dbSetOrder(1)
@@ -202,12 +204,13 @@ Static Function RunReport(Cabec1,Cabec2,Titulo,nLin)
 	//	cQuery += " ,'PC' AS TIPO,C7_PRODUTO AS PRODUTO,C7_DESCRI AS DESCRI,C7_QUANT AS QTD,(C7_TOTAL - C7_DESPESA - C7_VLDESC + C7_VALFRE) AS VALOR "
 	cQuery += " ,'PC' AS TIPO,'' AS PRODUTO,'' AS DESCRI,0 AS QTD,C7_CONAPRO AS LIBERADO "
 	cQuery += " ,(SELECT MAX(CR_DATALIB) FROM SCR010 WHERE CR_NUM = C7_NUM AND CR_TIPO = 'PC' AND D_E_L_E_T_ = '') AS LIBERACAO "
-	cQuery += " ,SUM(C7_TOTAL + C7_DESPESA - C7_VLDESC + C7_VALFRE + C7_VALIPI + C7_ICMSRET) AS VALOR " //AGRUPADO POR PEDIDO
+	cQuery += " ,SUM(C7_TOTAL + C7_DESPESA - C7_VLDESC + C7_VALFRE + C7_VALIPI + C7_ICMSRET) AS VALOR, E4_DESCRI AS CONDPAG " //AGRUPADO POR PEDIDO
 	cQuery += " FROM SC7010 "
 	cQuery += " INNER JOIN SA2010 ON C7_FORNECE = A2_COD AND C7_LOJA = A2_LOJA "
 	cQuery += " INNER JOIN SC1010 ON C7_NUMSC = C1_NUM AND C7_ITEMSC = C1_ITEM AND C7_FILIAL = C1_FILIAL "
 	//cQuery += " INNER JOIN SCR010 ON C7_NUM = CR_NUM AND CR_USER = '000192' AND CR_TIPO = 'PC' "
 	cQuery += " INNER JOIN SED010 ON C1_NATUREZ = ED_CODIGO "
+	cQuery += " INNER JOIN SE4010 ON E4_CODIGO = C7_COND "
 	cQuery += " WHERE SC7010.D_E_L_E_T_ = '' AND C7_TIPO = 1 "
 	cQuery += " AND C7_EMISSAO >= '20130726' " // COMEÇARAM AS LIBERAÇÃO PELO SR CARLOS ALVES
 	cQuery += " AND SUBSTRING(C7_EMISSAO,1,6) <= '" + MV_PAR04 + MV_PAR03 + "' "
@@ -219,19 +222,20 @@ Static Function RunReport(Cabec1,Cabec2,Titulo,nLin)
 	cQuery += " AND C7_ENCER = '' "
 	cQuery += " AND SA2010.D_E_L_E_T_ = '' AND SED010.D_E_L_E_T_ = '' AND SC1010.D_E_L_E_T_ = '' "
 	//cQuery += " AND SCR010.D_E_L_E_T_ = '' AND (CR_DATALIB = '' OR SUBSTRING(CR_DATALIB,1,6) >= '" + MV_PAR04 + MV_PAR03 + "') "
-	cQuery += " GROUP BY ED_CONTSIG,C7_NUM,C7_EMISSAO,C7_FORNECE,C7_LOJA,A2_NOME,C7_CONAPRO " //AGRUPADO POR PEDIDO
+	cQuery += " GROUP BY ED_CONTSIG,C7_NUM,C7_EMISSAO,C7_FORNECE,C7_LOJA,A2_NOME,C7_CONAPRO,E4_DESCRI " //AGRUPADO POR PEDIDO
 	cQuery += " UNION "
 	cQuery += " SELECT ED_CONTSIG AS SIG1,C7_NUM AS NUM,C7_EMISSAO AS EMISSAO,C7_FORNECE AS FORNECE "
 	cQuery += " ,C7_LOJA AS LOJA, SUBSTRING(A2_NOME,1,30) AS NOMEFOR "
 	cQuery += " ,'AE' AS TIPO,C7_PRODUTO AS PRODUTO,C3_OBS AS DESCRI,C7_QUANT AS QTD,C7_CONAPRO AS LIBERADO "
 	cQuery += " ,CR_DATALIB AS LIBERACAO "
-	cQuery += " ,(C7_TOTAL + C7_DESPESA - C7_VLDESC + C7_VALFRE + C7_VALIPI + C7_ICMSRET) AS VALOR "
+	cQuery += " ,(C7_TOTAL + C7_DESPESA - C7_VLDESC + C7_VALFRE + C7_VALIPI + C7_ICMSRET) AS VALOR, E4_DESCRI AS CONDPAG "
 	//	cQuery += " ,'AE' AS TIPO,(C7_TOTAL - C7_DESPESA - C7_VLDESC + C7_VALFRE) AS VALOR " //AGRUPADO POR AP
 	cQuery += " FROM SC7010 "
 	cQuery += " INNER JOIN SA2010 ON C7_FORNECE = A2_COD AND C7_LOJA = A2_LOJA "
 	cQuery += " INNER JOIN SC3010 ON C7_NUMSC = C3_NUM AND C7_ITEMSC = C3_ITEM AND C7_FILIAL = C3_FILIAL "
 	cQuery += " INNER JOIN SCR010 ON C7_NUM = CR_NUM AND CR_USER = '000002' AND CR_TIPO = 'AE'  "
 	cQuery += " INNER JOIN SED010 ON C3_NATUREZ = ED_CODIGO "
+	cQuery += " INNER JOIN SE4010 ON E4_CODIGO = C7_COND "
 	cQuery += " WHERE SC7010.D_E_L_E_T_ = '' AND SED010.D_E_L_E_T_ = '' AND C7_TIPO = 2 "
 	cQuery += " AND C7_EMISSAO >= '20130726' " // COMEÇARAM AS LIBERAÇÃO PELO SR CARLOS ALVES
 	cQuery += " AND SUBSTRING(C7_EMISSAO,1,6) <= '" + MV_PAR04 + MV_PAR03 + "' "
@@ -248,7 +252,12 @@ Static Function RunReport(Cabec1,Cabec2,Titulo,nLin)
 	cQuery += " UNION "
 	cQuery += " SELECT ED_CONTSIG AS SIG1,ZS_CODIGO AS NUM,ZS_EMISSAO AS EMISSAO,ZS_FORNECE AS FORNECE,ZS_LOJA AS LOJA,ZS_NOME AS NOMEFOR "
 	//	cQuery += " ,'AP' AS TIPO,'AUTORIZACAO DE PAGAMENTO' AS PRODUTO,'' AS DESCRI,0 AS QTD,ZS_VALOR AS VALOR "
-	cQuery += " ,'AP' AS TIPO,'' AS PRODUTO,'' AS DESCRI,0 AS QTD,'L' AS LIBERADO,ZS_DTLIB AS LIBERACAO,ZS_VALOR AS VALOR "	//AGRUPADO POR PEDIDO
+	cQuery += " ,'AP' AS TIPO,'' AS PRODUTO,'' AS DESCRI,0 AS QTD,'L' AS LIBERADO,ZS_DTLIB AS LIBERACAO,ZS_VALOR AS VALOR "
+	cQuery += " , CASE ZS_TPPAG "
+	cQuery += "	WHEN '1' THEN 'TOTAL' "
+	cQuery += "	WHEN '2' THEN 'PARCIAL' "
+	cQuery += "	ELSE '' "
+	cQuery += "	END AS CONDPAG "	//AGRUPADO POR PEDIDO
 	cQuery += " FROM SZS010 "
 	cQuery += " INNER JOIN SED010 ON ZS_NATUREZ = ED_CODIGO "
 	cQuery += " WHERE SZS010.D_E_L_E_T_ = '' AND SED010.D_E_L_E_T_ = '' "
@@ -283,9 +292,9 @@ Static Function RunReport(Cabec1,Cabec2,Titulo,nLin)
 		IF !(TMP1->TIPO == "PC" .AND. (!EMPTY(TMP1->LIBERACAO) .AND. SUBSTR(TMP1->LIBERACAO,1,6) < (MV_PAR04+MV_PAR03)))
 
 			IF TMP1->TIPO == "PC" .AND. TMP1->LIBERADO == "B"
-				aAdd(aPedidos,{TMP1->SIG1,TMP1->NUM,TMP1->TIPO,TMP1->EMISSAO,TMP1->FORNECE,TMP1->LOJA,TMP1->NOMEFOR,TMP1->PRODUTO,TMP1->DESCRI,TMP1->QTD,TMP1->LIBERADO,"",TMP1->VALOR,TMP1->NUM})
+				aAdd(aPedidos,{TMP1->SIG1,TMP1->NUM,TMP1->TIPO,TMP1->EMISSAO,TMP1->FORNECE,TMP1->LOJA,TMP1->NOMEFOR,TMP1->PRODUTO,TMP1->DESCRI,TMP1->QTD,TMP1->LIBERADO,"",TMP1->VALOR,TMP1->NUM,TMP1->CONDPAG})
 			ELSE
-				aAdd(aPedidos,{TMP1->SIG1,TMP1->NUM,TMP1->TIPO,TMP1->EMISSAO,TMP1->FORNECE,TMP1->LOJA,TMP1->NOMEFOR,TMP1->PRODUTO,TMP1->DESCRI,TMP1->QTD,TMP1->LIBERADO,TMP1->LIBERACAO,TMP1->VALOR,TMP1->NUM})
+				aAdd(aPedidos,{TMP1->SIG1,TMP1->NUM,TMP1->TIPO,TMP1->EMISSAO,TMP1->FORNECE,TMP1->LOJA,TMP1->NOMEFOR,TMP1->PRODUTO,TMP1->DESCRI,TMP1->QTD,TMP1->LIBERADO,TMP1->LIBERACAO,TMP1->VALOR,TMP1->NUM,TMP1->CONDPAG})
 			ENDIF
 
 		ENDIF
@@ -300,7 +309,7 @@ Static Function RunReport(Cabec1,Cabec2,Titulo,nLin)
 
 	cQuery := " SELECT CT1_SIG AS SIG1,D1_DOC AS NUM,'NF' AS TIPO,D1_SERIE,D1_PEDIDO AS PEDIDO,D1_DTDIGIT AS EMISSAO,D1_TES,F4_ESTOQUE, "
 	cQuery += " D1_FORNECE AS FORNECE,D1_LOJA AS LOJA,A2_NOME AS NOMEFOR,D1_COD AS PRODUTO,D1_DESCRI AS DESCRI,D1_QUANT AS QTD,'L' AS LIBERADO, "
-	cQuery += " '' AS LIBERACAO,SUM(D1_TOTAL) AS VALOR "
+	cQuery += " '' AS LIBERACAO,SUM(D1_TOTAL) AS VALOR"
 	cQuery += " FROM SD1010 "
 	cQuery += " INNER JOIN SA2010 ON D1_FORNECE = A2_COD AND D1_LOJA = A2_LOJA "
 	cQuery += " INNER JOIN SF4010 ON D1_TES = F4_CODIGO "
@@ -329,7 +338,7 @@ Static Function RunReport(Cabec1,Cabec2,Titulo,nLin)
 	cQuery += " INNER JOIN SF4010 ON D1_TES = F4_CODIGO "
 	//cQuery += " INNER JOIN SEV010 ON D1_DOC = EV_NUM AND D1_SERIE = EV_PREFIXO AND D1_FORNECE = EV_CLIFOR AND D1_LOJA = EV_LOJA "
 	cQuery += " INNER JOIN CT1010 ON F4_CCONTA = CT1_CONTA "
-	cQuery += " WHERE F4_ESTOQUE = 'N' AND "
+		cQuery += " WHERE F4_ESTOQUE = 'N' AND "
 	cQuery += " SA2010.D_E_L_E_T_ = '' AND "
 	cQuery += " SD1010.D_E_L_E_T_ = '' AND "
 	cQuery += " SF4010.D_E_L_E_T_ = ''  AND "
@@ -411,7 +420,7 @@ Static Function RunReport(Cabec1,Cabec2,Titulo,nLin)
 	dbGoTop()
 	While !EOF()
 
-		aAdd(aPedidos,{TMP2->SIG1,TMP2->NUM,TMP2->TIPO,TMP2->EMISSAO,TMP2->FORNECE,TMP2->LOJA,TMP2->NOMEFOR,TMP2->PRODUTO,TMP2->DESCRI,TMP2->QTD,TMP2->LIBERADO,"L",TMP2->VALOR,TMP2->PEDIDO})
+		aAdd(aPedidos,{TMP2->SIG1,TMP2->NUM,TMP2->TIPO,TMP2->EMISSAO,TMP2->FORNECE,TMP2->LOJA,TMP2->NOMEFOR,TMP2->PRODUTO,TMP2->DESCRI,TMP2->QTD,TMP2->LIBERADO,"L",TMP2->VALOR,TMP2->PEDIDO,""})
 
 		dbSkip()
 
@@ -597,6 +606,7 @@ Static Function RunReport(Cabec1,Cabec2,Titulo,nLin)
 					@nLin,026 PSAY aPedidos[_I,5] 				//COD FORNECE
 					@nLin,034 PSAY aPedidos[_I,6]  				//LOJA
 					@nLin,038 PSAY SUBSTR(aPedidos[_I,7],1,34)  //NOME
+
 					IF aPedidos[_I,3] == "PC"
 						IF Posicione("SZL",2,xFilial("SZL") + aPedidos[_I,2],"ZL_PEDORC") == "1"
 							@nLin,178 PSAY "ORÇADO"
@@ -609,7 +619,7 @@ Static Function RunReport(Cabec1,Cabec2,Titulo,nLin)
 					@nLin,189 PSAY cAprov						//LIBERADO
 					@nLin,193 PSAY STOD(aPedidos[_I,12]) 		//DT LIBERAÇÃO
 					@nLin,206 PSAY aPedidos[_I,13] PICTURE "@E 999,999,999.99"	//VALOR
-				ELSE
+					ELSE
 					//IF cSig < "19999"
 					@nLin,017 PSAY (MV_PAR03) + "/" + (MV_PAR04)
 					//ELSE
@@ -624,6 +634,7 @@ Static Function RunReport(Cabec1,Cabec2,Titulo,nLin)
 					@nLin,189 PSAY cAprov				    	//LIBERADO
 					@nLin,194 PSAY STOD(aPedidos[_I,12]) 		//DT LIBERAÇÃO
 					@nLin,207 PSAY aPedidos[_I,13] PICTURE "@E 999,999,999.99"	//VALOR
+
 				ENDIF
 
 				IF aPedidos[_I,3] == "AE"
@@ -634,29 +645,31 @@ Static Function RunReport(Cabec1,Cabec2,Titulo,nLin)
 					dbSelectArea ("SZL")
 					dbSetOrder(2)
 					IF DbSeek(xFilial("SZL") + aPedidos[_I,2])
-						cMemo := MemoLine(ZL_OBS1,100,1)
+						cMemo := MemoLine(ZL_OBS1,85,1)
 						@nLin,076 PSAY ALLTRIM(UPPER(cMemo))
-						IF !EMPTY(ALLTRIM(SUBSTR(ZL_OBS1,101,100)))
-							cMemo := MemoLine(ZL_OBS1,100,2)
+						@nLin,165 PSAY aPedidos[_I,15]
+						IF !EMPTY(ALLTRIM(SUBSTR(ZL_OBS1,86,85)))
+							cMemo := MemoLine(ZL_OBS1,85,2)
 							nLin 	+= 1
 							@nLin,076 PSAY ALLTRIM(UPPER(cMemo))
-							IF !EMPTY(ALLTRIM(SUBSTR(ZL_OBS1,201,100)))
-								cMemo := MemoLine(ZL_OBS1,100,3)
+							IF !EMPTY(ALLTRIM(SUBSTR(ZL_OBS1,171,85)))
+								cMemo := MemoLine(ZL_OBS1,85,3)
 								nLin 	+= 1
 								@nLin,076 PSAY ALLTRIM(UPPER(cMemo))
 							ENDIF
 						ENDIF
-						IF !EMPTY(ALLTRIM(SUBSTR(ZL_EXCLUSI,001,100)))
-							cMemo := MemoLine(ZL_EXCLUSI,100,1)
+						IF !EMPTY(ALLTRIM(SUBSTR(ZL_EXCLUSI,001,85)))
+							cMemo := MemoLine(ZL_EXCLUSI,85,1)
+							//@nLin,165 PSAY aPedidos[_I,15]
 							nLin 	+= 1
 							@nLin,001 PSAY "MOTIVO FORNECEDOR EXCLUSIVO:"
 							@nLin,076 PSAY ALLTRIM(UPPER(cMemo))
-							IF !EMPTY(ALLTRIM(SUBSTR(ZL_EXCLUSI,101,100)))
-								cMemo := MemoLine(ZL_EXCLUSI,100,2)
+							IF !EMPTY(ALLTRIM(SUBSTR(ZL_EXCLUSI,86,85)))
+								cMemo := MemoLine(ZL_EXCLUSI,85,2)
 								nLin 	+= 1
 								@nLin,076 PSAY ALLTRIM(UPPER(cMemo))
-								IF !EMPTY(ALLTRIM(SUBSTR(ZL_OBS1,201,100)))
-									cMemo := MemoLine(ZL_OBS1,100,3)
+								IF !EMPTY(ALLTRIM(SUBSTR(ZL_OBS1,171,85)))
+									cMemo := MemoLine(ZL_OBS1,85,3)
 									nLin 	+= 1
 									@nLin,076 PSAY ALLTRIM(UPPER(cMemo))
 								ENDIF
@@ -667,15 +680,16 @@ Static Function RunReport(Cabec1,Cabec2,Titulo,nLin)
 					dbSelectArea ("SZS")
 					dbSetOrder(1)
 					IF DbSeek(xFilial("SZS") + aPedidos[_I,2])
-						cMemo := MemoLine(ZS_HISTORI,100,1)
+						cMemo := MemoLine(ZS_HISTORI,85,1)
 						@nLin,076 PSAY ALLTRIM(UPPER(cMemo))
-						IF !EMPTY(ALLTRIM(SUBSTR(ZS_HISTORI,101,100)))
+						@nLin,165 PSAY aPedidos[_I,15]
+						IF !EMPTY(ALLTRIM(SUBSTR(ZS_HISTORI,86,85)))
 							nLin 	+= 1
-							cMemo 	:= MemoLine(ZS_HISTORI,100,2)
+							cMemo 	:= MemoLine(ZS_HISTORI,85,2)
 							@nLin,076 PSAY ALLTRIM(UPPER(cMemo))
-							IF !EMPTY(ALLTRIM(SUBSTR(ZS_HISTORI,201,100)))
+							IF !EMPTY(ALLTRIM(SUBSTR(ZS_HISTORI,171,85)))
 								nLin 	+= 1
-								cMemo 	:= MemoLine(ZS_HISTORI,100,3)
+								cMemo 	:= MemoLine(ZS_HISTORI,85,3)
 								@nLin,076 PSAY ALLTRIM(UPPER(cMemo))
 							ENDIF
 						ENDIF
@@ -683,9 +697,11 @@ Static Function RunReport(Cabec1,Cabec2,Titulo,nLin)
 				ELSEIF aPedidos[_I,3] == "NF"
 					@nLin,076 PSAY ALLTRIM(aPedidos[_I,8])    	//PRODUTO
 					@nLin,085 PSAY SUBSTR(aPedidos[_I,9],1,80)  //DESCRIÇÃO
+
 				ELSEIF aPedidos[_I,3] == "AM"
 					@nLin,076 PSAY ALLTRIM(aPedidos[_I,8])    	//PRODUTO
 					@nLin,087 PSAY SUBSTR(aPedidos[_I,9],1,78)  //DESCRIÇÃO
+
 				ENDIF
 
 				lOk 	:= .T.
@@ -837,12 +853,13 @@ Static Function RunReport(Cabec1,Cabec2,Titulo,nLin)
 		//	cQuery += " ,'PC' AS TIPO,C7_PRODUTO AS PRODUTO,C7_DESCRI AS DESCRI,C7_QUANT AS QTD,(C7_TOTAL - C7_DESPESA - C7_VLDESC + C7_VALFRE) AS VALOR "
 		cQuery += " ,'PC' AS TIPO,'' AS PRODUTO,'' AS DESCRI,0 AS QTD,C7_CONAPRO AS LIBERADO "
 		cQuery += " ,(SELECT MAX(CR_DATALIB) FROM SCR010 WHERE CR_NUM = C7_NUM AND CR_TIPO = 'PC' AND D_E_L_E_T_ = '') AS LIBERACAO "
-		cQuery += " ,SUM(C7_TOTAL + C7_DESPESA - C7_VLDESC + C7_VALFRE + C7_VALIPI + C7_ICMSRET) AS VALOR " //AGRUPADO POR PEDIDO
+		cQuery += " ,SUM(C7_TOTAL + C7_DESPESA - C7_VLDESC + C7_VALFRE + C7_VALIPI + C7_ICMSRET) AS VALOR, E4_CODIGO As COD_PAG, E4_DESCRI AS CONDPAG  " //AGRUPADO POR PEDIDO
 		cQuery += " FROM SC7010 "
 		cQuery += " INNER JOIN SA2010 ON C7_FORNECE = A2_COD AND C7_LOJA = A2_LOJA "
 		cQuery += " INNER JOIN SC1010 ON C7_NUMSC = C1_NUM AND C7_ITEMSC = C1_ITEM AND C7_FILIAL = C1_FILIAL "
 		//cQuery += " INNER JOIN SCR010 ON C7_NUM = CR_NUM AND CR_USER = '000192' AND CR_TIPO = 'PC' "
 		cQuery += " INNER JOIN SED010 ON C1_NATUREZ = ED_CODIGO "
+		cQuery += " INNER JOIN SE4010 ON E4_CODIGO = C7_COND"
 		cQuery += " WHERE SC7010.D_E_L_E_T_ = '' AND C7_TIPO = 1 "
 		cQuery += " AND C7_EMISSAO >= '20130726' " // COMEÇARAM AS LIBERAÇÃO PELO SR CARLOS ALVES
 		cQuery += " AND SUBSTRING(C7_EMISSAO,1,6) <= '" + MV_PAR04 + MV_PAR03 + "' "
@@ -860,13 +877,14 @@ Static Function RunReport(Cabec1,Cabec2,Titulo,nLin)
 		cQuery += " ,C7_LOJA AS LOJA, SUBSTRING(A2_NOME,1,30) AS NOMEFOR "
 		cQuery += " ,'AE' AS TIPO,C7_PRODUTO AS PRODUTO,C3_OBS AS DESCRI,C7_QUANT AS QTD,C7_CONAPRO AS LIBERADO "
 		cQuery += " ,CR_DATALIB AS LIBERACAO "
-		cQuery += " ,(C7_TOTAL + C7_DESPESA - C7_VLDESC + C7_VALFRE + C7_VALIPI + C7_ICMSRET) AS VALOR "
+		cQuery += " ,(C7_TOTAL + C7_DESPESA - C7_VLDESC + C7_VALFRE + C7_VALIPI + C7_ICMSRET) AS VALOR, E4_CODIGO AS COD_PAG, E4_DESCRI AS CONDPAG"
 		//	cQuery += " ,'AE' AS TIPO,(C7_TOTAL - C7_DESPESA - C7_VLDESC + C7_VALFRE) AS VALOR " //AGRUPADO POR AP
 		cQuery += " FROM SC7010 "
 		cQuery += " INNER JOIN SA2010 ON C7_FORNECE = A2_COD AND C7_LOJA = A2_LOJA "
 		cQuery += " INNER JOIN SC3010 ON C7_NUMSC = C3_NUM AND C7_ITEMSC = C3_ITEM AND C7_FILIAL = C3_FILIAL "
 		cQuery += " INNER JOIN SCR010 ON C7_NUM = CR_NUM AND CR_USER = '000002' AND CR_TIPO = 'AE'  "
 		cQuery += " INNER JOIN SED010 ON C3_NATUREZ = ED_CODIGO "
+		cQuery += " INNER JOIN SE4010 ON E4_CODIGO = C7_COND "
 		cQuery += " WHERE SC7010.D_E_L_E_T_ = '' AND SED010.D_E_L_E_T_ = '' AND C7_TIPO = 2 "
 		cQuery += " AND C7_EMISSAO >= '20130726' " // COMEÇARAM AS LIBERAÇÃO PELO SR CARLOS ALVES
 		cQuery += " AND SUBSTRING(C7_EMISSAO,1,6) <= '" + MV_PAR04 + MV_PAR03 + "' "
@@ -917,9 +935,9 @@ Static Function RunReport(Cabec1,Cabec2,Titulo,nLin)
 
 			IF !(TMP1->TIPO == "PC" .AND. (!EMPTY(TMP1->LIBERACAO) .AND. SUBSTR(TMP1->LIBERACAO,1,6) < (MV_PAR04+MV_PAR03)))
 				IF TMP1->TIPO == "PC" .AND. TMP1->LIBERADO == "B"
-					aAdd(aPedidosF,{TMP1->SIG1,TMP1->NUM,TMP1->TIPO,TMP1->EMISSAO,TMP1->FORNECE,TMP1->LOJA,TMP1->NOMEFOR,TMP1->PRODUTO,TMP1->DESCRI,TMP1->QTD,TMP1->LIBERADO,"",TMP1->VALOR,TMP1->NUM})
+					aAdd(aPedidosF,{TMP1->SIG1,TMP1->NUM,TMP1->TIPO,TMP1->EMISSAO,TMP1->FORNECE,TMP1->LOJA,TMP1->NOMEFOR,TMP1->PRODUTO,TMP1->DESCRI,TMP1->QTD,TMP1->LIBERADO,"",TMP1->VALOR,TMP1->NUM,TMP1->CONDPAG})
 				ELSE
-					aAdd(aPedidosF,{TMP1->SIG1,TMP1->NUM,TMP1->TIPO,TMP1->EMISSAO,TMP1->FORNECE,TMP1->LOJA,TMP1->NOMEFOR,TMP1->PRODUTO,TMP1->DESCRI,TMP1->QTD,TMP1->LIBERADO,TMP1->LIBERACAO,TMP1->VALOR,TMP1->NUM})
+					aAdd(aPedidosF,{TMP1->SIG1,TMP1->NUM,TMP1->TIPO,TMP1->EMISSAO,TMP1->FORNECE,TMP1->LOJA,TMP1->NOMEFOR,TMP1->PRODUTO,TMP1->DESCRI,TMP1->QTD,TMP1->LIBERADO,TMP1->LIBERACAO,TMP1->VALOR,TMP1->NUM,TMP1->CONDPAG})
 				ENDIF
 
 			ENDIF
@@ -989,7 +1007,7 @@ Static Function RunReport(Cabec1,Cabec2,Titulo,nLin)
 		dbGoTop()
 		While !EOF()
 
-			aAdd(aPedidosF,{TMP2->SIG1,TMP2->NUM,TMP2->TIPO,TMP2->EMISSAO,TMP2->FORNECE,TMP2->LOJA,TMP2->NOMEFOR,TMP2->PRODUTO,TMP2->DESCRI,TMP2->QTD,TMP2->LIBERADO,"L",TMP2->VALOR,TMP2->PEDIDO})
+			aAdd(aPedidosF,{TMP2->SIG1,TMP2->NUM,TMP2->TIPO,TMP2->EMISSAO,TMP2->FORNECE,TMP2->LOJA,TMP2->NOMEFOR,TMP2->PRODUTO,TMP2->DESCRI,TMP2->QTD,TMP2->LIBERADO,"L",TMP2->VALOR,TMP2->PEDIDO,""})
 
 			dbSkip()
 
@@ -1117,6 +1135,7 @@ Static Function RunReport(Cabec1,Cabec2,Titulo,nLin)
 						@nLin,026 PSAY aPedidosF[_I,5] 				//COD FORNECE
 						@nLin,034 PSAY aPedidosF[_I,6]  				//LOJA
 						@nLin,038 PSAY SUBSTR(aPedidosF[_I,7],1,34)  //NOME
+
 						IF aPedidosF[_I,3] == "PC"
 							IF Posicione("SZL",2,xFilial("SZL") + aPedidosF[_I,2],"ZL_PEDORC") == "1"
 								@nLin,178 PSAY "ORÇADO"
@@ -1129,14 +1148,14 @@ Static Function RunReport(Cabec1,Cabec2,Titulo,nLin)
 						@nLin,188 PSAY cAprovF						//LIBERADO
 						@nLin,193 PSAY STOD(aPedidosF[_I,12]) 		//DT LIBERAÇÃO
 						@nLin,206 PSAY aPedidosF[_I,13] PICTURE "@E 999,999,999.99"	//VALOR
-					ELSE
+						ELSE
 						@nLin,017 PSAY (MV_PAR03) + "/" + (MV_PAR04)
 						@nLin,026 PSAY aPedidosF[_I,5]
 						@nLin,038 PSAY "                         "  //NOME
 						@nLin,189 PSAY cAprovF				    	//LIBERADO
 						@nLin,194 PSAY STOD(aPedidosF[_I,12]) 		//DT LIBERAÇÃO
 						@nLin,207 PSAY aPedidosF[_I,13] PICTURE "@E 999,999,999.99"	//VALOR
-					ENDIF
+						ENDIF
 
 					IF aPedidosF[_I,3] == "AE"
 						//@nLin,075 PSAY ALLTRIM(aPedidosF[_I,8])    	//PRODUTO
@@ -1146,25 +1165,27 @@ Static Function RunReport(Cabec1,Cabec2,Titulo,nLin)
 						dbSelectArea ("SZL")
 						dbSetOrder(2)
 						IF DbSeek(xFilial("SZL") + aPedidosF[_I,2])
-							cMemo := MemoLine(ZL_OBS1,100,1)
+							cMemo := MemoLine(ZL_OBS1,85,1)
 							@nLin,076 PSAY ALLTRIM(UPPER(cMemo))
-							IF !EMPTY(ALLTRIM(SUBSTR(ZL_OBS1,101,100)))
-								cMemo := MemoLine(ZL_OBS1,100,2)
+							@nLin,165 PSAY aPedidosF[_I,15]
+							IF !EMPTY(ALLTRIM(SUBSTR(ZL_OBS1,86,85)))
+								cMemo := MemoLine(ZL_OBS1,85,2)
 								nLin 	+= 1
 								@nLin,076 PSAY ALLTRIM(UPPER(cMemo))
-								IF !EMPTY(ALLTRIM(SUBSTR(ZL_OBS1,201,100)))
-									cMemo := MemoLine(ZL_OBS1,100,3)
+								IF !EMPTY(ALLTRIM(SUBSTR(ZL_OBS1,171,85)))
+									cMemo := MemoLine(ZL_OBS1,85,3)
 									nLin 	+= 1
 									@nLin,076 PSAY ALLTRIM(UPPER(cMemo))
 								ENDIF
 							ENDIF
 							IF !EMPTY(ALLTRIM(SUBSTR(ZL_EXCLUSI,001,100)))
-								cMemo := MemoLine(ZL_EXCLUSI,100,1)
+								cMemo := MemoLine(ZL_EXCLUSI,85,1)
+								//@nLin,165 PSAY aPedidosF[_I,15]
 								nLin 	+= 1
 								@nLin,001 PSAY "MOTIVO FORNECEDOR EXCLUSIVO:"
 								@nLin,076 PSAY ALLTRIM(UPPER(cMemo))
-								IF !EMPTY(ALLTRIM(SUBSTR(ZL_EXCLUSI,101,100)))
-									cMemo := MemoLine(ZL_EXCLUSI,100,2)
+								IF !EMPTY(ALLTRIM(SUBSTR(ZL_EXCLUSI,86,85)))
+									cMemo := MemoLine(ZL_EXCLUSI,85,2)
 									nLin 	+= 1
 									@nLin,076 PSAY ALLTRIM(UPPER(cMemo))
 								ENDIF
@@ -1174,15 +1195,16 @@ Static Function RunReport(Cabec1,Cabec2,Titulo,nLin)
 						dbSelectArea ("SZS")
 						dbSetOrder(1)
 						IF DbSeek(xFilial("SZS") + aPedidosF[_I,2])
-							cMemo := MemoLine(ZS_HISTORI,100,1)
+							cMemo := MemoLine(ZS_HISTORI,85,1)
 							@nLin,076 PSAY ALLTRIM(UPPER(cMemo))
-							IF !EMPTY(ALLTRIM(SUBSTR(ZS_HISTORI,101,100)))
+							@nLin,165 PSAY aPedidosF[_I,15]
+							IF !EMPTY(ALLTRIM(SUBSTR(ZS_HISTORI,86,85)))
 								nLin 	+= 1
-								cMemo 	:= MemoLine(ZS_HISTORI,100,2)
+								cMemo 	:= MemoLine(ZS_HISTORI,85,2)
 								@nLin,076 PSAY ALLTRIM(UPPER(cMemo))
-								IF !EMPTY(ALLTRIM(SUBSTR(ZS_HISTORI,201,100)))
+								IF !EMPTY(ALLTRIM(SUBSTR(ZS_HISTORI,171,85)))
 									nLin 	+= 1
-									cMemo 	:= MemoLine(ZS_HISTORI,100,3)
+									cMemo 	:= MemoLine(ZS_HISTORI,85,3)
 									@nLin,076 PSAY ALLTRIM(UPPER(cMemo))
 								ENDIF
 							ENDIF
@@ -1190,9 +1212,11 @@ Static Function RunReport(Cabec1,Cabec2,Titulo,nLin)
 					ELSEIF aPedidosF[_I,3] == "NF"
 						@nLin,076 PSAY ALLTRIM(aPedidosF[_I,8])    	//PRODUTO
 						@nLin,085 PSAY SUBSTR(aPedidosF[_I,9],1,80)  //DESCRIÇÃO
+
 					ELSEIF aPedidosF[_I,3] == "AM"
 						@nLin,076 PSAY ALLTRIM(aPedidosF[_I,8])    	//PRODUTO
 						@nLin,087 PSAY SUBSTR(aPedidosF[_I,9],1,78)  //DESCRIÇÃO
+
 					ENDIF
 
 					lOk 	:= .T.
