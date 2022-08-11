@@ -188,6 +188,7 @@ Static Function fProcPdf()
 	oPrint:Say( nLin,685, "TOTAL:",oFonte10N)
 	oPrint:Say( nLin,776, Transform(nTotalR, "@E 999,999,999.99"),oFonte10N)
 
+			nTotalR	  := 0
 
 			//Verifico se imprime apenas o total ou não
 			If cImpTot == "N"
@@ -645,6 +646,7 @@ Static Function ImpPerComp()
 		nTotalR	  += nTotRepas
 		nTotCalc  := 0
 		nTotRepas := 0
+
 
 		nLin += REL_VERT_STD
 
