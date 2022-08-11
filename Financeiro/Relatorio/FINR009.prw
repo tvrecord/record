@@ -84,6 +84,7 @@ Local nSubTot		:= 0
 Local cSubTot 		:= ""
 Local cTipo  		:= ""
 Local nVlAplFin		:= 0 // Valor da aplicação financeira conta contabil 321100009
+Local nVlRepR7I		:= 0 // Valor do repasse R7 I conta contabil 311010004
 Local cAno			:= Alltrim(STR(Year(MV_PAR03)))
 Local cFiltro 		:= "% DATA_DE_EMISSAO BETWEEN '"+DTOS(MV_PAR03)+"' AND '"+DTOS(MV_PAR04)+"' AND CONTA_SIG BETWEEN '"+MV_PAR05+"' AND '"+MV_PAR06+"' %"
 
@@ -97,11 +98,11 @@ IF 	   MV_PAR01 == 1  //Sintetico
 
 	BeginSql Alias cAlias1
 
-	SELECT SUBSTRING(CONTA_SIG,1,2) AS GRUPO, CONTA_SIG, CONTA_RM AS CCONTABIL, SUM(VALOR) AS VALOR
+	SELECT SUBSTRING(CONTA_SIG,1,2) AS GRUPO, CONTA_SIG, CONTA_RM AS CCONTABIL, SUM(VALOR) AS VALOR, NUMERO_DO_DOCUMENTO AS DOC
 	FROM CONTABILQLIKVIEW
 	WHERE
 	%Exp:cFiltro%
-	GROUP BY SUBSTRING(CONTA_SIG,1,2), CONTA_SIG, CONTA_RM
+	GROUP BY SUBSTRING(CONTA_SIG,1,2), CONTA_SIG, CONTA_RM, NUMERO_DO_DOCUMENTO
 	ORDER BY GRUPO, CONTA_SIG, CONTA_RM
 
 	EndSql
@@ -180,8 +181,11 @@ IF 	   MV_PAR01 == 1  //Sintetico
 			ENDIF
 		ENDIF
 
-		IF ALLTRIM((cAlias1)->CCONTABIL) == "311010012"
+		IF ALLTRIM((cAlias1)->CCONTABIL) == "311010012"							//Regra para tirar receita de aplicação
 			nVlAplFin	+= (cAlias1)->VALOR
+		EndIF
+		IF ALLTRIM((cAlias1)->CCONTABIL) == "311010004" .and. ALLTRIM((cAlias1)->DOC) == '039389'	//Regra para tirar repasse R7 I (basta inserir o documento do relatório rateio de nat do contas a receber)
+			nVlRepR7I	+= (cAlias1)->VALOR
 		EndIF
 
 		(cAlias1)->(DbSkip())
@@ -216,6 +220,9 @@ IF 	   MV_PAR01 == 1  //Sintetico
 				nLin += 2
 				@nLin, 001 PSAY UPPER("Faturamento sem a receita de aplicação (" +ALLTRIM(Transform(nVlAplFin, "@E 999,999,999.99")) +"):"	)
 				@nLin, 065 PSAY (nVlTotalR - nVlNaoFat - nVlAplFin) PICTURE "@E 999,999,999.99"
+				nLin += 2
+				@nLin, 001 PSAY UPPER("Faturamento sem receita de aplicação e repasse R7 I:")
+				@nLin, 065 PSAY (nVlTotalR - nVlNaoFat - nVlAplFin - nVlRepR7I) PICTURE "@E 999,999,999.99"
 			ENDIF
 			nLin += 1
 			@nLin, 000 PSAY REPLICATE("-",LIMITE)
