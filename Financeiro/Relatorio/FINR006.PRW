@@ -78,9 +78,12 @@ Static Function fProcPdf()
 	Private cFiltro1	:= ""
 	Private cFiltro2	:= ""
 	Private cFiltro3	:= ""
+	Private cFiltro4	:= "% (E1_NUM IN  " + FormatIn(ALLTRIM(MV_PAR16),"/") + " )" + "  %"
+	Private cFiltro5 	:= "% (E1_NUM IN  " + FormatIn(ALLTRIM(MV_PAR17),"/") + " )" + "  %"
+
 
 	// Query para buscar as informações
-	cFiltro1	:= "% (E1_EMISSAO BETWEEN '"+DTOS(MV_PAR04)+"' AND '"+DTOS(MV_PAR05)+"' AND E1_BAIXA BETWEEN '"+DTOS(MV_PAR06)+"' AND '"+DTOS(MV_PAR07)+"' AND E1_VEND1 BETWEEN '"+(MV_PAR02)+"' AND '"+(MV_PAR03)+"' OR E1_NUM IN " + FormatIn(ALLTRIM(MV_PAR14),"/") + " ) %"
+	cFiltro1	:= "% (E1_EMISSAO BETWEEN '"+DTOS(MV_PAR04)+"' AND '"+DTOS(MV_PAR05)+"' AND E1_BAIXA BETWEEN '"+DTOS(MV_PAR06)+"' AND '"+DTOS(MV_PAR07)+"' AND E1_VEND1 BETWEEN '"+(MV_PAR02)+"' AND '"+(MV_PAR03)+"' AND E1_NUM NOT IN " + FormatIn(ALLTRIM(MV_PAR14),"/") + ")" +  "  %"
 
 	// Busca os registros a serem impressos no relatório - BonIficação de volume
 	BeginSql Alias cAlias
@@ -104,6 +107,7 @@ Static Function fProcPdf()
 		ON E1_NATUREZ = ED_CODIGO AND %table:SED%.D_E_L_E_T_ <> '*'
 		WHERE E1_FILIAL = '01' AND %table:SE1%.D_E_L_E_T_ <> '*' AND %table:SE1%.E1_NATUREZ <> '1101006'
 		AND %exp:cFiltro1%
+		OR %exp:cFiltro4%
 		AND ( E1_CLIENTE <> '001689' OR E1_VEND1 <> '000219' )
 		ORDER BY E1_VEND1, MESFAT, E1_CLIENTE, E1_LOJA, E1_NUM, E1_PARCELA, E1_VENCTO
 
@@ -217,7 +221,7 @@ Static Function fProcPdf()
 			If (STOD((cAlias)->E1_BAIXA) > STOD((cAlias)->E1_VENCTO)) .AND. (STOD((cAlias)->E1_BAIXA)) <= (STOD((cAlias)->E1_VENCTO) + (cAlias)->ZU_DIAS) .AND. lVend
 
 				// Query para buscar as informações
-				cFiltro2	:= "% AND (SUBSTRING(E1_EMISSAO,1,6) = '"+(cAlias)->MESFAT+"' AND E1_BAIXA BETWEEN '"+dIniBxA+"' AND '"+dFimBxA+"' AND E1_VEND1 = '"+(cAlias)->E1_VEND1+"' OR E1_NUM IN " + FormatIn(ALLTRIM(MV_PAR14),"/") + ") %"
+				cFiltro2	:= "% AND (SUBSTRING(E1_EMISSAO,1,6) = '"+(cAlias)->MESFAT+"' AND E1_BAIXA BETWEEN '"+dIniBxA+"' AND '"+dFimBxA+"' AND E1_VEND1 = '"+(cAlias)->E1_VEND1+"' OR E1_NUM IN " + FormatIn(ALLTRIM(MV_PAR14),"/") + " %"
 				//FatMesAnt()
 
 			EndIf //Fim do controle do mês anterior
@@ -312,7 +316,7 @@ Static Function fProcPdf()
 	nFatAge  := 0
 	nBVAge 	 := 0
 	nPerc 	 := 0
-	cFiltro3 := "% (E1_EMISSAO BETWEEN '"+DTOS(MV_PAR04)+"' AND '"+DTOS(MV_PAR05)+"' AND E1_BAIXA BETWEEN '"+DTOS(MV_PAR06)+"' AND '"+DTOS(MV_PAR07)+"' AND E1_VEND1 BETWEEN '"+(MV_PAR02)+"' AND '"+(MV_PAR03)+"' OR E1_NUM IN " + FormatIn(ALLTRIM(MV_PAR15),"/") + ") %"
+	cFiltro3 := "% (E1_EMISSAO BETWEEN '"+DTOS(MV_PAR04)+"' AND '"+DTOS(MV_PAR05)+"' AND E1_BAIXA BETWEEN '"+DTOS(MV_PAR06)+"' AND '"+DTOS(MV_PAR07)+"' AND E1_VEND1 BETWEEN '"+(MV_PAR02)+"' AND '"+(MV_PAR03)+"' AND E1_NUM NOT IN " + FormatIn(ALLTRIM(MV_PAR15),"/") + " )" + "  %"
 
 	// Busca os registros a serem impressos no relatório - Comissão de Agência
 	BeginSql Alias cAlias1
@@ -326,6 +330,8 @@ Static Function fProcPdf()
 		INNER JOIN %table:SED% ON E1_NATUREZ = ED_CODIGO AND %table:SED%.D_E_L_E_T_ = ''
 		WHERE %table:SE1%.D_E_L_E_T_ = '' AND E1_COMIS1 > 0
 		AND %exp:cFiltro3%  // Coloque sua exceção aqui
+		OR %exp:cFiltro5%
+
 		ORDER BY A3_COD, MESFAT
 
 	EndSql //FINALIZO A MINHA QUERY
@@ -500,6 +506,7 @@ Static Function fProcPdf()
 		ON E1_NATUREZ = ED_CODIGO AND %table:SED%.D_E_L_E_T_ <> '*'
 		WHERE E1_FILIAL = '01' AND %table:SE1%.D_E_L_E_T_ <> '*' AND E1_NATUREZ <> '1101006'
 		AND %exp:cFiltro1%
+		OR %exp:cFiltro4%
 		AND (E1_CLIENTE <> '001689' OR E1_VEND1 <> '000219')
 		ORDER BY E1_VEND1, MESFAT, E1_CLIENTE, E1_LOJA, E1_NUM, E1_PARCELA, E1_VENCTO
 		EndSql
@@ -603,6 +610,9 @@ Static Function ValidPerg(cPerg)
 	AADD(aRegs,{cPerg,"13","Imprime Não Pagos:	","","","mv_ch13","N",01,00,0,"C","","mv_par13","Sim","","","","","Não","","","","","","","","","","","","","","","","","","",""})
 	AADD(aRegs,{cPerg,"14","Exceção NF BV: 		","","","mv_ch14","C",35,00,0,"G","","mv_par14","","","","","","","","","","","","","","","","","","","","","","","","","SE1"})
 	AADD(aRegs,{cPerg,"15","Exceção NF Agência: ","","","mv_ch15","C",35,00,0,"G","","mv_par15","","","","","","","","","","","","","","","","","","","","","","","","","SE1"})
+	AADD(aRegs,{cPerg,"16","Incluir NF BV: 		","","","mv_ch16","C",35,00,0,"G","","mv_par16","","","","","","","","","","","","","","","","","","","","","","","","","SE1"})
+	AADD(aRegs,{cPerg,"17","Incluir NF Agência: ","","","mv_ch17","C",35,00,0,"G","","mv_par17","","","","","","","","","","","","","","","","","","","","","","","","","SE1"})
+
 
 	For i:=1 to Len(aRegs)
 		If !dbSeek(PADR(cPerg,10)+aRegs[i,2])
