@@ -830,6 +830,7 @@ AADD(aDBF,{"DTENT"  , "D", 08,0})
 AADD(aDBF,{"HRENT"  , "C", 05,0})
 AADD(aDBF,{"QTDE"   , "N", 06,2})
 AADD(aDBF,{"QTDEVO" , "N", 06,2})
+AADD(aDBF,{"OBS" 	, "C", 40,0})
 AADD(aDBF,{"DEV"    , "C", 01,0})
 AADD(aDBF,{"NUMCAP" , "C", 12,0})
 AADD(aDBF,{"NUMCRI" , "C", 12,0})
@@ -1516,7 +1517,7 @@ If lSigaMdtps
 			EndIf
 			//DbSelectArea("TN3")
 			If ZAA->(FieldPos("ZAA_OBS")) > 0
-				@ Li,002 PSay ZAA->ZAA_OBS
+			@ Li,002 PSay ZAA->ZAA_OBS  //Se não aparecer a observação, copiar a linha 1847 na 1519
 			EndIf
 			//IF TN3->(FieldPos("TN3_NUMCRI") > 0)
 			//	@ Li,016 PSay (cTRB)->NUMCRI
@@ -1844,7 +1845,7 @@ Else
 			EndIf
 			//DbSelectArea("TN3")
 			If ZAA->(FieldPos("ZAA_OBS")) > 0
-				@ Li,002 PSay ZAA->ZAA_OBS
+				@ Li,002 PSay (cTRB)->OBS
 			EndIf
 			//IF TN3->(FieldPos("TN3_NUMCRI") > 0)
 			//	@ Li,016 PSay (cTRB)->NUMCRI
@@ -2038,6 +2039,7 @@ If lSigaMdtps
 	(cTRB)->HRENT    := ZAA->ZAA_HRENTR
 	(cTRB)->QTDE     := ZAA->ZAA_QTDENT
 	(cTRB)->QTDEVO   := ZAA->ZAA_QTDEVO
+	(cTRB)->OBS   	 := ZAA->ZAA_OBS
 	(cTRB)->DEV      := ZAA->ZAA_INDDEV
 	(cTRB)->NUMCAP   := If(lCPONumcap,ZAA->ZAA_NUMCAP,TN3->TN3_NUMCAP)
 
@@ -2100,6 +2102,7 @@ Else
 	(cTRB)->HRENT    := ZAA->ZAA_HRENTR
 	(cTRB)->QTDE     := ZAA->ZAA_QTDENT
 	(cTRB)->QTDEVO   := ZAA->ZAA_QTDEVO
+	(cTRB)->OBS		 := ZAA->ZAA_OBS
 	(cTRB)->DEV      := ZAA->ZAA_INDDEV
 	(cTRB)->NUMCAP   := If(lCPONumcap,ZAA->ZAA_NUMCAP,TN3->TN3_NUMCAP)
 
