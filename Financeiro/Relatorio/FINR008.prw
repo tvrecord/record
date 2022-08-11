@@ -71,6 +71,7 @@ Static Function fProcPdf()
 	Private nValNatI	:= 0
 	Private cVendedor	:= ""
 	Private cNome		:= ""
+	Private cTipoCom	:= ""
 	//Tabelas temporarias
 	Private cAlias1    	:= GetNextAlias()
 	Private cAlias2    	:= GetNextAlias()
@@ -110,7 +111,7 @@ Static Function fProcPdf()
 
 		SELECT ZAJ_VEND AS VENDEDOR, ZAK_ANO AS ANO, ZAK_GRPNAT AS GRUPO, ZAK_TPSUB AS TPSUB, ZAK_PERC AS PERC_COM, ZAL_MES AS MES
 		, ZAL_TIPO AS TIPO, ZAL_PERC AS PERC_COL, ZAL_VALOR AS VL_COM, ZAL_MTCOLE AS META_COL
-		, ZAL_ATCOLE AS VL_COL, ZAL_MTINDI AS META_IND, ZAL_ATINDI AS VL_IND, ZAL_PERCIN AS PERC_IND
+		, ZAL_ATCOLE AS VL_COL, ZAL_MTINDI AS META_IND, ZAL_ATINDI AS VL_IND, ZAL_PERCIN AS PERC_IND, ZAJ_TIPO AS TIPOCOM
 		FROM %table:ZAJ%
 		INNER JOIN %table:ZAK% ON ZAJ_FILIAL = ZAK_FILIAL AND ZAJ_VEND = ZAK_VEND AND %table:ZAK%.D_E_L_E_T_ = ''
 		INNER JOIN %table:ZAL% ON ZAK_FILIAL = ZAL_FILIAL AND ZAK_VEND = ZAL_VEND AND ZAK_ANO = ZAL_ANO AND ZAK_GRPNAT = ZAL_GRPNAT AND %table:ZAL%.D_E_L_E_T_ = ''
@@ -138,7 +139,8 @@ Static Function fProcPdf()
 		(cAlias1)->META_IND,;		//11 - Meta individual
 		(cAlias1)->VL_IND,;			//12 - Valor atingido indvidual
 		(cAlias1)->PERC_IND,;		//13 - Percentual da comissão individual
-		(cAlias1)->TPSUB})			//14 - Tipo do subtotal do Grupo, 1=Calcula; 2=Não Calcula; 3=Calc. Com Descontos
+		(cAlias1)->TPSUB,;			//14 - Tipo do subtotal do Grupo, 1=Calcula; 2=Não Calcula; 3=Calc. Com Descontos
+		(cAlias1)->TIPOCOM})		//15 - Tipo de impressão no relatório:Individual, Coletivo ou ambos
 
 		(cAlias1)->(DbSkip())
 
@@ -203,6 +205,8 @@ Static Function fProcPdf()
 
 	While (cAlias2)->(!Eof())
 
+		cTipoCom	:= aNatPerc[nPos][15]
+
 		IF nLin > REL_END .or. cVendedor != Alltrim((cAlias2)->VENDEDOR)
 
 			cFileName 	:= "FINR008_COMISSAO_"+cPeriodo+"_"+(cAlias2)->VENDEDOR+"_"+Alltrim((cAlias2)->NOME)
@@ -226,10 +230,15 @@ Static Function fProcPdf()
 		IF (cNatureza != (cAlias2)->NATUREZA .or. cGrupo != (cAlias2)->NAT_COMISS) .and. lOk .and. MV_PAR11 == 2
 			oPrint:Say( nLin,020, cNatureza					  									,oFonte)
 			oPrint:Say( nLin,080, cDescricao						  			  				,oFonte)
-			IF aNatPerc[nPos][11] > 0
+			IF aNatPerc[nPos][11] > 0 .and. cTipoCom = "3"
 				oPrint:Say( nLin,410, PADR(Transform(nValNatI, "@E 999,999,999.99"),14) 		,oFonte)
+			ELSEIF aNatPerc[nPos][11] > 0 .and. cTipoCom = "1"
+				oPrint:Say( nLin,520, PADR(Transform(nValNatI, "@E 999,999,999.99"),14) 		,oFonte)
 			ENDIf
-			oPrint:Say( nLin,520, PADR(Transform(nValNatC, "@E 999,999,999.99"),14) 			,oFonte)
+
+			IF cTipoCom = "3" .or. cTipoCom = "2"
+				oPrint:Say( nLin,520, PADR(Transform(nValNatC, "@E 999,999,999.99"),14) 		,oFonte)
+			ENDIF
 			nLin += REL_LIN_STD
 			nValNatI		:= 0
 			nValNatC		:= 0
@@ -262,6 +271,7 @@ Static Function fProcPdf()
 		nPerc		:= (cAlias2)->PERCENTUAL
 		nPercCom	:= aNatPerc[nPos][04]
 		cTipoSub	:= aNatPerc[nPos][14]
+		cTipoCom	:= aNatPerc[nPos][15]
 		nValNatI	+= ((cAlias2)->VL_IND   * nPerc) / 100
 		nValNatC	+= ((cAlias2)->VL_BRUTO * nPerc) / 100
 		nTotGrupoI	+= ((cAlias2)->VL_IND   * nPerc) / 100
@@ -280,10 +290,16 @@ Static Function fProcPdf()
 			IF (cNatureza != (cAlias2)->NATUREZA .or. cGrupo != (cAlias2)->NAT_COMISS .or. cVendedor != Alltrim((cAlias2)->VENDEDOR)) .and. MV_PAR11 == 2
 				oPrint:Say( nLin,020, cNatureza					  									,oFonte)
 				oPrint:Say( nLin,080, cDescricao						  			  				,oFonte)
-				IF aNatPerc[nPos][11] > 0
+				IF aNatPerc[nPos][11] > 0 .and. cTipoCom = "3"
 					oPrint:Say( nLin,410, PADR(Transform(nValNatI, "@E 999,999,999.99"),14) 		,oFonte)
+				ELSEIF aNatPerc[nPos][11] > 0 .and. cTipoCom = "1"
+					oPrint:Say( nLin,520, PADR(Transform(nValNatI, "@E 999,999,999.99"),14) 		,oFonte)
 				ENDIF
+
+				IF cTipoCom = "3" .or. cTipoCom = "2"
 				oPrint:Say( nLin,520, PADR(Transform(nValNatC, "@E 999,999,999.99"),14) 			,oFonte)
+				ENDIF
+
 				nValNatI		:= 0
 				nValNatC		:= 0
 				nLin += REL_LIN_STD
@@ -381,8 +397,14 @@ Static Function ImpProxPag(cVendedor,cNome,cPeriodo)
 	oPrint:Say( nLin,020, "NATUREZA"	,oFonteN)
 	oPrint:Say( nLin,080, "DESCRIÇÃO"	,oFonteN)
 	oPrint:Say( nLin,290, "PERC %"		,oFonteN)
+	IF cTipoCom = "1"
+	oPrint:Say( nLin,525, "INDIVIDUAL"	,oFonteN)
+	ELSEIF cTipoCom = "2"
+	oPrint:Say( nLin,525, "COLETIVO"	,oFonteN)
+	ELSE
 	oPrint:Say( nLin,410, "INDIVIDUAL"	,oFonteN)
 	oPrint:Say( nLin,525, "COLETIVO"	,oFonteN)
+	ENDIF
 
 	oPrint:line(nLin+5,REL_LEFT,nLin+5,REL_RIGHT )
 
@@ -524,10 +546,14 @@ Static Function ImpTotais()
 	IF cTipoSub == "3"
 
 		oPrint:Say( nLin,020, "SUBTOTAL:"				  						,oFonteN)
-		IF aNatPerc[nPos][11] > 0
+		IF aNatPerc[nPos][11] > 0 .and. cTipoCom = "3"
 			oPrint:Say( nLin,410, PADR(Transform(nSubTotI, "@E 999,999,999.99"),14)	,oFonteN)
+			elseif aNatPerc[nPos][11] > 0 .and. cTipoCom = "1"
+			oPrint:Say( nLin,520, PADR(Transform(nSubTotI, "@E 999,999,999.99"),14)	,oFonteN)
 		ENDIF
+		IF aNatPerc[nPos][11] > 0 .and. cTipoCom = "3" .or. cTipoCom = "2"
 		oPrint:Say( nLin,520, PADR(Transform(nSubTotC, "@E 999,999,999.99"),14)	,oFonteN)
+		ENDIF
 
 		nLin += REL_LIN_TOT
 		oPrint:Say( nLin,020, "(-) COMISSÃO AGÊNCIA:"			  				,oFonteN)
@@ -563,17 +589,18 @@ Static Function ImpTotais()
 				nLin += REL_LIN_STD
 			END
 
+			// Rafael França - Utilizar o valor sem desconto para meta coletiva, nSubTotC no lugar de nTotGrupoC. Pedido Sra. Elenn 03/06/2022.
 			IF aNatPerc[nPos][09] <> 0
 				oPrint:Say( nLin,020, "META COLETIVA:   " +ALLTRIM(Transform(aNatPerc[nPos][09], "@E 999,999,999.99")) 	,oFonteN)
-				oPrint:Say( nLin,160, "VALOR ATINGIDO:  " +ALLTRIM(Transform(nTotGrupoC, "@E 999,999,999.99")) 			,oFonteN)
+				oPrint:Say( nLin,160, "VALOR ATINGIDO:  " +ALLTRIM(Transform(nSubTotC, "@E 999,999,999.99")) 			,oFonteN)
 				IF aNatPerc[nPos][06] == "P"
 					oPrint:Say( nLin,340, "PRÊMIO COLETIVO (" +ALLTRIM(Transform(aNatPerc[nPos][07], "999.99%")) + "):"	,oFonteN)
-					oPrint:Say( nLin,520, PADR(Transform(IIF((nTotGrupoC) > aNatPerc[nPos][09],(nTotGrupoC*aNatPerc[nPos][07]/100),0), "@E 999,999,999.99"),14)	,oFonteN)
-					nTotalPre  += IIF((nTotGrupoC) > aNatPerc[nPos][09],(nTotGrupoC*aNatPerc[nPos][07]/100),0)
+					oPrint:Say( nLin,520, PADR(Transform(IIF((nSubTotC) > aNatPerc[nPos][09],(nSubTotC*aNatPerc[nPos][07]/100),0), "@E 999,999,999.99"),14)	,oFonteN)
+					nTotalPre  += IIF((nSubTotC) > aNatPerc[nPos][09],(nSubTotC*aNatPerc[nPos][07]/100),0)
 				ELSEIF aNatPerc[nPos][06] == "V"
 					oPrint:Say( nLin,340, "PRÊMIO COLETIVO: " 					,oFonteN)
-					oPrint:Say( nLin,520, PADR(Transform(IIF(nTotGrupoC >= aNatPerc[nPos][09],aNatPerc[nPos][08],0), "@E 999,999,999.99"),14)	,oFonteN)
-					nTotalPre  += IIF(nTotGrupoC >= aNatPerc[nPos][09],aNatPerc[nPos][08],0)
+					oPrint:Say( nLin,520, PADR(Transform(IIF(nSubTotC >= aNatPerc[nPos][09],aNatPerc[nPos][08],0), "@E 999,999,999.99"),14)	,oFonteN)
+					nTotalPre  += IIF(nSubTotC >= aNatPerc[nPos][09],aNatPerc[nPos][08],0)
 				ENDIF
 			ENDIF
 		ENDIF
@@ -612,17 +639,18 @@ Static Function ImpTotais()
 				ENDIF
 			END
 
+			// Rafael França - Utilizar o valor sem desconto para meta coletiva, nSubTotC no lugar de nTotGrupoC. Pedido Sra. Elenn 03/06/2022.
 			IF aNatPerc[nPos][09] <> 0
 				oPrint:Say( nLin,020, "META COLETIVA:   " +ALLTRIM(Transform(aNatPerc[nPos][09], "@E 999,999,999.99")) 	,oFonteN)
-				oPrint:Say( nLin,160, "VALOR ATINGIDO:  " +ALLTRIM(Transform(nTotGrupoC, "@E 999,999,999.99")) 			,oFonteN)
+				oPrint:Say( nLin,160, "VALOR ATINGIDO:  " +ALLTRIM(Transform(nSubTotC, "@E 999,999,999.99")) 			,oFonteN)
 				IF aNatPerc[nPos][06] == "P"
-					oPrint:Say( nLin,340, "PRÊMIO COLETIVO (" +ALLTRIM(Transform(aNatPerc[nPos][07], "999.999%")) + "):"	,oFonteN)
-					oPrint:Say( nLin,520, PADR(Transform(IIF((nTotGrupoC) > aNatPerc[nPos][09],(nTotGrupoC*aNatPerc[nPos][07]/100),0), "@E 999,999,999.99"),14)	,oFonteN)
-					nTotalPre  += IIF((nTotGrupoC) > aNatPerc[nPos][09],(nTotGrupoC*aNatPerc[nPos][07]/100),0)
+					oPrint:Say( nLin,340, "PRÊMIO COLETIVO (" +ALLTRIM(Transform(aNatPerc[nPos][07], "999.999%")) + "):",oFonteN)
+					oPrint:Say( nLin,520, PADR(Transform(IIF((nSubTotC) > aNatPerc[nPos][09],(nSubTotC*aNatPerc[nPos][07]/100),0), "@E 999,999,999.99"),14)	,oFonteN)
+					nTotalPre  += IIF((nSubTotC) > aNatPerc[nPos][09],(nSubTotC*aNatPerc[nPos][07]/100),0)
 				ELSEIF aNatPerc[nPos][06] == "V"
 					oPrint:Say( nLin,340, "PRÊMIO COLETIVO: " 					,oFonteN)
-					oPrint:Say( nLin,520, PADR(Transform(IIF(nTotGrupoC >= aNatPerc[nPos][09],aNatPerc[nPos][08],0), "@E 999,999,999.99"),14)	,oFonteN)
-					nTotalPre  += IIF(nTotGrupoC >= aNatPerc[nPos][09],aNatPerc[nPos][08],0)
+					oPrint:Say( nLin,520, PADR(Transform(IIF(nSubTotC >= aNatPerc[nPos][09],aNatPerc[nPos][08],0), "@E 999,999,999.99"),14)	,oFonteN)
+					nTotalPre  += IIF(nSubTotC >= aNatPerc[nPos][09],aNatPerc[nPos][08],0)
 				ENDIF
 			ENDIF
 		ENDIF
