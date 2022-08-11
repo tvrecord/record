@@ -39,7 +39,7 @@ User Function FINR008()
 		Return
 	ENDIF
 
-	FwMsgRun(Nil, { || fProcPDF() }, "Processando", "Emitindo relatorio em PDF..." )
+	FwMsgRun(Nil, { || fProcPdf() }, "Processando", "Emitindo relatorio em PDF..." )
 
 Return
 
@@ -91,6 +91,7 @@ Static Function fProcPdf()
 	Private cFiltro1	:= "%AND SUBSTRING(E1_EMISSAO,1,6) = '"+cPeriodo+"' AND E1_TIPO NOT IN " + FormatIn(MV_PAR06,"/") + " AND E1_FILIAL = '01' %"
 	Private cFiltro2	:= "%AND A3_COD BETWEEN '"+MV_PAR01+"' AND '"+MV_PAR02+"' %"
 	Private cFiltro3	:= "%AND ZAJ_VEND BETWEEN '"+MV_PAR01+"' AND '"+MV_PAR02+"'AND ZAK_ANO = '"+(MV_PAR04)+"' %"
+	Private cFiltro4	:= "%AND SUBSTRING(E1_EMISSAO,1,6) = '"+cPeriodo+"' AND E1_TIPO NOT IN " + FormatIn(MV_PAR06,"/") + " AND E1_FILIAL = '01' %"
 	//Calculo e regras de descontos do contato
 	Private nDescAge	:= 0
 	Private nDescBV		:= 0
@@ -101,9 +102,6 @@ Static Function fProcPdf()
 	Private nDescAge1	:= 0
 	Private nDescBV1	:= 0
 	Private nDescCac1	:= 0
-
-	//Calcula os descontos de Agência, Bonificação Volume e Cachê
-	CalcDesc()
 
 	// Query para buscar as informações
 	//Pega as regras de comissões e transforma em vetor para uso posterior
@@ -142,6 +140,9 @@ Static Function fProcPdf()
 		(cAlias1)->TPSUB,;			//14 - Tipo do subtotal do Grupo, 1=Calcula; 2=Não Calcula; 3=Calc. Com Descontos
 		(cAlias1)->TIPOCOM})		//15 - Tipo de impressão no relatório:Individual, Coletivo ou ambos
 
+		cTipoCom	:= (cAlias1)->TIPOCOM
+		cVendedor2	:= (cAlias1)->VENDEDOR
+
 		(cAlias1)->(DbSkip())
 
 	EndDo
@@ -151,12 +152,12 @@ Static Function fProcPdf()
 	// Busca os registros a serem impressos no relatório, vendedores e titulos a receber lançados no periodo
 	BeginSql Alias cAlias2
 
-		SELECT VENDEDOR, NOME, DESCAG, DESCBV, DESCCA, GRUPOS, PERCENTUAL, NAT_COMISS, NATUREZA, DESCRICAO, SUM(VL_BRUTO) AS VL_BRUTO, SUM(COMISSAO) AS COMISSAO, SUM(VL_IND) AS VL_IND FROM (
+		SELECT VENDEDOR, NOME, DESCAG, DESCBV, DESCCA, GRUPOS, PERCENTUAL, NAT_COMISS, NATUREZA, DESCRICAO, SUM(VL_BRUTO) AS VL_BRUTO, SUM(COMISSAO) AS COMISSAO, SUM(VL_IND) AS VL_IND, TIPOCOM FROM (
 
 		SELECT A3_COD AS VENDEDOR, A3_NOME AS NOME, ZAJ_DESCAG AS DESCAG, ZAJ_DESCBV AS DESCBV, ZAJ_DESCCA AS DESCCA
 		, ZAM_GRPNAT AS GRUPOS, ZAM_PERC AS PERCENTUAL, ED_NATCOM AS NAT_COMISS, E1_NATUREZ AS NATUREZA, ED_DESCRIC AS DESCRICAO
 		, SUM(E1_VALOR) AS VL_BRUTO, SUM(E1_VALOR * E1_COMIS1 / 100) AS COMISSAO
-		, SUM(CASE WHEN E1_VEND2 = A3_COD THEN E1_VALOR - (E1_VALOR * E1_COMIS1 / 100) ELSE 0 END) AS VL_IND
+		, SUM(CASE WHEN E1_VEND2 = A3_COD THEN E1_VALOR - (E1_VALOR * E1_COMIS1 / 100) ELSE 0 END) AS VL_IND, ZAJ_TIPO AS TIPOCOM
 		FROM %table:SA3%
 		INNER JOIN %table:ZAJ% ON A3_COD = ZAJ_VEND AND %table:ZAJ%.D_E_L_E_T_ = ''
 		INNER JOIN %table:ZAM% ON A3_COD = ZAM_VEND AND %table:ZAM%.D_E_L_E_T_ = ''
@@ -166,12 +167,12 @@ Static Function fProcPdf()
 		INNER JOIN %table:SA1% ON %table:SA1%.D_E_L_E_T_ = '' AND E1_CLIENTE = A1_COD AND E1_LOJA = A1_LOJA
 		WHERE %table:SA3%.D_E_L_E_T_ = ''
 		%Exp:cFiltro2%
-		GROUP BY A3_COD, A3_NOME, ZAJ_DESCAG, ZAJ_DESCBV, ZAJ_DESCCA, ZAM_GRPNAT, ZAM_PERC, ED_NATCOM, E1_NATUREZ, ED_DESCRIC
+		GROUP BY A3_COD, A3_NOME, ZAJ_DESCAG, ZAJ_DESCBV, ZAJ_DESCCA, ZAM_GRPNAT, ZAM_PERC, ED_NATCOM, E1_NATUREZ, ED_DESCRIC, ZAJ_TIPO
 		UNION ALL
 		SELECT A3_COD AS VENDEDOR, A3_NOME AS NOME, ZAJ_DESCAG AS DESCAG, ZAJ_DESCBV AS DESCBV, ZAJ_DESCCA AS DESCCA
 		, ZAM_GRPNAT AS GRUPOS, ZAM_PERC AS PERCENTUAL, ED_NATCOM AS NAT_COMISS, EV_NATUREZ AS NATUREZA, ED_DESCRIC AS DESCRICAO
 		, SUM(EV_VALOR) AS VL_BRUTO, SUM(EV_VALOR * E1_COMIS1 / 100) AS COMISSAO
-		, SUM(CASE WHEN E1_VEND2 = A3_COD THEN EV_VALOR - (EV_VALOR * E1_COMIS1 / 100) ELSE 0 END) AS VL_IND
+		, SUM(CASE WHEN E1_VEND2 = A3_COD THEN EV_VALOR - (EV_VALOR * E1_COMIS1 / 100) ELSE 0 END) AS VL_IND, ZAJ_TIPO AS TIPOCOM
 		FROM %table:SA3%
 		INNER JOIN %table:ZAJ% ON A3_COD = ZAJ_VEND AND %table:ZAJ%.D_E_L_E_T_ = ''
 		INNER JOIN %table:ZAM% ON A3_COD = ZAM_VEND AND %table:ZAM%.D_E_L_E_T_ = ''
@@ -183,9 +184,9 @@ Static Function fProcPdf()
 		INNER JOIN %table:SA1% ON %table:SA1%.D_E_L_E_T_ = '' AND E1_CLIENTE = A1_COD AND E1_LOJA = A1_LOJA
 		WHERE %table:SA3%.D_E_L_E_T_ = ''
 		%Exp:cFiltro2%
-		GROUP BY A3_COD, A3_NOME, ZAJ_DESCAG, ZAJ_DESCBV, ZAJ_DESCCA, ZAM_GRPNAT, ZAM_PERC, ED_NATCOM, EV_NATUREZ, ED_DESCRIC) AS CONTATOS
+		GROUP BY A3_COD, A3_NOME, ZAJ_DESCAG, ZAJ_DESCBV, ZAJ_DESCCA, ZAM_GRPNAT, ZAM_PERC, ED_NATCOM, EV_NATUREZ, ED_DESCRIC, ZAJ_TIPO) AS CONTATOS
 
-		GROUP BY VENDEDOR, NOME, DESCAG, DESCBV, DESCCA, GRUPOS, PERCENTUAL, NAT_COMISS, NATUREZA, DESCRICAO
+		GROUP BY VENDEDOR, NOME, DESCAG, DESCBV, DESCCA, GRUPOS, PERCENTUAL, NAT_COMISS, NATUREZA, DESCRICAO, TIPOCOM
 		ORDER BY VENDEDOR, NAT_COMISS, NATUREZA
 
 	EndSql
@@ -200,12 +201,14 @@ Static Function fProcPdf()
 		Return
 	ENDIF
 
+	//Calcula os descontos de Agência, Bonificação Volume e Cachê
+	//CalcDesc()
+
 	dbSelectArea(cAlias2)
 	DbGoTop()
 
 	While (cAlias2)->(!Eof())
 
-		cTipoCom	:= aNatPerc[nPos][15]
 
 		IF nLin > REL_END .or. cVendedor != Alltrim((cAlias2)->VENDEDOR)
 
@@ -218,7 +221,8 @@ Static Function fProcPdf()
 
 			cVendedor := (cAlias2)->VENDEDOR
 			cNome     := (cAlias2)->NOME
-			ImpProxPag(cVendedor,cNome,cPeriodo) //Monta cabeçario da primeira e proxima pagina
+			cTipoCom  := (cAlias2)->TIPOCOM
+			ImpProxPag(cVendedor,cNome,cPeriodo,cTipoCom) //Monta cabeçario da primeira e proxima pagina
 			nLin += REL_LIN_RED
 
 		ENDIF
@@ -232,7 +236,7 @@ Static Function fProcPdf()
 			oPrint:Say( nLin,080, cDescricao						  			  				,oFonte)
 			IF aNatPerc[nPos][11] > 0 .and. cTipoCom = "3"
 				oPrint:Say( nLin,410, PADR(Transform(nValNatI, "@E 999,999,999.99"),14) 		,oFonte)
-			ELSEIF aNatPerc[nPos][11] > 0 .and. cTipoCom = "1"
+			ELSEIF cTipoCom = "1"
 				oPrint:Say( nLin,520, PADR(Transform(nValNatI, "@E 999,999,999.99"),14) 		,oFonte)
 			ENDIf
 
@@ -252,7 +256,7 @@ Static Function fProcPdf()
 
 		IF cSubTot != Substring((cAlias2)->NAT_COMISS,1,2) .AND. lOk //Impressão do totalizador por grupo de comissao de natureza
 
-			ImpTotais()
+			ImpTotais(Alltrim((cAlias2)->VENDEDOR))
 
 		ENDIF
 
@@ -292,7 +296,7 @@ Static Function fProcPdf()
 				oPrint:Say( nLin,080, cDescricao						  			  				,oFonte)
 				IF aNatPerc[nPos][11] > 0 .and. cTipoCom = "3"
 					oPrint:Say( nLin,410, PADR(Transform(nValNatI, "@E 999,999,999.99"),14) 		,oFonte)
-				ELSEIF aNatPerc[nPos][11] > 0 .and. cTipoCom = "1"
+				ELSEIF cTipoCom = "1"
 					oPrint:Say( nLin,520, PADR(Transform(nValNatI, "@E 999,999,999.99"),14) 		,oFonte)
 				ENDIF
 
@@ -313,7 +317,7 @@ Static Function fProcPdf()
 
 			IF cSubTot != Substring((cAlias2)->NAT_COMISS,1,2) .or. cVendedor != Alltrim((cAlias2)->VENDEDOR) //Impressão do totalizador por grupo de comissao de natureza
 
-				ImpTotais()
+				ImpTotais(cVendedor)
 
 			ENDIF
 
@@ -387,7 +391,7 @@ Static Function fProcPdf()
 Return
 
 // ImpProxPag - Imprime cabeçalho da próxima página
-Static Function ImpProxPag(cVendedor,cNome,cPeriodo)
+Static Function ImpProxPag(cVendedor,cNome,cPeriodo,cTipoCom)
 
 	nPag++
 	oPrint:StartPage()
@@ -413,15 +417,23 @@ Static Function ImpProxPag(cVendedor,cNome,cPeriodo)
 Return
 
 // CalcDesc() - Calcula os totais dos descontos
-Static Function CalcDesc()
+Static Function CalcDesc(cCodVend)
 
-	// Query paraccalcular o comissão agência
+	Local cFiltDesc	:= ""
+
+	IF cTipoCom = "1"
+	cFiltDesc	:= "%AND SUBSTRING(E1_EMISSAO,1,6) = '"+cPeriodo+"' AND E1_TIPO NOT IN " + FormatIn(MV_PAR06,"/") + " AND E1_FILIAL = '01' AND E1_VEND2 = '"+cCodVend+"' %"
+	ELSE
+	cFiltDesc	:= cFiltro1
+	ENDIF
+
+	// Query para calcular o comissão agência
 	BeginSql Alias cAlias3
 
 		SELECT SUM(E1_VALOR * E1_COMIS1 / 100) AS DESCAGE
 		FROM %table:SE1%
 		WHERE %table:SE1%.D_E_L_E_T_ = '' AND E1_COMIS1 > 0
-		%Exp:cFiltro1%
+		%Exp:cFiltDesc%
 
 	EndSql
 
@@ -458,7 +470,7 @@ Static Function CalcDesc()
 		WHEN SUM(E1_VALOR - (E1_VALOR * E1_COMIS1 / 100)) BETWEEN ZU_DEFX7 AND ZU_ATEFX7 THEN ZU_PERC7
 		ELSE 0
 		END AS PERCENTUAL
-		, SUM(E1_VALOR - (E1_VALOR * E1_COMIS1 / 100)) AS LIQUIDO
+		, SUM(E1_VALOR - (E1_VALOR * E1_COMIS1 / 100)) AS LIQUIDO, E1_VEND2 AS VENDEDOR2
 		FROM %table:SE1%
 		INNER JOIN %table:SA3% ON E1_VEND1 = A3_COD AND %table:SA3%.D_E_L_E_T_ = ''
 		INNER JOIN %table:SZU% ON E1_VEND1 = ZU_VEND AND %table:SZU% .D_E_L_E_T_ = '' AND E1_EMISSAO BETWEEN ZU_VALIDA AND ZU_ATEVALI
@@ -472,6 +484,7 @@ Static Function CalcDesc()
 		, ZU_DEFX5, ZU_ATEFX5, ZU_PERC5
 		, ZU_DEFX6, ZU_ATEFX6, ZU_PERC6
 		, ZU_DEFX7, ZU_ATEFX7, ZU_PERC7
+		, E1_VEND2
 		ORDER BY AGENCIABV
 
 	EndSql
@@ -480,9 +493,15 @@ Static Function CalcDesc()
 
 	While (cAlias4)->(!Eof())
 
-		//IF !EMPTY((cAlias4)->PERCENTUAL) //> 0 .AND. (cAlias4)->PERCENTUAL < 100
+	IF (cAlias4)->VENDEDOR2 == cCodVend .and. cTipoCom == "1"
 		nDescBV += (cAlias4)->LIQUIDO * (cAlias4)->PERCENTUAL / 100
-		//ENDIF
+		elseif cTipoCom <> "1"
+		nDescBV += (cAlias4)->LIQUIDO * (cAlias4)->PERCENTUAL / 100
+	ENDIF
+
+	//IF !EMPTY((cAlias4)->PERCENTUAL) //> 0 .AND. (cAlias4)->PERCENTUAL < 100
+
+	//ENDIF
 
 		(cAlias4)->(DbSkip())
 
@@ -497,16 +516,22 @@ Static Function CalcDesc()
 
 Return()
 
-// ImpSubTot() - Imprime os subtotais das naturezas
+// ImpSubTot() - Imprime os subtotais das naturezas gerenciais
 Static Function ImpSubTot()
 
 	oPrint:Say( nLin,020, cGrupo 					  										,oFonteN)
 	oPrint:Say( nLin,080, Posicione("SX5",1,xFilial("SX5")+"Z0" + cGrupo ,"X5_DESCRI")		,oFonteN)
 	oPrint:Say( nLin,300, PADR(Transform(nPerc, "999%"),6)									,oFonteN)
-	IF aNatPerc[nPos][11] > 0
+	IF aNatPerc[nPos][11] > 0 .and. cTipoCom = '3'
 		oPrint:Say( nLin,410, PADR(Transform(nTotGrupoI, "@E 999,999,999.99"),14)				,oFonteN)
+	ELSEIF cTipoCom = '1'
+		oPrint:Say( nLin,520, PADR(Transform(nTotGrupoI, "@E 999,999,999.99"),14)				,oFonteN)
 	ENDIF
+
+	IF cTipoCom = '3' .or. cTipoCom = '2'
 	oPrint:Say( nLin,520, PADR(Transform(nTotGrupoC, "@E 999,999,999.99"),14)				,oFonteN)
+	ENDIf
+
 	nTotGrupoI	:= 0
 	nTotGrupoC	:= 0
 	IF MV_PAR11 == 2
@@ -518,11 +543,15 @@ Static Function ImpSubTot()
 Return
 
 // ImpTotais() - Imprime os totais por grupo de natureza
-Static Function ImpTotais()
+Static Function ImpTotais(cCodVend)
 
 	IF MV_PAR11 == 2 .AND. cTipoSub <> "2" // Quando não calcula os totais (cTipoSub = 2) continua imprimindo as naturezas sem considerar o subtotal
 		nLin -= REL_LIN_RED
 	ENDIF
+
+	nDescAge	:= 0
+	nDescBV		:= 0
+	CalcDesc(cCodVend) //Calcula os totais antes de se fazer os descontos
 
 	//Verifica quais serão os descontos do contato
 	IF lDescAge
@@ -548,10 +577,10 @@ Static Function ImpTotais()
 		oPrint:Say( nLin,020, "SUBTOTAL:"				  						,oFonteN)
 		IF aNatPerc[nPos][11] > 0 .and. cTipoCom = "3"
 			oPrint:Say( nLin,410, PADR(Transform(nSubTotI, "@E 999,999,999.99"),14)	,oFonteN)
-			elseif aNatPerc[nPos][11] > 0 .and. cTipoCom = "1"
+			elseif cTipoCom = "1"
 			oPrint:Say( nLin,520, PADR(Transform(nSubTotI, "@E 999,999,999.99"),14)	,oFonteN)
 		ENDIF
-		IF aNatPerc[nPos][11] > 0 .and. cTipoCom = "3" .or. cTipoCom = "2"
+		IF cTipoCom = "3" .or. cTipoCom = "2"
 		oPrint:Say( nLin,520, PADR(Transform(nSubTotC, "@E 999,999,999.99"),14)	,oFonteN)
 		ENDIF
 
@@ -570,13 +599,23 @@ Static Function ImpTotais()
 
 		nLin += REL_LIN_STD
 		nTotGrupoC := nSubTotC-nDescAge1-nDescBV1-nDescCac1
+		nTotGrupoI := nSubTotI-nDescAge1-nDescBV1-nDescCac1
 		oPrint:Say( nLin,020, "TOTAL PARA CÁLCULO:"				  					,oFonteN)
+
+		IF cTipoCom = "2" .or. cTipoCom = "3"
 		oPrint:Say( nLin,520, PADR(Transform(nTotGrupoC, "@E 999,999,999.99"),14)	,oFonteN)
+		ELSE
+		oPrint:Say( nLin,520, PADR(Transform(nTotGrupoI, "@E 999,999,999.99"),14)	,oFonteN)
+		ENDIF
 
 		nLin += REL_LIN_STD
 		oPrint:Say( nLin,020, "VALOR COMISSÃO:"				  						,oFonteN)
 		oPrint:Say( nLin,290, PADR(Transform(nPercCom, "999.9999%"),9)				,oFonteN)
+		IF cTipoCom = "2" .or. cTipoCom = "3"
 		oPrint:Say( nLin,520, PADR(Transform((nTotGrupoC)*nPercCom/100, "@E 999,999,999.99"),14)	,oFonteN)
+		else
+		oPrint:Say( nLin,520, PADR(Transform((nTotGrupoI)*nPercCom/100, "@E 999,999,999.99"),14)	,oFonteN)
+		endif
 
 		IF aNatPerc[nPos][11] <> 0 .OR. aNatPerc[nPos][09] <> 0
 			nLin += REL_LIN_TOT
@@ -607,7 +646,12 @@ Static Function ImpTotais()
 
 		nLin += REL_LIN_RED
 		oPrint:Line(nLin,REL_LEFT,nLin,REL_RIGHT,CLR_HGRAY,"-9")
+
+		IF cTipoCom = "2" .or. cTipoCom = "3"
 		nTotalCom  	+= (nTotGrupoC)*nPercCom/100
+		else
+		nTotalCom  	+= (nTotGrupoI)*nPercCom/100
+		endif
 		nTotGrupoI 	:= 0
 		nTotGrupoC 	:= 0
 		nSubTotI	:= 0
@@ -618,13 +662,24 @@ Static Function ImpTotais()
 
 		nLin += REL_LIN_RED
 		nTotGrupoC 	:= nSubTotC
+		nTotGrupoI	:=nSubTotI
 		oPrint:Say( nLin,020, "TOTAL PARA CÁLCULO:"		  						,oFonteN)
+
+		IF cTipoCom = "2" .or. cTipoCom = "3"
 		oPrint:Say( nLin,520, PADR(Transform(nSubTotC, "@E 999,999,999.99"),14)	,oFonteN)
+		ELSE
+		oPrint:Say( nLin,520, PADR(Transform(nSubTotI, "@E 999,999,999.99"),14)	,oFonteN)
+		ENDIF
 
 		nLin += REL_LIN_STD
 		oPrint:Say( nLin,020, "VALOR COMISSÃO:"				  									,oFonteN)
 		oPrint:Say( nLin,290, PADR(Transform(nPercCom, "999.9999%"),9)							,oFonteN)
+		IF cTipoCom = "2" .or. cTipoCom = "3"
 		oPrint:Say( nLin,520, PADR(Transform((nSubTotC)*nPercCom/100, "@E 999,999,999.99"),14)	,oFonteN)
+		else
+		oPrint:Say( nLin,520, PADR(Transform((nSubTotI)*nPercCom/100, "@E 999,999,999.99"),14)	,oFonteN)
+		endif
+
 
 		IF aNatPerc[nPos][11] <> 0 .OR. aNatPerc[nPos][09] <> 0
 			nLin += REL_LIN_TOT
@@ -657,7 +712,12 @@ Static Function ImpTotais()
 
 		nLin += REL_LIN_RED
 		oPrint:Line(nLin,REL_LEFT,nLin,REL_RIGHT,CLR_HGRAY,"-9")
+
+		IF cTipoCom = "2" .or. cTipoCom = "3"
 		nTotalCom  	+= (nTotGrupoC)*nPercCom/100
+		else
+		nTotalCom  	+= (nTotGrupoI)*nPercCom/100
+		endif
 		nTotGrupoI 	:= 0
 		nTotGrupoC 	:= 0
 		nSubTotI	:= 0
