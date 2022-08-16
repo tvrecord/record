@@ -1,8 +1,8 @@
 #INCLUDE "TOPCONN.CH"
 #INCLUDE "PROTHEUS.CH"
 
-//Pedro Leonardo -> Relatório para extrair o vencimento dos exames periódicos dos funcionários
-//SIGAGPE -> Relatorios -> Especificos Record -> Venc. Exame Periódico
+//Programa para extrair tabelas a pedido da Giselly
+
 
 
 User Function GPER003()
