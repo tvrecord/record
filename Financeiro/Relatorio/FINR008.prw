@@ -44,7 +44,7 @@ User Function FINR008()
 Return
 
 // fProcPdf - Imprime relatório em PDF
-Static Function fProcPdf()
+Static Function fProcPdf(cCodVend)
 
 	Local nRegAtu		:= 0
 	Local nTotReg		:= 0
@@ -102,6 +102,7 @@ Static Function fProcPdf()
 	Private nDescAge1	:= 0
 	Private nDescBV1	:= 0
 	Private nDescCac1	:= 0
+	Private nCacheJulho	:= 10
 
 	// Query para buscar as informações
 	//Pega as regras de comissões e transforma em vetor para uso posterior
@@ -329,9 +330,18 @@ Static Function fProcPdf()
 			oPrint:Say( nLin,020, "VALOR PRÊMIO:"										,oFonteN)
 			oPrint:Say( nLin,520, PADL(Transform( nTotalPre, "@E 999,999,999.99"),14)	,oFonteN)
 			//ENDIF
+			IF cVendedor != "000608" .and. cVendedor != "000609"
 			nLin += (REL_LIN_STD)
-			oPrint:Say( nLin,020, "TOTAL:"														,oFonteN)
-			oPrint:Say( nLin,520, PADL(Transform(nTotalCom + nTotalPre, "@E 999,999,999.99"),14),oFonteN)
+			oPrint:Say( nLin,020, "CORREÇÃO REFERENTE CACHE JULHO:"						,oFonteN)
+			oPrint:Say( nLin,520, PADL(Transform( nCacheJulho, "@E 999,999,999.99"),14)	,oFonteN)
+			nLin += (REL_LIN_STD)
+			oPrint:Say( nLin,020, "TOTAL:"												,oFonteN)
+			oPrint:Say( nLin,520, PADL(Transform(nTotalCom + nTotalPre + nCacheJulho, "@E 999,999,999.99"),14)	,oFonteN)
+			ELSE
+			nLin += (REL_LIN_STD)
+			oPrint:Say( nLin,020, "TOTAL:"												,oFonteN)
+			oPrint:Say( nLin,520, PADL(Transform(nTotalCom + nTotalPre, "@E 999,999,999.99"),14)	,oFonteN)
+			ENDIF
 
 			//Pula mais linhas para assinatura
 			nLin += (REL_LIN_TOT * 3)
