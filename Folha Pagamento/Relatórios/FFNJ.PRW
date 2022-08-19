@@ -97,8 +97,8 @@ Return
 Static Function Relatorio()
 
 If MV_PAR07 == 2
-	
-	cQuery := "SELECT RA_MAT,RA_NOME,PI_DATA,PI_PD,PH_QUANTC FROM SPI010 "
+
+	cQuery := "SELECT RA_MAT,RA_NOME,PI_DATA,PI_PD,PH_QUANTC, RA_CC, CTT_DESC01, RA_CODFUNC, RJ_DESC, RA_DEPTO, QB_DESCRIC FROM SPI010 "
 	cQuery += "INNER JOIN SRA010 ON "
 	cQuery += "RA_FILIAL = PI_FILIAL AND "
 	cQuery += "RA_MAT = PI_MAT "
@@ -107,6 +107,9 @@ If MV_PAR07 == 2
 	cQuery += "PI_MAT = PH_MAT AND "
 	cQuery += "PH_DATA = PI_DATA AND "
 	cQuery += "PH_PD = PI_PD "
+	cQuery += "inner join CTT010 ON CTT_CUSTO = RA_CC AND CTT010.D_E_L_E_T_ = '' "
+	cQuery += "INNER JOIN SRJ010 ON RA_CODFUNC = RJ_FUNCAO AND SRJ010.D_E_L_E_T_ <> '*'	"
+	cQuery += "LEFT JOIN SQB010 ON QB_DEPTO = RA_DEPTO	"
 	cQuery += "WHERE "
 	cQuery += "PI_DATA BETWEEN '" + DTOS(MV_PAR01) + "' AND '" + DTOS(MV_PAR02) + "' AND "
 	cQuery += "RA_MAT BETWEEN '" + MV_PAR03 + "' AND '" + MV_PAR04 + "' AND "
@@ -118,17 +121,20 @@ If MV_PAR07 == 2
 	cQuery += "RA_REGRA <> '07' AND "
 	cQuery += "PH_ABONO <> '015' AND "
 	cQuery += "PH_QTABONO = 0 "
-	cQuery += "GROUP BY RA_MAT,RA_NOME,PI_DATA,PI_PD,PH_QUANTC,PH_ABONO,PH_QTABONO "
+	cQuery += "GROUP BY RA_MAT,RA_NOME,PI_DATA,PI_PD,PH_QUANTC,PH_ABONO,PH_QTABONO, RA_CC, CTT_DESC01, RA_CODFUNC, RJ_DESC, RA_DEPTO, QB_DESCRIC "
 	cQuery += "ORDER BY RA_MAT,PI_DATA "
-	
+
 Else
-	
-	cQuery := "SELECT RA_MAT,RA_NOME,PH_DATA,PH_PD,PH_QUANTC,PH_ABONO,P6_DESC,PH_QTABONO FROM SPH010 "
+
+	cQuery := "SELECT RA_MAT,RA_NOME,PH_DATA,PH_PD,PH_QUANTC,PH_ABONO,P6_DESC,PH_QTABONO, RA_CC, CTT_DESC01, RA_CODFUNC, RJ_DESC, RA_DEPTO, QB_DESCRIC FROM SPH010 "
 	cQuery += "INNER JOIN SRA010 ON "
 	cQuery += "RA_FILIAL = PH_FILIAL AND "
 	cQuery += "RA_MAT = PH_MAT "
 	cQuery += "INNER JOIN SP6010 ON "
 	cQuery += "P6_CODIGO = PH_ABONO "
+	cQuery += "inner join CTT010 ON CTT_CUSTO = RA_CC AND CTT010.D_E_L_E_T_ = '' "
+	cQuery += "INNER JOIN SRJ010 ON RA_CODFUNC = RJ_FUNCAO AND SRJ010.D_E_L_E_T_ <> '*'	"
+	cQuery += "LEFT JOIN SQB010 ON QB_DEPTO = RA_DEPTO	"
 	cQuery += "WHERE "
 	cQuery += "PH_DATA BETWEEN '" + DTOS(MV_PAR01) + "' AND '" + DTOS(MV_PAR02) + "' AND "
 	cQuery += "RA_MAT BETWEEN '" + MV_PAR03 + "' AND '" + MV_PAR04 + "' AND "
@@ -142,7 +148,7 @@ Else
 	cQuery += "RA_REGRA <> '07' AND "
 	cQuery += "PH_FILIAL = '01' "
 	cQuery += "ORDER BY PH_MAT,PH_DATA "
-	
+
 EndIf
 
 tcQuery cQuery New Alias "TMP"
@@ -172,75 +178,91 @@ Static Function RunReport(Cabec1,Cabec2,Titulo,nLin)
 //DEFINE FONT oFont NAME "Courier New" SIZE 0,-11 BOLD
 
 If MV_PAR07 == 2
-	
+
 	// **************************** Cria Arquivo Temporario
 	_aCExcel:={}//SPCSQL->(DbStruct())
-	aadd( _aCExcel , {"MAT"		    , "C" , 10 , 00 } ) //01
-	aadd( _aCExcel , {"NOME	"		, "C" , 50 , 00 } ) //02
-	aadd( _aCExcel , {"DAT"			, "C" , 10 , 00 } ) //03
-	aadd( _aCExcel , {"EVENTO"		, "C" , 06 , 00 } ) //04
-	aadd( _aCExcel , {"HORAS"		, "C" , 10 , 00 } ) //05
-	
+	aadd( _aCExcel , {"MAT"		    	, "C" , 10 , 00 } ) //01
+	aadd( _aCExcel , {"NOME	"			, "C" , 50 , 00 } ) //02
+	aadd( _aCExcel , {"CC "				, "C" , 10 , 00 } ) //03
+	aadd( _aCExcel , {"CCUSTO "			, "C" , 20 , 00 } ) //04
+	aadd( _aCExcel , {"FUNCAO "		 	, "C" , 30 , 00 } ) //05
+	aadd( _aCExcel , {"DEPARTAMENTO "	, "C" , 20 , 00 } ) //06
+	aadd( _aCExcel , {"DAT"				, "C" , 10 , 00 } ) //07
+	aadd( _aCExcel , {"EVENTO"			, "C" , 06 , 00 } ) //08
+	aadd( _aCExcel , {"HORAS"			, "C" , 10 , 00 } ) //09
+
 	//	_cTemp := CriaTrab(_aCExcel, .T.)
 	//	DbUseArea(.T.,"DBFCDX",_cTemp,"TMP1",.F.,.F.)
-	
+
 	DBSelectArea("TMP")
 	DBGotop()
-	
+
 	While !TMP->(EOF())
-		
+
 		_aItem := ARRAY(LEN(_aCExcel) + 1)
 		_aItem[01]		:= TMP->RA_MAT
 		_aItem[02]		:= TMP->RA_NOME
-		_aItem[03]		:= DTOC(STOD(TMP->PI_DATA))
-		_aItem[04]  	:= TMP->PI_PD
-		_aItem[05]		:= StrTran(cvaltoChar(TMP->PH_QUANTC),".",":")
+		_aItem[03]		:= TMP->RA_CC
+		_aItem[04]		:= TMP->CTT_DESC01
+		_aItem[05]		:= TMP->RJ_DESC
+		_aItem[06]		:= TMP->QB_DESCRIC
+		_aItem[07]		:= DTOC(STOD(TMP->PI_DATA))
+		_aItem[08]  	:= TMP->PI_PD
+		_aItem[09]		:= StrTran(cvaltoChar(TMP->PH_QUANTC),".",":")
 		AADD(_aIExcel,_aItem)
 		_aItem := {}
-		
+
 		DBSelectArea("TMP")
 		DBSkip()
-		
+
 	Enddo
-	
+
 Else
-	
+
 	// **************************** Cria Arquivo Temporario
 	_aCExcel:={}//SPCSQL->(DbStruct())
-	aadd( _aCExcel , {"MAT"		    , "C" , 10 , 00 } ) //01
-	aadd( _aCExcel , {"NOME	"		, "C" , 50 , 00 } ) //02
-	aadd( _aCExcel , {"DAT"			, "C" , 10 , 00 } ) //03
-	aadd( _aCExcel , {"EVENTO"		, "C" , 06 , 00 } ) //04
-	aadd( _aCExcel , {"HORAS"		, "C" , 10 , 00 } ) //05
-	aadd( _aCExcel , {"ABONO"		, "C" , 07 , 00 } ) //06
-	aadd( _aCExcel , {"DESC"		, "C" , 45 , 00 } ) //07
-	aadd( _aCExcel , {"ABONADO"		, "C" , 07 , 00 } )	//08
-	
+	aadd( _aCExcel , {"MAT"		    	, "C" , 10 , 00 } ) //01
+	aadd( _aCExcel , {"NOME	"			, "C" , 50 , 00 } ) //02
+	aadd( _aCExcel , {"CC "				, "C" , 10 , 00 } ) //03
+	aadd( _aCExcel , {"CCUSTO "			, "C" , 20 , 00 } ) //04
+	aadd( _aCExcel , {"FUNCAO "		 	, "C" , 30 , 00 } ) //05
+	aadd( _aCExcel , {"DEPARTAMENTO "	, "C" , 20 , 00 } ) //06
+	aadd( _aCExcel , {"DAT"				, "C" , 10 , 00 } ) //07
+	aadd( _aCExcel , {"EVENTO"			, "C" , 06 , 00 } ) //08
+	aadd( _aCExcel , {"HORAS"			, "C" , 10 , 00 } ) //09
+	aadd( _aCExcel , {"ABONO"			, "C" , 07 , 00 } ) //10
+	aadd( _aCExcel , {"DESC"			, "C" , 45 , 00 } ) //11
+	aadd( _aCExcel , {"ABONADO"			, "C" , 07 , 00 } )	//12
+
 	//_cTemp := CriaTrab(_aCExcel, .T.)
 	//DbUseArea(.T.,"DBFCDX",_cTemp,"TMP1",.F.,.F.)
-	
+
 	DBSelectArea("TMP")
 	DBGotop()
-	
+
 	While !TMP->(EOF())
-		
+
 		_aItem := ARRAY(LEN(_aCExcel) + 1)
 		_aItem[01]		:= TMP->RA_MAT
 		_aItem[02]		:= TMP->RA_NOME
-		_aItem[03]		:= DTOC(STOD(TMP->PH_DATA))
-		_aItem[04]		:= TMP->PH_PD
-		_aItem[05]		:= StrTran(cvaltoChar(TMP->PH_QUANTC),".",":")
-		_aItem[06]  	:= TMP->PH_ABONO
-		_aItem[07]      := TMP->P6_DESC
-		_aItem[08]	   	:= StrTran(cvaltoChar(TMP->PH_QTABONO),".",":")
+		_aItem[03]		:= TMP->RA_CC
+		_aItem[04]		:= TMP->CTT_DESC01
+		_aItem[05]		:= TMP->RJ_DESC
+		_aItem[06]		:= TMP->QB_DESCRIC
+		_aItem[07]		:= DTOC(STOD(TMP->PH_DATA))
+		_aItem[08]		:= TMP->PH_PD
+		_aItem[09]		:= StrTran(cvaltoChar(TMP->PH_QUANTC),".",":")
+		_aItem[10]  	:= TMP->PH_ABONO
+		_aItem[11]      := TMP->P6_DESC
+		_aItem[12]	   	:= StrTran(cvaltoChar(TMP->PH_QTABONO),".",":")
 		AADD(_aIExcel,_aItem)
 		_aItem := {}
-		
+
 		DBSelectArea("TMP")
 		DBSkip()
-		
+
 	Enddo
-	
+
 Endif
 
 If !ApOleClient("MsExcel")
