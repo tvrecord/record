@@ -84,7 +84,7 @@ Local nVlISS	:= 0
 Local cNotas	:= ""
 
 IF MsgYesNo("O sistema irá atualizar os registros já gravados no periodo informado. Deseja continuar?","Atenção")
-	
+
 	cQuery	:= "SELECT SUBSTRING(D1_EMISSAO,1,6) AS PERIODO, D1_FORNECE,D1_LOJA,A2_NOME,A2_END,A2_BAIRRO,A2_MUN,A2_EST,A2_CEP,A2_INSCR,A2_CGC,D1_DOC "
 	cQuery	+= ",SUM(D1_TOTAL) AS VALOR,MAX(D1_ALIQISS) AS ALIQ,SUM(D1_VALISS) AS VLISS "
 	cQuery	+= "FROM SD1010 "
@@ -95,27 +95,27 @@ IF MsgYesNo("O sistema irá atualizar os registros já gravados no periodo informa
 	cQuery	+= "AND D1_VALISS <> 0 "
 	cQuery	+= "GROUP BY SUBSTRING(D1_EMISSAO,1,6), D1_FORNECE,D1_LOJA,A2_NOME,A2_END,A2_BAIRRO,A2_MUN,A2_EST,A2_CEP,A2_INSCR,A2_CGC,D1_DOC "
 	cQuery	+= "ORDER BY PERIODO,D1_FORNECE,D1_LOJA,D1_DOC "
-	
+
 	tcQuery cQuery New Alias "TMPZAC"
-	
+
 	If Eof()
 		MsgInfo("Nao existem dados no periodo informado!","Verifique")
 		dbSelectArea("TMPZAC")
 		dbCloseArea("TMPZAC")
 		Return
 	Endif
-	
+
 	Count To nRec
-	
+
 	dbSelectArea("TMPZAC")
 	dbGoTop()
-	
+
 	ProcRegua(nRec)
-	
+
 	While !EOF()
-		
+
 		IncProc()
-		
+
 		cPeriodo 	:= TMPZAC->PERIODO
 		cFornece 	:= ALLTRIM(TMPZAC->D1_FORNECE)
 		cLoja		:= TMPZAC->D1_LOJA
@@ -135,12 +135,12 @@ IF MsgYesNo("O sistema irá atualizar os registros já gravados no periodo informa
 		Else
 			cNotas		:= ALLTRIM(cNotas) + ";" + ALLTRIM(TMPZAC->D1_DOC)
 		Endif
-		
+
 		dbSelectArea("TMPZAC")
 		DbSkip()
-		
+
 		IF cFornece != ALLTRIM(TMPZAC->D1_FORNECE)
-			
+
 			dbSelectArea("ZAC")
 			dBSetOrder(1)
 			If !dbSeek(xFilial("ZAC") + cPeriodo + cFornece + cLoja)
@@ -161,7 +161,7 @@ IF MsgYesNo("O sistema irá atualizar os registros já gravados no periodo informa
 				ZAC->ZAC_ALIQ   := nAliq
 				ZAC->ZAC_VLISS  := nVlISS
 				MsUnlock()
-			Else    
+			Else
 				Reclock("ZAC",.F.)
 				ZAC->ZAC_NOME   := cNome
 				ZAC->ZAC_END    := cEnd
@@ -177,16 +177,16 @@ IF MsgYesNo("O sistema irá atualizar os registros já gravados no periodo informa
 				ZAC->ZAC_VLISS  := nVlISS
 				MsUnlock()
 			Endif
-			
+
 			nValor		:= 0
 			nAliq       := 0
 			nVlISS		:= 0
 			cNotas		:= ""
-			
+
 		EndIf
-		
+
 	EndDo
-	
+
 EndIF
 
 dbSelectArea("TMPZAC")
@@ -234,39 +234,39 @@ EndIf
 wcVlISS			:= Alltrim(Str(ZAC->ZAC_VLISS))+ " (" + Extenso(ZAC->ZAC_VLISS)  +  ")"
 wcFornecedor	:= Alltrim(ZAC->ZAC_NOME) + " "
 wcEnd			:= Alltrim(ZAC->ZAC_END)
-wcBairro		:= Alltrim(ZAC->ZAC_BAIRRO) + " - " + Alltrim(ZAC->ZAC_MUN) + "/" + Alltrim(ZAC->ZAC_EST)   
+wcBairro		:= Alltrim(ZAC->ZAC_BAIRRO) + " - " + Alltrim(ZAC->ZAC_MUN) + "/" + Alltrim(ZAC->ZAC_EST)
 wcCEP			:= Alltrim(ZAC->ZAC_CEP)
-wcInscri		:= ZAC->ZAC_INSCRI 
+wcInscri		:= ZAC->ZAC_INSCRI
 wcCGC			:= ZAC->ZAC_CGC
 wcNotas			:= ZAC->ZAC_NF
-wcValor			:= Alltrim(Str(ZAC->ZAC_VLTOT)) + " (" + Extenso(ZAC->ZAC_VLTOT)  +  ")"  
-wcAliq    		:= Alltrim(Str(ZAC->ZAC_ALIQ)) 
-wcPeriodo 		:= Mes(STOD(ZAC->ZAC_PERIOD + "01"))  + " de " + Alltrim(Str(Ano(STOD(ZAC->ZAC_PERIOD + "01"))))  
+wcValor			:= Alltrim(Str(ZAC->ZAC_VLTOT)) + " (" + Extenso(ZAC->ZAC_VLTOT)  +  ")"
+wcAliq    		:= Alltrim(Str(ZAC->ZAC_ALIQ))
+wcPeriodo 		:= Mes(STOD(ZAC->ZAC_PERIOD + "01"))  + " de " + Alltrim(Str(Ano(STOD(ZAC->ZAC_PERIOD + "01"))))
 IF !EMPTY(ZAC->ZAC_DATA)
-wcData			:= ALLTRIM(str(Day(ZAC->ZAC_DATA))) + " de " + Mes(ZAC->ZAC_DATA)  + " de " + Alltrim(Str(Ano(ZAC->ZAC_DATA)))   
+wcData			:= ALLTRIM(str(Day(ZAC->ZAC_DATA))) + " de " + Mes(ZAC->ZAC_DATA)  + " de " + Alltrim(Str(Ano(ZAC->ZAC_DATA)))
 ENDIF
 
-cPathDot := "X:\DeclaracaoISS.docx"
-
+//cPathDot := "X:\DeclaracaoISS.docx"
+cPathDot :=	"C:\Docs\DeclaracaoISS.docx"
 //Conecta ao word
 hWord	:= OLE_CreateLink()
 OLE_NewFile(hWord, cPathDot)
 
 cPathDot := ""
 
-//Montagem das variaveis do cabecalho    
+//Montagem das variaveis do cabecalho
 OLE_SetDocumentVar(hWord, 'VLISS'     ,wcVlISS)
 OLE_SetDocumentVar(hWord, 'Fornecedor',wcFornecedor)
 OLE_SetDocumentVar(hWord, 'End'       ,wcEnd)
-OLE_SetDocumentVar(hWord, 'Bairro'    ,wcBairro) 
-OLE_SetDocumentVar(hWord, 'CEP'	      ,Transform(wcCEP,"@R 99999-999"))  
-OLE_SetDocumentVar(hWord, 'Inscricao' ,wcInscri) 
-OLE_SetDocumentVar(hWord, 'CNPJ'      ,Transform(wcCGC,"@R 99.999.999/9999-99"))  
-OLE_SetDocumentVar(hWord, 'Periodo'   ,wcPeriodo) 
-OLE_SetDocumentVar(hWord, 'Notas'     ,wcNotas) 
-OLE_SetDocumentVar(hWord, 'Valor'     ,wcValor)                                  
+OLE_SetDocumentVar(hWord, 'Bairro'    ,wcBairro)
+OLE_SetDocumentVar(hWord, 'CEP'	      ,Transform(wcCEP,"@R 99999-999"))
+OLE_SetDocumentVar(hWord, 'Inscricao' ,wcInscri)
+OLE_SetDocumentVar(hWord, 'CNPJ'      ,Transform(wcCGC,"@R 99.999.999/9999-99"))
+OLE_SetDocumentVar(hWord, 'Periodo'   ,wcPeriodo)
+OLE_SetDocumentVar(hWord, 'Notas'     ,wcNotas)
+OLE_SetDocumentVar(hWord, 'Valor'     ,wcValor)
 OLE_SetDocumentVar(hWord, 'Aliq'      ,wcAliq)
-OLE_SetDocumentVar(hWord, 'Data'      ,wcData)  
+OLE_SetDocumentVar(hWord, 'Data'      ,wcData)
 
 //Reclock("ZAC",.F.)
 //ZAC->ZAC_DATA	:= Date()
