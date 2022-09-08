@@ -72,17 +72,19 @@ User function ZSTudoOK()
 
 	lOk1 := .T.
 
-
-	If M->ZS_TIPO != "21" .AND. EMPTY(M->ZS_NFISCAL)
-		lOk1 := .F.
-		MsgInfo("Favor, informar o número da Nota Fiscal.","Verifique")
-
+	If M->ZS_TIPO == "22"
+		If (EMPTY(M->ZS_NUMRP) .OR. EMPTY(M->ZS_NOTAFAT))
+			lOk1 := .F.
+			MsgInfo("Favor, informar o número da RP e Nota Fiscal de Saída.","Verifique")
+		EndIf
+	Else
+		If M->ZS_TIPO != "21" .AND. EMPTY(M->ZS_NFISCAL)
+			lOk1 := .F.
+			MsgInfo("Favor, informar o número da Nota Fiscal.","Verifique")
+		EndIf
 	EndIf
 
-	If lOk1 .AND. M->ZS_TIPO == "22" .AND. (EMPTY(M->ZS_NUMRP) .OR. EMPTY(M->ZS_NOTAFAT))
-		lOk1 := .F.
-		MsgInfo("Favor, informar o número da RP e Nota Fiscal de Saída.","Verifique")
-	EndIf
+
 
 Return lOk1
 

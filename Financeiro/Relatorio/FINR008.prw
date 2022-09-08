@@ -1010,6 +1010,7 @@ Static Function Cache(cCodVend,cNatCom)
 			AND ZS_EMISSAO BETWEEN %exp:cDataIni% AND %exp:cDataFim%
 			AND C5_VEND2 = %exp:cCodVend%
 			AND SUBSTRING(ED_NATCOM, 1, 2) = %exp:cNatCom%
+			AND ZS_LIBERAD = 'L'
 			AND SZS.D_E_L_E_T_ = ''
 			AND SC5.D_E_L_E_T_ = ''
 			AND SED.D_E_L_E_T_ = ''
@@ -1061,7 +1062,7 @@ Static Function CancNF(cCodVend,cNatCom)
 			E1_VEND2 = %exp:cCodVend%
 			AND E1_EMISSAO >= '20220101'
 			AND E1_BAIXA BETWEEN %exp:cDataIni% AND %exp:cDataFim%
-			AND E5_MOTBX = 'CNF'
+			AND E5_MOTBX IN ('BIN','BDE')
 			AND SUBSTRING(ED_NATCOM, 1, 2) = %exp:cNatCom%
 			AND SE1.D_E_L_E_T_ = ''
 			AND SE5.D_E_L_E_T_ = ''

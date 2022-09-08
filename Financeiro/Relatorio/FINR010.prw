@@ -225,11 +225,7 @@ Static Function GetData()
 			ZS_NOTAFAT,
 			E1_EMISSAO,
 			E1_BAIXA,
-			A1_NOME,
-			ZS_NFISCAL,
-			E2_EMISSAO,
-			E2_VENCTO,
-			E2_VALOR
+			A1_NOME
 		FROM
 			%table:SZS% SZS
 		INNER JOIN %table:SC5% AS SC5
@@ -260,16 +256,11 @@ Static Function GetData()
 		INNER JOIN %table:SA3% AS SA3
 		ON A3_COD = E1_VEND2
 			AND SA3.D_E_L_E_T_ = ''
-		INNER JOIN %table:SE2% AS SE2
-		ON E2_FILIAL = F2_FILIAL
-			AND E2_NUM = ZS_NFISCAL
-			AND E2_FORNECE = ZS_FORNECE
-			AND E2_PARCELA IN ('', '001')
-			AND SE2.D_E_L_E_T_ = ''
 		WHERE
 			E1_VEND2 BETWEEN %Exp:MV_PAR01% AND %Exp:MV_PAR02%
 			AND ZS_LIBERAD = 'L'
 			AND ZS_EMISSAO BETWEEN %Exp:MV_PAR03% AND %Exp:MV_PAR04%
+			AND ZS_TIPO = '22'
 			AND SZS.D_E_L_E_T_ = ''
 		ORDER BY
 			1,
