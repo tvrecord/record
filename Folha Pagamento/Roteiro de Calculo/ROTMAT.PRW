@@ -11,8 +11,8 @@
 ±±ÉÍÍÍÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
 ±±ÈÍÍÍÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¼±±
 ±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
-ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß     
-*/                                                                                
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+*/
 
 // Rotina tbm inclui salario maternidade
 
@@ -25,13 +25,13 @@ User Function ROTMAT()    //CALCULO DO VALOR DE ISS DOS AUTONOMOS
 	Private nValHeCont		:= 0
 	Private cData			:= ""
 	Private nDia			:= 0
-	Private _HE118			:= 0 
+	Private _HE118			:= 0
 	Private _HE122			:= 0
-	Private nValT 			:= 0     
+	Private nValT 			:= 0
 	Private _nDUteis		:= Posicione("RCF", 2,xFilial("RCH") + RCH->RCH_PROCES + RCH->RCH_PER,"RCF_DUTEIS")  // Rafael - Ajuste Protheus 12
-	Private _nDiasDSR		:= Posicione("RCF", 2,xFilial("RCH") + RCH->RCH_PROCES + RCH->RCH_PER,"RCF_DIADSR")  // Rafael - Ajuste Protheus 12                          
+	Private _nDiasDSR		:= Posicione("RCF", 2,xFilial("RCH") + RCH->RCH_PROCES + RCH->RCH_PER,"RCF_DIADSR")  // Rafael - Ajuste Protheus 12
 
-	nDia := nDiasMat //Dias Trabalhados
+	nDia := FBUSCAPD("035","H") //Dias Trabalhados
 
 
 	If fbuscapd("001") == 0
@@ -45,14 +45,14 @@ User Function ROTMAT()    //CALCULO DO VALOR DE ISS DOS AUTONOMOS
 			If SRA->RA_HEFIX25="S"
 				HorasExtras:=(((SalMes/SRA->RA_HRSMES) * 1.7)*25)/30 * (nDia - SRC->RC_HORAS)
 				//			DsrHorasExtra:=((HorasExtras/SR6->R6_HRNORMA)*SR6->R6_HRDESC)
-				DsrHorasExtra:=((HorasExtras/_nDUteis)*_nDiasDSR)       
+				DsrHorasExtra:=((HorasExtras/_nDUteis)*_nDiasDSR)
 				nValHeCont += (HorasExtras +  DsrHorasExtra)
-			Endif      
+			Endif
 
 			If SRA->RA_HEFIX50="S"
 				HorasExtras:=(((SalMes/SRA->RA_HRSMES) * 1.7)*50)/30 * (nDia - SRC->RC_HORAS)
 				//			DsrHorasExtra:=((HorasExtras/SR6->R6_HRNORMA)*SR6->R6_HRDESC)
-				DsrHorasExtra:=((HorasExtras/_nDUteis)*_nDiasDSR)       
+				DsrHorasExtra:=((HorasExtras/_nDUteis)*_nDiasDSR)
 				nValHeCont += (HorasExtras +  DsrHorasExtra)
 			Endif
 
@@ -67,48 +67,48 @@ User Function ROTMAT()    //CALCULO DO VALOR DE ISS DOS AUTONOMOS
 				//		DsrHorasExtra:=((HorasExtras/SR6->R6_HRNORMA)*SR6->R6_HRDESC)
 				DsrHorasExtra:=((HorasExtras/_nDUteis)*_nDiasDSR)
 				nValHeCont += (HorasExtras +  DsrHorasExtra)
-			Endif  
+			Endif
 
 			If SRA->RA_HEFIX50="S"
 				HorasExtras:=(((SalMes/SRA->RA_HRSMES) * 1.7)*50)
 				//		DsrHorasExtra:=((HorasExtras/SR6->R6_HRNORMA)*SR6->R6_HRDESC)
 				DsrHorasExtra:=((HorasExtras/_nDUteis)*_nDiasDSR)
 				nValHeCont += (HorasExtras +  DsrHorasExtra)
-			Endif		
+			Endif
 
-			nValHeCont += fbuscapd("035")	
+			nValHeCont += fbuscapd("035")
 
 		ENDIF
 
 		FdelPd("060")
 		FdelPd("118")
-		FdelPd("122")	
+		FdelPd("122")
 		FdelPd("035")
-		fGeraVerba("035",nValHeCont,nDia,,,,,,,,.T.)	
+		fGeraVerba("035",nValHeCont,nDia,,,,,,,,.T.)
 
 	else
 
 
 
 		FdelPd("118")
-		FdelPd("060") 
-		FdelPd("122")	
+		FdelPd("060")
+		FdelPd("122")
 
-		_HE118 := FBUSCAPD("035") 
-		_HE122 := FBUSCAPD("035") 
+		_HE118 := FBUSCAPD("035")
+		_HE122 := FBUSCAPD("035")
 
 		IF _HE118 > 0 .and. SRA->RA_HEFIX25="S" //   IF ALLTRIM(FUNNAME()) =  "GPEM020"
 			fGeraVerba("118",(((((salmes+fBuscaPd("003,007,008,100,117,127,169", "V"))/SRA->RA_HRSMES) * 1.7)*25)/30)*(DiasTrab),,,,,,,,,.T.)
 			nValHeCont := fbuscapd("118")
-			//		fGeraVerba("060",((nValHeCont/SR6->R6_HRNORMA) * SR6->R6_HRDESC),,,,,,,,,.T.)   
+			//		fGeraVerba("060",((nValHeCont/SR6->R6_HRNORMA) * SR6->R6_HRDESC),,,,,,,,,.T.)
 			fGeraVerba("060",((nValHeCont/_nDUteis) * _nDiasDSR),,,,,,,,,.T.)
 			nValHCont  += fbuscapd("060")
-		ENDIF   
+		ENDIF
 
 		IF _HE122 > 0 .and. SRA->RA_HEFIX50="S" //   IF ALLTRIM(FUNNAME()) =  "GPEM020"
 			fGeraVerba("118",(((((salmes+fBuscaPd("003,007,008,100,117,127,169", "V"))/SRA->RA_HRSMES) * 1.7)*50)/30)*(DiasTrab),,,,,,,,,.T.)
 			nValHeCont := fbuscapd("122")
-			//		fGeraVerba("060",((nValHeCont/SR6->R6_HRNORMA) * SR6->R6_HRDESC),,,,,,,,,.T.)   
+			//		fGeraVerba("060",((nValHeCont/SR6->R6_HRNORMA) * SR6->R6_HRDESC),,,,,,,,,.T.)
 			fGeraVerba("060",((nValHeCont/_nDUteis) * _nDiasDSR),,,,,,,,,.T.)
 			nValHCont  += fbuscapd("060")
 		ENDIF
@@ -131,7 +131,7 @@ User Function ROTMAT()    //CALCULO DO VALOR DE ISS DOS AUTONOMOS
 		nValT    += fbuscapd("035")
 
 		FdelPd("035")
-		fGeraVerba("035",nValT,nDia,,,,,,,,.T.)  
+		fGeraVerba("035",nValT,nDia,,,,,,,,.T.)
 
 	EndIf
 

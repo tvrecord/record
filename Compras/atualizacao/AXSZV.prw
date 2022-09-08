@@ -25,13 +25,13 @@ Private aRotina := { {"Pesquisar","AxPesqui",0,1} ,;
 {"Incluir","AxInclui",0,3} ,;
 {"Alterar","AxAltera",0,4} ,;
 {"Excluir","AxDeleta",0,5} ,;
-{"Impressao","u_WordSZV()",0,2},; 
-{"Legenda","u_LegeSZV()",0,4}}   
+{"Impressao","u_WordSZV()",0,2},;
+{"Legenda","u_LegeSZV()",0,4}}
 
 Private aCores := {{'ZV_CODIGO != "1"' ,'BR_VERDE'},{'ZV_CODIGO == "1"','BR_VERMELHO'}}
 Private cDelFunc := ".T." // Validacao para a exclusao. Pode-se utilizar ExecBlock
 Private cString := "SZV"
- 
+
 dbSelectArea(cString)
 dbSetOrder(1)
 mBrowse( 6,1,22,75,cString,,,,,,aCores)
@@ -57,7 +57,7 @@ Local waVTot	:= {}
 Local nAuxTot	:= 0
 Local nK
 Local cPathDot	:= ""
-Private	hWord    
+Private	hWord
 
 //Close(oDlg)
 
@@ -71,31 +71,31 @@ If !found()
 EndIf
 
 wcData			:= SZV->ZV_DATA
-wcFornecedor	:= Alltrim(SZV->ZV_NOMEFOR) 
+wcFornecedor	:= Alltrim(SZV->ZV_NOMEFOR)
 wcRazaoSocial	:= ""
-wcCNPJ			:= SZV->ZV_CNPJ 
+wcCNPJ			:= SZV->ZV_CNPJ
 wcCodAtiv		:= SZV->ZV_CODATIV
 wcInscEst		:= SZV->ZV_INSCEST
 wcEndereco		:= SZV->ZV_ENDEREC
 wcCEP			:= SZV->ZV_CEP
 wcBairro		:= SZV->ZV_BAIRRO
-wcTelefone		:= SZV->ZV_TELEFON	
+wcTelefone		:= SZV->ZV_TELEFON
 wcNome1			:= SZV->ZV_NOME1
 wcCPF1			:= SZV->ZV_CPF1
-wcRG1           := SZV->ZV_RG1 
+wcRG1           := SZV->ZV_RG1
 wcEstCiv1		:= SZV->ZV_ESTCIV1
 wcNaciona1		:= SZV->ZV_NACION1
 wcNome2			:= SZV->ZV_NOME2
 wcCPF2			:= SZV->ZV_CPF2
-wcRG2           := SZV->ZV_RG2 
+wcRG2           := SZV->ZV_RG2
 wcEstCiv2		:= SZV->ZV_ESTCIV2
-wcNaciona2		:= SZV->ZV_NACION2  
-wcObjeto		:= SZV->ZV_OBJETO                 
+wcNaciona2		:= SZV->ZV_NACION2
+wcObjeto		:= SZV->ZV_OBJETO
 wcDescricao		:= SZV->ZV_DESCRI
 wcVigeIni		:= SZV->ZV_VIGEINI
 wcVigeFim		:= SZV->ZV_VIGEFIM
-wcVlrAtual		:= Alltrim(Str(SZV->ZV_VLRATU)) + " (" + Extenso(SZV->ZV_VLRATU) +  ")" 
-wcVlrReajus		:= Alltrim(Str(SZV->ZV_VLRREA)) + " (" + Extenso(SZV->ZV_VLRREA) +  ")"   
+wcVlrAtual		:= Alltrim(Str(SZV->ZV_VLRATU)) + " (" + Extenso(SZV->ZV_VLRATU) +  ")"
+wcVlrReajus		:= Alltrim(Str(SZV->ZV_VLRREA)) + " (" + Extenso(SZV->ZV_VLRREA) +  ")"
 //wcForPag		:= SZV->ZV_
 
 cPathDot := "X:\SolicitacaoAdi.docx"
@@ -109,7 +109,7 @@ cPathDot := ""
 //Montagem das variaveis do cabecalho
 
 OLE_SetDocumentVar(hWord, 'Data'  	 	,wcData)
-OLE_SetDocumentVar(hWord, 'Fornecedor'	,wcFornecedor) 
+OLE_SetDocumentVar(hWord, 'Fornecedor'	,wcFornecedor)
 OLE_SetDocumentVar(hWord, 'CNPJ'       	,Transform(wcCNPJ,"@R 99.999.999/9999-99"))
 //OLE_SetDocumentVar(hWord, 'Emissao'   	,wcEmissao)
 //OLE_SetDocumentVar(hWord, 'DTAutor'   	,wcDTAutor)

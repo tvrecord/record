@@ -77,6 +77,8 @@ Static Function fProcPdf(cCodVend)
 	Private cAlias2    	:= GetNextAlias()
 	Private cAlias3    	:= GetNextAlias()
 	Private cAlias4    	:= GetNextAlias()
+	Private cAlias5    	:= GetNextAlias()
+	Private cAlias6    	:= GetNextAlias()
 	//Informações importantes / parametros para calculo
 	Private cPeriodo 	:= (MV_PAR04+MV_PAR05)
 	Private aNatPerc	:= {}
@@ -96,6 +98,8 @@ Static Function fProcPdf(cCodVend)
 	Private nDescAge	:= 0
 	Private nDescBV		:= 0
 	Private nDescCac	:= 0
+	Private nCancNF		:= 0
+	Private nBvSP	:= 0
 	Private lDescAge	:= .F.
 	Private lDescBV		:= .F.
 	Private lDescCac	:= .F.
@@ -107,17 +111,41 @@ Static Function fProcPdf(cCodVend)
 	// Query para buscar as informações
 	//Pega as regras de comissões e transforma em vetor para uso posterior
 	BeginSql Alias cAlias1
-
-		SELECT ZAJ_VEND AS VENDEDOR, ZAK_ANO AS ANO, ZAK_GRPNAT AS GRUPO, ZAK_TPSUB AS TPSUB, ZAK_PERC AS PERC_COM, ZAL_MES AS MES
-		, ZAL_TIPO AS TIPO, ZAL_PERC AS PERC_COL, ZAL_VALOR AS VL_COM, ZAL_MTCOLE AS META_COL
-		, ZAL_ATCOLE AS VL_COL, ZAL_MTINDI AS META_IND, ZAL_ATINDI AS VL_IND, ZAL_PERCIN AS PERC_IND, ZAJ_TIPO AS TIPOCOM
-		FROM %table:ZAJ%
-		INNER JOIN %table:ZAK% ON ZAJ_FILIAL = ZAK_FILIAL AND ZAJ_VEND = ZAK_VEND AND %table:ZAK%.D_E_L_E_T_ = ''
-		INNER JOIN %table:ZAL% ON ZAK_FILIAL = ZAL_FILIAL AND ZAK_VEND = ZAL_VEND AND ZAK_ANO = ZAL_ANO AND ZAK_GRPNAT = ZAL_GRPNAT AND %table:ZAL%.D_E_L_E_T_ = ''
-		WHERE %table:ZAJ%.D_E_L_E_T_ = ''
-		%Exp:cFiltro3%
-		ORDER BY VENDEDOR, ANO, GRUPO, MES
-
+		SELECT
+			ZAJ_VEND AS VENDEDOR,
+			ZAK_ANO AS ANO,
+			ZAK_GRPNAT AS GRUPO,
+			ZAK_TPSUB AS TPSUB,
+			ZAK_PERC AS PERC_COM,
+			ZAL_MES AS MES,
+			ZAL_TIPO AS TIPO,
+			ZAL_PERC AS PERC_COL,
+			ZAL_VALOR AS VL_COM,
+			ZAL_MTCOLE AS META_COL,
+			ZAL_ATCOLE AS VL_COL,
+			ZAL_MTINDI AS META_IND,
+			ZAL_ATINDI AS VL_IND,
+			ZAL_PERCIN AS PERC_IND,
+			ZAJ_TIPO AS TIPOCOM
+		FROM
+			%table:ZAJ%
+		INNER JOIN %table:ZAK%
+		ON ZAJ_FILIAL = ZAK_FILIAL
+			AND ZAJ_VEND = ZAK_VEND
+			AND %table:ZAK% .D_E_L_E_T_ = ''
+		INNER JOIN %table:ZAL%
+		ON ZAK_FILIAL = ZAL_FILIAL
+			AND ZAK_VEND = ZAL_VEND
+			AND ZAK_ANO = ZAL_ANO
+			AND ZAK_GRPNAT = ZAL_GRPNAT
+			AND %table:ZAL% .D_E_L_E_T_ = ''
+		WHERE
+			%table:ZAJ% .D_E_L_E_T_ = '' %Exp:cFiltro3%
+		ORDER BY
+			VENDEDOR,
+			ANO,
+			GRUPO,
+			MES
 	EndSql
 
 	(cAlias1)->(DbGoTop())
@@ -126,20 +154,20 @@ Static Function fProcPdf(cCodVend)
 
 		//Grava os percentuais do faturamento total da natureza por vendedor
 		aAdd(aNatPerc,{(cAlias1)->VENDEDOR,;	//01 - Vendedor
-		(cAlias1)->ANO,;			//02 - Ano
-		(cAlias1)->GRUPO,;			//03 - Grupo
-		(cAlias1)->PERC_COM,;		//04 - Percentual do GRupo
-		(cAlias1)->MES,;			//05 - Mes da meta
-		(cAlias1)->TIPO,;			//06 - Tipo de comissão coletiva
-		(cAlias1)->PERC_COL,;		//07 - Percentual da comissão (Quando for %)
-		(cAlias1)->VL_COM,;			//08 - Valor da comissão (Quando for valor)
-		(cAlias1)->META_COL,;		//09 - Meta coletiva
-		(cAlias1)->VL_COL,;			//10 - Valor coletivo atingido
-		(cAlias1)->META_IND,;		//11 - Meta individual
-		(cAlias1)->VL_IND,;			//12 - Valor atingido indvidual
-		(cAlias1)->PERC_IND,;		//13 - Percentual da comissão individual
-		(cAlias1)->TPSUB,;			//14 - Tipo do subtotal do Grupo, 1=Calcula; 2=Não Calcula; 3=Calc. Com Descontos
-		(cAlias1)->TIPOCOM})		//15 - Tipo de impressão no relatório:Individual, Coletivo ou ambos
+			(cAlias1)->ANO,;			//02 - Ano
+			(cAlias1)->GRUPO,;			//03 - Grupo
+			(cAlias1)->PERC_COM,;		//04 - Percentual do GRupo
+			(cAlias1)->MES,;			//05 - Mes da meta
+			(cAlias1)->TIPO,;			//06 - Tipo de comissão coletiva
+			(cAlias1)->PERC_COL,;		//07 - Percentual da comissão (Quando for %)
+			(cAlias1)->VL_COM,;			//08 - Valor da comissão (Quando for valor)
+			(cAlias1)->META_COL,;		//09 - Meta coletiva
+			(cAlias1)->VL_COL,;			//10 - Valor coletivo atingido
+			(cAlias1)->META_IND,;		//11 - Meta individual
+			(cAlias1)->VL_IND,;			//12 - Valor atingido indvidual
+			(cAlias1)->PERC_IND,;		//13 - Percentual da comissão individual
+			(cAlias1)->TPSUB,;			//14 - Tipo do subtotal do Grupo, 1=Calcula; 2=Não Calcula; 3=Calc. Com Descontos
+			(cAlias1)->TIPOCOM})		//15 - Tipo de impressão no relatório:Individual, Coletivo ou ambos
 
 		cTipoCom	:= (cAlias1)->TIPOCOM
 		cVendedor2	:= (cAlias1)->VENDEDOR
@@ -152,44 +180,158 @@ Static Function fProcPdf(cCodVend)
 
 	// Busca os registros a serem impressos no relatório, vendedores e titulos a receber lançados no periodo
 	BeginSql Alias cAlias2
-
-		SELECT VENDEDOR, NOME, DESCAG, DESCBV, DESCCA, GRUPOS, PERCENTUAL, NAT_COMISS, NATUREZA, DESCRICAO, SUM(VL_BRUTO) AS VL_BRUTO, SUM(COMISSAO) AS COMISSAO, SUM(VL_IND) AS VL_IND, TIPOCOM FROM (
-
-		SELECT A3_COD AS VENDEDOR, A3_NOME AS NOME, ZAJ_DESCAG AS DESCAG, ZAJ_DESCBV AS DESCBV, ZAJ_DESCCA AS DESCCA
-		, ZAM_GRPNAT AS GRUPOS, ZAM_PERC AS PERCENTUAL, ED_NATCOM AS NAT_COMISS, E1_NATUREZ AS NATUREZA, ED_DESCRIC AS DESCRICAO
-		, SUM(E1_VALOR) AS VL_BRUTO, SUM(E1_VALOR * E1_COMIS1 / 100) AS COMISSAO
-		, SUM(CASE WHEN E1_VEND2 = A3_COD THEN E1_VALOR - (E1_VALOR * E1_COMIS1 / 100) ELSE 0 END) AS VL_IND, ZAJ_TIPO AS TIPOCOM
-		FROM %table:SA3%
-		INNER JOIN %table:ZAJ% ON A3_COD = ZAJ_VEND AND %table:ZAJ%.D_E_L_E_T_ = ''
-		INNER JOIN %table:ZAM% ON A3_COD = ZAM_VEND AND %table:ZAM%.D_E_L_E_T_ = ''
-		INNER JOIN %table:SED% ON %table:SED%.D_E_L_E_T_ = '' AND ED_NATCOM <> '' AND ED_NATCOM = ZAM_GRPNAT
-		INNER JOIN %table:SE1% ON %table:SE1%.D_E_L_E_T_ = '' AND E1_NATUREZ = ED_CODIGO AND E1_MULTNAT <> '1'
-		%Exp:cFiltro1%
-		INNER JOIN %table:SA1% ON %table:SA1%.D_E_L_E_T_ = '' AND E1_CLIENTE = A1_COD AND E1_LOJA = A1_LOJA
-		WHERE %table:SA3%.D_E_L_E_T_ = ''
-		%Exp:cFiltro2%
-		GROUP BY A3_COD, A3_NOME, ZAJ_DESCAG, ZAJ_DESCBV, ZAJ_DESCCA, ZAM_GRPNAT, ZAM_PERC, ED_NATCOM, E1_NATUREZ, ED_DESCRIC, ZAJ_TIPO
-		UNION ALL
-		SELECT A3_COD AS VENDEDOR, A3_NOME AS NOME, ZAJ_DESCAG AS DESCAG, ZAJ_DESCBV AS DESCBV, ZAJ_DESCCA AS DESCCA
-		, ZAM_GRPNAT AS GRUPOS, ZAM_PERC AS PERCENTUAL, ED_NATCOM AS NAT_COMISS, EV_NATUREZ AS NATUREZA, ED_DESCRIC AS DESCRICAO
-		, SUM(EV_VALOR) AS VL_BRUTO, SUM(EV_VALOR * E1_COMIS1 / 100) AS COMISSAO
-		, SUM(CASE WHEN E1_VEND2 = A3_COD THEN EV_VALOR - (EV_VALOR * E1_COMIS1 / 100) ELSE 0 END) AS VL_IND, ZAJ_TIPO AS TIPOCOM
-		FROM %table:SA3%
-		INNER JOIN %table:ZAJ% ON A3_COD = ZAJ_VEND AND %table:ZAJ%.D_E_L_E_T_ = ''
-		INNER JOIN %table:ZAM% ON A3_COD = ZAM_VEND AND %table:ZAM%.D_E_L_E_T_ = ''
-		INNER JOIN %table:SED% ON %table:SED%.D_E_L_E_T_ = '' AND ED_NATCOM <> '' AND ED_NATCOM = ZAM_GRPNAT
-		INNER JOIN %table:SEV% ON %table:SEV%.D_E_L_E_T_ = '' AND EV_NATUREZ = ED_CODIGO
-		INNER JOIN %table:SE1% ON %table:SE1%.D_E_L_E_T_ = ''
-		AND E1_PREFIXO = EV_PREFIXO AND E1_NUM = EV_NUM AND E1_PARCELA = EV_PARCELA AND E1_TIPO = EV_TIPO AND EV_RECPAG = 'R'
-		%Exp:cFiltro1%
-		INNER JOIN %table:SA1% ON %table:SA1%.D_E_L_E_T_ = '' AND E1_CLIENTE = A1_COD AND E1_LOJA = A1_LOJA
-		WHERE %table:SA3%.D_E_L_E_T_ = ''
-		%Exp:cFiltro2%
-		GROUP BY A3_COD, A3_NOME, ZAJ_DESCAG, ZAJ_DESCBV, ZAJ_DESCCA, ZAM_GRPNAT, ZAM_PERC, ED_NATCOM, EV_NATUREZ, ED_DESCRIC, ZAJ_TIPO) AS CONTATOS
-
-		GROUP BY VENDEDOR, NOME, DESCAG, DESCBV, DESCCA, GRUPOS, PERCENTUAL, NAT_COMISS, NATUREZA, DESCRICAO, TIPOCOM
-		ORDER BY VENDEDOR, NAT_COMISS, NATUREZA
-
+		SELECT
+			VENDEDOR,
+			NOME,
+			DESCAG,
+			DESCBV,
+			DESCCA,
+			GRUPOS,
+			PERCENTUAL,
+			NAT_COMISS,
+			NATUREZA,
+			DESCRICAO,
+			SUM(VL_BRUTO) AS VL_BRUTO,
+			SUM(COMISSAO) AS COMISSAO,
+			SUM(VL_IND) AS VL_IND,
+			TIPOCOM
+		FROM
+			(
+				SELECT
+					A3_COD AS VENDEDOR,
+					A3_NOME AS NOME,
+					ZAJ_DESCAG AS DESCAG,
+					ZAJ_DESCBV AS DESCBV,
+					ZAJ_DESCCA AS DESCCA,
+					ZAM_GRPNAT AS GRUPOS,
+					ZAM_PERC AS PERCENTUAL,
+					ED_NATCOM AS NAT_COMISS,
+					E1_NATUREZ AS NATUREZA,
+					ED_DESCRIC AS DESCRICAO,
+					SUM(E1_VALOR) AS VL_BRUTO,
+					SUM(E1_VALOR * E1_COMIS1 / 100) AS COMISSAO,
+					SUM(
+						CASE
+							WHEN E1_VEND2 = A3_COD
+								THEN E1_VALOR - (E1_VALOR * E1_COMIS1 / 100)
+							ELSE 0
+						END
+					) AS VL_IND,
+					ZAJ_TIPO AS TIPOCOM
+				FROM
+					%table:SA3%
+				INNER JOIN %table:ZAJ%
+				ON A3_COD = ZAJ_VEND
+					AND %table:ZAJ% .D_E_L_E_T_ = ''
+				INNER JOIN %table:ZAM%
+				ON A3_COD = ZAM_VEND
+					AND %table:ZAM% .D_E_L_E_T_ = ''
+				INNER JOIN %table:SED%
+				ON %table:SED% .D_E_L_E_T_ = ''
+					AND ED_NATCOM <> ''
+					AND ED_NATCOM = ZAM_GRPNAT
+				INNER JOIN %table:SE1%
+				ON %table:SE1% .D_E_L_E_T_ = ''
+					AND E1_NATUREZ = ED_CODIGO
+					AND E1_MULTNAT <> '1' %Exp:cFiltro1%
+				INNER JOIN %table:SA1%
+				ON %table:SA1% .D_E_L_E_T_ = ''
+					AND E1_CLIENTE = A1_COD
+					AND E1_LOJA = A1_LOJA
+				WHERE
+					%table:SA3% .D_E_L_E_T_ = '' %Exp:cFiltro2%
+				GROUP BY
+					A3_COD,
+					A3_NOME,
+					ZAJ_DESCAG,
+					ZAJ_DESCBV,
+					ZAJ_DESCCA,
+					ZAM_GRPNAT,
+					ZAM_PERC,
+					ED_NATCOM,
+					E1_NATUREZ,
+					ED_DESCRIC,
+					ZAJ_TIPO
+				UNION
+				ALL
+				SELECT
+					A3_COD AS VENDEDOR,
+					A3_NOME AS NOME,
+					ZAJ_DESCAG AS DESCAG,
+					ZAJ_DESCBV AS DESCBV,
+					ZAJ_DESCCA AS DESCCA,
+					ZAM_GRPNAT AS GRUPOS,
+					ZAM_PERC AS PERCENTUAL,
+					ED_NATCOM AS NAT_COMISS,
+					EV_NATUREZ AS NATUREZA,
+					ED_DESCRIC AS DESCRICAO,
+					SUM(EV_VALOR) AS VL_BRUTO,
+					SUM(EV_VALOR * E1_COMIS1 / 100) AS COMISSAO,
+					SUM(
+						CASE
+							WHEN E1_VEND2 = A3_COD
+								THEN EV_VALOR - (EV_VALOR * E1_COMIS1 / 100)
+							ELSE 0
+						END
+					) AS VL_IND,
+					ZAJ_TIPO AS TIPOCOM
+				FROM
+					%table:SA3%
+				INNER JOIN %table:ZAJ%
+				ON A3_COD = ZAJ_VEND
+					AND %table:ZAJ% .D_E_L_E_T_ = ''
+				INNER JOIN %table:ZAM%
+				ON A3_COD = ZAM_VEND
+					AND %table:ZAM% .D_E_L_E_T_ = ''
+				INNER JOIN %table:SED%
+				ON %table:SED% .D_E_L_E_T_ = ''
+					AND ED_NATCOM <> ''
+					AND ED_NATCOM = ZAM_GRPNAT
+				INNER JOIN %table:SEV%
+				ON %table:SEV% .D_E_L_E_T_ = ''
+					AND EV_NATUREZ = ED_CODIGO
+				INNER JOIN %table:SE1%
+				ON %table:SE1% .D_E_L_E_T_ = ''
+					AND E1_PREFIXO = EV_PREFIXO
+					AND E1_NUM = EV_NUM
+					AND E1_PARCELA = EV_PARCELA
+					AND E1_TIPO = EV_TIPO
+					AND EV_RECPAG = 'R' %Exp:cFiltro1%
+				INNER JOIN %table:SA1%
+				ON %table:SA1% .D_E_L_E_T_ = ''
+					AND E1_CLIENTE = A1_COD
+					AND E1_LOJA = A1_LOJA
+				WHERE
+					%table:SA3% .D_E_L_E_T_ = '' %Exp:cFiltro2%
+				GROUP BY
+					A3_COD,
+					A3_NOME,
+					ZAJ_DESCAG,
+					ZAJ_DESCBV,
+					ZAJ_DESCCA,
+					ZAM_GRPNAT,
+					ZAM_PERC,
+					ED_NATCOM,
+					EV_NATUREZ,
+					ED_DESCRIC,
+					ZAJ_TIPO
+			) AS CONTATOS
+		GROUP BY
+			VENDEDOR,
+			NOME,
+			DESCAG,
+			DESCBV,
+			DESCCA,
+			GRUPOS,
+			PERCENTUAL,
+			NAT_COMISS,
+			NATUREZA,
+			DESCRICAO,
+			TIPOCOM
+		ORDER BY
+			VENDEDOR,
+			NAT_COMISS,
+			NATUREZA
 	EndSql
 
 	// Carrega regua de processamento
@@ -201,9 +343,6 @@ Static Function fProcPdf(cCodVend)
 		(cAlias2)->(DbCloseArea())
 		Return
 	ENDIF
-
-	//Calcula os descontos de Agência, Bonificação Volume e Cachê
-	//CalcDesc()
 
 	dbSelectArea(cAlias2)
 	DbGoTop()
@@ -257,7 +396,7 @@ Static Function fProcPdf(cCodVend)
 
 		IF cSubTot != Substring((cAlias2)->NAT_COMISS,1,2) .AND. lOk //Impressão do totalizador por grupo de comissao de natureza
 
-			ImpTotais(Alltrim((cAlias2)->VENDEDOR))
+			ImpTotais(Alltrim((cAlias2)->VENDEDOR),Substring(cGrupo,1,2))
 
 		ENDIF
 
@@ -302,7 +441,7 @@ Static Function fProcPdf(cCodVend)
 				ENDIF
 
 				IF cTipoCom = "3" .or. cTipoCom = "2"
-				oPrint:Say( nLin,520, PADR(Transform(nValNatC, "@E 999,999,999.99"),14) 			,oFonte)
+					oPrint:Say( nLin,520, PADR(Transform(nValNatC, "@E 999,999,999.99"),14) 			,oFonte)
 				ENDIF
 
 				nValNatI		:= 0
@@ -318,7 +457,7 @@ Static Function fProcPdf(cCodVend)
 
 			IF cSubTot != Substring((cAlias2)->NAT_COMISS,1,2) .or. cVendedor != Alltrim((cAlias2)->VENDEDOR) //Impressão do totalizador por grupo de comissao de natureza
 
-				ImpTotais(cVendedor)
+				ImpTotais(cVendedor,Substring(cGrupo,1,2))
 
 			ENDIF
 
@@ -331,16 +470,16 @@ Static Function fProcPdf(cCodVend)
 			oPrint:Say( nLin,520, PADL(Transform( nTotalPre, "@E 999,999,999.99"),14)	,oFonteN)
 			//ENDIF
 			IF cVendedor != "000608" .and. cVendedor != "000609"
-			nLin += (REL_LIN_STD)
-			oPrint:Say( nLin,020, "CORREÇÃO REFERENTE CACHE JULHO:"						,oFonteN)
-			oPrint:Say( nLin,520, PADL(Transform( nCacheJulho, "@E 999,999,999.99"),14)	,oFonteN)
-			nLin += (REL_LIN_STD)
-			oPrint:Say( nLin,020, "TOTAL:"												,oFonteN)
-			oPrint:Say( nLin,520, PADL(Transform(nTotalCom + nTotalPre + nCacheJulho, "@E 999,999,999.99"),14)	,oFonteN)
+				nLin += (REL_LIN_STD)
+				oPrint:Say( nLin,020, "CORREÇÃO REFERENTE CACHE JULHO:"						,oFonteN)
+				oPrint:Say( nLin,520, PADL(Transform( nCacheJulho, "@E 999,999,999.99"),14)	,oFonteN)
+				nLin += (REL_LIN_STD)
+				oPrint:Say( nLin,020, "TOTAL:"												,oFonteN)
+				oPrint:Say( nLin,520, PADL(Transform(nTotalCom + nTotalPre + nCacheJulho, "@E 999,999,999.99"),14)	,oFonteN)
 			ELSE
-			nLin += (REL_LIN_STD)
-			oPrint:Say( nLin,020, "TOTAL:"												,oFonteN)
-			oPrint:Say( nLin,520, PADL(Transform(nTotalCom + nTotalPre, "@E 999,999,999.99"),14)	,oFonteN)
+				nLin += (REL_LIN_STD)
+				oPrint:Say( nLin,020, "TOTAL:"												,oFonteN)
+				oPrint:Say( nLin,520, PADL(Transform(nTotalCom + nTotalPre, "@E 999,999,999.99"),14)	,oFonteN)
 			ENDIF
 
 			//Pula mais linhas para assinatura
@@ -412,12 +551,12 @@ Static Function ImpProxPag(cVendedor,cNome,cPeriodo,cTipoCom)
 	oPrint:Say( nLin,080, "DESCRIÇÃO"	,oFonteN)
 	oPrint:Say( nLin,290, "PERC %"		,oFonteN)
 	IF cTipoCom = "1"
-	oPrint:Say( nLin,525, "INDIVIDUAL"	,oFonteN)
+		oPrint:Say( nLin,525, "INDIVIDUAL"	,oFonteN)
 	ELSEIF cTipoCom = "2"
-	oPrint:Say( nLin,525, "COLETIVO"	,oFonteN)
+		oPrint:Say( nLin,525, "COLETIVO"	,oFonteN)
 	ELSE
-	oPrint:Say( nLin,410, "INDIVIDUAL"	,oFonteN)
-	oPrint:Say( nLin,525, "COLETIVO"	,oFonteN)
+		oPrint:Say( nLin,410, "INDIVIDUAL"	,oFonteN)
+		oPrint:Say( nLin,525, "COLETIVO"	,oFonteN)
 	ENDIF
 
 	oPrint:line(nLin+5,REL_LEFT,nLin+5,REL_RIGHT )
@@ -426,103 +565,24 @@ Static Function ImpProxPag(cVendedor,cNome,cPeriodo,cTipoCom)
 
 Return
 
-// CalcDesc() - Calcula os totais dos descontos
-Static Function CalcDesc(cCodVend)
+//Rotina responsavel pelo Calculo dos totais dos descontos
+Static Function CalcDesc(cCodVend,cNatCom)
 
-	Local cFiltDesc	:= ""
+	//Desconto Comissão de Agencia
+	nDescAge := ComisAgencia(cCodVend,cNatCom)
 
-	IF cTipoCom = "1"
-	cFiltDesc	:= "%AND SUBSTRING(E1_EMISSAO,1,6) = '"+cPeriodo+"' AND E1_TIPO NOT IN " + FormatIn(MV_PAR06,"/") + " AND E1_FILIAL = '01' AND E1_VEND2 = '"+cCodVend+"' %"
-	ELSE
-	cFiltDesc	:= cFiltro1
-	ENDIF
+	//calcular desconto bonificação de volume provisionado pelo faturamento
+	nDescBV := BonifVolume(cCodVend,cNatCom)
 
-	// Query para calcular o comissão agência
-	BeginSql Alias cAlias3
+	//calcular desconto bonificação de volume provisionado pelo faturamento SP
+	//nBvSP := BonifVolume(cCodVend,cNatCom) //Aguardar a definição da natureza para alterar apenas o parametro cNatCom SE FOR O CASO, ou criar uma nova rergra chamando outro fonte - Bruno Alves
+	nBvSP := 0
 
-		SELECT SUM(E1_VALOR * E1_COMIS1 / 100) AS DESCAGE
-		FROM %table:SE1%
-		WHERE %table:SE1%.D_E_L_E_T_ = '' AND E1_COMIS1 > 0
-		%Exp:cFiltDesc%
+	//calcular desconto do cache
+	nDescCac := Cache(cCodVend,cNatCom)
 
-	EndSql
-
-	(cAlias3)->(DbGoTop())
-
-	While (cAlias3)->(!Eof())
-
-	nDescAge := (cAlias3)->DESCAGE
-
-	(cAlias3)->(DbSkip())
-
-	EndDo
-
-	(cAlias3)->(DbCloseArea())
-
-	//Calculo desconto de BV - Previsão pelo faturamento - Pedido Sra. Elenn
-	IF MV_PAR09 > 0 //Se o parâmetro estiver preenchido, usar o valor informado, se não usar o valor calculado
-
-	nDescBV := MV_PAR09
-
-	ELSE
-
-	// Query para calcular bonificação de volume provisionado pelo faturamento - Pedido Sra. Elenn
-	BeginSql Alias cAlias4
-
-		SELECT E1_VEND1 AS AGENCIABV, A3_NOME AS NOME
-		, CASE
-		WHEN SUM(E1_VALOR - (E1_VALOR * E1_COMIS1 / 100)) BETWEEN ZU_DEFX1 AND ZU_ATEFX1 THEN ZU_PERC1
-		WHEN SUM(E1_VALOR - (E1_VALOR * E1_COMIS1 / 100)) BETWEEN ZU_DEFX2 AND ZU_ATEFX2 THEN ZU_PERC2
-		WHEN SUM(E1_VALOR - (E1_VALOR * E1_COMIS1 / 100)) BETWEEN ZU_DEFX3 AND ZU_ATEFX3 THEN ZU_PERC3
-		WHEN SUM(E1_VALOR - (E1_VALOR * E1_COMIS1 / 100)) BETWEEN ZU_DEFX4 AND ZU_ATEFX4 THEN ZU_PERC4
-		WHEN SUM(E1_VALOR - (E1_VALOR * E1_COMIS1 / 100)) BETWEEN ZU_DEFX5 AND ZU_ATEFX5 THEN ZU_PERC5
-		WHEN SUM(E1_VALOR - (E1_VALOR * E1_COMIS1 / 100)) BETWEEN ZU_DEFX6 AND ZU_ATEFX6 THEN ZU_PERC6
-		WHEN SUM(E1_VALOR - (E1_VALOR * E1_COMIS1 / 100)) BETWEEN ZU_DEFX7 AND ZU_ATEFX7 THEN ZU_PERC7
-		ELSE 0
-		END AS PERCENTUAL
-		, SUM(E1_VALOR - (E1_VALOR * E1_COMIS1 / 100)) AS LIQUIDO, E1_VEND2 AS VENDEDOR2
-		FROM %table:SE1%
-		INNER JOIN %table:SA3% ON E1_VEND1 = A3_COD AND %table:SA3%.D_E_L_E_T_ = ''
-		INNER JOIN %table:SZU% ON E1_VEND1 = ZU_VEND AND %table:SZU% .D_E_L_E_T_ = '' AND E1_EMISSAO BETWEEN ZU_VALIDA AND ZU_ATEVALI
-		WHERE %table:SE1%.D_E_L_E_T_ = '' AND E1_VEND1 <> ''
-		%Exp:cFiltro1%
-		GROUP BY E1_VEND1, A3_NOME
-		, ZU_DEFX1, ZU_ATEFX1, ZU_PERC1
-		, ZU_DEFX2, ZU_ATEFX2, ZU_PERC2
-		, ZU_DEFX3, ZU_ATEFX3, ZU_PERC3
-		, ZU_DEFX4, ZU_ATEFX4, ZU_PERC4
-		, ZU_DEFX5, ZU_ATEFX5, ZU_PERC5
-		, ZU_DEFX6, ZU_ATEFX6, ZU_PERC6
-		, ZU_DEFX7, ZU_ATEFX7, ZU_PERC7
-		, E1_VEND2
-		ORDER BY AGENCIABV
-
-	EndSql
-
-	(cAlias4)->(DbGoTop())
-
-	While (cAlias4)->(!Eof())
-
-	IF (cAlias4)->VENDEDOR2 == cCodVend .and. cTipoCom == "1"
-		nDescBV += (cAlias4)->LIQUIDO * (cAlias4)->PERCENTUAL / 100
-		elseif cTipoCom <> "1"
-		nDescBV += (cAlias4)->LIQUIDO * (cAlias4)->PERCENTUAL / 100
-	ENDIF
-
-	//IF !EMPTY((cAlias4)->PERCENTUAL) //> 0 .AND. (cAlias4)->PERCENTUAL < 100
-
-	//ENDIF
-
-		(cAlias4)->(DbSkip())
-
-	EndDo
-
-	(cAlias4)->(DbCloseArea())
-
-	ENDIF
-
-	// Calculo manual Cachê
-	nDescCac := MV_PAR10
+	//calcular desconto das nf - Bruno Alves
+	nCancNF := CancNF(cCodVend,cNatCom)
 
 Return()
 
@@ -539,7 +599,7 @@ Static Function ImpSubTot()
 	ENDIF
 
 	IF cTipoCom = '3' .or. cTipoCom = '2'
-	oPrint:Say( nLin,520, PADR(Transform(nTotGrupoC, "@E 999,999,999.99"),14)				,oFonteN)
+		oPrint:Say( nLin,520, PADR(Transform(nTotGrupoC, "@E 999,999,999.99"),14)				,oFonteN)
 	ENDIf
 
 	nTotGrupoI	:= 0
@@ -553,15 +613,13 @@ Static Function ImpSubTot()
 Return
 
 // ImpTotais() - Imprime os totais por grupo de natureza
-Static Function ImpTotais(cCodVend)
+Static Function ImpTotais(cCodVend,cGrpNat)
 
 	IF MV_PAR11 == 2 .AND. cTipoSub <> "2" // Quando não calcula os totais (cTipoSub = 2) continua imprimindo as naturezas sem considerar o subtotal
 		nLin -= REL_LIN_RED
 	ENDIF
 
-	nDescAge	:= 0
-	nDescBV		:= 0
-	CalcDesc(cCodVend) //Calcula os totais antes de se fazer os descontos
+	CalcDesc(cCodVend,cGrpNat) //Calcula os totais antes de se fazer os descontos
 
 	//Verifica quais serão os descontos do contato
 	IF lDescAge
@@ -587,11 +645,11 @@ Static Function ImpTotais(cCodVend)
 		oPrint:Say( nLin,020, "SUBTOTAL:"				  						,oFonteN)
 		IF aNatPerc[nPos][11] > 0 .and. cTipoCom = "3"
 			oPrint:Say( nLin,410, PADR(Transform(nSubTotI, "@E 999,999,999.99"),14)	,oFonteN)
-			elseif cTipoCom = "1"
+		elseif cTipoCom = "1"
 			oPrint:Say( nLin,520, PADR(Transform(nSubTotI, "@E 999,999,999.99"),14)	,oFonteN)
 		ENDIF
 		IF cTipoCom = "3" .or. cTipoCom = "2"
-		oPrint:Say( nLin,520, PADR(Transform(nSubTotC, "@E 999,999,999.99"),14)	,oFonteN)
+			oPrint:Say( nLin,520, PADR(Transform(nSubTotC, "@E 999,999,999.99"),14)	,oFonteN)
 		ENDIF
 
 		nLin += REL_LIN_TOT
@@ -603,9 +661,19 @@ Static Function ImpTotais(cCodVend)
 		oPrint:Say( nLin,020, "(-) BONIFICAÇÃO DE VOLUME:"		  				,oFonteN)
 		oPrint:Say( nLin,520, PADR(Transform(nDescBV1, "@E 999,999,999.99"),14)	,oFonteN)
 
+		//Verificar regra do desconto para acrescentar a variavel nBvSP1 - Bruno Alves
+		nLin += REL_LIN_STD
+		oPrint:Say( nLin,020, "(-) BONIFICAÇÃO DE VOLUME SP:"		  				,oFonteN)
+		oPrint:Say( nLin,520, PADR(Transform(nBvSP, "@E 999,999,999.99"),14)	,oFonteN)
+
 		nLin += REL_LIN_STD
 		oPrint:Say( nLin,020, "(-) CACHE:"				  						,oFonteN)
 		oPrint:Say( nLin,520, PADR(Transform(nDescCac1,"@E 999,999,999.99"),14)	,oFonteN)
+
+		//Verificar regra do desconto para acrescentar a variavel nCancNF - Bruno Alves
+		nLin += REL_LIN_STD
+		oPrint:Say( nLin,020, "(-) CANCELAMENTO NF:"				  						,oFonteN)
+		oPrint:Say( nLin,520, PADR(Transform(nCancNF,"@E 999,999,999.99"),14)	,oFonteN)
 
 		nLin += REL_LIN_STD
 		nTotGrupoC := nSubTotC-nDescAge1-nDescBV1-nDescCac1
@@ -613,18 +681,18 @@ Static Function ImpTotais(cCodVend)
 		oPrint:Say( nLin,020, "TOTAL PARA CÁLCULO:"				  					,oFonteN)
 
 		IF cTipoCom = "2" .or. cTipoCom = "3"
-		oPrint:Say( nLin,520, PADR(Transform(nTotGrupoC, "@E 999,999,999.99"),14)	,oFonteN)
+			oPrint:Say( nLin,520, PADR(Transform(nTotGrupoC, "@E 999,999,999.99"),14)	,oFonteN)
 		ELSE
-		oPrint:Say( nLin,520, PADR(Transform(nTotGrupoI, "@E 999,999,999.99"),14)	,oFonteN)
+			oPrint:Say( nLin,520, PADR(Transform(nTotGrupoI, "@E 999,999,999.99"),14)	,oFonteN)
 		ENDIF
 
 		nLin += REL_LIN_STD
 		oPrint:Say( nLin,020, "VALOR COMISSÃO:"				  						,oFonteN)
 		oPrint:Say( nLin,290, PADR(Transform(nPercCom, "999.9999%"),9)				,oFonteN)
 		IF cTipoCom = "2" .or. cTipoCom = "3"
-		oPrint:Say( nLin,520, PADR(Transform((nTotGrupoC)*nPercCom/100, "@E 999,999,999.99"),14)	,oFonteN)
+			oPrint:Say( nLin,520, PADR(Transform((nTotGrupoC)*nPercCom/100, "@E 999,999,999.99"),14)	,oFonteN)
 		else
-		oPrint:Say( nLin,520, PADR(Transform((nTotGrupoI)*nPercCom/100, "@E 999,999,999.99"),14)	,oFonteN)
+			oPrint:Say( nLin,520, PADR(Transform((nTotGrupoI)*nPercCom/100, "@E 999,999,999.99"),14)	,oFonteN)
 		endif
 
 		IF aNatPerc[nPos][11] <> 0 .OR. aNatPerc[nPos][09] <> 0
@@ -658,9 +726,9 @@ Static Function ImpTotais(cCodVend)
 		oPrint:Line(nLin,REL_LEFT,nLin,REL_RIGHT,CLR_HGRAY,"-9")
 
 		IF cTipoCom = "2" .or. cTipoCom = "3"
-		nTotalCom  	+= (nTotGrupoC)*nPercCom/100
+			nTotalCom  	+= (nTotGrupoC)*nPercCom/100
 		else
-		nTotalCom  	+= (nTotGrupoI)*nPercCom/100
+			nTotalCom  	+= (nTotGrupoI)*nPercCom/100
 		endif
 		nTotGrupoI 	:= 0
 		nTotGrupoC 	:= 0
@@ -676,18 +744,18 @@ Static Function ImpTotais(cCodVend)
 		oPrint:Say( nLin,020, "TOTAL PARA CÁLCULO:"		  						,oFonteN)
 
 		IF cTipoCom = "2" .or. cTipoCom = "3"
-		oPrint:Say( nLin,520, PADR(Transform(nSubTotC, "@E 999,999,999.99"),14)	,oFonteN)
+			oPrint:Say( nLin,520, PADR(Transform(nSubTotC, "@E 999,999,999.99"),14)	,oFonteN)
 		ELSE
-		oPrint:Say( nLin,520, PADR(Transform(nSubTotI, "@E 999,999,999.99"),14)	,oFonteN)
+			oPrint:Say( nLin,520, PADR(Transform(nSubTotI, "@E 999,999,999.99"),14)	,oFonteN)
 		ENDIF
 
 		nLin += REL_LIN_STD
 		oPrint:Say( nLin,020, "VALOR COMISSÃO:"				  									,oFonteN)
 		oPrint:Say( nLin,290, PADR(Transform(nPercCom, "999.9999%"),9)							,oFonteN)
 		IF cTipoCom = "2" .or. cTipoCom = "3"
-		oPrint:Say( nLin,520, PADR(Transform((nSubTotC)*nPercCom/100, "@E 999,999,999.99"),14)	,oFonteN)
+			oPrint:Say( nLin,520, PADR(Transform((nSubTotC)*nPercCom/100, "@E 999,999,999.99"),14)	,oFonteN)
 		else
-		oPrint:Say( nLin,520, PADR(Transform((nSubTotI)*nPercCom/100, "@E 999,999,999.99"),14)	,oFonteN)
+			oPrint:Say( nLin,520, PADR(Transform((nSubTotI)*nPercCom/100, "@E 999,999,999.99"),14)	,oFonteN)
 		endif
 
 
@@ -724,9 +792,9 @@ Static Function ImpTotais(cCodVend)
 		oPrint:Line(nLin,REL_LEFT,nLin,REL_RIGHT,CLR_HGRAY,"-9")
 
 		IF cTipoCom = "2" .or. cTipoCom = "3"
-		nTotalCom  	+= (nTotGrupoC)*nPercCom/100
+			nTotalCom  	+= (nTotGrupoC)*nPercCom/100
 		else
-		nTotalCom  	+= (nTotGrupoI)*nPercCom/100
+			nTotalCom  	+= (nTotGrupoI)*nPercCom/100
 		endif
 		nTotGrupoI 	:= 0
 		nTotGrupoC 	:= 0
@@ -776,3 +844,241 @@ Static Function ValidPerg(cPerg)
 	RestArea(aArea)
 
 Return()
+
+
+
+
+//Calcula o desconto da comissao de agencia
+
+Static Function ComisAgencia(cCodVend,cNatCom)
+
+	Local nValor 		:= 0
+	Local cFiltDesc		:= ""
+
+	IF cTipoCom = "1"
+		cFiltDesc	:= "%AND SUBSTRING(E1_EMISSAO,1,6) = '"+cPeriodo+"' AND E1_TIPO NOT IN " + FormatIn(MV_PAR06,"/") + " AND E1_FILIAL = '01' AND E1_VEND2 = '"+cCodVend+"' %"
+	ELSE
+		cFiltDesc	:= cFiltro1
+	ENDIF
+
+	// Query para calcular o comissão agência
+	BeginSql Alias cAlias3
+		SELECT
+			SUM(E1_VALOR * E1_COMIS1 / 100) AS DESCAGE
+		FROM
+			%table:SE1%
+		INNER JOIN %table:SED%
+		ON ED_CODIGO = E1_NATUREZ
+		WHERE
+			%table:SE1% .D_E_L_E_T_ = ''
+			AND %table:SED% .D_E_L_E_T_ = ''
+			AND E1_COMIS1 > 0 %Exp:cFiltDesc%
+			AND SUBSTRING(ED_NATCOM, 1, 2) = %exp:cNatCom%
+	EndSql
+
+	(cAlias3)->(DbGoTop())
+
+	While (cAlias3)->(!Eof())
+
+		nValor := (cAlias3)->DESCAGE
+
+		(cAlias3)->(DbSkip())
+
+	EndDo
+
+	(cAlias3)->(DbCloseArea())
+
+Return(nValor)
+
+
+//Rotina responsavel por calcular o dsconto da bonificação de volume
+
+Static Function BonifVolume(cCodVend,cNatCom)
+
+	Local nValor := 0
+
+	BeginSql Alias cAlias4
+		SELECT
+			E1_VEND1 AS AGENCIABV,
+			A3_NOME AS NOME,
+			CASE
+				WHEN SUM(E1_VALOR - (E1_VALOR * E1_COMIS1 / 100)) BETWEEN ZU_DEFX1 AND ZU_ATEFX1
+					THEN ZU_PERC1
+				WHEN SUM(E1_VALOR - (E1_VALOR * E1_COMIS1 / 100)) BETWEEN ZU_DEFX2 AND ZU_ATEFX2
+					THEN ZU_PERC2
+				WHEN SUM(E1_VALOR - (E1_VALOR * E1_COMIS1 / 100)) BETWEEN ZU_DEFX3 AND ZU_ATEFX3
+					THEN ZU_PERC3
+				WHEN SUM(E1_VALOR - (E1_VALOR * E1_COMIS1 / 100)) BETWEEN ZU_DEFX4 AND ZU_ATEFX4
+					THEN ZU_PERC4
+				WHEN SUM(E1_VALOR - (E1_VALOR * E1_COMIS1 / 100)) BETWEEN ZU_DEFX5 AND ZU_ATEFX5
+					THEN ZU_PERC5
+				WHEN SUM(E1_VALOR - (E1_VALOR * E1_COMIS1 / 100)) BETWEEN ZU_DEFX6 AND ZU_ATEFX6
+					THEN ZU_PERC6
+				WHEN SUM(E1_VALOR - (E1_VALOR * E1_COMIS1 / 100)) BETWEEN ZU_DEFX7 AND ZU_ATEFX7
+					THEN ZU_PERC7
+				ELSE 0
+			END AS PERCENTUAL,
+			SUM(E1_VALOR - (E1_VALOR * E1_COMIS1 / 100)) AS LIQUIDO,
+			E1_VEND2 AS VENDEDOR2
+		FROM
+			%table:SE1%
+		INNER JOIN %table:SA3%
+		ON E1_VEND1 = A3_COD
+			AND %table:SA3% .D_E_L_E_T_ = ''
+		INNER JOIN %table:SZU%
+		ON E1_VEND1 = ZU_VEND
+			AND %table:SZU% .D_E_L_E_T_ = ''
+			AND E1_EMISSAO BETWEEN ZU_VALIDA AND ZU_ATEVALI
+		INNER JOIN %table:SED%
+		ON ED_CODIGO = E1_NATUREZ
+			AND %table:SED% .D_E_L_E_T_ = ''
+		WHERE
+			%table:SE1% .D_E_L_E_T_ = ''
+			AND SUBSTRING(ED_NATCOM, 1, 2) = %exp:cNatCom%
+			AND E1_VEND1 <> '' %Exp:cFiltro1%
+		GROUP BY
+			E1_VEND1,
+			A3_NOME,
+			ZU_DEFX1,
+			ZU_ATEFX1,
+			ZU_PERC1,
+			ZU_DEFX2,
+			ZU_ATEFX2,
+			ZU_PERC2,
+			ZU_DEFX3,
+			ZU_ATEFX3,
+			ZU_PERC3,
+			ZU_DEFX4,
+			ZU_ATEFX4,
+			ZU_PERC4,
+			ZU_DEFX5,
+			ZU_ATEFX5,
+			ZU_PERC5,
+			ZU_DEFX6,
+			ZU_ATEFX6,
+			ZU_PERC6,
+			ZU_DEFX7,
+			ZU_ATEFX7,
+			ZU_PERC7,
+			E1_VEND2
+		ORDER BY
+			AGENCIABV
+	EndSql
+
+	(cAlias4)->(DbGoTop())
+
+	While (cAlias4)->(!Eof())
+
+		IF (cAlias4)->VENDEDOR2 == cCodVend .and. cTipoCom == "1"
+			nValor += (cAlias4)->LIQUIDO * (cAlias4)->PERCENTUAL / 100
+		elseif cTipoCom <> "1"
+			nValor += (cAlias4)->LIQUIDO * (cAlias4)->PERCENTUAL / 100
+		ENDIF
+
+		(cAlias4)->(DbSkip())
+
+	EndDo
+
+	(cAlias4)->(DbCloseArea())
+
+Return(nValor)
+
+
+//Rotina responsavel pelo calculo do desconto do cache
+
+Static Function Cache(cCodVend,cNatCom)
+
+	Local nValor := 0
+	Local cDataIni  := MV_PAR04 + MV_PAR03 + "01"
+	Local cDataFim  := MV_PAR04 + MV_PAR03 + "31"
+
+
+	// Query responsavel pelo desconto do cache
+	BeginSql Alias cAlias5
+		SELECT
+			SUM(ZS_VALOR) AS VALCACHE
+		FROM
+			%table:SZS% SZS
+		INNER JOIN %table:SC5% SC5
+		ON C5_FILIAL = ZS_FILIAL
+			AND C5_NUMRP = ZS_NUMRP
+			AND C5_NOTA = ZS_NOTAFAT
+		INNER JOIN %table:SED% SED
+		ON ED_CODIGO = C5_NATUREZ
+		WHERE
+			ZS_TIPO = '22'
+			AND ZS_EMISSAO BETWEEN %exp:cDataIni% AND %exp:cDataFim%
+			AND C5_VEND2 = %exp:cCodVend%
+			AND SUBSTRING(ED_NATCOM, 1, 2) = %exp:cNatCom%
+			AND SZS.D_E_L_E_T_ = ''
+			AND SC5.D_E_L_E_T_ = ''
+			AND SED.D_E_L_E_T_ = ''
+	EndSql
+
+	(cAlias5)->(DbGoTop())
+
+	While (cAlias5)->(!Eof())
+
+		nValor := (cAlias5)->VALCACHE
+
+		(cAlias5)->(DbSkip())
+
+	EndDo
+
+	(cAlias5)->(DbCloseArea())
+
+
+Return(nValor)
+
+
+
+//Rotina responsavel pelo calculo do desconto cancelamento da NF
+
+Static Function CancNF(cCodVend,cNatCom)
+
+	Local nValor := 0
+	Local cDataIni  := MV_PAR04 + MV_PAR03 + "01"
+	Local cDataFim  := MV_PAR04 + MV_PAR03 + "31"
+
+
+	// Query responsavel pelo desconto do cache
+	BeginSql Alias cAlias6
+		SELECT
+			E5_VALOR AS VALOR
+		FROM
+			%table:SE1% SE1
+		INNER JOIN %table:SE5% SE5
+		ON E5_FILIAL = E1_FILIAL
+			AND E5_PREFIXO = E1_PREFIXO
+			AND E5_NUMERO = E1_NUM
+			AND E5_PARCELA = E1_PARCELA
+			AND E5_CLIFOR = E1_CLIENTE
+			AND E5_LOJA = E1_LOJA
+			AND E5_DATA = E1_BAIXA
+		INNER JOIN %table:SED% SED
+		ON ED_CODIGO = E1_NATUREZ
+		WHERE
+			E1_VEND2 = %exp:cCodVend%
+			AND E1_EMISSAO >= '20220101'
+			AND E1_BAIXA BETWEEN %exp:cDataIni% AND %exp:cDataFim%
+			AND E5_MOTBX = 'CNF'
+			AND SUBSTRING(ED_NATCOM, 1, 2) = %exp:cNatCom%
+			AND SE1.D_E_L_E_T_ = ''
+			AND SE5.D_E_L_E_T_ = ''
+			AND SED.D_E_L_E_T_ = ''
+	EndSql
+
+	(cAlias6)->(DbGoTop())
+
+	While (cAlias6)->(!Eof())
+
+		nValor := (cAlias5)->VALOR
+
+		(cAlias5)->(DbSkip())
+
+	EndDo
+
+	(cAlias6)->(DbCloseArea())
+
+
+Return(nValor)

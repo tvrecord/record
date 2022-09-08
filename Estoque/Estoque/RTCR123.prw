@@ -1,5 +1,5 @@
 #INCLUDE "rwmake.ch"
-#INCLUDE "topconn.ch"         
+#INCLUDE "topconn.ch"
 
 /*/
 ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
@@ -22,7 +22,7 @@ User Function RTCR123()
 //³ Declaracao de Variaveis                                             ³
 //ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 
-Local _aArea		:= GetArea()                                                                           
+Local _aArea		:= GetArea()
 Local cDesc1       := "Este programa tem como objetivo imprimir relatorio "
 Local cDesc2       := "de acordo com os parametros informados pelo usuario."
 Local cDesc3       := "Relação de Requisição ao Almoxarifado"
@@ -49,7 +49,7 @@ Private CONTFL     := 01
 Private m_pag      := 01
 Private wnrel      := "RTCR123" // Coloque aqui o nome do arquivo usado para impressao em disco
 
-Private cString := "SD3"      
+Private cString := "SD3"
 
 //dbSelectArea("SD3")
 //dbSetOrder(1)
@@ -100,19 +100,19 @@ If FunName() == "MATA241"
 	EndIf
 	//RestArea(_aArea)
 EndIf
-*/     
+*/
 //Configuracao de parametros por usuario
 
 IF !ALLTRIM(FUNNAME()) $ "MATA241"
 	ValidPerg()
-	Pergunte(cPerg,.T.)   
-	wnrel := SetPrint(cString,NomeProg,cPerg,@titulo,cDesc1,cDesc2,cDesc3,.T.,aOrd,.T.,Tamanho,,.T.)                             
-ENDIF                 
+	Pergunte(cPerg,.T.)
+	wnrel := SetPrint(cString,NomeProg,cPerg,@titulo,cDesc1,cDesc2,cDesc3,.T.,aOrd,.T.,Tamanho,,.T.)
+ENDIF
 
 //Para não aparecer o botao de parametros para o usuário. Por Cristiano em 12/05/10.
-IF ALLTRIM(FUNNAME()) $ "MATA241" 
+IF ALLTRIM(FUNNAME()) $ "MATA241"
 	wnrel := SetPrint(cString,NomeProg,,@titulo,cDesc1,cDesc2,cDesc3,.T.,aOrd,.T.,Tamanho,,.T.)
-EndIf    
+EndIf
 
 If nLastKey == 27
 	Return
@@ -130,7 +130,7 @@ nTipo := If(aReturn[4]==1,15,18)
 //³ Processamento. RPTSTATUS monta janela com a regua de processamento. ³
 //ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 
-RptStatus({|| RunReport(Cabec1,Cabec2,Titulo,nLin) },Titulo)    
+RptStatus({|| RunReport(Cabec1,Cabec2,Titulo,nLin) },Titulo)
 
 Return
 
@@ -152,7 +152,7 @@ Return
 Static Function RunReport(Cabec1,Cabec2,Titulo,nLin)
 
 Local _cQuery := ""
-Local _nQuant := 0    
+Local _nQuant := 0
 Local cOBS	  := ""
 
 Private _cUsuario := ""
@@ -172,7 +172,7 @@ IF ALLTRIM(FUNNAME()) $ "MATA241"
 ELSE
 	_cQuery += "AND D3_DOC BETWEEN '"+MV_PAR01+"' AND '"+MV_PAR02+"' "
 	_cQuery += "AND D3_EMISSAO BETWEEN '"+DTOS(MV_PAR03)+"' AND '"+DTOS(MV_PAR04)+"' "
-ENDIF	
+ENDIF
 _cQuery += "AND D3_COD = B1_COD "
 _cQuery += "ORDER BY D3_FILIAL, D3_DOC, D3_COD"
 
@@ -182,31 +182,31 @@ TcQuery _cQuery New Alias "QRY"
 
 dbGoTop()
 While !QRY->(EOF())
-	
+
 	_cDoc	:= QRY->D3_DOC
-	
+
 	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 	//³ Verifica o cancelamento pelo usuario...                             ³
 	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-	
+
 	If lAbortPrint
 		@nLin,00 PSAY "*** CANCELADO PELO OPERADOR ***"
 		Exit
 	Endif
-	
+
 	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 	//³ Impressao do cabecalho do relatorio. . .                            ³
 	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-	
+
 	While !QRY->(EOF()) .and. QRY->D3_DOC == _cDoc
-		
+
 		If nLin > 55
 			Cabec(Titulo,Cabec1,Cabec2,NomeProg,Tamanho,nTipo)
 			nLin := 6
 			ImpCabec(@nLin)
 			nLin ++
 		Endif
-		
+
 		@nLin,004 PSAY QRY->D3_COD
 		@nLin,020 PSAY QRY->D3_QUANT Picture "@E 999,999,999.99"
 		@nLin,035 PSAY QRY->B1_DESC
@@ -344,7 +344,7 @@ For i:=1 to Len(aRegs)
 Next
 dbSelectArea(_sAlias)
 
-Return            
+Return
 
 
 /*
