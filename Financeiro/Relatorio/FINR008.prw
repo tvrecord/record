@@ -31,6 +31,8 @@ User Function FINR008()
 	Private oFonteN 	:= u_xFonte(09,.T.,,,"Arial")
 	Private oFonte10 	:= u_xFonte(10,   ,,,"Arial")
 	Private oFonte10N 	:= u_xFonte(10,.T.,,,"Arial")
+	//Meses Trimestral
+	Private cMeses 		:= ""
 
 	// Cria e abre a tela de pergunta
 	ValidPerg( _cPerg )
@@ -38,6 +40,16 @@ User Function FINR008()
 		ApMsgStop("Operação cancelada pelo usuário!")
 		Return
 	ENDIF
+
+	If MV_PAR05 $ "01/02/03"
+		cMeses := "01/02/03"
+	ElseIf MV_PAR05 $ "04/05/06"
+		cMeses := "04/05/06"
+	ElseIf MV_PAR05 $ "07/08/09"
+		cMeses := "07/08/09"
+	ElseIf MV_PAR05 $ "10/11/12"
+		cMeses := "10/11/12"
+	EndIf
 
 	FwMsgRun(Nil, { || fProcPdf() }, "Processando", "Emitindo relatorio em PDF..." )
 
@@ -99,14 +111,17 @@ Static Function fProcPdf(cCodVend)
 	Private nDescBV		:= 0
 	Private nDescCac	:= 0
 	Private nCancNF		:= 0
-	Private nBvSP	:= 0
+	Private nOutDesc	:= 0
+	Private nBvSP		:= 0
 	Private lDescAge	:= .F.
 	Private lDescBV		:= .F.
 	Private lDescCac	:= .F.
 	Private nDescAge1	:= 0
 	Private nDescBV1	:= 0
 	Private nDescCac1	:= 0
-	Private nCacheJulho	:= 10
+	Private nCacheJulho	:= 0
+
+
 
 	// Query para buscar as informações
 	//Pega as regras de comissões e transforma em vetor para uso posterior
@@ -441,7 +456,7 @@ Static Function fProcPdf(cCodVend)
 				ENDIF
 
 				IF cTipoCom = "3" .or. cTipoCom = "2"
-					oPrint:Say( nLin,520, PADR(Transform(nValNatC, "@E 999,999,999.99"),14) 			,oFonte)
+					oPrint:Say( nLin,520, PADR(Transform(nValNatC, "@E 999,999,999.99"),14) 		,oFonte)
 				ENDIF
 
 				nValNatI		:= 0
@@ -470,9 +485,9 @@ Static Function fProcPdf(cCodVend)
 			oPrint:Say( nLin,520, PADL(Transform( nTotalPre, "@E 999,999,999.99"),14)	,oFonteN)
 			//ENDIF
 			IF cVendedor != "000608" .and. cVendedor != "000609"
-				nLin += (REL_LIN_STD)
-				oPrint:Say( nLin,020, "CORREÇÃO REFERENTE CACHE JULHO:"						,oFonteN)
-				oPrint:Say( nLin,520, PADL(Transform( nCacheJulho, "@E 999,999,999.99"),14)	,oFonteN)
+				//nLin += (REL_LIN_STD)
+				//oPrint:Say( nLin,020, "CORREÇÃO REFERENTE CACHE JULHO:"						,oFonteN)
+				//oPrint:Say( nLin,520, PADL(Transform( nCacheJulho, "@E 999,999,999.99"),14)	,oFonteN)
 				nLin += (REL_LIN_STD)
 				oPrint:Say( nLin,020, "TOTAL:"												,oFonteN)
 				oPrint:Say( nLin,520, PADL(Transform(nTotalCom + nTotalPre + nCacheJulho, "@E 999,999,999.99"),14)	,oFonteN)
@@ -547,9 +562,9 @@ Static Function ImpProxPag(cVendedor,cNome,cPeriodo,cTipoCom)
 	cSubTitle := cVendedor + " - " + Alltrim(cNome)
 	nLin := u_PXCABECA(@oPrint, UPPER("RELATÓRIO DE COMISSÃO DE VENDAS " + MesExtenso(Val(SUBSTRING(cPeriodo,5,2))) + "/" + SUBSTRING(cPeriodo,1,4)), cSubTitle  , nPag)
 
-	oPrint:Say( nLin,020, "NATUREZA"	,oFonteN)
-	oPrint:Say( nLin,080, "DESCRIÇÃO"	,oFonteN)
-	oPrint:Say( nLin,290, "PERC %"		,oFonteN)
+	oPrint:Say( nLin,020, "NATUREZA"		,oFonteN)
+	oPrint:Say( nLin,080, "DESCRIÇÃO"		,oFonteN)
+	oPrint:Say( nLin,290, "PERC %"			,oFonteN)
 	IF cTipoCom = "1"
 		oPrint:Say( nLin,525, "INDIVIDUAL"	,oFonteN)
 	ELSEIF cTipoCom = "2"
@@ -584,14 +599,17 @@ Static Function CalcDesc(cCodVend,cNatCom)
 	//calcular desconto das nf - Bruno Alves
 	nCancNF := CancNF(cCodVend,cNatCom)
 
+	//Localiza valores de outros descontos
+	nOutDesc := OutrosDesc(cCodVend,cNatCom)
+
 Return()
 
 // ImpSubTot() - Imprime os subtotais das naturezas gerenciais
 Static Function ImpSubTot()
 
-	oPrint:Say( nLin,020, cGrupo 					  										,oFonteN)
-	oPrint:Say( nLin,080, Posicione("SX5",1,xFilial("SX5")+"Z0" + cGrupo ,"X5_DESCRI")		,oFonteN)
-	oPrint:Say( nLin,300, PADR(Transform(nPerc, "999%"),6)									,oFonteN)
+	oPrint:Say( nLin,020, cGrupo 					  											,oFonteN)
+	oPrint:Say( nLin,080, Posicione("SX5",1,xFilial("SX5")+"Z0" + cGrupo ,"X5_DESCRI")			,oFonteN)
+	oPrint:Say( nLin,300, PADR(Transform(nPerc, "999%"),6)										,oFonteN)
 	IF aNatPerc[nPos][11] > 0 .and. cTipoCom = '3'
 		oPrint:Say( nLin,410, PADR(Transform(nTotGrupoI, "@E 999,999,999.99"),14)				,oFonteN)
 	ELSEIF cTipoCom = '1'
@@ -642,7 +660,7 @@ Static Function ImpTotais(cCodVend,cGrpNat)
 
 	IF cTipoSub == "3"
 
-		oPrint:Say( nLin,020, "SUBTOTAL:"				  						,oFonteN)
+		oPrint:Say( nLin,020, "SUBTOTAL:"				  							,oFonteN)
 		IF aNatPerc[nPos][11] > 0 .and. cTipoCom = "3"
 			oPrint:Say( nLin,410, PADR(Transform(nSubTotI, "@E 999,999,999.99"),14)	,oFonteN)
 		elseif cTipoCom = "1"
@@ -653,8 +671,8 @@ Static Function ImpTotais(cCodVend,cGrpNat)
 		ENDIF
 
 		nLin += REL_LIN_TOT
-		oPrint:Say( nLin,020, "(-) COMISSÃO AGÊNCIA:"			  				,oFonteN)
-		oPrint:Say( nLin,300, PADR(Transform(20, "999%"),6)						,oFonteN)
+		oPrint:Say( nLin,020, "(-) COMISSÃO AGÊNCIA:"			  					,oFonteN)
+		oPrint:Say( nLin,300, PADR(Transform(20, "999%"),6)							,oFonteN)
 		oPrint:Say( nLin,520, PADR(Transform(nDescAge1, "@E 999,999,999.99"),14)	,oFonteN)
 
 		nLin += REL_LIN_STD
@@ -663,7 +681,7 @@ Static Function ImpTotais(cCodVend,cGrpNat)
 
 		//Verificar regra do desconto para acrescentar a variavel nBvSP1 - Bruno Alves
 		nLin += REL_LIN_STD
-		oPrint:Say( nLin,020, "(-) BONIFICAÇÃO DE VOLUME SP:"		  				,oFonteN)
+		oPrint:Say( nLin,020, "(-) BONIFICAÇÃO DE VOLUME SP:"	 				,oFonteN)
 		oPrint:Say( nLin,520, PADR(Transform(nBvSP, "@E 999,999,999.99"),14)	,oFonteN)
 
 		nLin += REL_LIN_STD
@@ -672,13 +690,18 @@ Static Function ImpTotais(cCodVend,cGrpNat)
 
 		//Verificar regra do desconto para acrescentar a variavel nCancNF - Bruno Alves
 		nLin += REL_LIN_STD
-		oPrint:Say( nLin,020, "(-) CANCELAMENTO NF:"				  						,oFonteN)
+		oPrint:Say( nLin,020, "(-) CANCELAMENTO NF:"	  						,oFonteN)
 		oPrint:Say( nLin,520, PADR(Transform(nCancNF,"@E 999,999,999.99"),14)	,oFonteN)
 
+		//Imprime valor dos outros descontos
 		nLin += REL_LIN_STD
-		nTotGrupoC := nSubTotC-nDescAge1-nDescBV1-nDescCac1
-		nTotGrupoI := nSubTotI-nDescAge1-nDescBV1-nDescCac1
-		oPrint:Say( nLin,020, "TOTAL PARA CÁLCULO:"				  					,oFonteN)
+		oPrint:Say( nLin,020, "(-) OUTROS DESCONTOS:"		  					,oFonteN)
+		oPrint:Say( nLin,520, PADR(Transform(nOutDesc,"@E 999,999,999.99"),14)	,oFonteN)
+
+		nLin += REL_LIN_STD
+		nTotGrupoC := nSubTotC-nDescAge1-nDescBV1-nDescCac1-nOutDesc
+		nTotGrupoI := nSubTotI-nDescAge1-nDescBV1-nDescCac1-nOutDesc
+		oPrint:Say( nLin,020, "BASE DE CÁLCULO:"				  					,oFonteN)
 
 		IF cTipoCom = "2" .or. cTipoCom = "3"
 			oPrint:Say( nLin,520, PADR(Transform(nTotGrupoC, "@E 999,999,999.99"),14)	,oFonteN)
@@ -702,9 +725,32 @@ Static Function ImpTotais(cCodVend,cGrpNat)
 				oPrint:Say( nLin,160, "VALOR ATINGIDO:    " +ALLTRIM(Transform(nSubTotI, "@E 999,999,999.99"))				,oFonteN)
 				oPrint:Say( nLin,340, "PRÊMIO INDIVIDUAL (" +ALLTRIM(Transform(aNatPerc[nPos][13], "999.999%")) +"):"		,oFonteN)
 				oPrint:Say( nLin,520, PADR(Transform(IIF(nSubTotI > aNatPerc[nPos][11],(nSubTotI*aNatPerc[nPos][13]/100),0), "@E 999,999,999.99"),14)	,oFonteN)
-				nTotalPre  += IIF(nSubTotI > aNatPerc[nPos][11],(nSubTotI*aNatPerc[nPos][13]/100),0)
-				nLin += REL_LIN_STD
-			END
+
+				//Verifico se vou gravar a tabela ou não
+				If PerCalc() .AND. GetMv("RR_GRVZAL")
+					//Gravo o valor calculado, pois o registro já se encontra posicionado devido a função CalcDesc()
+					RECLOCK("ZAL",.F.)
+					ZAL->ZAL_ATINDI := nSubTotI
+					ZAL->(MSUNLOCK())
+				EndIf
+
+			EndIf
+
+
+			nTotalPre  += IIF(nSubTotI > aNatPerc[nPos][11],(nSubTotI*aNatPerc[nPos][13]/100),0)
+			nLin += REL_LIN_STD
+
+			oPrint:Say( nLin,020, "META TRIMESTRAL:   " +ALLTRIM(Transform(SumTri(cCodVend,cGrpNat,2), "@E 999,999,999.99")) 	,oFonteN)
+			oPrint:Say( nLin,160, "VALOR ATINGIDO:    " +ALLTRIM(Transform(SumTri(cCodVend,cGrpNat,1), "@E 999,999,999.99"))				,oFonteN)
+			oPrint:Say( nLin,340, "PRÊMIO TRIMESTRAL (" +ALLTRIM(Transform(aNatPerc[nPos][13], "999.999%")) +"):"		,oFonteN)
+			oPrint:Say( nLin,520, PADR(Transform(IIF(SumTri(cCodVend,cGrpNat,1) > SumTri(cCodVend,cGrpNat,2),(SumTri(cCodVend,cGrpNat,1)*aNatPerc[nPos][13]/100),0), "@E 999,999,999.99"),14)	,oFonteN)
+
+			If MV_PAR05 $ "03/06/09/12"
+				nTotalPre  += IIF(SumTri(cCodVend,cGrpNat,1) > SumTri(cCodVend,cGrpNat,2),(SumTri(cCodVend,cGrpNat,1)*aNatPerc[nPos][13]/100),0)
+			EndIf
+
+			nLin += REL_LIN_STD
+
 
 			// Rafael França - Utilizar o valor sem desconto para meta coletiva, nSubTotC no lugar de nTotGrupoC. Pedido Sra. Elenn 03/06/2022.
 			IF aNatPerc[nPos][09] <> 0
@@ -741,7 +787,7 @@ Static Function ImpTotais(cCodVend,cGrpNat)
 		nLin += REL_LIN_RED
 		nTotGrupoC 	:= nSubTotC
 		nTotGrupoI	:=nSubTotI
-		oPrint:Say( nLin,020, "TOTAL PARA CÁLCULO:"		  						,oFonteN)
+		oPrint:Say( nLin,020, "BASE DE CÁLCULO:"		  						,oFonteN)
 
 		IF cTipoCom = "2" .or. cTipoCom = "3"
 			oPrint:Say( nLin,520, PADR(Transform(nSubTotC, "@E 999,999,999.99"),14)	,oFonteN)
@@ -989,8 +1035,8 @@ Return(nValor)
 Static Function Cache(cCodVend,cNatCom)
 
 	Local nValor := 0
-	Local cDataIni  := MV_PAR04 + MV_PAR03 + "01"
-	Local cDataFim  := MV_PAR04 + MV_PAR03 + "31"
+	Local cDataIni  := MV_PAR04 + MV_PAR05 + "01"
+	Local cDataFim  := MV_PAR04 + MV_PAR05 + "31"
 
 
 	// Query responsavel pelo desconto do cache
@@ -1032,14 +1078,13 @@ Static Function Cache(cCodVend,cNatCom)
 Return(nValor)
 
 
-
 //Rotina responsavel pelo calculo do desconto cancelamento da NF
 
 Static Function CancNF(cCodVend,cNatCom)
 
 	Local nValor := 0
-	Local cDataIni  := MV_PAR04 + MV_PAR03 + "01"
-	Local cDataFim  := MV_PAR04 + MV_PAR03 + "31"
+	Local cDataIni  := MV_PAR04 + MV_PAR05 + "01"
+	Local cDataFim  := MV_PAR04 + MV_PAR05 + "31"
 
 
 	// Query responsavel pelo desconto do cache
@@ -1062,7 +1107,7 @@ Static Function CancNF(cCodVend,cNatCom)
 			E1_VEND2 = %exp:cCodVend%
 			AND E1_EMISSAO >= '20220101'
 			AND E1_BAIXA BETWEEN %exp:cDataIni% AND %exp:cDataFim%
-			AND E5_MOTBX IN ('BIN','BDE')
+			AND E5_MOTBX IN ('BIN', 'BDE')
 			AND SUBSTRING(ED_NATCOM, 1, 2) = %exp:cNatCom%
 			AND SE1.D_E_L_E_T_ = ''
 			AND SE5.D_E_L_E_T_ = ''
@@ -1083,3 +1128,95 @@ Static Function CancNF(cCodVend,cNatCom)
 
 
 Return(nValor)
+
+
+
+//Rotina responsavel por buscar o valor de outros descontos
+
+Static Function OutrosDesc(cCodVend,cNatCom)
+
+	Local nValor := 0
+
+	DbSelectArea("ZAL");DbSetorder(1)
+	If DbSeek(xFilial("ZAL") + cCodVend + cNatCom + MV_PAR04 + MV_PAR05 )
+		nValor := ZAL->ZAL_DESCON
+	EndIf
+
+Return(nValor)
+
+
+//Rotina responsavel por verificar se existe periodo superior calculado
+
+Static Function PerCalc()
+
+	Local lQtd 		:= .F.
+	Local cAlias    := GetNextAlias()
+
+	BeginSql Alias cAlias
+		SELECT
+			COUNT(*) AS QTD
+		FROM
+			%table:ZAL%
+		WHERE
+			ZAL_ANO = %Exp:MV_PAR04%
+			AND ZAL_MES > %Exp:MV_PAR05%
+			AND ZAL_ATINDI > 0
+			AND D_E_L_E_T_ = ''
+	EndSql
+
+	//Verifico se encontrou informação nos meses superiores
+	If (cAlias)->(!Eof()) .AND. (cAlias)->QTD == 0
+
+		lQtd := .T.
+
+		(cAlias)->(DbCloseArea())
+
+	EndIf
+
+
+
+Return(lQtd)
+
+//Rotina responsavel por somar o valor e meta trimestral do vendedor
+//nOpcao: 1 = Valor, 2 = Meta
+
+Static Function SumTri(cCodVend,cNatCom,nOpcao)
+
+	Local cAlias      := GetNextAlias()
+	Local nValor	  := 0
+	Local nMeta	  	  := 0
+	Local cTrimestral := "%" + FormatIn(cMeses,"/") + "%"
+
+	BeginSql Alias cAlias
+		SELECT
+			SUM(ZAL_ATINDI) as VALOR,
+			SUM(ZAL_MTINDI) as META
+		FROM
+			%table:ZAL%
+		WHERE
+			ZAL_ANO = %Exp:MV_PAR04%
+			AND ZAL_MES IN %Exp:cTrimestral%
+			AND ZAL_VEND = %Exp:cCodVend%
+			AND ZAL_GRPNAT = %Exp:cNatCom%
+			AND D_E_L_E_T_ = ''
+	EndSql
+
+	(cAlias)->(DbGoTop())
+
+	While (cAlias)->(!Eof())
+
+		nValor := (cAlias)->VALOR
+		nMeta  := (cAlias)->META
+
+		(cAlias)->(DbSkip())
+
+	EndDo
+
+	(cAlias)->(DbCloseArea())
+
+	If nOpcao == 2
+		nValor := nMeta
+	EndIf
+
+Return(nValor)
+
