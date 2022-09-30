@@ -60,8 +60,8 @@ Return
 imprimir relatorio em pdf
 @type function
 @version
-@author Rafael França
-@since 24/08/2020
+@author Pedro Leonardo
+@since 07/09/2022
 @return return_type, return_description
 /*/
 
@@ -78,6 +78,20 @@ Static Function fProcPdf()
 	Local cCargo1 	:= ""
 	Local cCargo2 	:= ""
 
+	Private cApura		:= " (Apuração -> " + SUBSTRING(DTOC(MV_PAR09),1,5) + " - " + SUBSTRING(DTOC(MV_PAR10),1,5) + ")"
+	Private nQtd	:= 0
+	Private cCodVend := ""
+	Private cNome	:= ""
+	Private cFiltro := ""
+
+	if (mv_par08) == 2
+		cFiltro := "L"
+	ELSEIF (mv_par08) == 1
+		cFiltro := "P"
+	ELSE
+		cFiltro	:= "%'L' AND E1_BAIXA <> ''%"
+	EndIf
+
 	// Query para buscar as informações
 	GetData()
 
@@ -91,7 +105,7 @@ Static Function fProcPdf()
 
 		If nLin > REL_END .or. cVendedor != Alltrim((cTmp1)->E1_VEND2)
 
-			cFileName 	:= "VENDEDOR_"+Alltrim((cTmp1)->E1_VEND2)+"_PERIODO_"+SUBSTRING((cTmp1)->ZS_EMISSAO,1,6)+"_FINR010" + "_" +DTOS(Date())+ "_" + StrTran(Time(),":","_")
+			cFileName 	:= "VENDEDOR_"+Alltrim((cTmp1)->E1_VEND2)+"_PERIODO_"+SUBSTR((cTmp1)->ZS_EMISSAO,1,6)+"_FINR010" + "_" +DTOS(Date())+ "_" + StrTran(Time(),":","_")
 			oPrint := FWMSPrinter():New(cFileName, IMP_PDF, .F., cDir, .T.)
 			//oPrint:SetPortrait()//Retrato
 			oPrint:SetLandScape()//Paisagem
@@ -175,26 +189,31 @@ Return
 
 /*/{Protheus.doc} ImpProxPag
     Imprime cabeçlho da proxima pagina
-    @author  Rafael França
-    @since   28-08-2020
+    @author  Pedro Leonardo
+    @since   07-09-2022
 /*/
 
 Static Function ImpProxPag()
 
 	nPag++
 	oPrint:StartPage()
-	cSubTitle := "DEFINIR SUBTITULO"
-	nLin := u_PXCABECA(@oPrint, UPPER("DEFINIR CABEÇALHO") , cSubTitle  , nPag)
+	cSubTitle := cCodVend + " - " + Alltrim(cNome) + cApura
 
-	oPrint:Say( nLin,020, "RP"	   			 ,oFonteN)
-	oPrint:Say( nLin,052, "NF Rec."			 ,oFonteN)
-	oPrint:Say( nLin,084, "Emissao"			 ,oFonteN)
-	oPrint:Say( nLin,128, "Receb."  		 ,oFonteN)
-	oPrint:Say( nLin,170, "Cliente"			 ,oFonteN)
-	oPrint:Say( nLin,340, "Agencia"			 ,oFonteN)
-	oPrint:Say( nLin,492, "NF Pag."			 ,oFonteN)
-	oPrint:Say( nLin,524, "Emissão"			 ,oFonteN)
-	oPrint:Say( nLin,568, "Vencto" 			 ,oFonteN)
+	IF MV_PAR08 == 1
+		nLin := u_PXCABECA(@oPrint, UPPER("PENDÊNCIAS DE AUTORIZAÇÃO DE CACHE") , cSubTitle  , nPag)
+	ELSE
+		nLin := u_PXCABECA(@oPrint, UPPER("PAGAMENTOS DE CACHE APROVADOS (" + DTOC(MV_PAR04) + ")") , cSubTitle  , nPag)
+	ENDIF
+
+	oPrint:Say( nLin,020, "Autoriz."	   	 ,oFonteN)
+	oPrint:Say( nLin,052, "Emissão"			 ,oFonteN)
+	oPrint:Say( nLin,092, "RP"				 ,oFonteN)
+	oPrint:Say( nLin,120, "NF Rec."  		 ,oFonteN)
+	oPrint:Say( nLin,150, "Emissão"			 ,oFonteN)
+	oPrint:Say( nLin,190, "Baixa"			 ,oFonteN)
+	oPrint:Say( nLin,235, "Cliente"			 ,oFonteN)
+	oPrint:Say( nLin,375, "Natureza"		 ,oFonteN)
+	oPrint:Say( nLin,505, "Histórico" 		 ,oFonteN)
 	oPrint:Say( nLin,795, "Valor"  			 ,oFonteN)
 
 	oPrint:line(nLin+5,REL_LEFT,nLin+5,REL_RIGHT )
@@ -205,8 +224,8 @@ Return
 
 /*/{Protheus.doc} GetData
     Busca dados no banco
-    @author  Rafael França
-    @since   24-08-2020
+    @author  Pedro Leonardo
+    @since   07-09-2022
 /*/
 
 Static Function GetData()
@@ -222,12 +241,16 @@ Static Function GetData()
 			ZS_VALOR,
 			A3_NOME,
 			ZS_NUMRP,
+			ISNULL(CONVERT(VARCHAR(2047), CONVERT(VARBINARY(2047), ZS_HISTORI)),'') AS ZS_HISTORI,
+			ED_CODIGO,
+			ED_DESCRIC,
 			ZS_NOTAFAT,
 			E1_EMISSAO,
+			F2_EMISSAO,
 			E1_BAIXA,
 			A1_NOME
 		FROM
-			%table:SZS% SZS
+			%table:SZS% AS SZS
 		INNER JOIN %table:SC5% AS SC5
 		ON C5_FILIAL = ZS_FILIAL
 			AND C5_NUMRP = ZS_NUMRP
@@ -256,24 +279,31 @@ Static Function GetData()
 		INNER JOIN %table:SA3% AS SA3
 		ON A3_COD = E1_VEND2
 			AND SA3.D_E_L_E_T_ = ''
+		INNER JOIN %table:SED% AS SED
+		ON ED_CODIGO = C5_NATUREZ
+			AND SED.D_E_L_E_T_ = ''
 		WHERE
 			E1_VEND2 BETWEEN %Exp:MV_PAR01% AND %Exp:MV_PAR02%
-			AND ZS_LIBERAD = 'L'
 			AND ZS_EMISSAO BETWEEN %Exp:MV_PAR03% AND %Exp:MV_PAR04%
 			AND ZS_TIPO = '22'
+			AND ZS_FORNECE <> '000131' //Filtro para retirar fornecedor Rádio a pedido da Pâmela
 			AND SZS.D_E_L_E_T_ = ''
+			AND ZS_LIBERAD = %exp:cFiltro%
 		ORDER BY
 			1,
 			2,
 			3
 	EndSql
 
+	cCodVend	:= (cTmp1)->E1_VEND2
+	cNome		:= (cTmp1)->A3_NOME
+
 Return
 
 /*/{Protheus.doc} ValidPerg
 //TODO Funï¿½ï¿½o que cria as perguntas.
-@author Rafael França
-@since 01/06/2020
+@author Pedro Leonardo
+@since 07/09/2022
 @version 1.0
 @return ${return}, ${return_description}
 @param cPerg, characters, descricao
@@ -288,16 +318,17 @@ Static Function ValidPerg(cPerg)
 	DbSelectArea("SX1")
 	SX1->(DbSetOrder(1))
 	cPerg := PADR(cPerg,10)
-	//          Grupo Ordem Desc Por               Desc Espa   Desc Ingl  Variavel  Tipo  Tamanho  Decimal  PreSel  GSC  Valid   Var01       Def01     DefSpa01  DefEng01  CNT01  Var02  Def02     DefSpa02  DefEng02  CNT02  Var03  Def03  DefEsp03  DefEng03  CNT03     Var04  Def04  DefEsp04  DefEng04  CNT04  Var05  Def05  DefEsp05  DefEng05  CNT05  F3        PYME  GRPSXG   HELP  PICTURE  IDFIL
-	aAdd(aRegs,{cPerg,"01","Do Vendedor:" 	,"","","mv_ch01","C",06,00,0,"G","","MV_PAR01","","","","","","","","","","","","","","","","","","","","","","","","","ZA3"})
-	aAdd(aRegs,{cPerg,"02","Ate Vendedor:" 	,"","","mv_ch02","C",06,00,0,"G","","MV_PAR02","","","","","","","","","","","","","","","","","","","","","","","","","ZA3"})
-	aAdd(aRegs,{cPerg,"03","Da Emissao:"	,"","","mv_ch03","D",08,00,0,"G","","MV_PAR03","","","","","","","","","","","","","","","","","","","","","","","","",""})
-	aAdd(aRegs,{cPerg,"04","Até Emissao:"	,"","","mv_ch04","D",08,00,0,"G","","MV_PAR04","","","","","","","","","","","","","","","","","","","","","","","","",""})
+	//      Grupo Ordem Desc Por               Desc Espa   Desc Ingl  Variavel  Tipo  Tamanho  Decimal  PreSel  GSC  Valid   Var01       Def01     DefSpa01  DefEng01  CNT01  Var02  Def02     DefSpa02  DefEng02  CNT02  Var03  Def03  DefEsp03  DefEng03  CNT03     Var04  Def04  DefEsp04  DefEng04  CNT04  Var05  Def05  DefEsp05  DefEng05  CNT05  F3        PYME  GRPSXG   HELP  PICTURE  IDFIL
+	aAdd(aRegs,{cPerg,"01","Do Vendedor:" 			,"","","mv_ch01","C",06,00,0,"G","","MV_PAR01","","","","","","","","","","","","","","","","","","","","","","","","","ZA3"})
+	aAdd(aRegs,{cPerg,"02","Ate Vendedor:" 			,"","","mv_ch02","C",06,00,0,"G","","MV_PAR02","","","","","","","","","","","","","","","","","","","","","","","","","ZA3"})
+	aAdd(aRegs,{cPerg,"03","Da Emissão:"			,"","","mv_ch03","D",08,00,0,"G","","MV_PAR03","","","","","","","","","","","","","","","","","","","","","","","","",""})
+	aAdd(aRegs,{cPerg,"04","Até Emissão:"			,"","","mv_ch04","D",08,00,0,"G","","MV_PAR04","","","","","","","","","","","","","","","","","","","","","","","","",""})
 	aAdd(aRegs,{cPerg,"05","Destino do(s) Arq.:"	,"","","mv_ch05","C",99,00,0,"G","","MV_PAR05","","","","","","","","","","","","","","","","","","","","","","","","",""})
 	aAdd(aRegs,{cPerg,"06","Assinatura 1:" 		 	,"","","mv_ch06","C",06,00,0,"G","","mv_par06","","","","","","","","","","","","","","","","","","","","","","","","","USR"})
 	aAdd(aRegs,{cPerg,"07","Assinatura 2:"		 	,"","","mv_ch07","C",06,00,0,"G","","mv_par07","","","","","","","","","","","","","","","","","","","","","","","","","USR"})
-
-
+	aAdd(aRegs,{cPerg,"08","Tipo Relatório:"		,"","","mv_ch08","N",01,0,2,"C","","mv_par08","Pendentes","","","","","Aprovados","","","","","Aprov e Baixado","","","","","","","","","","","","","","","","","",""})
+	aAdd(aRegs,{cPerg,"09","Da Apuração:"			,"","","mv_ch09","D",08,00,0,"G","","MV_PAR09","","","","","","","","","","","","","","","","","","","","","","","","",""})
+	aAdd(aRegs,{cPerg,"10","Até :"					,"","","mv_ch10","D",08,00,0,"G","","MV_PAR10","","","","","","","","","","","","","","","","","","","","","","","","",""})
 
 	For i:=1 to Len(aRegs)
 		If !dbSeek(PADR(cPerg,10)+aRegs[i,2])
@@ -315,8 +346,8 @@ Return()
 
 /*/{Protheus.doc} ImpDetalhe
 //Função responsavel pela impressão do detalhe
-@author Rafael França
-@since 22/10/2020
+@author Pedro Leonardo
+@since 07/09/2022
 @version 1.0
 @return ${return}, ${return_description}
 @param cPerg, characters, descricao
@@ -325,30 +356,33 @@ Return()
 
 Static Function ImpDetalhe()
 
-	oPrint:Say( nLin,020, (cTmp1)->ZAG_NUMRP			  					  ,oFonte)
-	oPrint:Say( nLin,052, (cTmp1)->F2_DOC				  					  ,oFonte)
-	oPrint:Say( nLin,084, DTOC(STOD((cTmp1)->F2_EMISSAO)) 					  ,oFonte)
-	oPrint:Say( nLin,128, DTOC(STOD((cTmp1)->E1_BAIXA)) 					  ,oFonte)
+	oPrint:Say( nLin,020, (cTmp1)->	ZS_CODIGO		  						,oFonte)
+	oPrint:Say( nLin,052, DTOC(STOD((cTmp1)->ZS_EMISSAO))				,oFonte)
+	oPrint:Say( nLin,092, (cTmp1)->ZS_NUMRP				  					,oFonte)
+	oPrint:Say( nLin,120, (cTmp1)->ZS_NOTAFAT			  					,oFonte)
+	oPrint:Say( nLin,150, DTOC(STOD((cTmp1)->F2_EMISSAO)) 					,oFonte)
+	oPrint:Say( nLin,190, DTOC(STOD((cTmp1)->E1_BAIXA)) 					,oFonte)
 
-	If Empty(SUBSTR((cTmp1)->ZAH_CLIENT,35,1))
-		oPrint:Say( nLin,170, Substring((cTmp1)->ZAH_CLIENT,1,35)	    	  ,oFonte)
+	If Empty(SUBSTR((cTmp1)->A1_NOME,30,1))
+		oPrint:Say( nLin,235, SUBSTR((cTmp1)->A1_NOME,1,30)	    	  	,oFonte)
 	Else
-		oPrint:Say(nLin,170, SUBSTR((cTmp1)->ZAH_CLIENT,1,34) + "."			  ,oFonte)
+		oPrint:Say(nLin,235, SUBSTR((cTmp1)->A1_NOME,1,29) + "."			,oFonte)
 	EndIf
 
-	If Empty(SUBSTR((cTmp1)->ZAH_AGENCI,25,1))
-		oPrint:Say( nLin,340, Substring((cTmp1)->ZAH_AGENCI,1,25)			  ,oFonte)
+	If Empty(SUBSTR((cTmp1)->ED_DESCRIC,25,1))
+		oPrint:Say( nLin,375, SUBSTR((cTmp1)->ED_DESCRIC,1,25)			,oFonte)
 	Else
-		oPrint:Say(nLin,340, SUBSTR((cTmp1)->ZAH_CLIENT,1,24) + "."			  ,oFonte)
+		oPrint:Say(nLin,375, SUBSTR((cTmp1)->ED_DESCRIC,1,24) + "."			,oFonte)
 	EndIf
 
-	oPrint:Say( nLin,492, (cTmp1)->E2_NUM				  					  ,oFonte)
-	oPrint:Say( nLin,524, DTOC(STOD((cTmp1)->E2_EMISSAO)) 					  ,oFonte)
-	oPrint:Say( nLin,568, DTOC(STOD((cTmp1)->E2_VENCTO)) 					  ,oFonte)
-	oPrint:Say( nLin,780, Transform( (cTmp1)->E2_VALOR, "@E 999,999,999.99"),oFonte)
+	If Empty(SUBSTR((cTmp1)->ZS_HISTORI,60,1))
+		oPrint:Say( nLin,505, SUBSTR((cTmp1)->ZS_HISTORI,1,60)				,oFonte)
+	Else
+		oPrint:Say( nLin,505, SUBSTR((cTmp1)->ZS_HISTORI,1,59) + "."		,oFonte)
+	EndIf
 
+	oPrint:Say( nLin,780, Transform((cTmp1)->ZS_VALOR,"@e 999,999,999.99")	,oFonte)
 	nLin += REL_VERT_STD
-
 	nTotCalc 	+= (cTmp1)->ZS_VALOR
 
 
