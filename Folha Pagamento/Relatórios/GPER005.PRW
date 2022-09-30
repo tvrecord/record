@@ -32,7 +32,7 @@ If !ApOleClient("MsExcel")
 EndIf
 
 //TRATO AS PERGUNTAS PARA USO NOS FILTROS
-cNomeTabela	:= UPPER("Admissões e Recisões " )
+cNomeTabela	:= UPPER("Admissões e Rescisões " )
 cFiltro		:= "% RA_MAT BETWEEN '"+(MV_PAR01)+"' AND '"+(MV_PAR02)+ "' AND RA_ADMISSA BETWEEN '"+DTOS(MV_PAR03)+"' AND '"+DTOS(MV_PAR04)+"' %" //Filtro MATRÍCULA e período solicitado nos parametros
 
 //COMEÇO A MINHA CONSULTA SQL
