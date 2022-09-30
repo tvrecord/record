@@ -17,7 +17,7 @@
 ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
 /*/
 
-User Function RFERIA()                                    
+User Function RFERIA()
 
 //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 //³ Declaracao de Variaveis                                             ³
@@ -60,7 +60,7 @@ ValidPerg(cPerg)
 If !Pergunte(cPerg,.T.)
 	alert("OPERAÇÃO CANCELADA")
 	return
-ENDIF                 
+ENDIF
 
 
 //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
@@ -75,7 +75,7 @@ wnrel := SetPrint("",NomeProg,cPerg,@titulo,cDesc1,cDesc2,cDesc3,.T.,,.T.,Tamanh
 
 Titulo := Titulo + " - "+(MV_PAR08)+""
 
-cQuery := "SELECT RF_FILIAL,RF_MAT,RF_DATABAS,RA_NOME,RA_CATFUNC,RA_ADMISSA,RA_CC,RA_SITFOLH,RF_DATAINI,RF_DFEPRO1,RF_DATINI2,RF_DFEPRO2,RF_DATINI3,RF_DFEPRO3 FROM SRF010 "
+cQuery := "SELECT RF_FILIAL,RF_MAT,RF_DATABAS,RA_NOME,RA_CATFUNC,RA_ADMISSA,RA_CC,RA_SITFOLH,RF_DATAINI,RF_DFEPRO1,RF_DATINI2,RF_DFEPRO2,RF_DATINI3,RF_DFEPRO3, RF_PERC13S, RF_PAR13AT, RA_CODFUNC, RA_DEPTO, RA_CODFUNC FROM SRF010 "
 cQuery += "INNER JOIN SRA010 ON "
 cQuery += "SRF010.RF_FILIAL = SRA010.RA_FILIAL AND "
 cQuery += "SRF010.RF_MAT = SRA010.RA_MAT "
@@ -85,19 +85,19 @@ cQuery += "SRA010.D_E_L_E_T_ <> '*' AND "
 cQuery += "SRA010.RA_CC BETWEEN '" + (MV_PAR05) + "' AND '" + (MV_PAR06) + "' AND "
 IF !Empty (MV_PAR09)
 	cQuery += "SRA010.RA_SITFOLH NOT IN " + FormatIn(MV_PAR09,";") + " AND "
-Endif    
+Endif
 IF !Empty (MV_PAR10)
 	cQuery += "SRA010.RA_CATFUNC NOT IN " + FormatIn(MV_PAR10,";") + " AND "
 Endif
 cQuery += "SRF010.RF_MAT BETWEEN '" + (MV_PAR01) + "' AND '" + (MV_PAR02) + "' AND "
-cQuery += "SRF010.RF_DATABAS BETWEEN '" + DTOS(MV_PAR03) + "' AND '" + DTOS(MV_PAR04) + "' AND " 
-cQuery += "SRF010.RF_STATUS <> '3' "  //Ferias que ja foram pagas
+cQuery += "SRF010.RF_DATABAS BETWEEN '" + DTOS(MV_PAR03) + "' AND '" + DTOS(MV_PAR04) + "' AND "
+cQuery += "SRF010.RF_STATUS = '1' "  //Ferias que NÃO foram pagas
 //cQuery += "SRF010.RF_DATAINI BETWEEN '" + DTOS(MV_PAR13) + "' AND '" + DTOS(MV_PAR14) + "' "
 IF MV_PAR11 == 1
-cQuery += "ORDER BY SRA010.RA_CC,SRF010.RF_MAT,SRF010.RF_DATABAS "  
+cQuery += "ORDER BY SRA010.RA_CC,SRF010.RF_MAT,SRF010.RF_DATABAS "
 ELSEIF MV_PAR11 == 2
 cQuery += "ORDER BY SRA010.RA_CC,SRA010.RA_NOME,SRF010.RF_DATABAS "
-ENDIF  
+ENDIF
 
 tcQuery cQuery New Alias "TMP"
 
@@ -160,7 +160,8 @@ Local nFuncio	 	:= 0
 Local nFuncioCC	 	:= 0
 Local lOk        	:= .T.
 Local cOBS1  	 	:= "* AVISO IMPORTANTE:"
-Local cOBS2      	:= " A PROGRAMACAO DE FERIAS DEVERA SER MARCADA SOMENTE APOS O VENCIMENTO DO PERIODO AQUISITIVO DE FERIAS." 	                       
+Local cOBS2      	:= " A PROGRAMACAO DE FERIAS DEVERA SER MARCADA SOMENTE APOS O VENCIMENTO DO PERIODO AQUISITIVO DE FERIAS."
+
 
 DBSelectArea("TMP")
 DBGotop()
@@ -168,58 +169,67 @@ DBGotop()
 //DEFINE FONT oFont NAME "Courier New" SIZE 0,-11 BOLD
 
 While !EOF()
-	
+
 	SetRegua(RecCount())
-	
+
 	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 	//³ Verifica o cancelamento pelo usuario...                             ³
 	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-	
+
 	If lAbortPrint
 		@nLin,00 PSAY "*** CANCELADO PELO OPERADOR ***"
 		Exit
 	Endif
-	
+
 	If nLin > 55  // Salto de Página. Neste caso o formulario tem 55 linhas...
 		Cabec(Titulo,Cabec1,Cabec2,NomeProg,Tamanho,nTipo)
 		nLin := 8
 	Endif
-	
+
 	IF MV_PAR07 == 1 .and. TMP->RA_CC != cCodCusto .and. nLin != 8
 		Cabec(Titulo,Cabec1,Cabec2,NomeProg,Tamanho,nTipo)
 		nLin := 8
 	EndIF
-	
-	
+
+
 	IF (TMP->RA_CC != cCodCusto .or. lOk == .T.)
 		@nLin, 000 PSAY Replicate("-",Limite)
 		nLin := nLin + 1 // Avanca a linha de impressao
-		@nLin, 000 PSAY TMP->RA_CC
-		@nLin, 010 PSAY Posicione("CTT",1,xFilial("CTT")+TMP->RA_CC,"CTT_DESC01")
+		@nLin, 000 PSAY "CENTRO DE CUSTO: "
+		@nLin, 010 PSAY TMP->RA_CC
+		@nLin, 020 PSAY Posicione("CTT",1,xFilial("CTT")+TMP->RA_CC,"CTT_DESC01")
+		@nLin, 010 PSAY "DEPARTAMENTO: "
+		@nLin, 040 PSAY Posicione("SQB",1,xFilial("SQB")+TMP->RA_DEPTO,"QB_DESCRIC")
+		@nLin, 050 PSAY "FUNÇÃO: "
+		@nLin, 060 PSAY Posicione("SRJ",1,xFilial("SRJ")+TMP->RA_CODFUNC,"RJ_DESC")
 		nLin := nLin + 1 // Avanca a linha de impressao
 		@nLin, 000 PSAY Replicate("-",Limite)
-		nLin += 2 // Avanca a linha de impressao 
+		nLin += 2 // Avanca a linha de impressao
 	Endif
-	
-	   
+
+
 
 	//If EMPTY(TMP->RF_DATAINI)    // Bruno Alves, verificar se a pessoal entrou de férias no ano
-	                                    
-	dBaseFer  	:= STOD(TMP->RF_DATABAS) 
-	dPerAqui1   := STOD(TMP->RF_DATABAS)
+
+	dBaseFer  	:= STOD(TMP->RF_DATABAS)
 	dPerAqui2   := (YEARSUM(dBaseFer,1) -1)
-	dLimite 	:= (YEARSUM(dPerAqui2,1) -45)	
+	dPerAqui1   := STOD(TMP->RF_DATABAS)
+	dLimite 	:= (YEARSUM(dPerAqui2,1) -45)
+	Private dFinal1		:= DaySum( SToD(TMP->RF_DATAINI) , TMP->RF_DFEPRO1 )
+	Private dFinal2		:= DaySum( SToD(TMP->RF_DATINI2) , TMP->RF_DFEPRO2 )
+
+
 
 	//else
-		
-	//dBaseFer  	:= YEARSUM(STOD(TMP->RF_DATABAS),1)   
+
+	//dBaseFer  	:= YEARSUM(STOD(TMP->RF_DATABAS),1)
 	//dPerAqui1   := YEARSUM(STOD(TMP->RF_DATABAS),1)
 	//dPerAqui2   := (YEARSUM(dBaseFer,1)-1)
-	//dLimite 	:= (YEARSUM(dPerAqui2,1) -45)	
-	
+	//dLimite 	:= (YEARSUM(dPerAqui2,1) -45)
+
 	//Endif
 
-	
+
 	nLin += 1
 	@nLin, 000 PSAY TMP->RF_MAT
 	@nLin, 008 PSAY SUBSTR(TMP->RA_NOME,1,35)
@@ -230,28 +240,34 @@ While !EOF()
 	@nLin, 083 PSAY (dPerAqui2 + 1)
 	@nLin, 094 PSAY "A"
 	@nLin, 096 PSAY dLimite
-	@nLin, 110 PSAY Replicate ("_",26)
+	@nLin, 110 PSAY TMP->RF_PERC13S
+	@nLin, 116 PSAY TMP->RF_PAR13AT
 	//RF_DFEPRO1,RF_DATINI2,RF_DFEPRO2
 	If STOD(TMP->RF_DATAINI) >= MV_PAR13 .AND. STOD(TMP->RF_DATAINI) <= MV_PAR14
-	@nLin, 143 PSAY STOD(TMP->RF_DATAINI)
-	@nLin, 160 PSAY PadC(STRZERO(ROUND(TMP->RF_DFEPRO1,0),2),12)	 
-	ELSE 
-	@nLin, 139 PSAY "_____/_____/_____" 
-	@nLin, 160 PSAY Replicate ("_",12)	
+	@nLin, 135 PSAY STOD(TMP->RF_DATAINI)
+	@nLin, 146 PSAY "A"
+	@nLin, 148 PSAY dFinal1
+	@nLin, 160 PSAY PadC(STRZERO(ROUND(TMP->RF_DFEPRO1,0),2),12)
+	ELSE
+	@nLin, 139 PSAY "_____/_____/_____"
+	@nLin, 160 PSAY Replicate ("_",12)
 	ENDIF
 	//@nLin, 168 PSAY "Sim (  ) Nao (  )"
 	@nLin, 180 PSAY Replicate ("_",33)
-	nLin += 2 
-  
-  	@nLin, 110 PSAY Replicate ("_",26) 	
+	nLin += 2
+
+  	@nLin, 110 PSAY TMP->RF_PERC13S
+	@nLin, 116 PSAY TMP->RF_PAR13AT
 	If STOD(TMP->RF_DATINI2) >= MV_PAR13 .AND. STOD(TMP->RF_DATINI2) <= MV_PAR14
-	@nLin, 143 PSAY STOD(TMP->RF_DATINI2)
+	@nLin, 135 PSAY STOD(TMP->RF_DATINI2)
+	@nLin, 146 PSAY "A"
+	@nLin, 148 PSAY dFinal2
 	@nLin, 160 PSAY PadC(STRZERO(ROUND(TMP->RF_DFEPRO2,0),2),12)
-	ELSE 
-	@nLin, 139 PSAY "_____/_____/_____" 
-	@nLin, 160 PSAY Replicate ("_",12)	
-	ENDIF		
-	@nLin, 180 PSAY Replicate ("_",33)	 	
+	ELSE
+	@nLin, 139 PSAY "_____/_____/_____"
+	@nLin, 160 PSAY Replicate ("_",12)
+	ENDIF
+	@nLin, 180 PSAY Replicate ("_",33)
 
 IF EMPTY(TMP->RF_DATINI3)
 
@@ -261,27 +277,28 @@ ELSE
 
 	nLin += 2
 
-	@nLin, 110 PSAY Replicate ("_",26) 	
+	@nLin, 110 PSAY TMP->RF_PERC13S
+	@nLin, 116 PSAY TMP->RF_PAR13AT
 	If STOD(TMP->RF_DATINI3) >= MV_PAR13 .AND. STOD(TMP->RF_DATINI3) <= MV_PAR14
-	@nLin, 143 PSAY STOD(TMP->RF_DATINI3)
+	@nLin, 135 PSAY STOD(TMP->RF_DATINI3)
 	@nLin, 160 PSAY PadC(STRZERO(ROUND(TMP->RF_DFEPRO3,0),2),12)
-	ELSE 
-	@nLin, 139 PSAY "_____/_____/_____" 
-	@nLin, 160 PSAY Replicate ("_",12)	
-	ENDIF		
-	@nLin, 180 PSAY Replicate ("_",33)	 	
-	nLin -= 1
-	
+	ELSE
+	@nLin, 139 PSAY "_____/_____/_____"
+	@nLin, 160 PSAY Replicate ("_",12)
 	ENDIF
-	
+	@nLin, 180 PSAY Replicate ("_",33)
+	nLin -= 1
+
+	ENDIF
+
 	nFuncio   += 1
 	nFuncioCC += 1
 	cCodCusto := TMP->RA_CC
-	
+
 	dbskip()
-	
+
 	/*
-	
+
 	IF (TMP->RF_MAT != cCodMat)
 	nLin += 1
 	@nLin, 000 PSAY "Total de Horas do Funcionario "
@@ -290,34 +307,34 @@ ELSE
 	nHorasFunc := 0
 	nLin += 1
 	ENDIF
-	
+
 	*/
-	
-	If nLin > 55 // Salto de Página. Neste caso o formulario tem 55 linhas...  
+
+	If nLin > 55 // Salto de Página. Neste caso o formulario tem 55 linhas...
 		Cabec(Titulo,Cabec1,Cabec2,NomeProg,Tamanho,nTipo)
 		nLin := 8
 	Endif
-	
+
 	IF (TMP->RA_CC != cCodCusto)
 		nLin += 2
 		@nLin, 000 PSAY "Total de Funcionarios do Centro de Custo "
 		@nLin, 045 PSAY cCodCusto  + " : "
 		@nLin, 060 PSAY nFuncioCC
 		nLin += 3
-		IF MV_PAR12 == 1   
+		IF MV_PAR12 == 1
 		nLin += 2
 		@nLin, 000 PSAY PADC(UPPER("_______________________________                             _______________________________"),220)
-		nLin += 1 // Avanca a linha de impressao       
+		nLin += 1 // Avanca a linha de impressao
 		@nLin, 000 PSAY PADC(UPPER("          Supervisor                                                Gerente / Diretor      "),220)
-	    nLin += 1 // Avanca a linha de impressao    
+	    nLin += 1 // Avanca a linha de impressao
 	    EndIF
 		nFuncioCC := 0
 	ENDIF
-	
+
 	nLin := nLin + 2 // Avanca a linha de impressao
-	
+
 	lOk := .F.
-	
+
 ENDDO
 
 
@@ -370,7 +387,7 @@ AADD(aRegs,{cPerg,"06","Ate o C. Custos ","","","mv_ch06","C",09,0,0,"G","","mv_
 AADD(aRegs,{cPerg,"07","Salta pag. por CC?","","","mv_ch07","N",01,0,2,"C","","mv_par07","Sim","","","","","Nao","","","","","","","","","","","","","","","","","","","","","","",""})
 AADD(aRegs,{cPerg,"08","Ano ","","","mv_ch08","C",04,0,0,"G","","mv_par08","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""})
 AADD(aRegs,{cPerg,"09","Nao Imprimir Tipos","","","mv_ch09","C",10,0,0,"G","","mv_par09","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""})
-AADD(aRegs,{cPerg,"10","Nao Imp. Categorias","","","mv_ch10","C",10,0,0,"G","","mv_par10","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""}) 
+AADD(aRegs,{cPerg,"10","Nao Imp. Categorias","","","mv_ch10","C",10,0,0,"G","","mv_par10","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""})
 AADD(aRegs,{cPerg,"11","Ordem","","","mv_ch11","N",01,0,2,"C","","mv_par11","Matricula","","","","","Nome","","","","","","","","","","","","","","","","","","","","","","",""})
 AADD(aRegs,{cPerg,"12","Imprime Ass. Supervisor","","","mv_ch12","N",01,0,2,"C","","mv_par12","Sim","","","","","Nao","","","","","","","","","","","","","","","","","","","","","","",""})
 AADD(aRegs,{cPerg,"13","Da  Programação ","","","mv_ch13","D",08,0,0,"G","","mv_par13","","","","","","","","","","","","","","","","","","","","","","","","",""})
