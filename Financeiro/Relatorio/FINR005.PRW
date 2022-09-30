@@ -78,11 +78,14 @@ Static Function fProcPdf()
 	Private cPeriodo 	:= SUBSTRING(DTOS(MV_PAR07),5,2) + SUBSTRING(DTOS(MV_PAR07),1,4)
 	Private cPerTitulo	:= SUBSTRING(DTOS(MV_PAR07),5,2) + "/" + SUBSTRING(DTOS(MV_PAR07),1,4)
 	Private cPeriodoAnt,cDataIni,cDataFin
+	Private cApura		:= SUBSTRING(DTOC(MV_PAR13),1,5) + "-" + SUBSTRING(DTOC(MV_PAR14),1,5)
 
 	cDataIni	:= DTOS(MV_PAR06)
 	cDataFin	:= DTOS(MV_PAR07)
 	cPeriodo 	:= SUBSTRING(DTOS(MV_PAR07),5,2) + SUBSTRING(DTOS(MV_PAR07),1,4)
 	cPeriodoAnt := SUBSTRING(DTOS(MonthSub(MV_PAR07,1)),5,2) + SUBSTRING(DTOS(MonthSub(MV_PAR07,1)),1,4)
+
+	DTOC(MV_PAR12)
 
 	// Query para buscar as informações
 	GetData(cPeriodo,MV_PAR01,MV_PAR02,MV_PAR03,MV_PAR04)
@@ -322,7 +325,7 @@ Static Function ImpProxPag()
 
 	nPag++
 	oPrint:StartPage()
-	cSubTitle := "VENCIMENTO: " + DTOC(MV_PAR12)
+	cSubTitle := "VENCIMENTO: " + DTOC(MV_PAR12) + " -> APURAÇÃO(" + cApura + ")"
 	nLin := u_PXCABECA(@oPrint, "REPASSE A PAGAR REFERENTE FATURAMENTO SPOT-> PAGAMENTO", cSubTitle  , nPag)
 
 	oPrint:Say( nLin,020, "PRAÇA",oFonteN)
@@ -369,6 +372,8 @@ Static Function ValidPerg(cPerg)
 	aAdd(aRegs,{cPerg,"10","Assinatura 3:" 		 	,"","","mv_ch10","C",06,00,0, "G","","MV_PAR10","","","","","","","","","","","","","","","","","","","","","","","","","USR"})
 	aAdd(aRegs,{cPerg,"11","Assinatura 4:"		 	,"","","mv_ch11","C",06,00,0, "G","","MV_PAR11","","","","","","","","","","","","","","","","","","","","","","","","","USR"})
 	aAdd(aRegs,{cPerg,"12","Vencimento:"  		 	,"","","mv_ch12","D",08,00,0, "G","","MV_PAR12","","","","","","","","","","","","","","","","","","","","","","","","",""})
+	aAdd(aRegs,{cPerg,"13","Da Data de Apuração:" 	,"","","mv_ch13","D",08,00,0, "G","","MV_PAR13","","","","","","","","","","","","","","","","","","","","","","","","",""})
+	aAdd(aRegs,{cPerg,"14","Até a Data de Apuração:","","","mv_ch14","D",08,00,0, "G","","MV_PAR14","","","","","","","","","","","","","","","","","","","","","","","","",""})
 
 	For i:=1 to Len(aRegs)
 		If !dbSeek(PADR(cPerg,10)+aRegs[i,2])
