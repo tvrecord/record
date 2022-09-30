@@ -80,6 +80,8 @@ Static Function fProcPdf()
 	Private cFiltro3	:= ""
 	Private cFiltro4	:= "% (E1_NUM IN  " + FormatIn(ALLTRIM(MV_PAR16),"/") + " )" + "  %"
 	Private cFiltro5 	:= "% (E1_NUM IN  " + FormatIn(ALLTRIM(MV_PAR17),"/") + " )" + "  %"
+	Private cApura		:= SUBSTRING(DTOC(MV_PAR18),1,5) + "-" + SUBSTRING(DTOC(MV_PAR19),1,5)
+
 
 
 	// Query para buscar as informações
@@ -566,7 +568,7 @@ Static Function ImpProxPag()
 
 	nPag++
 	oPrint:StartPage()
-	cSubTitle := "PAGAMENTO DIA " + DTOC(MV_PAR01)
+	cSubTitle := "PAGAMENTO DIA " + DTOC(MV_PAR01) + " -> APURAÇÃO(" + cApura + ")"
 	nLin := u_PXCABECA(@oPrint, "BONIFICAÇÃO DE VOLUME BSB E COMISSÃO DE AGÊNCIA", cSubTitle  , nPag)
 
 	oPrint:Say(nLin,020, "CLIENTE"		,oFonteN)
@@ -612,6 +614,8 @@ Static Function ValidPerg(cPerg)
 	AADD(aRegs,{cPerg,"15","Exceção NF Agência: ","","","mv_ch15","C",35,00,0,"G","","mv_par15","","","","","","","","","","","","","","","","","","","","","","","","","SE1"})
 	AADD(aRegs,{cPerg,"16","Incluir NF BV: 		","","","mv_ch16","C",35,00,0,"G","","mv_par16","","","","","","","","","","","","","","","","","","","","","","","","","SE1"})
 	AADD(aRegs,{cPerg,"17","Incluir NF Agência: ","","","mv_ch17","C",35,00,0,"G","","mv_par17","","","","","","","","","","","","","","","","","","","","","","","","","SE1"})
+	AADD(aRegs,{cPerg,"18","Apuração de:		","","","mv_ch18","D",08,00,0,"G","","mv_par18","","","","","","","","","","","","","","","","","","","","","","","","",""})
+	AADD(aRegs,{cPerg,"19","Até:				","","","mv_ch19","D",08,00,0,"G","","mv_par19","","","","","","","","","","","","","","","","","","","","","","","","",""})
 
 
 	For i:=1 to Len(aRegs)
