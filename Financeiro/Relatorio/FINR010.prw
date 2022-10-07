@@ -75,18 +75,23 @@ Static Function fProcPdf()
 	Local cDir 		:= Alltrim(MV_PAR05) + "\"
 	Local cAssin1 	:= ""
 	Local cAssin2 	:= ""
+	Local cAssin3 	:= ""
+	Local cAssin4 	:= ""
 	Local cCargo1 	:= ""
 	Local cCargo2 	:= ""
+	Local cCargo3 	:= ""
+	Local cCargo4 	:= ""
 
-	Private cApura		:= " (Apuração -> " + SUBSTRING(DTOC(MV_PAR09),1,5) + " - " + SUBSTRING(DTOC(MV_PAR10),1,5) + ")"
+
+	Private cApura		:= " (Apuração -> " + SUBSTRING(DTOC(MV_PAR11),1,5) + " - " + SUBSTRING(DTOC(MV_PAR12),1,5) + ")"
 	Private nQtd	:= 0
 	Private cCodVend := ""
 	Private cNome	:= ""
 	Private cFiltro := ""
 
-	if (mv_par08) == 2
+	if (MV_PAR10) == 2
 		cFiltro := "L"
-	ELSEIF (mv_par08) == 1
+	ELSEIF (MV_PAR10) == 1
 		cFiltro := "P"
 	ELSE
 		cFiltro	:= "%'L' AND E1_BAIXA <> ''%"
@@ -145,28 +150,71 @@ Static Function fProcPdf()
 
 			nLin += (REL_VERT_STD*3)
 
-			If !Empty(MV_PAR06) //.and. FWSFALLUSERS(MV_PAR05,.T.)
-				oPrint:Say(nLin,458, "_________________________" ,oFonteN)
-				aUsuario := FWSFALLUSERS({MV_PAR06}) // Retorna vetor com informações do usuário
-				cAssin1 := Alltrim(aUsuario[1][4])
-				cCargo1 := Alltrim(aUsuario[1][7])
-				nLin += REL_VERT_STD
-				oPrint:Say(nLin,458, PADC(cAssin1,40) ,oFonte)
-				nLin += REL_VERT_STD
-				oPrint:Say(nLin,458, PADC(cCargo1,33) ,oFonteN)
-			EndIf
+		If !Empty(MV_PAR06) .and. PswSeek( 	MV_PAR06, .T. )
+			oPrint:Say( nLin,024, "_________________________" ,oFonteN)
+			aUsuario := PswRet() // Retorna vetor com informações do usuário
+			cAssin1 := Alltrim(aUsuario[1][4])
+			cCargo1 := Alltrim(aUsuario[1][13])
+		EndIf
 
-			If !Empty(MV_PAR06) .and. !Empty(MV_PAR07)  //.and. FWSFALLUSERS(MV_PAR06,.T.)
-				nLin -= (REL_VERT_STD*2)
-				oPrint:Say(nLin,620, "_________________________" ,oFonteN)
-				aUsuario := FWSFALLUSERS({MV_PAR07})// Retorna vetor com informações do usuário
-				cAssin2 := Alltrim(aUsuario[1][4])
-				cCargo2 := Alltrim(aUsuario[1][7])
-				nLin += REL_VERT_STD
-				oPrint:Say(nLin,620, PADC(cAssin2,40) ,oFonte)
-				nLin += REL_VERT_STD
-				oPrint:Say(nLin,620, PADC(cCargo2,33) ,oFonteN)
-			EndIf
+		If !Empty(MV_PAR07) .and. PswSeek( 	MV_PAR07, .T. )
+			oPrint:Say( nLin,175, "_________________________" ,oFonteN)
+			aUsuario := PswRet() // Retorna vetor com informações do usuário
+			cAssin2 := Alltrim(aUsuario[1][4])
+			cCargo2 := Alltrim(aUsuario[1][13])
+		EndIf
+
+		If !Empty(MV_PAR08) .and. PswSeek( 	MV_PAR08, .T. )
+			oPrint:Say( nLin,318, "_________________________" ,oFonteN)
+			aUsuario := PswRet() // Retorna vetor com informações do usuário
+			cAssin3 := Alltrim(aUsuario[1][4])
+			cCargo3 := Alltrim(aUsuario[1][13])
+		EndIf
+
+		If !Empty(MV_PAR09) .and. PswSeek( 	MV_PAR09, .T. )
+			oPrint:Say( nLin,470, "_________________________" ,oFonteN)
+			aUsuario := PswRet() // Retorna vetor com informações do usuário
+			cAssin4 := Alltrim(aUsuario[1][4])
+			cCargo4 := Alltrim(aUsuario[1][13])
+		EndIf
+
+nLin += REL_VERT_STD
+
+	//Imprime o nome das assinaturas
+
+	If !Empty(cAssin1)
+		oPrint:Say( nLin,024, PADC(cAssin1,40) ,oFonteN)
+	EndIf
+
+	If !Empty(cAssin2)
+		oPrint:Say( nLin,175, PADC(cAssin2,40) ,oFonteN)
+	EndIf
+
+	If !Empty(cAssin3)
+		oPrint:Say( nLin,318, PADC(cAssin3,40) ,oFonteN)
+	EndIf
+
+	If !Empty(cAssin4)
+		oPrint:Say( nLin,470, PADC(cAssin4,40) ,oFonteN)
+	EndIf
+
+	nLin += REL_VERT_STD
+
+	If !Empty(cCargo1)
+		oPrint:Say( nLin,024, PADC(cCargo1,33) ,oFonteN)
+	EndIf
+
+	If !Empty(cCargo2)
+		oPrint:Say( nLin,175, PADC(cCargo2,33) ,oFonteN)
+	EndIf
+
+	If !Empty(cCargo3)
+		oPrint:Say( nLin,318, PADC(cCargo3,33) ,oFonteN)
+	EndIf
+
+	If !Empty(cCargo4)
+		oPrint:Say( nLin,470, PADC(cCargo4,33) ,oFonteN)
+	EndIf
 
 			//Zero o vetor para o proxima praça
 			aInfo := {}
@@ -199,7 +247,7 @@ Static Function ImpProxPag()
 	oPrint:StartPage()
 	cSubTitle := cCodVend + " - " + Alltrim(cNome) + cApura
 
-	IF MV_PAR08 == 1
+	IF MV_PAR10 == 1
 		nLin := u_PXCABECA(@oPrint, UPPER("PENDÊNCIAS DE AUTORIZAÇÃO DE CACHE") , cSubTitle  , nPag)
 	ELSE
 		nLin := u_PXCABECA(@oPrint, UPPER("PAGAMENTOS DE CACHE APROVADOS (" + DTOC(MV_PAR04) + ")") , cSubTitle  , nPag)
@@ -326,9 +374,11 @@ Static Function ValidPerg(cPerg)
 	aAdd(aRegs,{cPerg,"05","Destino do(s) Arq.:"	,"","","mv_ch05","C",99,00,0,"G","","MV_PAR05","","","","","","","","","","","","","","","","","","","","","","","","",""})
 	aAdd(aRegs,{cPerg,"06","Assinatura 1:" 		 	,"","","mv_ch06","C",06,00,0,"G","","mv_par06","","","","","","","","","","","","","","","","","","","","","","","","","USR"})
 	aAdd(aRegs,{cPerg,"07","Assinatura 2:"		 	,"","","mv_ch07","C",06,00,0,"G","","mv_par07","","","","","","","","","","","","","","","","","","","","","","","","","USR"})
-	aAdd(aRegs,{cPerg,"08","Tipo Relatório:"		,"","","mv_ch08","N",01,0,2,"C","","mv_par08","Pendentes","","","","","Aprovados","","","","","Aprov e Baixado","","","","","","","","","","","","","","","","","",""})
-	aAdd(aRegs,{cPerg,"09","Da Apuração:"			,"","","mv_ch09","D",08,00,0,"G","","MV_PAR09","","","","","","","","","","","","","","","","","","","","","","","","",""})
-	aAdd(aRegs,{cPerg,"10","Até :"					,"","","mv_ch10","D",08,00,0,"G","","MV_PAR10","","","","","","","","","","","","","","","","","","","","","","","","",""})
+	aAdd(aRegs,{cPerg,"08","Assinatura 3:" 		 	,"","","mv_ch08","C",06,00,0,"G","","mv_par08","","","","","","","","","","","","","","","","","","","","","","","","","USR"})
+	aAdd(aRegs,{cPerg,"09","Assinatura 4:"		 	,"","","mv_ch09","C",06,00,0,"G","","mv_par09","","","","","","","","","","","","","","","","","","","","","","","","","USR"})
+	aAdd(aRegs,{cPerg,"10","Tipo Relatório:"		,"","","mv_ch10","N",01,0,2,"C","","mv_par10","Pendentes","","","","","Aprovados","","","","","Aprov e Baixado","","","","","","","","","","","","","","","","","",""})
+	aAdd(aRegs,{cPerg,"11","Da Apuração:"			,"","","mv_ch11","D",08,00,0,"G","","MV_PAR11","","","","","","","","","","","","","","","","","","","","","","","","",""})
+	aAdd(aRegs,{cPerg,"12","Até :"					,"","","mv_ch12","D",08,00,0,"G","","MV_PAR12","","","","","","","","","","","","","","","","","","","","","","","","",""})
 
 	For i:=1 to Len(aRegs)
 		If !dbSeek(PADR(cPerg,10)+aRegs[i,2])

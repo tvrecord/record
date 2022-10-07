@@ -68,7 +68,7 @@ Static Function ModelDef()
 	Local oModel 		:= Nil
 	Local oStPai 		:= FWFormStruct(1, 'ZAJ')
 	Local oStFil1 		:= FWFormStruct( 1, 'ZAK',{ |cCampo| Alltrim(cCampo) $ 'ZAK_ANO/ZAK_GRPNAT/ZAK_TPSUB/ZAK_PERC' } ,/*lViewUsado*/ )
-	Local oStFil2 		:= FWFormStruct( 1, 'ZAL',{ |cCampo| Alltrim(cCampo) $ 'ZAL_MES/ZAL_TIPO/ZAL_PERC/ZAL_PERCIN/ZAL_VALOR/ZAL_MTINDI/ZAL_ATINDI/ZAL_MTCOLE/ZAL_ATCOLE' } ,/*lViewUsado*/ )
+	Local oStFil2 		:= FWFormStruct( 1, 'ZAL',{ |cCampo| Alltrim(cCampo) $ 'ZAL_MES/ZAL_TIPO/ZAL_PERC/ZAL_PERCIN/ZAL_VALOR/ZAL_MTINDI/ZAL_ATINDI/ZAL_MTCOLE/ZAL_ATCOLE/ZAL_CACOLE/ZAL_CAINDI/ZAL_DESCON/ZAL_JUSTIF/ZAL_CATRIC/ZAL_CATRII/ZAL_CAANUC/ZAL_CAANUI' } ,/*lViewUsado*/ )
 	Local oStFil3 		:= FWFormStruct( 1, 'ZAM',{ |cCampo| Alltrim(cCampo) $ 'ZAM_GRPNAT/ZAM_NMGRP/ZAM_PERC' } ,/*lViewUsado*/ )
 
 
@@ -122,7 +122,7 @@ Static Function ViewDef()
 	Local oModel	:= FWLoadModel('AXZAJ')
 	Local oStPai	:= FWFormStruct(2, 'ZAJ')
 	Local oStFil1 	:= FWFormStruct(2, 'ZAK',{ |cCampo| Alltrim(cCampo) $ 'ZAK_ANO/ZAK_GRPNAT/ZAK_TPSUB/ZAK_PERC' } ,/*lViewUsado*/ )
-	Local oStFil2 	:= FWFormStruct(2, 'ZAL',{ |cCampo| Alltrim(cCampo) $ 'ZAL_MES/ZAL_TIPO/ZAL_PERC/ZAL_PERCIN/ZAL_VALOR/ZAL_MTINDI/ZAL_ATINDI/ZAL_MTCOLE/ZAL_ATCOLE' } ,/*lViewUsado*/ )
+	Local oStFil2 	:= FWFormStruct(2, 'ZAL',{ |cCampo| Alltrim(cCampo) $ 'ZAL_MES/ZAL_TIPO/ZAL_PERC/ZAL_PERCIN/ZAL_VALOR/ZAL_MTINDI/ZAL_ATINDI/ZAL_MTCOLE/ZAL_ATCOLE/ZAL_CACOLE/ZAL_CAINDI/ZAL_DESCON/ZAL_JUSTIF/ZAL_CATRIC/ZAL_CATRII/ZAL_CAANUC/ZAL_CAANUI' } ,/*lViewUsado*/ )
 	Local oStFil3 	:= FWFormStruct(2, 'ZAM',{ |cCampo| Alltrim(cCampo) $ 'ZAM_GRPNAT/ZAM_NMGRP/ZAM_PERC' } ,/*lViewUsado*/ )
 	Local oStTot 	:= FWCalcStruct(oModel:GetModel('TOTAL'))
 
