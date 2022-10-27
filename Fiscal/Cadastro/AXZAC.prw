@@ -247,7 +247,7 @@ wcData			:= ALLTRIM(str(Day(ZAC->ZAC_DATA))) + " de " + Mes(ZAC->ZAC_DATA)  + " 
 ENDIF
 
 //cPathDot := "X:\DeclaracaoISS.docx"
-cPathDot :=	"X:\Docs\DeclaracaoISS.docx"
+cPathDot :=	"C:\Docs\DeclaracaoISS.docx"
 //Conecta ao word
 hWord	:= OLE_CreateLink()
 OLE_NewFile(hWord, cPathDot)
