@@ -220,7 +220,7 @@ Static Function fProcPdf(cCodVend)
 					SUM(
 						CASE
 							WHEN E1_VEND2 = A3_COD
-								THEN E1_VALOR - (E1_VALOR * E1_COMIS1 / 100)
+								THEN E1_VALOR
 							ELSE 0
 						END
 					) AS VL_IND,
@@ -680,7 +680,7 @@ Static Function ImpTotais(cCodVend,cGrpNat)
 
 	IF cTipoSub == "3"
 
-		oPrint:Say( nLin,020, "SUBTOTAL:"				  							,oFonteN)
+		oPrint:Say( nLin,020, "FATURAMENTO BRUTO:"				  					,oFonteN)
 		IF aNatPerc[nPos][11] > 0 .and. cTipoCom = "3"
 			oPrint:Say( nLin,410, PADR(Transform(nSubTotI, "@E 999,999,999.99"),14)	,oFonteN)
 		elseif cTipoCom = "1"
@@ -743,7 +743,7 @@ Static Function ImpTotais(cCodVend,cGrpNat)
 
 			IF aNatPerc[nPos][11] <> 0
 				oPrint:Say( nLin,020, "META INDIVIDUAL:   " +ALLTRIM(Transform(aNatPerc[nPos][11], "@E 999,999,999.99")) 	,oFonteN)
-				oPrint:Say( nLin,190, "VALOR ATINGIDO:    " +ALLTRIM(Transform(nSubTotI, "@E 999,999,999.99"))				,oFonteN)
+				oPrint:Say( nLin,190, "VALOR LIQ. ATINGIDO:    " +ALLTRIM(Transform(nSubTotI, "@E 999,999,999.99"))				,oFonteN)
 				oPrint:Say( nLin,340, "PRÊMIO INDIVIDUAL (" +ALLTRIM(Transform(aNatPerc[nPos][13], "999.999%")) +"):"		,oFonteN)
 				oPrint:Say( nLin,520, PADR(Transform(IIF(nSubTotI > aNatPerc[nPos][11],(nTotGrupoI*aNatPerc[nPos][13]/100),0), "@E 999,999,999.99"),14)	,oFonteN)
 
@@ -1109,14 +1109,17 @@ Static Function BVSP()
 
 	Local nValor    := 0
 	Local cNatureza := "1204018"
+	Local cDataIni  := MV_PAR04 + MV_PAR05 + "01"
+	Local cDataFim  := MV_PAR04 + MV_PAR05 + "31"
 
 	BeginSql Alias cAlias4
 		SELECT
-			SUM(E2_VALOR) AS VALOR
+			SUM(E2_VALOR + E2_VRETISS) AS VALOR
 		FROM
 			%table:SE2%
 		WHERE
 			E2_NATUREZ = %Exp:cNatureza%
+			and E2_EMISSAO BETWEEN %exp:cDataIni% AND %exp:cDataFim%
 			AND D_E_L_E_T_ = ''
 	EndSql
 
