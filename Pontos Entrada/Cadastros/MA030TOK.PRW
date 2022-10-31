@@ -60,7 +60,7 @@ Local cPara  	:= ""
 Local cAssunto	:= ""
 Local cCorpo 	:= ""
 
-	cPara 		:= "rfranca@recordtvdf.com.br;plpontes@recordtvdf.com.br;Contabilidade@recordtvdf.com.br"
+	cPara 		:= "rfranca@recordtvdf.com.br;plpontes@recordtvdf.com.br;Contabilidade@recordtvdf.com.br;jabreu@recordtvdf.com.br"
 	cAssunto	:= "Cliente incluído: " + M->A1_COD + " - " + M->A1_NOME
 	cCorpo 		:= "Codigo: " + M->A1_COD + "<br>"
 	cCorpo 		+= "Descrição: "+ M->A1_NOME + "<br>"
