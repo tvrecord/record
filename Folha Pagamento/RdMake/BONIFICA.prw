@@ -55,7 +55,7 @@ Private wnrel        := "NOME" // Coloque aqui o nome do arquivo usado para impr
 Private cString      := "SRA"
 Private cPerg	     := "BONIFICA1"
 Private cQuery       := ""
-Private aPag		 := {}   
+Private aPag		 := {}
 Private cPeriodo 	 := ""
 
 
@@ -65,6 +65,12 @@ If !Pergunte(cPerg,.T.)
 	alert("OPERAÇÃO CANCELADA")
 	return
 ENDIF
+
+IF (MV_PAR08) == 2
+	u_GPER009()
+	Return
+ENDIF
+
 
 //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 //³ Monta a interface padrao com o usuario...                           ³
@@ -79,9 +85,9 @@ wnrel := SetPrint("",NomeProg,,@titulo,cDesc1,cDesc2,cDesc3,.T.,,.T.,Tamanho,,.T
 //Utilizado para imprimir o relatorio
 IF MV_PAR07 <= "2018"
 cQuery := "SELECT RA_CC,RA_FILIAL,RA_MAT,RA_NOME,RA_CODFUNC,RA_DEPTO,RA_ADMISSA,RA_NASC,CTT_DESC01,RJ_DESC,(SELECT SUBSTRING(RX_TXT,7,8) FROM SRX010 WHERE RX_TIP = '11' AND SUBSTRING(RX_COD,9,4) = '" + (MV_PAR07) +"' AND SUBSTRING(RX_COD,13,2) = '" + (MV_PAR06) +"' AND D_E_L_E_T_ <> '*' AND SUBSTRING(RX_COD,1,2) = '" + (MV_PAR01) + "') AS SALMINIMO FROM SRA010 "
-ELSE 
-cQuery := "SELECT RA_CC,RA_FILIAL,RA_MAT,RA_NOME,RA_CODFUNC,RA_DEPTO,RA_ADMISSA,RA_NASC,CTT_DESC01,RJ_DESC,(SELECT SUBSTRING(RCC_CONTEU,13,12)FROM RCC010 WHERE RCC_CODIGO = 'S004' AND SUBSTRING(RCC_CONTEU,1,4) = '" + (MV_PAR07) +"' AND '" + (MV_PAR06) +"' BETWEEN SUBSTRING(RCC_CONTEU,05,2) AND SUBSTRING(RCC_CONTEU,11,2)  AND D_E_L_E_T_ <> '*' AND SUBSTRING(RCC_FIL,1,2) = '" + (MV_PAR01) + "') AS SALMINIMO FROM SRA010 
-ENDIF  
+ELSE
+cQuery := "SELECT RA_CC,RA_FILIAL,RA_MAT,RA_NOME,RA_CODFUNC,RA_DEPTO,RA_ADMISSA,RA_NASC,CTT_DESC01,RJ_DESC,(SELECT SUBSTRING(RCC_CONTEU,13,12)FROM RCC010 WHERE RCC_CODIGO = 'S004' AND SUBSTRING(RCC_CONTEU,1,4) = '" + (MV_PAR07) +"' AND '" + (MV_PAR06) +"' BETWEEN SUBSTRING(RCC_CONTEU,05,2) AND SUBSTRING(RCC_CONTEU,11,2)  AND D_E_L_E_T_ <> '*' AND SUBSTRING(RCC_FIL,1,2) = '" + (MV_PAR01) + "') AS SALMINIMO FROM SRA010 "
+ENDIF
 cQuery += "INNER JOIN CTT010 ON RA_FILIAL = CTT_FILIAL AND RA_CC = CTT_CUSTO "
 cQuery += "INNER JOIN SRJ010 ON RA_CODFUNC = RJ_FUNCAO "
 cQuery += "WHERE "
@@ -100,7 +106,7 @@ cQuery += "ORDER BY RA_NOME "
 tcQuery cQuery New Alias "TMP"
 
 
-If Eof() 
+If Eof()
 	MsgInfo("Nao existem dados a serem impressos!","Verifique")
 	dbSelectArea("TMP")
 	dbCloseArea("TMP")
@@ -165,31 +171,31 @@ DBGotop()
 
 //DEFINE FONT oFont NAME "Courier New" SIZE 0,-11 BOLD
 
-While !EOF()
-	
+While !("TMP")->(Eof())
+
 	SetRegua(RecCount())
-	
+
 	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 	//³ Verifica o cancelamento pelo usuario...                             ³
 	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-	
+
 	If lAbortPrint
 		@nLin,00 PSAY "*** CANCELADO PELO OPERADOR ***"
 		Exit
 	Endif
-	
-	
+
+
 	If nLin > 70 // Salto de Página. Neste caso o formulario tem 55 linhas...
 		Cabec(Titulo,Cabec1,Cabec2,NomeProg,Tamanho,nTipo)
 		nLin := 8
 	Endif
-	
-	
+
+
 	nAno := VAL(MV_PAR07) - VAL(SUBSTR(TMP->RA_ADMISSA,1,4))  //Quantidade de anos trabalhados na empresa
 	nVal := 0
-	
+
 	If MV_PAR07 == "2013" //Calculo para compensar os meses não recebidos, devido a data do surgimento da bonificação Ano 2013
-		
+
 		If nAno > 0 // alterar, valido somente em 5 e 5 anos
 			If nAno < 5
 				nVal := 0
@@ -206,9 +212,9 @@ While !EOF()
 			nAno := 0
 			nVal := 0
 		EndIf
-		
+
 	Else
-		
+
 		If nAno > 0
 			If nAno < 5
 				nVal := 0
@@ -226,50 +232,72 @@ While !EOF()
 			nVal := 0
 		EndIf
 	EndIf
-	
+
 	If nVal == 0
 		dbskip()
 		loop
 	EndIf
-	
+
 	If MV_PAR08 == 1
-	
+
 	cVerba := ""
 	If nAno <= 5
 	cVerba := "305"
 	ElseIf nAno >= 6
 	cVerba := "307"
     EndIf
-    
+
     If MV_PAR07 == "2013" .AND. nAno >= 10
     nVal += VAL(ALLTRIM(TMP->SALMINIMO))
     EndIf
-	
-		
+
+
 		aAdd(aPag,{TMP->RA_FILIAL,;  		// 1 - Filial
 		TMP->RA_MAT,;	// 2 - Matricula
 		TMP->RA_CC,;	// 3 - Centro de Custo
 		nAno,;	// 4 - Qtd Ano
 		nVal,;// 5 - Valor
 		cVerba}) //6 - Verba
-		
+
 	Endif
-	
+
+	IF(MV_PAR08) ==2
+
+	//Criando o objeto que irá gerar o conteúdo do Excel
+    oFWMsExcel := FWMSExcel():New()
+
+    //Aba 01 - Nome Guia
+    oFWMsExcel:AddworkSheet("Dados Do Funcionário") //Não utilizar número junto com sinal de menos. Ex.: 1-
+        //Criando a Tabela
+        oFWMsExcel:AddTable("Dados Do Funcionário",cNomeTabela)
+        //Criando Colunas
+          oFWMsExcel:AddColumn("Dados Do Funcionário",cNomeTabela,"FILIAL",1,1) //1,1 = Modo Texto  // 2,2 = Valor sem R$  //  3,3 = Valor com R$
+        oFWMsExcel:AddColumn("Dados Do Funcionário",cNomeTabela,"CCUSTO",1,1)
+        oFWMsExcel:AddColumn("Dados Do Funcionário",cNomeTabela,"CENTRO_CUSTO",1,1)
+		oFWMsExcel:AddColumn("Dados Do Funcionário",cNomeTabela,"MATRÍCULA",1,1)
+        oFWMsExcel:AddColumn("Dados Do Funcionário",cNomeTabela,"NOME",1,1)
+        oFWMsExcel:AddColumn("Dados Do Funcionário",cNomeTabela,"DT_ADMISS",1,1)
+        oFWMsExcel:AddColumn("Dados Do Funcionário",cNomeTabela,"QTD_ANOS",1,1)
+        oFWMsExcel:AddColumn("Dados Do Funcionário",cNomeTabela,"VALOR",3,3)
+
+ENDIF
+
 	@nLin, 000 PSAY TMP->RA_FILIAL
 	@nLin, 004 PSAY TMP->RA_MAT
 	@nLin, 014 PSAY TMP->RA_NOME
 	@nLin, 056 PSAY STOD(TMP->RA_ADMISSA)
 	@nLin, 068 PSAY nAno
 	@nLin, 072 PSAY nVal Picture "@E 999,999,999.99"
-	
+	oFWMsExcel:AddRow("Dados Do Funcionário",cNomeTabela,{TMP->RA_FILIAL, TMP->RA_CC, TMP->CTT_DESC01, TMP->RA_MAT, TMP->RA_NOME, TMP->RA_ADMISSA, nAno, nVal})
+
 	nValCC += nVal // valor total por centr
 	nValTot += nVal
-	
+
 	nLin++
-	
+
 	dbskip()
-	
-	
+
+
 EndDo
 
 nLin++
@@ -280,33 +308,49 @@ nLin++
 nLin++
 @nLin, 000 PSAY "-------------------------------------------------------------------------------------------------------------------------------------"
 
-If MV_PAR08 == 1       
+oFWMsExcel:Activate()
+    oFWMsExcel:GetXMLFile(cArquivo)
+
+    //Abrindo o excel e abrindo o arquivo xml
+    oExcel:= MsExcel():New()            	//Abre uma nova conexão com Excel
+    oExcel:WorkBooks:Open(cArquivo)     	//Abre uma planilha
+    oExcel:SetVisible(.T.)              	//Visualiza a planilha
+    oExcel:Destroy()                    	//Encerra o processo do gerenciador de tarefas
+
+	("TMP")->(dbClosearea()) 				//FECHO A TABELA APOS O USO
+
+	RestArea(aArea)
+
+
+Return
+
+If MV_PAR08 == 1
 
 cPeriodo := MV_PAR07 + MV_PAR06
 
 	For _J := 1 To Len(aPag)
-	
+
 	DBSelectArea("RGB")
 	DBSetOrder(5)
-	If DBSeek(aPag[_J][1] + "00001" + cPeriodo + "01" + "FOL" +  aPag[_J][2] + "305") 
-		
+	If DBSeek(aPag[_J][1] + "00001" + cPeriodo + "01" + "FOL" +  aPag[_J][2] + "305")
+
 	    Reclock("RGB",.F.)
 		RGB->RGB_FILIAL		:= aPag[_J][1]
 		RGB->RGB_MAT		:= aPag[_J][2]
-		RGB->RGB_PD			:= "305"  
+		RGB->RGB_PD			:= "305"
 		RGB->RGB_TIPO1		:= "V"
 		RGB->RGB_HORAS		:= aPag[_J][4]
 		RGB->RGB_VALOR		:= aPag[_J][5]
 		RGB->RGB_DTREF		:= STOD(cPeriodo + "01")
 		RGB->RGB_CC			:= aPag[_J][3]
 		MsUnlock()
-		
+
 	ELSE
-	
+
 	    Reclock("RGB",.T.)
 		RGB->RGB_FILIAL		:= aPag[_J][1]
 		RGB->RGB_MAT		:= aPag[_J][2]
-		RGB->RGB_PD			:= "305"  
+		RGB->RGB_PD			:= "305"
 		RGB->RGB_TIPO1		:= "V"
 		RGB->RGB_HORAS		:= aPag[_J][4]
 		RGB->RGB_VALOR		:= aPag[_J][5]
@@ -329,20 +373,15 @@ cPeriodo := MV_PAR07 + MV_PAR06
 		RGB_DSEIS   		:= 0
 		RGB_DSETE   		:= 0
 		MsUnlock()
-		
+
 	EndIf
-	
 
-	Next _J	
-	
-	
-	
+
+	Next _J
+
+
+
 EndIf
-
-
-
-
-
 
 
 //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
@@ -367,10 +406,7 @@ DBSelectArea("TMP")
 DBCloseArea("TMP")
 
 
-
-
 Return
-
 
 Static Function ValidPerg(cPerg)
 
@@ -389,8 +425,6 @@ AADD(aRegs,{cPerg,"05","C. Custo Ate ?","","","mv_ch05","C",06,0,0,"G","","mv_pa
 AADD(aRegs,{cPerg,"06","Mes ?","","","mv_ch06","C",02,0,0,"G","","mv_par06","","","","","","","","","","","","","","","","","","","","","","","","",""})
 AADD(aRegs,{cPerg,"07","Ano ?","","","mv_ch07","C",04,0,0,"G","","mv_par07","","","","","","","","","","","","","","","","","","","","","","","","",""})
 AADD(aRegs,{cPerg,"08","Atualiza Movimento ?","","","mv_ch08","N",01,0,2,"C","","mv_par08","Sim","","","","","Nao","","","","","","","","","","","","","","","","","","",""})
-
-
 
 
 

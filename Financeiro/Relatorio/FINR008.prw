@@ -112,6 +112,7 @@ Static Function fProcPdf(cCodVend)
 	Private nDBVSP1 	:= 0
 	Private nDescCac1	:= 0
 	Private nCacheJulho	:= 0
+	Private nCorrecao	:= (MV_PAR12)
 
 	// Query para buscar as informações
 	//Pega as regras de comissões e transforma em vetor para uso posterior
@@ -279,7 +280,7 @@ Static Function fProcPdf(cCodVend)
 					SUM(
 						CASE
 							WHEN E1_VEND2 = A3_COD
-								THEN EV_VALOR - (EV_VALOR * E1_COMIS1 / 100)
+								THEN EV_VALOR
 							ELSE 0
 						END
 					) AS VL_IND,
@@ -480,6 +481,10 @@ Static Function fProcPdf(cCodVend)
 			nLin += (REL_LIN_STD)
 			oPrint:Say( nLin,020, "VALOR PRÊMIO:"										,oFonteN)
 			oPrint:Say( nLin,520, PADL(Transform( nTotalPre, "@E 999,999,999.99"),14)	,oFonteN)
+			//Correção de desconto de agência descontado duplicadamente nos meses anteriores (apagar após folha de outubro)
+			/*nLin += (REL_LIN_STD)
+			oPrint:Say( nLin,020, "ACRÉSCIMO REF. DESCONTO COMISSÃO AGÊNCIA(FEV/MAR/ABR/MAI/JUN/JUL/AGO/SET):"		,oFonteN)
+			oPrint:Say( nLin,520, PADL(Transform( nCorrecao, "@E 999,999,999.99"),14)	,oFonteN)*/
 			//ENDIF
 			IF cVendedor != "000608" .and. cVendedor != "000609"
 				//nLin += (REL_LIN_STD)
@@ -487,11 +492,11 @@ Static Function fProcPdf(cCodVend)
 				//oPrint:Say( nLin,520, PADL(Transform( nCacheJulho, "@E 999,999,999.99"),14)	,oFonteN)
 				nLin += (REL_LIN_STD)
 				oPrint:Say( nLin,020, "TOTAL:"												,oFonteN)
-				oPrint:Say( nLin,520, PADL(Transform(nTotalCom + nTotalPre + nCacheJulho, "@E 999,999,999.99"),14)	,oFonteN)
+				oPrint:Say( nLin,520, PADL(Transform(nTotalCom + nTotalPre + nCacheJulho + nCorrecao, "@E 999,999,999.99"),14)	,oFonteN)
 			ELSE
 				nLin += (REL_LIN_STD)
 				oPrint:Say( nLin,020, "TOTAL:"												,oFonteN)
-				oPrint:Say( nLin,520, PADL(Transform(nTotalCom + nTotalPre, "@E 999,999,999.99"),14)	,oFonteN)
+				oPrint:Say( nLin,520, PADL(Transform(nTotalCom + nTotalPre + nCorrecao, "@E 999,999,999.99"),14)	,oFonteN)
 			ENDIF
 
 			//Pula mais linhas para assinatura
@@ -660,6 +665,10 @@ Static Function ImpTotais(cCodVend,cGrpNat)
 		nDescAge1 := 0
 	ENDIF
 
+	IF cVendedor == "000608"
+	nDescAge1 := 41917.60
+	ENDIF
+
 	IF lDescBV
 		nDescBV1 := nDescBV
 	ELSE
@@ -704,6 +713,7 @@ Static Function ImpTotais(cCodVend,cGrpNat)
 		oPrint:Say( nLin,020, "(-) BONIFICAÇÃO DE VOLUME SP:"	 				,oFonteN)
 		oPrint:Say( nLin,520, PADR(Transform(nDBVSP1, "@E 999,999,999.99"),14)	,oFonteN)
 
+
 		nLin += REL_LIN_STD
 		oPrint:Say( nLin,020, "(-) CACHE:"				  						,oFonteN)
 		oPrint:Say( nLin,520, PADR(Transform(nDescCac1,"@E 999,999,999.99"),14)	,oFonteN)
@@ -715,12 +725,14 @@ Static Function ImpTotais(cCodVend,cGrpNat)
 
 		//Imprime valor dos outros descontos
 		nLin += REL_LIN_STD
-		oPrint:Say( nLin,020, "(-) OUTROS DESCONTOS:"		  					,oFonteN)
+		oPrint:Say( nLin,020, "(-) COMISSÃO MÊS 10/22:"		  					,oFonteN)
 		oPrint:Say( nLin,520, PADR(Transform(nOutDesc,"@E 999,999,999.99"),14)	,oFonteN)
 
 		nLin += REL_LIN_STD
-		nTotGrupoC := nSubTotC-nDescAge1-nDescBV1-nDBVSP1-nDescCac1-nOutDesc
-		nTotGrupoI := nSubTotI-nDescAge1-nDescBV1-nDBVSP1-nDescCac1-nOutDesc
+		nSubTotC -= nDescAge1
+		nSubTotI -= nDescAge1
+		nTotGrupoC := nSubTotC-nDescBV1-nDBVSP1-nDescCac1-nOutDesc
+		nTotGrupoI := nSubTotI-nDescBV1-nDBVSP1-nDescCac1-nOutDesc
 		oPrint:Say( nLin,020, "BASE DE CÁLCULO:"				  					,oFonteN)
 
 		IF cTipoCom = "2" .or. cTipoCom = "3"
@@ -947,6 +959,8 @@ Static Function ValidPerg(cPerg)
 	aAdd(aRegs,{cPerg,"09","Valor do BV:"			,"","","mv_ch09" ,"N",12,02,0, "C","","MV_PAR09","","","","","","","","","","","","","","","","","","","","","","","","","",""})
 	aAdd(aRegs,{cPerg,"10","Cachê:"					,"","","mv_ch10" ,"N",12,02,0, "C","","MV_PAR10","","","","","","","","","","","","","","","","","","","","","","","","","",""})
 	aAdd(aRegs,{cPerg,"11","Tipo Relatório:"		,"","","mv_ch11" ,"N",01,00,1, "C","","MV_PAR11","Sintético","","","","","Resumido","","","","","Analítico Xml","","","","","","","","","","","","","","",""})
+	aAdd(aRegs,{cPerg,"12","Acréscimo C.A.:"		,"","","mv_ch12" ,"N",12,02,0, "C","","MV_PAR12","","","","","","","","","","","","","","","","","","","","","","","","","",""})
+
 
 	For i:=1 to Len(aRegs)
 		IF !dbSeek(PADR(cPerg,10)+aRegs[i,2])

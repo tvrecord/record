@@ -53,19 +53,9 @@ DBSelectARea(cAlias)
 
 	lEmail := .F.
 
-		if (cAlias)->ZN_PRAZO - Date() == 15
+		if stod((cAlias)->ZN_PRAZO) - Date() == 15
 		lEmail := .T.
 		cCorpo   += "FALTAM 15 DIAS PARA O PRAZO DE DEVOLUÇÃO DO BEM ACABAR!"+ "<br>"
-		ELSEIF (cAlias)->ZN_PRAZO - Date() == 10
-		lEmail := .T.
-		cCorpo   += "FALTAM 10 DIAS PARA O PRAZO DE DEVOLUÇÃO DO BEM ACABAR!"+ "<br>"
-		ELSEIF (cAlias)->ZN_PRAZO - Date() == 5
-		lEmail := .T.
-		cCorpo   += "FALTAM 5 DIAS PARA O PRAZO DE DEVOLUÇÃO DO BEM ACABAR!"+ "<br>"
-		ELSEIF (cAlias)->ZN_PRAZO - Date() == -1
-		cCorpo   += "O PRAZO DO BEM VENCEU!"+ "<br>"
-		Endif
-
 		cCorpo   += "Cod: " + (cAlias)->ZN_COD + "<br>"
 		cCorpo   += "Situação: " + (cAlias)->SITUACAO + "<br>"
 		cCorpo   += "Bem: " + (cAlias)->ZN_DESCRI + "<br>"
@@ -79,6 +69,55 @@ DBSelectARea(cAlias)
 		cCorpo 	+=  "<br>"
 		//cCorpo 	+=  Chr(13) + Chr(10) + Chr(13) + Chr(10)
 
+		ELSEIF stod((cAlias)->ZN_PRAZO) - Date() == 10
+		lEmail := .T.
+		cCorpo   += "FALTAM 10 DIAS PARA O PRAZO DE DEVOLUÇÃO DO BEM ACABAR!"+ "<br>"
+		cCorpo   += "Cod: " + (cAlias)->ZN_COD + "<br>"
+		cCorpo   += "Situação: " + (cAlias)->SITUACAO + "<br>"
+		cCorpo   += "Bem: " + (cAlias)->ZN_DESCRI + "<br>"
+		cCorpo   += "N° Serie: " + (cAlias)->ZN_NSERIE + "<br>"
+		cCorpo   += "Valor: " + Transform((cAlias)->ZN_VALOR,"@e 99,999,999.99") + "<br>"
+		cCorpo   += "NF Entrada: " + (cAlias)->ZN_NOTA + "<br>"
+		cCorpo   += "DT. Entrada: " +SubStr((cAlias)->ZN_DTRECEB,7,2) +"/"+ SubStr((cAlias)->ZN_DTRECEB,5,2) +"/"+ SubStr((cAlias)->ZN_DTRECEB,1,4) + "<br>"
+		cCorpo   += "Fornecedor: ("+(cAlias)->ZN_FORNECE+") "+ (cAlias)->ZN_EMPRESA + "<br>"
+		cCorpo   += "C.Custo: ("+(cAlias)->ZN_CC+") "+ (cAlias)->ZN_CCDESC + "<br>"
+		cCorpo   += "DATA PRAZO :" + SubStr((cAlias)->ZN_PRAZO,7,2) +"/"+ SubStr((cAlias)->ZN_PRAZO,5,2) +"/"+ SubStr((cAlias)->ZN_PRAZO,1,4) + "<br>"
+		cCorpo 	+=  "<br>"
+		//cCorpo 	+=  Chr(13) + Chr(10) + Chr(13) + Chr(10)
+
+		ELSEIF stod((cAlias)->ZN_PRAZO) - Date() == 5
+		lEmail := .T.
+		cCorpo   += "FALTAM 5 DIAS PARA O PRAZO DE DEVOLUÇÃO DO BEM ACABAR!"+ "<br>"
+		cCorpo   += "Cod: " + (cAlias)->ZN_COD + "<br>"
+		cCorpo   += "Situação: " + (cAlias)->SITUACAO + "<br>"
+		cCorpo   += "Bem: " + (cAlias)->ZN_DESCRI + "<br>"
+		cCorpo   += "N° Serie: " + (cAlias)->ZN_NSERIE + "<br>"
+		cCorpo   += "Valor: " + Transform((cAlias)->ZN_VALOR,"@e 99,999,999.99") + "<br>"
+		cCorpo   += "NF Entrada: " + (cAlias)->ZN_NOTA + "<br>"
+		cCorpo   += "DT. Entrada: " +SubStr((cAlias)->ZN_DTRECEB,7,2) +"/"+ SubStr((cAlias)->ZN_DTRECEB,5,2) +"/"+ SubStr((cAlias)->ZN_DTRECEB,1,4) + "<br>"
+		cCorpo   += "Fornecedor: ("+(cAlias)->ZN_FORNECE+") "+ (cAlias)->ZN_EMPRESA + "<br>"
+		cCorpo   += "C.Custo: ("+(cAlias)->ZN_CC+") "+ (cAlias)->ZN_CCDESC + "<br>"
+		cCorpo   += "DATA PRAZO :" + SubStr((cAlias)->ZN_PRAZO,7,2) +"/"+ SubStr((cAlias)->ZN_PRAZO,5,2) +"/"+ SubStr((cAlias)->ZN_PRAZO,1,4) + "<br>"
+		cCorpo 	+=  "<br>"
+		//cCorpo 	+=  Chr(13) + Chr(10) + Chr(13) + Chr(10)
+
+		ELSEIF stod((cAlias)->ZN_PRAZO) - Date() == -1
+		lEmail := .T.
+		cCorpo   += "O PRAZO DO BEM VENCEU!"+ "<br>"
+		cCorpo   += "Cod: " + (cAlias)->ZN_COD + "<br>"
+		cCorpo   += "Situação: " + (cAlias)->SITUACAO + "<br>"
+		cCorpo   += "Bem: " + (cAlias)->ZN_DESCRI + "<br>"
+		cCorpo   += "N° Serie: " + (cAlias)->ZN_NSERIE + "<br>"
+		cCorpo   += "Valor: " + Transform((cAlias)->ZN_VALOR,"@e 99,999,999.99") + "<br>"
+		cCorpo   += "NF Entrada: " + (cAlias)->ZN_NOTA + "<br>"
+		cCorpo   += "DT. Entrada: " +SubStr((cAlias)->ZN_DTRECEB,7,2) +"/"+ SubStr((cAlias)->ZN_DTRECEB,5,2) +"/"+ SubStr((cAlias)->ZN_DTRECEB,1,4) + "<br>"
+		cCorpo   += "Fornecedor: ("+(cAlias)->ZN_FORNECE+") "+ (cAlias)->ZN_EMPRESA + "<br>"
+		cCorpo   += "C.Custo: ("+(cAlias)->ZN_CC+") "+ (cAlias)->ZN_CCDESC + "<br>"
+		cCorpo   += "DATA PRAZO :" + SubStr((cAlias)->ZN_PRAZO,7,2) +"/"+ SubStr((cAlias)->ZN_PRAZO,5,2) +"/"+ SubStr((cAlias)->ZN_PRAZO,1,4) + "<br>"
+		cCorpo 	+=  "<br>"
+		//cCorpo 	+=  Chr(13) + Chr(10) + Chr(13) + Chr(10)
+		Endif
+
 		IF lEmail
 		u_zEnvMail(cPara, cAssunto, cCorpo, , .T.)
 		EndIf
@@ -91,6 +130,9 @@ DBSelectARea(cAlias)
 DBCloseArea()
 
 //dbSelectArea(aArea)
+	If !lLogin
+		RESET ENVIRONMENT
+	EndIf
 
 //RESET ENVIRONMENT // usado para utilizar a rotina schedule
 
